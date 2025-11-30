@@ -14,6 +14,10 @@ class JoinGate {
       return { filtered: false, reason: null, action: null };
     }
 
+    // Get threat sensitivity settings to adjust thresholds
+    const sensitivity = await db.getThreatSensitivity(guild.id);
+    const sensitivityMultiplier = sensitivity.risk_threshold / 30; // 1.0 = default
+
     const checks = [];
 
     // 1. Check for bots added by unauthorized members
@@ -87,11 +91,16 @@ class JoinGate {
       const Security = require("./security");
       const threat = await Security.detectThreat(guild, member.user, "join");
 
-      if (threat.score >= (config.suspicious_threshold || 60)) {
+      // Adjust suspicious threshold based on sensitivity (less sensitive = higher threshold needed)
+      const baseSuspiciousThreshold = config.suspicious_threshold || 60;
+      const adjustedSuspiciousThreshold = Math.ceil(baseSuspiciousThreshold * sensitivityMultiplier);
+      const banThreshold = Math.ceil(80 * sensitivityMultiplier);
+
+      if (threat.score >= adjustedSuspiciousThreshold) {
         checks.push({
           filtered: true,
           reason: `Suspicious account (threat score: ${threat.score})`,
-          action: threat.score >= 80 ? "ban" : config.action || "kick",
+          action: threat.score >= banThreshold ? "ban" : config.action || "kick",
         });
       }
     }

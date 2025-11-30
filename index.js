@@ -164,9 +164,17 @@ client.checkAntiRaid = async (guild, member) => {
 // Heat-based moderation
 client.addHeat = async (guildId, userId, amount, reason) => {
   const key = `${guildId}-${userId}`;
-  const current = client.heatSystem.get(key) || { score: 0, history: [] };
+  let current = client.heatSystem.get(key);
+  
+  // Ensure current has the correct structure
+  if (!current || typeof current !== 'object' || !Array.isArray(current.history)) {
+    current = { score: 0, history: [] };
+  }
 
   current.score += amount;
+  if (!current.history) {
+    current.history = [];
+  }
   current.history.push({ amount, reason, timestamp: Date.now() });
 
   // Decay heat over time (remove old entries)

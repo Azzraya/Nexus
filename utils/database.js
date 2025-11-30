@@ -498,6 +498,20 @@ class Database {
             )
         `);
 
+    // Threat sensitivity settings
+    this.db.run(`
+            CREATE TABLE IF NOT EXISTS threat_sensitivity (
+                guild_id TEXT PRIMARY KEY,
+                risk_threshold INTEGER DEFAULT 30,
+                severity_critical INTEGER DEFAULT 40,
+                severity_high INTEGER DEFAULT 30,
+                severity_medium INTEGER DEFAULT 20,
+                severity_low INTEGER DEFAULT 10,
+                recent_multiplier INTEGER DEFAULT 5,
+                recent_days INTEGER DEFAULT 7
+            )
+        `);
+
     // Auto-recovery snapshots
     this.db.run(`
             CREATE TABLE IF NOT EXISTS recovery_snapshots (
@@ -540,6 +554,32 @@ class Database {
                 report_data TEXT,
                 generated_at INTEGER,
                 generated_by TEXT
+            )
+        `);
+
+    // Bot activity log (server joins/leaves)
+    this.db.run(`
+            CREATE TABLE IF NOT EXISTS bot_activity_log (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                event_type TEXT,
+                guild_id TEXT,
+                guild_name TEXT,
+                member_count INTEGER,
+                owner_id TEXT,
+                timestamp INTEGER
+            )
+        `);
+
+    // Command usage log
+    this.db.run(`
+            CREATE TABLE IF NOT EXISTS command_usage_log (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                guild_id TEXT,
+                guild_name TEXT,
+                user_id TEXT,
+                user_tag TEXT,
+                command_name TEXT,
+                timestamp INTEGER
             )
         `);
   }
@@ -1856,6 +1896,69 @@ class Database {
           resolve(reports);
         }
       });
+    });
+  }
+
+  // Threat sensitivity settings
+  async getThreatSensitivity(guildId) {
+    return new Promise((resolve, reject) => {
+      this.db.get(
+        "SELECT * FROM threat_sensitivity WHERE guild_id = ?",
+        [guildId],
+        (err, row) => {
+          if (err) reject(err);
+          else {
+            if (row) {
+              resolve(row);
+            } else {
+              // Return defaults
+              resolve({
+                guild_id: guildId,
+                risk_threshold: 30,
+                severity_critical: 40,
+                severity_high: 30,
+                severity_medium: 20,
+                severity_low: 10,
+                recent_multiplier: 5,
+                recent_days: 7,
+              });
+            }
+          }
+        }
+      );
+    });
+  }
+
+  async setThreatSensitivity(guildId, settings) {
+    return new Promise((resolve, reject) => {
+      this.db.run(
+        `INSERT INTO threat_sensitivity (
+          guild_id, risk_threshold, severity_critical, severity_high,
+          severity_medium, severity_low, recent_multiplier, recent_days
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(guild_id) DO UPDATE SET
+          risk_threshold = excluded.risk_threshold,
+          severity_critical = excluded.severity_critical,
+          severity_high = excluded.severity_high,
+          severity_medium = excluded.severity_medium,
+          severity_low = excluded.severity_low,
+          recent_multiplier = excluded.recent_multiplier,
+          recent_days = excluded.recent_days`,
+        [
+          guildId,
+          settings.risk_threshold || 30,
+          settings.severity_critical || 40,
+          settings.severity_high || 30,
+          settings.severity_medium || 20,
+          settings.severity_low || 10,
+          settings.recent_multiplier || 5,
+          settings.recent_days || 7,
+        ],
+        (err) => {
+          if (err) reject(err);
+          else resolve();
+        }
+      );
     });
   }
 }

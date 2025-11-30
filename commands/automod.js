@@ -99,6 +99,11 @@ module.exports = {
     .addSubcommand((subcommand) =>
       subcommand.setName("stats").setDescription("View auto-mod statistics")
     )
+    .addSubcommand((subcommand) =>
+      subcommand
+        .setName("setup")
+        .setDescription("Quick setup with preset word filters and common rules")
+    )
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 
   async execute(interaction) {
@@ -242,6 +247,153 @@ module.exports = {
         .setTimestamp();
 
       await interaction.reply({ embeds: [embed] });
+    } else if (subcommand === "setup") {
+      await interaction.deferReply();
+
+      // Enable auto-mod
+      await db.setServerConfig(interaction.guild.id, {
+        auto_mod_enabled: 1,
+      });
+
+      // Preset word list (spam/scam terms - moderate profanity filter)
+      const presetWords = [
+        // Spam/scam terms
+        "discord.gg",
+        "discord.com/invite",
+        "nitro",
+        "free nitro",
+        "click here",
+        "limited time",
+        "steam",
+        "gift card",
+        "verify",
+        "claim",
+        "expired",
+        "suspended",
+        // Common spam phrases
+        "get rich",
+        "make money",
+        "work from home",
+        "bitcoin",
+        "crypto",
+        // Raid/harassment terms
+        "raid",
+        "nuke",
+        "crash server",
+      ];
+
+      // Preset rules to add
+      const presetRules = [
+        // Word filters (spam/scam focused)
+        ...presetWords.map((word) => ({
+          type: "contains",
+          trigger: word,
+          action: "delete",
+        })),
+        // Invite links
+        {
+          type: "invite_link",
+          trigger: ".*",
+          action: "mute",
+        },
+        // Spam detection
+        {
+          type: "spam",
+          trigger: ".*",
+          action: "warn",
+        },
+        // Excessive caps
+        {
+          type: "caps",
+          trigger: ".*",
+          action: "delete",
+        },
+        // Excessive mentions
+        {
+          type: "mentions",
+          trigger: ".*",
+          action: "warn",
+        },
+        // Emoji spam
+        {
+          type: "emoji_spam",
+          trigger: ".*",
+          action: "delete",
+        },
+      ];
+
+      let added = 0;
+      let skipped = 0;
+      const errors = [];
+
+      // Check existing rules to avoid duplicates
+      const existingRules = await AutoMod.getRules(interaction.guild.id);
+      const existingTriggers = new Set(
+        existingRules.map((r) => `${r.rule_type}:${r.trigger.toLowerCase()}`)
+      );
+
+      // Add preset rules
+      for (const rule of presetRules) {
+        const ruleKey = `${rule.type}:${rule.trigger.toLowerCase()}`;
+        if (existingTriggers.has(ruleKey)) {
+          skipped++;
+          continue;
+        }
+
+        try {
+          await AutoMod.addRule(
+            interaction.guild.id,
+            rule.type,
+            rule.trigger,
+            rule.action
+          );
+          added++;
+        } catch (error) {
+          errors.push(`${rule.type}: ${error.message}`);
+        }
+      }
+
+      const embed = new EmbedBuilder()
+        .setTitle("✅ Auto-Mod Quick Setup Complete")
+        .setDescription(
+          `Auto-moderation has been enabled with preset rules. You can still add custom rules with \`/automod add\`.`
+        )
+        .addFields(
+          {
+            name: "Rules Added",
+            value: `${added} new rules`,
+            inline: true,
+          },
+          {
+            name: "Skipped (Already Exist)",
+            value: `${skipped} rules`,
+            inline: true,
+          },
+          {
+            name: "Preset Features",
+            value:
+              "• Word filters (spam, scams, raid terms)\n• Invite link detection\n• Spam detection\n• Caps filter\n• Mention spam\n• Emoji spam",
+            inline: false,
+          },
+          {
+            name: "Next Steps",
+            value:
+              "• Use `/automod list` to see all rules\n• Use `/automod add` to add custom words\n• Use `/automod remove` to remove preset rules if needed",
+            inline: false,
+          }
+        )
+        .setColor(0x00ff00)
+        .setTimestamp();
+
+      if (errors.length > 0 && errors.length <= 5) {
+        embed.addFields({
+          name: "⚠️ Errors",
+          value: errors.join("\n"),
+          inline: false,
+        });
+      }
+
+      await interaction.editReply({ embeds: [embed] });
     }
   },
 };

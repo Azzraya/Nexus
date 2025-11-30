@@ -5,6 +5,9 @@ class AutoMod {
   static async checkMessage(message, client) {
     if (message.author.bot) return false;
 
+    // Skip automod for server owner
+    if (message.guild && message.guild.ownerId === message.author.id) return false;
+
     const config = await db.getServerConfig(message.guild.id);
     if (!config || !config.auto_mod_enabled) return false;
 

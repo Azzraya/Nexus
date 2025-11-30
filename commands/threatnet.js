@@ -76,6 +76,67 @@ module.exports = {
             .setRequired(true)
         )
     )
+    .addSubcommand((subcommand) =>
+      subcommand
+        .setName("sensitivity")
+        .setDescription("Configure threat detection sensitivity")
+        .addIntegerOption((option) =>
+          option
+            .setName("threshold")
+            .setDescription("Risk score threshold (0-100, default: 30)")
+            .setRequired(false)
+            .setMinValue(0)
+            .setMaxValue(100)
+        )
+        .addIntegerOption((option) =>
+          option
+            .setName("critical")
+            .setDescription("Critical severity weight (default: 40)")
+            .setRequired(false)
+            .setMinValue(0)
+            .setMaxValue(100)
+        )
+        .addIntegerOption((option) =>
+          option
+            .setName("high")
+            .setDescription("High severity weight (default: 30)")
+            .setRequired(false)
+            .setMinValue(0)
+            .setMaxValue(100)
+        )
+        .addIntegerOption((option) =>
+          option
+            .setName("medium")
+            .setDescription("Medium severity weight (default: 20)")
+            .setRequired(false)
+            .setMinValue(0)
+            .setMaxValue(100)
+        )
+        .addIntegerOption((option) =>
+          option
+            .setName("low")
+            .setDescription("Low severity weight (default: 10)")
+            .setRequired(false)
+            .setMinValue(0)
+            .setMaxValue(100)
+        )
+        .addIntegerOption((option) =>
+          option
+            .setName("recent_multiplier")
+            .setDescription("Recent threat multiplier (default: 5)")
+            .setRequired(false)
+            .setMinValue(0)
+            .setMaxValue(50)
+        )
+        .addIntegerOption((option) =>
+          option
+            .setName("recent_days")
+            .setDescription("Days to consider recent (default: 7)")
+            .setRequired(false)
+            .setMinValue(1)
+            .setMaxValue(30)
+        )
+    )
     .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers),
 
   async execute(interaction) {
@@ -104,7 +165,10 @@ module.exports = {
       await interaction.deferReply();
 
       const user = interaction.options.getUser("user");
-      const threatInfo = await ThreatIntelligence.checkThreat(user.id);
+      const threatInfo = await ThreatIntelligence.checkThreat(
+        user.id,
+        interaction.guild.id
+      );
 
       const embed = new EmbedBuilder()
         .setTitle(`🔍 Threat Check: ${user.tag}`)
@@ -121,17 +185,17 @@ module.exports = {
           },
           {
             name: "Threat Count",
-            value: `${threatInfo.threatCount}`,
+            value: `${threatInfo.threatCount || 0}`,
             inline: true,
           },
           {
             name: "Verified Reports",
-            value: `${threatInfo.verifiedCount}`,
+            value: `${threatInfo.verifiedCount || 0}`,
             inline: true,
           },
           {
             name: "Recent Threats",
-            value: `${threatInfo.recentCount} (last 7 days)`,
+            value: `${threatInfo.recentCount || 0} (last 7 days)`,
             inline: true,
           }
         )
@@ -163,6 +227,62 @@ module.exports = {
         content: `✅ Threat #${threatId} verified`,
         ephemeral: true,
       });
+    } else if (subcommand === "sensitivity") {
+      await interaction.deferReply();
+
+      const currentSettings = await db.getThreatSensitivity(
+        interaction.guild.id
+      );
+      const newSettings = { ...currentSettings };
+
+      // Update only provided values
+      const threshold = interaction.options.getInteger("threshold");
+      const critical = interaction.options.getInteger("critical");
+      const high = interaction.options.getInteger("high");
+      const medium = interaction.options.getInteger("medium");
+      const low = interaction.options.getInteger("low");
+      const recentMultiplier =
+        interaction.options.getInteger("recent_multiplier");
+      const recentDays = interaction.options.getInteger("recent_days");
+
+      if (threshold !== null) newSettings.risk_threshold = threshold;
+      if (critical !== null) newSettings.severity_critical = critical;
+      if (high !== null) newSettings.severity_high = high;
+      if (medium !== null) newSettings.severity_medium = medium;
+      if (low !== null) newSettings.severity_low = low;
+      if (recentMultiplier !== null)
+        newSettings.recent_multiplier = recentMultiplier;
+      if (recentDays !== null) newSettings.recent_days = recentDays;
+
+      await db.setThreatSensitivity(interaction.guild.id, newSettings);
+
+      const embed = new EmbedBuilder()
+        .setTitle("⚙️ Threat Sensitivity Updated")
+        .setDescription("Threat detection sensitivity has been configured.")
+        .addFields(
+          {
+            name: "Risk Threshold",
+            value: `${newSettings.risk_threshold}%`,
+            inline: true,
+          },
+          {
+            name: "Severity Weights",
+            value: `Critical: ${newSettings.severity_critical}\nHigh: ${newSettings.severity_high}\nMedium: ${newSettings.severity_medium}\nLow: ${newSettings.severity_low}`,
+            inline: true,
+          },
+          {
+            name: "Recent Threats",
+            value: `Multiplier: ${newSettings.recent_multiplier}\nDays: ${newSettings.recent_days}`,
+            inline: true,
+          }
+        )
+        .setColor(0x0099ff)
+        .setTimestamp()
+        .setFooter({
+          text: "Lower threshold = more sensitive | Higher weights = more impact",
+        });
+
+      await interaction.editReply({ embeds: [embed] });
     }
   },
 };

@@ -1,9 +1,36 @@
 const { registerCommands } = require("../utils/registerCommands");
+const db = require("../utils/database");
 
 module.exports = {
   name: "guildCreate",
   async execute(guild, client) {
     console.log(`🆕 Joined new server: ${guild.name} (${guild.id})`);
+
+    // Log server join
+    try {
+      const owner = await guild.fetchOwner().catch(() => null);
+      await new Promise((resolve, reject) => {
+        db.db.run(
+          "INSERT INTO bot_activity_log (event_type, guild_id, guild_name, member_count, owner_id, timestamp) VALUES (?, ?, ?, ?, ?, ?)",
+          [
+            "guild_join",
+            guild.id,
+            guild.name,
+            guild.memberCount || 0,
+            owner ? owner.id : null,
+            Date.now(),
+          ],
+          (err) => {
+            if (err) reject(err);
+            else resolve();
+          }
+        );
+      });
+      console.log(`   Owner: ${owner ? owner.user.tag : "Unknown"}`);
+      console.log(`   Members: ${guild.memberCount || 0}`);
+    } catch (error) {
+      console.error("Failed to log guild join:", error.message);
+    }
 
     // Register commands for the new server
     try {

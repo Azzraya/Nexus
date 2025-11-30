@@ -60,6 +60,148 @@ module.exports = {
         );
       });
 
+      // Backup server structure
+      const serverData = {
+        name: interaction.guild.name,
+        description: interaction.guild.description,
+        icon: interaction.guild.iconURL(),
+        banner: interaction.guild.bannerURL(),
+        verificationLevel: interaction.guild.verificationLevel,
+        defaultMessageNotifications: interaction.guild.defaultMessageNotifications,
+        explicitContentFilter: interaction.guild.explicitContentFilter,
+        mfaLevel: interaction.guild.mfaLevel,
+        preferredLocale: interaction.guild.preferredLocale,
+        nsfwLevel: interaction.guild.nsfwLevel,
+        premiumTier: interaction.guild.premiumTier,
+        systemChannelId: interaction.guild.systemChannelId,
+        rulesChannelId: interaction.guild.rulesChannelId,
+        publicUpdatesChannelId: interaction.guild.publicUpdatesChannelId,
+        afkChannelId: interaction.guild.afkChannelId,
+        afkTimeout: interaction.guild.afkTimeout,
+        vanityURLCode: interaction.guild.vanityURLCode,
+        memberCount: interaction.guild.memberCount,
+      };
+
+      // Backup roles (excluding @everyone)
+      const roles = interaction.guild.roles.cache
+        .filter((role) => role.id !== interaction.guild.id)
+        .map((role) => ({
+          id: role.id,
+          name: role.name,
+          color: role.color,
+          hoist: role.hoist,
+          position: role.position,
+          mentionable: role.mentionable,
+          permissions: role.permissions.bitfield.toString(),
+          icon: role.iconURL(),
+          unicodeEmoji: role.unicodeEmoji,
+        }))
+        .sort((a, b) => b.position - a.position);
+
+      // Backup channels
+      const channels = interaction.guild.channels.cache.map((channel) => {
+        const channelData = {
+          id: channel.id,
+          name: channel.name,
+          type: channel.type,
+          position: channel.position,
+          parentId: channel.parentId,
+          nsfw: channel.nsfw,
+        };
+
+        // Text channel specific
+        if (channel.type === 0) {
+          // GuildText
+          channelData.topic = channel.topic;
+          channelData.rateLimitPerUser = channel.rateLimitPerUser;
+          channelData.defaultAutoArchiveDuration =
+            channel.defaultAutoArchiveDuration;
+        }
+
+        // Voice channel specific
+        if (channel.type === 2) {
+          // GuildVoice
+          channelData.bitrate = channel.bitrate;
+          channelData.userLimit = channel.userLimit;
+          channelData.rtcRegion = channel.rtcRegion;
+        }
+
+        // Forum channel specific
+        if (channel.type === 15) {
+          // GuildForum
+          channelData.topic = channel.topic;
+          channelData.defaultAutoArchiveDuration =
+            channel.defaultAutoArchiveDuration;
+          channelData.defaultReactionEmoji = channel.defaultReactionEmoji;
+          channelData.defaultThreadRateLimitPerUser =
+            channel.defaultThreadRateLimitPerUser;
+        }
+
+        // Backup permission overwrites (if available)
+        if (channel.permissionOverwrites && channel.permissionOverwrites.cache) {
+          channelData.permissionOverwrites = channel.permissionOverwrites.cache.map(
+            (overwrite) => ({
+              id: overwrite.id,
+              type: overwrite.type,
+              allow: overwrite.allow.bitfield.toString(),
+              deny: overwrite.deny.bitfield.toString(),
+            })
+          );
+        } else {
+          channelData.permissionOverwrites = [];
+        }
+
+        return channelData;
+      });
+
+      // Backup categories
+      const categories = interaction.guild.channels.cache
+        .filter((ch) => ch.type === 4)
+        .map((category) => {
+          const categoryData = {
+            id: category.id,
+            name: category.name,
+            position: category.position,
+          };
+          
+          // Backup permission overwrites (if available)
+          if (category.permissionOverwrites && category.permissionOverwrites.cache) {
+            categoryData.permissionOverwrites = category.permissionOverwrites.cache.map(
+              (overwrite) => ({
+                id: overwrite.id,
+                type: overwrite.type,
+                allow: overwrite.allow.bitfield.toString(),
+                deny: overwrite.deny.bitfield.toString(),
+              })
+            );
+          } else {
+            categoryData.permissionOverwrites = [];
+          }
+          
+          return categoryData;
+        })
+        .sort((a, b) => a.position - b.position);
+
+      // Backup emojis
+      const emojis = interaction.guild.emojis.cache.map((emoji) => ({
+        id: emoji.id,
+        name: emoji.name,
+        animated: emoji.animated,
+        url: emoji.url,
+        roles: emoji.roles.cache.map((r) => r.id),
+      }));
+
+      // Backup stickers
+      const stickers = interaction.guild.stickers.cache.map((sticker) => ({
+        id: sticker.id,
+        name: sticker.name,
+        description: sticker.description,
+        tags: sticker.tags,
+        type: sticker.type,
+        format: sticker.format,
+        url: sticker.url,
+      }));
+
       const backup = {
         guild_id: interaction.guild.id,
         timestamp: Date.now(),
@@ -67,9 +209,19 @@ module.exports = {
         modLogs,
         warnings,
         automodRules,
-        channels: interaction.guild.channels.cache.size,
-        members: interaction.guild.memberCount,
-        roles: interaction.guild.roles.cache.size,
+        serverData,
+        roles,
+        channels,
+        categories,
+        emojis,
+        stickers,
+        stats: {
+          channels: interaction.guild.channels.cache.size,
+          members: interaction.guild.memberCount,
+          roles: interaction.guild.roles.cache.size,
+          emojis: interaction.guild.emojis.cache.size,
+          stickers: interaction.guild.stickers.cache.size,
+        },
       };
 
       const backupDir = path.join(__dirname, "..", "backups");
@@ -98,7 +250,7 @@ module.exports = {
         embeds: [
           {
             title: "✅ Backup Created",
-            description: `Backup ID: \`${backupId}\`\n**Included:**\n- Server Configuration\n- ${modLogs.length} Moderation Logs\n- ${warnings.length} Warnings\n- ${automodRules.length} Auto-Mod Rules`,
+            description: `Backup ID: \`${backupId}\`\n**Included:**\n- Server Configuration\n- ${modLogs.length} Moderation Logs\n- ${warnings.length} Warnings\n- ${automodRules.length} Auto-Mod Rules\n- Server Structure (${roles.length} roles, ${channels.length} channels, ${categories.length} categories)\n- ${emojis.length} Emojis\n- ${stickers.length} Stickers`,
             color: 0x00ff00,
             timestamp: new Date().toISOString(),
           },

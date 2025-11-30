@@ -14,9 +14,10 @@ class AdvancedAntiRaid {
 
     // Algorithm 2: Pattern-based detection (detects coordinated joins)
     patternBased: (joins) => {
-      if (joins.length < 3) return false;
+      // Require at least 5 joins for pattern detection
+      if (joins.length < 5) return false;
 
-      // Check for similar account ages (common in raids)
+      // Check for similar account ages (common in raids) - more strict
       const accountAges = joins.map((j) => j.accountAge);
       const avgAge =
         accountAges.reduce((a, b) => a + b, 0) / accountAges.length;
@@ -24,34 +25,40 @@ class AdvancedAntiRaid {
         accountAges.reduce((sum, age) => sum + Math.pow(age - avgAge, 2), 0) /
         accountAges.length;
 
-      // Low variance = similar account ages = likely raid
-      if (variance < 86400000) return true; // Less than 1 day variance
+      // Low variance = similar account ages = likely raid (stricter threshold)
+      if (variance < 43200000 && joins.length >= 7) return true; // Less than 12 hours variance, need 7+ joins
 
-      // Check for similar usernames (bot accounts often have patterns)
+      // Check for similar usernames (bot accounts often have patterns) - more strict
       const usernames = joins.map((j) => j.username.toLowerCase());
       const commonPatterns = usernames.filter(
         (name, i, arr) =>
-          arr.filter((n) => n.includes(name.slice(0, 3))).length > 2
+          arr.filter((n) => n.includes(name.slice(0, 4))).length > 3 // Stricter (was 3 chars, 2 matches)
       );
-      if (commonPatterns.length > 0) return true;
+      if (commonPatterns.length > 2 && joins.length >= 7) return true; // Need more patterns and joins
 
       return false;
     },
 
     // Algorithm 3: Behavioral analysis
     behavioral: (joins) => {
-      // Require at least 3 joins to avoid false positives
-      if (joins.length < 3) return false;
+      // Require at least 5 joins to avoid false positives
+      if (joins.length < 5) return false;
 
       // Check for accounts with no avatar (common in bot accounts)
       const noAvatarCount = joins.filter((j) => !j.hasAvatar).length;
-      if (noAvatarCount / joins.length > 0.8) return true; // Increased threshold to 80%
+      if (noAvatarCount / joins.length > 0.9) return true; // Very high threshold (was 0.8)
 
       // Check for accounts with default discriminator patterns
       const defaultDiscriminators = joins.filter(
         (j) => parseInt(j.discriminator) < 1000
       ).length;
-      if (defaultDiscriminators / joins.length > 0.6) return true; // Increased threshold to 60%
+      if (defaultDiscriminators / joins.length > 0.8) return true; // Higher threshold (was 0.6)
+
+      // Check for very new accounts (less than 1 day old)
+      const newAccounts = joins.filter(
+        (j) => Date.now() - j.createdTimestamp < 86400000
+      ).length;
+      if (newAccounts / joins.length > 0.8 && joins.length >= 7) return true; // Need more joins
 
       return false;
     },
@@ -88,6 +95,13 @@ class AdvancedAntiRaid {
   static async detectRaid(guild, member) {
     const config = await db.getServerConfig(guild.id);
     if (!config || !config.anti_raid_enabled) return false;
+
+    // Get threat sensitivity settings (affects how aggressive detection is)
+    const sensitivity = await db.getThreatSensitivity(guild.id);
+    // Convert sensitivity to multipliers (lower threshold = more sensitive = higher multipliers)
+    // Default threshold is 30, so we scale based on that
+    const sensitivityMultiplier = sensitivity.risk_threshold / 30; // 1.0 = default, <1.0 = more sensitive, >1.0 = less sensitive
+    const isLessSensitive = sensitivityMultiplier > 1.0; // Higher threshold = less sensitive
 
     // Check whitelist first (before any detection)
     const isWhitelisted = await new Promise((resolve, reject) => {
@@ -129,36 +143,71 @@ class AdvancedAntiRaid {
       networkBased: this.detectionAlgorithms.networkBased(joinData.joins),
     };
 
-    // Calculate threat score (0-100)
-    // Only add to threat score if we have enough joins (3+) to avoid false positives
+    // Calculate threat score (0-100) - adjusted by sensitivity
+    // Adjust minimum joins based on sensitivity (less sensitive = need more joins)
+    const baseMinJoins = 5;
+    const minJoinsForThreatScore = Math.ceil(
+      baseMinJoins * sensitivityMultiplier
+    );
+
     let threatScore = 0;
-    if (joinData.joins.length >= 3) {
-      if (results.rateBased) threatScore += 40;
-      if (results.patternBased) threatScore += 30;
-      if (results.behavioral) threatScore += 20;
-      if (results.networkBased) threatScore += 10;
+    if (joinData.joins.length >= minJoinsForThreatScore) {
+      // Adjust threat score contributions based on sensitivity
+      const baseRateScore = 30;
+      const basePatternScore = 25;
+      const baseBehavioralScore = 15;
+      const baseNetworkScore = 10;
+
+      if (results.rateBased)
+        threatScore += Math.ceil(baseRateScore / sensitivityMultiplier);
+      if (results.patternBased)
+        threatScore += Math.ceil(basePatternScore / sensitivityMultiplier);
+      if (results.behavioral)
+        threatScore += Math.ceil(baseBehavioralScore / sensitivityMultiplier);
+      if (results.networkBased)
+        threatScore += Math.ceil(baseNetworkScore / sensitivityMultiplier);
     } else {
-      // For single or double joins, only count if it's a very obvious threat
-      // (e.g., brand new account joining during a known raid pattern)
-      if (memberData.accountAge < 86400000) {
-        // Less than 1 day old
-        threatScore += 10; // Minimal threat score for new accounts
-      }
+      threatScore = 0;
     }
 
-    // If any algorithm triggers or threat score is high, it's a raid
-    // Behavioral detection requires at least 3 joins to avoid false positives
-    // Only trigger on actual raids, not single suspicious joins
+    // Adjust minimum joins for raid detection based on sensitivity
+    // Less sensitive (higher threshold) = need more joins
+    const minJoinsForRaid = Math.ceil(baseMinJoins * sensitivityMultiplier);
+
+    if (joinData.joins.length < minJoinsForRaid) {
+      return false; // Not enough joins to be considered a raid
+    }
+
+    // Adjust thresholds based on sensitivity
+    // Less sensitive = need more joins for pattern/behavioral detection
+    const patternBehavioralMinJoins = Math.ceil(7 * sensitivityMultiplier);
+    const networkMinJoins = Math.ceil(10 * sensitivityMultiplier);
+
+    // Adjust threat score threshold (less sensitive = higher threshold needed)
+    const threatScoreThreshold = Math.ceil(85 * sensitivityMultiplier);
+
+    // Only trigger if multiple algorithms agree OR threat score is very high
     const isRaid =
-      (results.rateBased && joinData.joins.length >= 3) || // Rate-based needs multiple joins
-      (results.patternBased && joinData.joins.length >= 3) || // Pattern needs multiple joins
-      (results.behavioral && joinData.joins.length >= 3) || // Behavioral needs at least 3 joins
-      (results.networkBased && joinData.joins.length >= 3) || // Network needs multiple joins
-      threatScore >= 70; // Higher threshold for single-join threats
+      (results.rateBased && results.patternBased) || // Both rate and pattern must trigger
+      (results.rateBased && results.behavioral) || // Rate + behavioral
+      (results.patternBased &&
+        results.behavioral &&
+        joinData.joins.length >= patternBehavioralMinJoins) || // Pattern + behavioral (needs more joins if less sensitive)
+      (results.networkBased && joinData.joins.length >= networkMinJoins) || // Network needs many joins
+      threatScore >= threatScoreThreshold; // Threshold adjusted by sensitivity
 
     if (isRaid) {
-      await this.handleRaid(guild, joinData.joins, threatScore, results);
-      return true;
+      // Only pass RECENT joins (within last 2 minutes) to prevent banning old members
+      const twoMinutesAgo = Date.now() - 120000; // 2 minutes
+      const recentJoins = joinData.joins.filter(
+        (join) => join.timestamp && join.timestamp >= twoMinutesAgo
+      );
+
+      // Only handle raid if we have recent suspicious joins
+      if (recentJoins.length > 0) {
+        await this.handleRaid(guild, recentJoins, threatScore, results);
+        return true;
+      }
     }
 
     // Clean old joins (older than 1 minute)
@@ -205,16 +254,96 @@ class AdvancedAntiRaid {
     const config = await db.getServerConfig(guild.id);
     const action = config.anti_raid_action || "ban";
 
+    // Get sensitivity settings to adjust suspicion thresholds
+    const sensitivity = await db.getThreatSensitivity(guild.id);
+    const sensitivityMultiplier = sensitivity.risk_threshold / 30;
+
     logger.warn(
       `Raid detected in ${guild.name} (${guild.id}): Threat score ${threatScore}, ${suspiciousJoins.length} suspicious joins`
     );
 
-    // Take action on all suspicious members
-    let successCount = 0;
-    for (const join of suspiciousJoins) {
+    // Only take action on the most suspicious members (not all joins)
+    // Filter to only ban members that match multiple criteria
+    // Adjust suspicion threshold based on sensitivity (less sensitive = need higher suspicion)
+    const baseSuspicionThreshold = 3;
+    const suspicionThreshold = Math.ceil(
+      baseSuspicionThreshold * sensitivityMultiplier
+    );
+
+    const highlySuspicious = suspiciousJoins.filter((join) => {
+      let suspicionScore = 0;
+
+      // Account age (new accounts are more suspicious)
+      if (Date.now() - join.createdTimestamp < 86400000) suspicionScore += 2; // Less than 1 day old
+      if (Date.now() - join.createdTimestamp < 3600000) suspicionScore += 1; // Less than 1 hour old
+
+      // Account characteristics
+      if (!join.hasAvatar) suspicionScore += 1; // No avatar
+      if (parseInt(join.discriminator) < 1000) suspicionScore += 1; // Default discriminator
+
+      // Threshold adjusted by sensitivity (less sensitive = need higher suspicion)
+      return suspicionScore >= suspicionThreshold;
+    });
+
+    // If we don't have enough highly suspicious members, don't ban anyone
+    // This prevents banning legitimate users
+    if (highlySuspicious.length === 0) {
+      logger.warn(
+        `Raid detected but no highly suspicious members to ban in ${guild.name}`
+      );
+      // Still enable lockdown but don't ban anyone
       try {
+        const { Client } = require("discord.js");
+        // Try to get client from index.js
+        const indexModule = require("../index.js");
+        if (indexModule.client?.antiRaid?.lockdown) {
+          indexModule.client.antiRaid.lockdown.set(guild.id, {
+            enabled: true,
+            startedAt: Date.now(),
+            reason: "Raid detected - lockdown enabled",
+          });
+        }
+      } catch (error) {
+        // If we can't set lockdown, just log
+        logger.warn("Could not set lockdown:", error.message);
+      }
+      return;
+    }
+
+    // Take action on highly suspicious members only
+    // IMPORTANT: Only ban members who joined RECENTLY (within last 2 minutes)
+    // This prevents banning existing members
+    const twoMinutesAgo = Date.now() - 120000;
+    const recentSuspicious = highlySuspicious.filter(
+      (join) => join.timestamp && join.timestamp >= twoMinutesAgo
+    );
+
+    if (recentSuspicious.length === 0) {
+      logger.warn(
+        `Raid detected but no recent suspicious joins to ban in ${guild.name}`
+      );
+      return;
+    }
+
+    let successCount = 0;
+    for (const join of recentSuspicious) {
+      try {
+        // Double-check: Only ban if they joined recently
         const member = await guild.members.fetch(join.id).catch(() => null);
         if (!member) continue;
+
+        // Verify member joined recently (within last 5 minutes as safety)
+        const memberJoinTime = member.joinedTimestamp;
+        const fiveMinutesAgo = Date.now() - 300000;
+        if (memberJoinTime && memberJoinTime < fiveMinutesAgo) {
+          // Member joined more than 5 minutes ago - skip (existing member)
+          logger.warn(
+            `Skipping ban for ${member.user.tag} - joined ${Math.floor(
+              (Date.now() - memberJoinTime) / 1000
+            )}s ago (existing member)`
+          );
+          continue;
+        }
 
         if (action === "ban") {
           await member.ban({

@@ -104,6 +104,9 @@ module.exports = {
         });
       }
 
+      // Defer reply since we're about to do heavy async work
+      await interaction.deferReply();
+
       // Get or create quarantine role
       let quarantineRole = interaction.guild.roles.cache.find((r) =>
         r.name.toLowerCase().includes("quarantine")
@@ -129,9 +132,8 @@ module.exports = {
               reason: "Quarantine system - ensure bot can manage role",
             });
           } catch (error) {
-            return interaction.reply({
+            return interaction.editReply({
               content: `❌ Cannot position quarantine role correctly. The bot's role must be higher than the quarantine role!`,
-              ephemeral: true,
             });
           }
         }
@@ -264,9 +266,8 @@ module.exports = {
           }
         }
       } catch (error) {
-        return interaction.reply({
+        return interaction.editReply({
           content: `❌ Failed to quarantine user: ${error.message}. Make sure the bot has "Manage Roles" permission and its role is higher than the quarantine role.`,
-          ephemeral: true,
         });
       }
 
@@ -280,7 +281,7 @@ module.exports = {
         .setColor(0xff0000)
         .setTimestamp();
 
-      await interaction.reply({ embeds: [embed] });
+      await interaction.editReply({ embeds: [embed] });
     } else if (subcommand === "remove") {
       const user = interaction.options.getUser("user");
 
@@ -302,6 +303,9 @@ module.exports = {
         });
       }
 
+      // Defer reply since we're about to do heavy async work
+      await interaction.deferReply();
+
       const member = await interaction.guild.members
         .fetch(user.id)
         .catch(() => null);
@@ -312,10 +316,9 @@ module.exports = {
           interaction.client.user.id
         );
         if (!member.manageable) {
-          return interaction.reply({
+          return interaction.editReply({
             content:
               "❌ I cannot manage this user (they have a higher role than me or are the server owner)!",
-            ephemeral: true,
           });
         }
 
@@ -339,9 +342,8 @@ module.exports = {
           try {
             await member.roles.remove(quarantineRole);
           } catch (error) {
-            return interaction.reply({
+            return interaction.editReply({
               content: `❌ Failed to remove quarantine role: ${error.message}`,
-              ephemeral: true,
             });
           }
         }
@@ -377,7 +379,7 @@ module.exports = {
         .setColor(0x00ff00)
         .setTimestamp();
 
-      await interaction.reply({ embeds: [embed] });
+      await interaction.editReply({ embeds: [embed] });
     }
   },
 };

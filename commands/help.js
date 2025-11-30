@@ -68,10 +68,12 @@ module.exports = {
       ],
       utility: [
         "config",
+        "welcome",
         "info",
         "serverinfo",
         "userinfo",
         "stats",
+        "activity",
         "ticket",
         "backup",
         "performance",

@@ -32,34 +32,54 @@ class ThreatIntelligence {
     return { id: threatId, verified: false };
   }
 
-  static async checkThreat(userId) {
+  static async checkThreat(userId, guildId = null) {
     const threats = await db.getThreatIntelligence(userId);
 
     if (threats.length === 0) {
-      return { hasThreat: false, riskScore: 0 };
+      return {
+        hasThreat: false,
+        riskScore: 0,
+        threatCount: 0,
+        verifiedCount: 0,
+        recentCount: 0,
+        threats: [],
+      };
     }
 
-    // Calculate risk score
+    // Get guild-specific sensitivity settings (or defaults)
+    const settings = guildId
+      ? await db.getThreatSensitivity(guildId)
+      : {
+          risk_threshold: 30,
+          severity_critical: 40,
+          severity_high: 30,
+          severity_medium: 20,
+          severity_low: 10,
+          recent_multiplier: 5,
+          recent_days: 7,
+        };
+
+    // Calculate risk score using configured weights
     let riskScore = 0;
     const verifiedThreats = threats.filter((t) => t.verified);
 
     verifiedThreats.forEach((threat) => {
-      if (threat.severity === "critical") riskScore += 40;
-      else if (threat.severity === "high") riskScore += 30;
-      else if (threat.severity === "medium") riskScore += 20;
-      else riskScore += 10;
+      if (threat.severity === "critical") riskScore += settings.severity_critical;
+      else if (threat.severity === "high") riskScore += settings.severity_high;
+      else if (threat.severity === "medium") riskScore += settings.severity_medium;
+      else riskScore += settings.severity_low;
     });
 
-    // Recent threats weigh more
+    // Recent threats weigh more (using configured multiplier and days)
     const recentThreats = threats.filter(
-      (t) => Date.now() - t.reported_at < 604800000
-    ); // Last week
-    riskScore += recentThreats.length * 5;
+      (t) => Date.now() - t.reported_at < settings.recent_days * 86400000
+    );
+    riskScore += recentThreats.length * settings.recent_multiplier;
 
     riskScore = Math.min(100, riskScore);
 
     return {
-      hasThreat: riskScore >= 30,
+      hasThreat: riskScore >= settings.risk_threshold,
       riskScore,
       threatCount: threats.length,
       verifiedCount: verifiedThreats.length,

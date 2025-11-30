@@ -47,7 +47,28 @@ class BehavioralAnalysis {
 
   static analyzeMessagePatterns(behaviors) {
     const messages = behaviors
-      .map((b) => JSON.parse(b.data || "{}").content || "")
+      .map((b) => {
+        try {
+          // Handle if data is already an object or a JSON string
+          let data = b.data;
+          if (typeof data === 'string') {
+            // Try to parse JSON
+            try {
+              data = JSON.parse(data);
+            } catch (e) {
+              // If parsing fails, return empty string
+              return "";
+            }
+          }
+          // If data is an object, extract content
+          if (typeof data === 'object' && data !== null) {
+            return data.content || "";
+          }
+          return "";
+        } catch (error) {
+          return "";
+        }
+      })
       .filter((m) => m);
 
     if (messages.length === 0) {
@@ -111,7 +132,17 @@ class BehavioralAnalysis {
 
   static analyzeModerationPatterns(behaviors) {
     const actions = behaviors.map(
-      (b) => JSON.parse(b.data || "{}").action || ""
+      (b) => {
+        try {
+          let data = b.data;
+          if (typeof data === 'string') {
+            data = JSON.parse(data);
+          }
+          return (typeof data === 'object' && data !== null) ? (data.action || "") : "";
+        } catch {
+          return "";
+        }
+      }
     );
 
     const actionCounts = {};
@@ -181,7 +212,7 @@ class BehavioralAnalysis {
   static calculateAverage(data) {
     if (data.length === 0) return 0;
     const values = data.map(
-      (d) => this.extractValue(JSON.parse(d.data || "{}"), "length") || 0
+      (d) => this.extractValue(d.data || {}, "length") || 0
     );
     return values.reduce((a, b) => a + b, 0) / values.length;
   }

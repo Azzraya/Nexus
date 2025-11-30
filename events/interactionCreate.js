@@ -9,6 +9,35 @@ module.exports = {
       if (!command) return;
 
       try {
+        // Log command usage to console
+        console.log(
+          `📝 [${interaction.guild.name} (${interaction.guild.id})] ${interaction.user.tag} (${interaction.user.id}) used /${interaction.commandName}`
+        );
+
+        // Log command usage to database
+        try {
+          await new Promise((resolve, reject) => {
+            db.db.run(
+              "INSERT INTO command_usage_log (guild_id, guild_name, user_id, user_tag, command_name, timestamp) VALUES (?, ?, ?, ?, ?, ?)",
+              [
+                interaction.guild.id,
+                interaction.guild.name,
+                interaction.user.id,
+                interaction.user.tag,
+                interaction.commandName,
+                Date.now(),
+              ],
+              (err) => {
+                if (err) reject(err);
+                else resolve();
+              }
+            );
+          });
+        } catch (logError) {
+          // Don't fail command if logging fails
+          console.error("Failed to log command usage:", logError.message);
+        }
+
         await command.execute(interaction);
         await db.updateUserStats(
           interaction.guild.id,

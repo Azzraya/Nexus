@@ -41,9 +41,9 @@ module.exports = {
     // Set bot status
     client.user.setActivity(
       shardInfo.isSharded
-        ? `Protecting servers | Shard ${shardInfo.shardId}/${
-            shardInfo.shardCount - 1
-          } | /help`
+        ? `Protecting ${client.guilds.cache.size} servers | Shard ${
+            shardInfo.shardId
+          }/${shardInfo.shardCount - 1} | /help`
         : "Protecting servers | /help",
       {
         type: ActivityType.Watching,
@@ -64,7 +64,10 @@ module.exports = {
       try {
         await SmartRecommendations.analyzeServer(guild.id, guild);
       } catch (error) {
-        console.error(`Failed to generate recommendations for ${guild.name}:`, error);
+        console.error(
+          `Failed to generate recommendations for ${guild.name}:`,
+          error
+        );
       }
     }
     console.log(`🤖 Smart recommendations generated`);
