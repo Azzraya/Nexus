@@ -1,8 +1,8 @@
 const express = require("express");
 const crypto = require("crypto");
-const db = require("../utils/database");
-const EnhancedLogging = require("../utils/enhancedLogging");
-const AILearning = require("../utils/aiLearning");
+const db = require("../../utils/database");
+const EnhancedLogging = require("../../utils/enhancedLogging");
+const AILearning = require("../../utils/aiLearning");
 
 const app = express();
 
