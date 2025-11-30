@@ -40,6 +40,9 @@ module.exports = {
     .addSubcommand((subcommand) =>
       subcommand.setName("list").setDescription("List all custom commands")
     )
+    .addSubcommand((subcommand) =>
+      subcommand.setName("info").setDescription("Learn how to use custom commands")
+    )
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild),
 
   async execute(interaction) {
@@ -89,7 +92,7 @@ module.exports = {
         embeds: [
           {
             title: "✅ Custom Command Created",
-            description: `Command: \`${name}\`\nResponse: ${response}`,
+            description: `**Command:** \`!${name}\`\n**Response:** ${response}\n\n💡 **Usage:** Type \`!${name}\` in any channel to trigger this command.`,
             color: 0x00ff00,
           },
         ],
@@ -140,6 +143,25 @@ module.exports = {
       const embed = new EmbedBuilder()
         .setTitle("📋 Custom Commands")
         .setDescription(list)
+        .setColor(0x0099ff)
+        .setTimestamp();
+
+      await interaction.reply({ embeds: [embed] });
+    } else if (subcommand === "info") {
+      const embed = new EmbedBuilder()
+        .setTitle("📖 How to Use Custom Commands")
+        .setDescription(
+          "Custom commands are triggered using the **`!` prefix** in chat.\n\n" +
+          "**Example:**\n" +
+          "1. Create a command: `/customcommand create name:hello response:Hello there!`\n" +
+          "2. Use it in chat: Type `!hello` in any channel\n" +
+          "3. Bot responds: `Hello there!`\n\n" +
+          "**Features:**\n" +
+          "• Server-specific commands (each server has its own)\n" +
+          "• Simple text responses\n" +
+          "• Use `/customcommand list` to see all commands\n" +
+          "• Use `/customcommand delete` to remove commands"
+        )
         .setColor(0x0099ff)
         .setTimestamp();
 

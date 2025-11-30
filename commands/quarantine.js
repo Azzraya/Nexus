@@ -2,6 +2,7 @@ const {
   SlashCommandBuilder,
   PermissionFlagsBits,
   EmbedBuilder,
+  ChannelType,
 } = require("discord.js");
 const db = require("../utils/database");
 
@@ -77,11 +78,28 @@ module.exports = {
 
       // Check if moderator is server owner (owners can quarantine anyone)
       const isOwner = interaction.member.id === interaction.guild.ownerId;
-      
+
       // Check role hierarchy (unless moderator is owner)
-      if (!isOwner && member.roles.highest.position >= interaction.member.roles.highest.position) {
+      if (
+        !isOwner &&
+        member.roles.highest.position >=
+          interaction.member.roles.highest.position
+      ) {
         return interaction.reply({
-          content: "❌ You cannot quarantine someone with equal or higher roles!",
+          content:
+            "❌ You cannot quarantine someone with equal or higher roles!",
+          ephemeral: true,
+        });
+      }
+
+      // Check if bot can manage this member
+      const botMember = await interaction.guild.members.fetch(
+        interaction.client.user.id
+      );
+      if (!member.manageable) {
+        return interaction.reply({
+          content:
+            "❌ I cannot manage this user (they have a higher role than me or are the server owner)!",
           ephemeral: true,
         });
       }
@@ -92,18 +110,60 @@ module.exports = {
       );
 
       if (!quarantineRole) {
+        // Create quarantine role below bot's highest role
+        const botHighestRole = botMember.roles.highest;
         quarantineRole = await interaction.guild.roles.create({
           name: "Quarantine",
           color: 0xff0000,
           reason: "Quarantine system",
-          permissions: [],
+          permissions: [], // NO base permissions - channel-specific overrides will handle access
+          position:
+            botHighestRole.position > 0 ? botHighestRole.position - 1 : 0,
         });
+      } else {
+        // Ensure quarantine role is below bot's highest role
+        const botHighestRole = botMember.roles.highest;
+        if (quarantineRole.position >= botHighestRole.position) {
+          try {
+            await quarantineRole.setPosition(botHighestRole.position - 1, {
+              reason: "Quarantine system - ensure bot can manage role",
+            });
+          } catch (error) {
+            return interaction.reply({
+              content: `❌ Cannot position quarantine role correctly. The bot's role must be higher than the quarantine role!`,
+              ephemeral: true,
+            });
+          }
+        }
+
+        // Ensure quarantine role has no base permissions
+        // Channel-specific overrides will handle access (prevents seeing hidden channels)
+        const currentPerms = quarantineRole.permissions;
+        if (currentPerms.bitfield !== 0n) {
+          try {
+            await quarantineRole.setPermissions([]);
+          } catch (error) {
+            console.error(
+              `Failed to update quarantine role permissions: ${error.message}`
+            );
+          }
+        }
       }
 
-      // Store original roles
+      // Store original roles and permissions
       const originalRoles = member.roles.cache
         .filter((r) => r.id !== interaction.guild.id)
         .map((r) => r.id);
+
+      // Store which channels the user could view before quarantine
+      const viewableChannels = [];
+      for (const channel of interaction.guild.channels.cache.values()) {
+        if (
+          channel.permissionsFor(member)?.has(PermissionFlagsBits.ViewChannel)
+        ) {
+          viewableChannels.push(channel.id);
+        }
+      }
 
       await new Promise((resolve, reject) => {
         db.db.run(
@@ -111,7 +171,10 @@ module.exports = {
           [
             interaction.guild.id,
             user.id,
-            JSON.stringify(originalRoles),
+            JSON.stringify({
+              roles: originalRoles,
+              viewableChannels: viewableChannels,
+            }),
             reason,
             interaction.user.id,
             Date.now(),
@@ -124,7 +187,88 @@ module.exports = {
       });
 
       // Remove all roles and add quarantine role
-      await member.roles.set([quarantineRole.id], reason);
+      try {
+        await member.roles.set([quarantineRole.id], reason);
+
+        // Override channel permissions to restrict the quarantined user
+        // Only apply to channels the user could already view (don't grant access to hidden channels)
+        const channelOverrides = {
+          SendMessages: false, // Cannot send messages
+          AddReactions: false, // Cannot react
+          UseExternalEmojis: false, // Cannot use external emojis
+          AttachFiles: false, // Cannot attach files
+          EmbedLinks: false, // Cannot embed links
+          MentionEveryone: false, // Cannot mention everyone
+          UseApplicationCommands: false, // Cannot use slash commands
+        };
+
+        // Only apply to channels the user could already view
+        // This prevents granting access to hidden channels
+        let updated = 0;
+        for (const channelId of viewableChannels) {
+          const channel = interaction.guild.channels.cache.get(channelId);
+          if (
+            !channel ||
+            (channel.type !== ChannelType.GuildText &&
+              channel.type !== ChannelType.GuildVoice)
+          ) {
+            continue;
+          }
+
+          try {
+            // Allow viewing only for channels they could already see
+            const overrides = {
+              ...channelOverrides,
+              ViewChannel: true, // They could view it before, so allow viewing
+            };
+
+            await channel.permissionOverwrites.edit(
+              quarantineRole.id,
+              overrides
+            );
+            updated++;
+          } catch (error) {
+            // Skip if we can't edit (e.g., missing permissions on that channel)
+            console.error(
+              `Failed to update permissions for ${channel.name}: ${error.message}`
+            );
+          }
+        }
+        
+        // Explicitly deny access to ALL channels they couldn't view
+        // This prevents them from seeing hidden channels
+        const allChannels = interaction.guild.channels.cache.filter(
+          (ch) =>
+            ch.type === ChannelType.GuildText ||
+            ch.type === ChannelType.GuildVoice ||
+            ch.type === ChannelType.GuildForum
+        );
+        
+        for (const channel of allChannels.values()) {
+          // Skip channels they can already view (handled above)
+          if (viewableChannels.includes(channel.id)) {
+            continue;
+          }
+          
+          try {
+            // Explicitly deny viewing for channels they couldn't see
+            // This is critical to prevent seeing hidden channels
+            await channel.permissionOverwrites.edit(quarantineRole.id, {
+              ViewChannel: false,
+            });
+          } catch (error) {
+            // Skip if we can't edit (might not have permission for that channel)
+            console.error(
+              `Failed to deny access for ${channel.name}: ${error.message}`
+            );
+          }
+        }
+      } catch (error) {
+        return interaction.reply({
+          content: `❌ Failed to quarantine user: ${error.message}. Make sure the bot has "Manage Roles" permission and its role is higher than the quarantine role.`,
+          ephemeral: true,
+        });
+      }
 
       const embed = new EmbedBuilder()
         .setTitle("✅ Member Quarantined")
@@ -163,23 +307,53 @@ module.exports = {
         .catch(() => null);
 
       if (member) {
-        // Restore original roles
-        const originalRoles = JSON.parse(quarantineData.original_roles || "[]");
-        const rolesToAdd = originalRoles.filter((roleId) =>
-          interaction.guild.roles.cache.has(roleId)
+        // Check if bot can manage this member
+        const botMember = await interaction.guild.members.fetch(
+          interaction.client.user.id
         );
+        if (!member.manageable) {
+          return interaction.reply({
+            content:
+              "❌ I cannot manage this user (they have a higher role than me or are the server owner)!",
+            ephemeral: true,
+          });
+        }
+
+        // Restore original roles
+        // Handle both old format (array) and new format (object with roles property)
+        const parsedData = JSON.parse(quarantineData.original_roles || "[]");
+        const originalRoles = Array.isArray(parsedData) 
+          ? parsedData 
+          : (parsedData.roles || []);
+        
+        const rolesToAdd = originalRoles.filter((roleId) => {
+          const role = interaction.guild.roles.cache.get(roleId);
+          return role && role.position < botMember.roles.highest.position;
+        });
 
         // Remove quarantine role
         const quarantineRole = interaction.guild.roles.cache.find((r) =>
           r.name.toLowerCase().includes("quarantine")
         );
         if (quarantineRole) {
-          await member.roles.remove(quarantineRole);
+          try {
+            await member.roles.remove(quarantineRole);
+          } catch (error) {
+            return interaction.reply({
+              content: `❌ Failed to remove quarantine role: ${error.message}`,
+              ephemeral: true,
+            });
+          }
         }
 
-        // Restore original roles
+        // Restore original roles (only if bot can manage them)
         if (rolesToAdd.length > 0) {
-          await member.roles.add(rolesToAdd);
+          try {
+            await member.roles.add(rolesToAdd);
+          } catch (error) {
+            // If some roles can't be added, continue but log it
+            console.error(`Failed to restore some roles: ${error.message}`);
+          }
         }
       }
 

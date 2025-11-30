@@ -10,3 +10,4 @@ data/
 *.db-wal
 *.db-shm
 readmes/
+backups/
