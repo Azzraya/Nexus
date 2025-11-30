@@ -4,6 +4,7 @@ const {
   EmbedBuilder,
 } = require("discord.js");
 const StatsTracker = require("../utils/statsTracker");
+const Owner = require("../utils/owner");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -21,6 +22,16 @@ module.exports = {
 
   async execute(interaction) {
     const subcommand = interaction.options.getSubcommand();
+
+    // Global stats are owner-only
+    if (subcommand === "global") {
+      if (!Owner.isOwner(interaction.user.id)) {
+        return interaction.reply({
+          content: "❌ Only the bot owner can view global statistics!",
+          ephemeral: true,
+        });
+      }
+    }
 
     if (subcommand === "server") {
       await interaction.deferReply();

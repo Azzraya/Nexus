@@ -1,16 +1,18 @@
 const crypto = require("crypto");
+const { authenticator } = require("otplib");
+const QRCode = require("qrcode");
 const db = require("./database");
 
 class RescueKey {
   /**
-   * Generate a rescue key for a guild
+   * Generate a TOTP secret for a guild
    */
-  static generateKey() {
-    return crypto.randomBytes(20).toString("hex").toUpperCase();
+  static generateSecret() {
+    return authenticator.generateSecret();
   }
 
   /**
-   * Get rescue key for a guild
+   * Get rescue key (authenticator secret) for a guild
    */
   static async getKey(guildId) {
     return new Promise((resolve, reject) => {
@@ -26,40 +28,63 @@ class RescueKey {
   }
 
   /**
-   * Set rescue key for a guild
+   * Set rescue key (authenticator secret) for a guild
+   * Returns the secret and QR code data URL
    */
-  static async setKey(guildId, ownerId, key = null) {
-    const rescueKey = key || this.generateKey();
+  static async setKey(guildId, ownerId, secret = null) {
+    const authenticatorSecret = secret || this.generateSecret();
     const createdAt = Date.now();
+
+    // Generate QR code for authenticator setup
+    const otpauth = authenticator.keyuri(
+      `Nexus-${guildId}`,
+      "Nexus Bot",
+      authenticatorSecret
+    );
+
+    let qrCodeDataUrl = null;
+    try {
+      qrCodeDataUrl = await QRCode.toDataURL(otpauth);
+    } catch (error) {
+      console.error("Failed to generate QR code:", error);
+    }
 
     return new Promise((resolve, reject) => {
       db.db.run(
         `INSERT OR REPLACE INTO rescue_keys (guild_id, owner_id, rescue_key, created_at) 
          VALUES (?, ?, ?, ?)`,
-        [guildId, ownerId, rescueKey, createdAt],
+        [guildId, ownerId, authenticatorSecret, createdAt],
         (err) => {
           if (err) reject(err);
-          else resolve(rescueKey);
+          else
+            resolve({
+              secret: authenticatorSecret,
+              qrCode: qrCodeDataUrl,
+              otpauth: otpauth,
+            });
         }
       );
     });
   }
 
   /**
-   * Regenerate rescue key
+   * Regenerate rescue key (authenticator secret)
    */
   static async regenerateKey(guildId, ownerId) {
     return this.setKey(guildId, ownerId);
   }
 
   /**
-   * Verify and use rescue key to transfer ownership
+   * Verify authenticator code and transfer ownership
+   * @param {string} guildId - The server ID
+   * @param {string} code - The 6-digit authenticator code
+   * @param {string} newOwnerId - The new owner's user ID
    */
-  static async useKey(guildId, key, newOwnerId) {
+  static async useKey(guildId, code, newOwnerId) {
     return new Promise((resolve, reject) => {
       db.db.get(
-        "SELECT * FROM rescue_keys WHERE guild_id = ? AND rescue_key = ?",
-        [guildId, key.toUpperCase()],
+        "SELECT * FROM rescue_keys WHERE guild_id = ?",
+        [guildId],
         async (err, row) => {
           if (err) {
             reject(err);
@@ -67,7 +92,24 @@ class RescueKey {
           }
 
           if (!row) {
-            resolve({ valid: false, message: "Invalid rescue key" });
+            resolve({
+              valid: false,
+              message: "No rescue key found for this server",
+            });
+            return;
+          }
+
+          // Verify the authenticator code
+          const isValid = authenticator.verify({
+            token: code,
+            secret: row.rescue_key,
+          });
+
+          if (!isValid) {
+            resolve({
+              valid: false,
+              message: "Invalid authenticator code",
+            });
             return;
           }
 
@@ -102,12 +144,24 @@ class RescueKey {
   }
 
   /**
-   * Get QR code data for rescue key (returns data URL for QR code)
+   * Get QR code data for rescue key setup
    */
-  static getQRCodeData(key) {
-    // In a real implementation, you'd use a QR code library
-    // For now, return the key as a string that can be encoded
-    return `NEXUS_RESCUE:${key}`;
+  static async getQRCode(guildId) {
+    const key = await this.getKey(guildId);
+    if (!key) return null;
+
+    const otpauth = authenticator.keyuri(
+      `Nexus-${guildId}`,
+      "Nexus Bot",
+      key.rescue_key
+    );
+
+    try {
+      return await QRCode.toDataURL(otpauth);
+    } catch (error) {
+      console.error("Failed to generate QR code:", error);
+      return null;
+    }
   }
 }
 

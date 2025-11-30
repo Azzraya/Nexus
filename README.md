@@ -131,7 +131,7 @@ Open source - MIT License. See [LICENSE](LICENSE) file for details.
 
 **Ready to experience the future of Discord security?**
 
-[Invite Nexus](https://discord.com/oauth2/authorize?client_id=YOUR_BOT_ID&permissions=8&scope=bot%20applications.commands) | [GitHub](https://github.com/Azzraya/Nexus) | [Support Server](https://discord.gg/UHNcUKheZP)
+[Invite Nexus](https://discord.com/oauth2/authorize?client_id=1444739230679957646&permissions=268443574&scope=bot%20applications.commands) | [GitHub](https://github.com/Azzraya/Nexus) | [Support Server](https://discord.gg/UHNcUKheZP)
 
 ---
 

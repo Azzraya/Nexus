@@ -5,6 +5,7 @@ const {
 } = require("discord.js");
 const crypto = require("crypto");
 const db = require("../utils/database");
+const Owner = require("../utils/owner");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -51,6 +52,14 @@ module.exports = {
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 
   async execute(interaction) {
+    // Only bot owner can manage API keys
+    if (!Owner.isOwner(interaction.user.id)) {
+      return interaction.reply({
+        content: "❌ Only the bot owner can manage API keys!",
+        ephemeral: true,
+      });
+    }
+
     const subcommand = interaction.options.getSubcommand();
 
     if (subcommand === "create") {

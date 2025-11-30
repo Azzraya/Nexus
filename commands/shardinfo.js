@@ -1,12 +1,20 @@
 const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
 const ShardManager = require("../utils/shardManager");
+const Owner = require("../utils/owner");
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("shardinfo")
-    .setDescription("View shard information and statistics"),
+    .setDescription("View shard information and statistics (OWNER ONLY)"),
 
   async execute(interaction) {
+    // Only bot owner can view shard info
+    if (!Owner.isOwner(interaction.user.id)) {
+      return interaction.reply({
+        content: "❌ Only the bot owner can view shard information!",
+        ephemeral: true,
+      });
+    }
     const shardInfo = ShardManager.getShardInfo(interaction.client);
     const stats = await ShardManager.getShardStats(interaction.client);
 
