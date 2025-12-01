@@ -84,6 +84,16 @@ Nexus is a Discord security bot that combines all of Wick's features with cuttin
 | Auto-Recovery         | ✅        | ❌       |
 | Custom Workflows      | ✅        | ❌       |
 | Advanced Reporting    | ✅        | ❌       |
+| Polls & Voting        | ✅        | ❌       |
+| Suggestions System    | ✅        | ❌       |
+| Role Templates        | ✅        | ❌       |
+| Achievement System    | ✅        | ❌       |
+| Message Scheduling    | ✅        | ❌       |
+| Auto-Responders       | ✅        | ❌       |
+| Advanced Custom Cmds  | ✅        | ❌       |
+| Advanced Anti-Nuke    | ✅        | ❌       |
+| Performance Monitoring | ✅        | ❌       |
+| Database Indexing     | ✅        | ❌       |
 | Open Source           | ✅        | ❌       |
 | Free                  | ✅        | ❓       |
 | Performance           | ⚡ Faster | Standard |

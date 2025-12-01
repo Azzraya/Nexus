@@ -53,6 +53,21 @@ client.logger = logger;
 const WorkflowEngine = require("./utils/workflows");
 client.workflows = new WorkflowEngine(client);
 
+// Advanced Anti-Nuke System
+const AdvancedAntiNuke = require("./utils/advancedAntiNuke");
+client.advancedAntiNuke = new AdvancedAntiNuke(client);
+
+// Performance Monitor
+const PerformanceMonitor = require("./utils/performanceMonitor");
+client.performanceMonitor = new PerformanceMonitor();
+
+// Cleanup anti-nuke history every 5 minutes
+setInterval(() => {
+  if (client.advancedAntiNuke) {
+    client.advancedAntiNuke.cleanup();
+  }
+}, 5 * 60 * 1000);
+
 // Load commands
 const commandsPath = path.join(__dirname, "commands");
 if (!fs.existsSync(commandsPath))

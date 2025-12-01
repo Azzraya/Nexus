@@ -5,112 +5,82 @@ const {
   MessageFlags,
 } = require("discord.js");
 const db = require("../utils/database");
-const cron = require("node-cron");
+const logger = require("../utils/logger");
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("schedule")
-    .setDescription("Schedule moderation actions ")
+    .setDescription("Schedule messages to be sent later")
     .addSubcommand((subcommand) =>
       subcommand
-        .setName("ban")
-        .setDescription("Schedule a ban")
-        .addUserOption((option) =>
-          option.setName("user").setDescription("User to ban").setRequired(true)
-        )
-        .addStringOption((option) =>
+        .setName("message")
+        .setDescription("Schedule a message")
+        .addChannelOption((option) =>
           option
-            .setName("time")
-            .setDescription("When to ban (e.g., 'in 1h', '2024-12-31 23:59')")
+            .setName("channel")
+            .setDescription("Channel to send message in")
             .setRequired(true)
         )
         .addStringOption((option) =>
           option
-            .setName("reason")
-            .setDescription("Reason for ban")
-            .setRequired(false)
-        )
-    )
-    .addSubcommand((subcommand) =>
-      subcommand
-        .setName("unban")
-        .setDescription("Schedule an unban")
-        .addUserOption((option) =>
-          option
-            .setName("user")
-            .setDescription("User to unban")
+            .setName("content")
+            .setDescription("Message content")
             .setRequired(true)
         )
         .addStringOption((option) =>
           option
             .setName("time")
-            .setDescription("When to unban (e.g., 'in 7d', '2024-12-31 23:59')")
+            .setDescription(
+              "When to send (e.g., 'in 2 hours', 'tomorrow 3pm', '2025-12-25 12:00')"
+            )
             .setRequired(true)
         )
     )
     .addSubcommand((subcommand) =>
-      subcommand.setName("list").setDescription("List scheduled actions")
+      subcommand.setName("list").setDescription("List scheduled messages")
     )
     .addSubcommand((subcommand) =>
       subcommand
         .setName("cancel")
-        .setDescription("Cancel a scheduled action")
+        .setDescription("Cancel a scheduled message")
         .addIntegerOption((option) =>
           option
             .setName("id")
-            .setDescription("Scheduled action ID")
+            .setDescription("Scheduled message ID")
             .setRequired(true)
         )
     )
-    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
+    .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages),
 
   async execute(interaction) {
     const subcommand = interaction.options.getSubcommand();
 
-    if (subcommand === "ban" || subcommand === "unban") {
-      const user = interaction.options.getUser("user");
-      const timeInput = interaction.options.getString("time");
-      const reason =
-        interaction.options.getString("reason") || "Scheduled action";
+    if (subcommand === "message") {
+      const channel = interaction.options.getChannel("channel");
+      const content = interaction.options.getString("content");
+      const timeStr = interaction.options.getString("time");
+
+      await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
       // Parse time
-      let executeAt;
-      if (timeInput.startsWith("in ")) {
-        const ms = require("ms")(timeInput.slice(3));
-        if (!ms) {
-          return interaction.reply({
-            content: "❌ Invalid time format! Use 'in 1h', 'in 7d', etc.",
-            flags: MessageFlags.Ephemeral,
-          });
-        }
-        executeAt = Date.now() + ms;
-      } else {
-        executeAt = new Date(timeInput).getTime();
-        if (isNaN(executeAt)) {
-          return interaction.reply({
-            content: "❌ Invalid date format!",
-            flags: MessageFlags.Ephemeral,
-          });
-        }
-      }
-
-      if (executeAt <= Date.now()) {
-        return interaction.reply({
-          content: "❌ Scheduled time must be in the future!",
-          flags: MessageFlags.Ephemeral,
+      const scheduledTime = parseTime(timeStr);
+      if (!scheduledTime || scheduledTime < Date.now()) {
+        return interaction.editReply({
+          content:
+            "❌ Invalid time! Use formats like 'in 2 hours', 'tomorrow 3pm', or '2025-12-25 12:00'",
         });
       }
 
       await new Promise((resolve, reject) => {
         db.db.run(
-          "INSERT INTO scheduled_actions (guild_id, user_id, action_type, reason, execute_at, created_by) VALUES (?, ?, ?, ?, ?, ?)",
+          "INSERT INTO scheduled_messages (guild_id, channel_id, message_content, scheduled_for, created_by, created_at) VALUES (?, ?, ?, ?, ?, ?)",
           [
             interaction.guild.id,
-            user.id,
-            subcommand,
-            reason,
-            executeAt,
+            channel.id,
+            content,
+            scheduledTime,
             interaction.user.id,
+            Date.now(),
           ],
           (err) => {
             if (err) reject(err);
@@ -120,22 +90,34 @@ module.exports = {
       });
 
       const embed = new EmbedBuilder()
-        .setTitle("✅ Action Scheduled")
+        .setTitle("✅ Message Scheduled")
         .setDescription(
-          `${subcommand.toUpperCase()} for ${
-            user.tag
-          } scheduled for <t:${Math.floor(executeAt / 1000)}:F>`
+          `**Channel:** ${channel}\n**Content:** ${content.slice(0, 200)}${
+            content.length > 200 ? "..." : ""
+          }\n**Scheduled for:** <t:${Math.floor(
+            scheduledTime / 1000
+          )}:F> (<t:${Math.floor(scheduledTime / 1000)}:R>)`
         )
-        .addFields({ name: "Reason", value: reason, inline: false })
         .setColor(0x00ff00)
         .setTimestamp();
 
-      await interaction.reply({ embeds: [embed] });
+      await interaction.editReply({ embeds: [embed] });
+
+      // Schedule the message
+      const delay = scheduledTime - Date.now();
+      setTimeout(async () => {
+        await sendScheduledMessage(
+          interaction.client,
+          interaction.guild.id,
+          channel.id,
+          content
+        );
+      }, delay);
     } else if (subcommand === "list") {
-      const scheduled = await new Promise((resolve, reject) => {
+      const messages = await new Promise((resolve, reject) => {
         db.db.all(
-          "SELECT * FROM scheduled_actions WHERE guild_id = ? AND execute_at > ? ORDER BY execute_at ASC",
-          [interaction.guild.id, Date.now()],
+          "SELECT * FROM scheduled_messages WHERE guild_id = ? AND sent = 0 ORDER BY scheduled_for ASC",
+          [interaction.guild.id],
           (err, rows) => {
             if (err) reject(err);
             else resolve(rows || []);
@@ -143,26 +125,29 @@ module.exports = {
         );
       });
 
-      if (scheduled.length === 0) {
+      if (messages.length === 0) {
         return interaction.reply({
-          content: "❌ No scheduled actions found!",
+          content: "❌ No scheduled messages found!",
           flags: MessageFlags.Ephemeral,
         });
       }
 
       const embed = new EmbedBuilder()
-        .setTitle("📅 Scheduled Actions")
+        .setTitle("📅 Scheduled Messages")
         .setDescription(
-          scheduled
+          messages
             .map(
-              (s) =>
-                `**#${s.id}** ${s.action_type.toUpperCase()} <@${
-                  s.user_id
-                }> - <t:${Math.floor(s.execute_at / 1000)}:R>`
+              (m) =>
+                `**ID:** ${m.id}\n` +
+                `**Channel:** <#${m.channel_id}>\n` +
+                `**Content:** ${m.message_content.slice(0, 100)}${
+                  m.message_content.length > 100 ? "..." : ""
+                }\n` +
+                `**Scheduled:** <t:${Math.floor(m.scheduled_for / 1000)}:F>`
             )
-            .join("\n")
+            .join("\n\n")
         )
-        .setColor(0x0099ff)
+        .setColor(0x5865f2)
         .setTimestamp();
 
       await interaction.reply({ embeds: [embed] });
@@ -171,8 +156,8 @@ module.exports = {
 
       const result = await new Promise((resolve, reject) => {
         db.db.run(
-          "DELETE FROM scheduled_actions WHERE id = ? AND guild_id = ?",
-          [id, interaction.guild.id],
+          "DELETE FROM scheduled_messages WHERE guild_id = ? AND id = ? AND sent = 0",
+          [interaction.guild.id, id],
           function (err) {
             if (err) reject(err);
             else resolve(this.changes);
@@ -182,15 +167,90 @@ module.exports = {
 
       if (result === 0) {
         return interaction.reply({
-          content: "❌ Scheduled action not found!",
+          content: "❌ Scheduled message not found or already sent!",
           flags: MessageFlags.Ephemeral,
         });
       }
 
       await interaction.reply({
-        content: `✅ Cancelled scheduled action #${id}`,
+        content: `✅ Scheduled message #${id} cancelled!`,
         flags: MessageFlags.Ephemeral,
       });
     }
   },
 };
+
+function parseTime(timeStr) {
+  const now = Date.now();
+  const lower = timeStr.toLowerCase().trim();
+
+  // "in X hours/minutes/days"
+  const inMatch = lower.match(/in\s+(\d+)\s+(hour|minute|day|week)s?/);
+  if (inMatch) {
+    const value = parseInt(inMatch[1]);
+    const unit = inMatch[2];
+    const multipliers = {
+      minute: 60 * 1000,
+      hour: 60 * 60 * 1000,
+      day: 24 * 60 * 60 * 1000,
+      week: 7 * 24 * 60 * 60 * 1000,
+    };
+    return now + value * (multipliers[unit] || 0);
+  }
+
+  // "tomorrow X:XX"
+  if (lower.startsWith("tomorrow")) {
+    const timeMatch = lower.match(/(\d{1,2}):?(\d{2})?\s*(am|pm)?/);
+    if (timeMatch) {
+      let hours = parseInt(timeMatch[1]);
+      const minutes = parseInt(timeMatch[2] || "0");
+      const ampm = timeMatch[3];
+      if (ampm === "pm" && hours !== 12) hours += 12;
+      if (ampm === "am" && hours === 12) hours = 0;
+      const tomorrow = new Date(now);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      tomorrow.setHours(hours, minutes, 0, 0);
+      return tomorrow.getTime();
+    }
+    // Just "tomorrow" = tomorrow at current time
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    return tomorrow.getTime();
+  }
+
+  // ISO date format or "YYYY-MM-DD HH:MM"
+  const dateMatch = timeStr.match(
+    /(\d{4})-(\d{2})-(\d{2})\s+(\d{1,2}):?(\d{2})?/
+  );
+  if (dateMatch) {
+    const year = parseInt(dateMatch[1]);
+    const month = parseInt(dateMatch[2]) - 1;
+    const day = parseInt(dateMatch[3]);
+    const hours = parseInt(dateMatch[4] || "0");
+    const minutes = parseInt(dateMatch[5] || "0");
+    const date = new Date(year, month, day, hours, minutes);
+    return date.getTime();
+  }
+
+  return null;
+}
+
+async function sendScheduledMessage(client, guildId, channelId, content) {
+  try {
+    const channel = await client.channels.fetch(channelId);
+    await channel.send(content);
+
+    await new Promise((resolve, reject) => {
+      db.db.run(
+        "UPDATE scheduled_messages SET sent = 1 WHERE guild_id = ? AND channel_id = ? AND message_content = ? AND sent = 0",
+        [guildId, channelId, content],
+        (err) => {
+          if (err) reject(err);
+          else resolve();
+        }
+      );
+    });
+  } catch (error) {
+    logger.error("Error sending scheduled message:", error);
+  }
+}

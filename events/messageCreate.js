@@ -7,6 +7,14 @@ module.exports = {
     // Ignore bots
     if (message.author.bot) return;
 
+    // Advanced anti-nuke: Monitor spam in newly created channels
+    if (client.advancedAntiNuke && message.channel) {
+      await client.advancedAntiNuke.monitorChannelMessage(
+        message.channel,
+        message.author.id
+      );
+    }
+
     // Update user stats
     await db.updateUserStats(
       message.guild.id,
@@ -59,10 +67,37 @@ module.exports = {
       });
 
       if (customCommand) {
-        await message.reply(customCommand.response);
+        let response = customCommand.response;
+
+        // Replace variables
+        response = response
+          .replace(/{user}/g, `<@${message.author.id}>`)
+          .replace(/{user\.tag}/g, message.author.tag)
+          .replace(/{user\.id}/g, message.author.id)
+          .replace(/{guild}/g, message.guild.name)
+          .replace(
+            /{member}/g,
+            message.member?.displayName || message.author.username
+          )
+          .replace(/{channel}/g, `<#${message.channel.id}>`);
+
+        if (customCommand.use_embed) {
+          const { EmbedBuilder } = require("discord.js");
+          const embed = new EmbedBuilder()
+            .setDescription(response)
+            .setColor(0x5865f2)
+            .setTimestamp();
+          await message.reply({ embeds: [embed] });
+        } else {
+          await message.reply(response);
+        }
         return;
       }
     }
+
+    // Check auto-responders
+    const AutoResponder = require("../commands/autoresponder");
+    await AutoResponder.checkAutoResponder(message);
 
     // Check auto-moderation
     await AutoMod.checkMessage(message, client);
@@ -121,7 +156,10 @@ module.exports = {
           const ErrorHandler = require("../utils/errorHandler");
           const constants = require("../utils/constants");
           await ErrorHandler.safeExecute(
-            message.member.timeout(constants.TIME.MINUTE * 10, "Auto-mute: High heat score"),
+            message.member.timeout(
+              constants.TIME.MINUTE * 10,
+              "Auto-mute: High heat score"
+            ),
             `messageCreate [${message.guild.id}]`,
             `Auto-mute for heat score ${heatResult.score}`
           );
@@ -145,7 +183,10 @@ module.exports = {
         } else if (heatResult.action === "ban") {
           const ErrorHandler = require("../utils/errorHandler");
           await ErrorHandler.safeExecute(
-            message.member.ban({ reason: "Auto-ban: Extreme spam", deleteMessageDays: 1 }),
+            message.member.ban({
+              reason: "Auto-ban: Extreme spam",
+              deleteMessageDays: 1,
+            }),
             `messageCreate [${message.guild.id}]`,
             `Auto-ban for heat score ${heatResult.score}`
           );

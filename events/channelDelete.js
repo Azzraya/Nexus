@@ -6,6 +6,27 @@ const ErrorHandler = require("../utils/errorHandler");
 module.exports = {
   name: "channelDelete",
   async execute(channel, client) {
+    // Advanced anti-nuke monitoring
+    if (client.advancedAntiNuke) {
+      try {
+        // Try to get the user who deleted (from audit log)
+        const auditLogs = await channel.guild.fetchAuditLogs({
+          limit: 1,
+          type: 12, // CHANNEL_DELETE
+        });
+        const entry = auditLogs.entries.first();
+        if (entry && entry.executor) {
+          await client.advancedAntiNuke.monitorAction(
+            channel.guild,
+            "channelDelete",
+            entry.executor.id,
+            { channelId: channel.id, channelName: channel.name }
+          );
+        }
+      } catch (error) {
+        // Ignore audit log errors
+      }
+    }
     // Check if this was a mass deletion (potential nuke)
     const recentDeletions = await new Promise((resolve, reject) => {
       client.db.db.all(

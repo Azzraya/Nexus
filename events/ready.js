@@ -85,5 +85,61 @@ module.exports = {
         });
       }
     });
+
+    // Create recovery snapshots for all servers (if auto-recovery is enabled)
+    const AutoRecovery = require("../utils/autoRecovery");
+    const logger = require("../utils/logger");
+    for (const guild of client.guilds.cache.values()) {
+      try {
+        const config = await db.getServerConfig(guild.id);
+        // Default to enabled if not set
+        if (config?.auto_recovery_enabled !== 0) {
+          // Check if we have a recent snapshot (within last 24 hours)
+          const recentSnapshots = await db.getRecoverySnapshots(guild.id, 1);
+          const hasRecentSnapshot = recentSnapshots.length > 0 && 
+            (Date.now() - recentSnapshots[0].created_at) < 24 * 60 * 60 * 1000;
+          
+          if (!hasRecentSnapshot) {
+            await AutoRecovery.autoSnapshot(guild, "Periodic auto-snapshot");
+            logger.info(`📸 Created recovery snapshot for ${guild.name}`);
+          }
+        }
+      } catch (error) {
+        // Silently continue - not critical
+        logger.debug(`Failed to create snapshot for ${guild.name}:`, error.message);
+      }
+    }
+
+    // Check bot role position in all servers (warn if not high enough)
+    for (const guild of client.guilds.cache.values()) {
+      try {
+        const botMember = await guild.members.fetch(client.user.id).catch(() => null);
+        if (!botMember) continue;
+
+        const botRole = botMember.roles.highest;
+        if (!botRole) continue;
+
+        // Get all roles (excluding @everyone)
+        const allRoles = guild.roles.cache
+          .filter(r => r.id !== guild.id)
+          .sort((a, b) => b.position - a.position);
+
+        // Check if bot role is in top 3 positions (should be highest for best protection)
+        const botRoleIndex = allRoles.findIndex(r => r.id === botRole.id);
+        const totalRoles = allRoles.size;
+
+        if (botRoleIndex > 2) {
+          logger.warn(
+            `⚠️ [${guild.name}] Bot role "${botRole.name}" is at position ${botRole.position} (${botRoleIndex + 1}/${totalRoles}). ` +
+            `For best anti-nuke protection, position the bot's role ABOVE all other roles. ` +
+            `Use /security rolecheck for details.`
+          );
+        } else if (botRoleIndex === 0) {
+          logger.info(`✅ [${guild.name}] Bot role is at highest position - optimal for anti-nuke protection`);
+        }
+      } catch (error) {
+        // Silently continue - not critical
+      }
+    }
   },
 };

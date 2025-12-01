@@ -4,6 +4,27 @@ const ModerationQueue = require("../utils/moderationQueue");
 module.exports = {
   name: "guildBanAdd",
   async execute(ban, client) {
+    // Advanced anti-nuke monitoring
+    if (client.advancedAntiNuke) {
+      try {
+        const auditLogs = await ban.guild.fetchAuditLogs({
+          limit: 1,
+          type: 20, // MEMBER_BAN_ADD
+        });
+        const entry = auditLogs.entries.first();
+        if (entry && entry.executor) {
+          await client.advancedAntiNuke.monitorAction(
+            ban.guild,
+            "banAdd",
+            entry.executor.id,
+            { bannedUserId: ban.user.id }
+          );
+        }
+      } catch (error) {
+        // Ignore audit log errors
+      }
+    }
+
     // Check for mass bans
     const recentBans = await new Promise((resolve, reject) => {
       client.db.db.all(

@@ -6,6 +6,27 @@ const logger = require("../utils/logger");
 module.exports = {
   name: "roleCreate",
   async execute(role, client) {
+    // Advanced anti-nuke monitoring
+    if (client.advancedAntiNuke) {
+      try {
+        const auditLogs = await role.guild.fetchAuditLogs({
+          limit: 1,
+          type: 30, // ROLE_CREATE
+        });
+        const entry = auditLogs.entries.first();
+        if (entry && entry.executor) {
+          await client.advancedAntiNuke.monitorAction(
+            role.guild,
+            "roleCreate",
+            entry.executor.id,
+            { roleId: role.id, roleName: role.name }
+          );
+        }
+      } catch (error) {
+        // Ignore audit log errors
+      }
+    }
+
     // Logging
     logger.info(`Role created: ${role.name}`, {
       guildId: role.guild.id,

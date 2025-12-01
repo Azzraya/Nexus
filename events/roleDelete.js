@@ -6,6 +6,26 @@ const ErrorHandler = require("../utils/errorHandler");
 module.exports = {
   name: "roleDelete",
   async execute(role, client) {
+    // Advanced anti-nuke monitoring
+    if (client.advancedAntiNuke) {
+      try {
+        const auditLogs = await role.guild.fetchAuditLogs({
+          limit: 1,
+          type: 32, // ROLE_DELETE
+        });
+        const entry = auditLogs.entries.first();
+        if (entry && entry.executor) {
+          await client.advancedAntiNuke.monitorAction(
+            role.guild,
+            "roleDelete",
+            entry.executor.id,
+            { roleId: role.id, roleName: role.name }
+          );
+        }
+      } catch (error) {
+        // Ignore audit log errors
+      }
+    }
     // Check if this was a mass deletion (potential nuke)
     const recentDeletions = await new Promise((resolve, reject) => {
       client.db.db.all(

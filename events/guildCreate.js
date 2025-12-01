@@ -1,5 +1,6 @@
 const { registerCommands } = require("../utils/registerCommands");
 const db = require("../utils/database");
+const logger = require("../utils/logger");
 
 module.exports = {
   name: "guildCreate",
@@ -67,6 +68,17 @@ module.exports = {
         `❌ Failed to register commands for ${guild.name}:`,
         error.message
       );
+    }
+
+    // Create initial recovery snapshot for new servers
+    try {
+      const AutoRecovery = require("../utils/autoRecovery");
+      await AutoRecovery.autoSnapshot(guild, "Initial snapshot on bot join");
+      logger.info(`📸 Created initial recovery snapshot for ${guild.name} (${guild.id})`);
+      console.log(`📸 Created initial recovery snapshot for ${guild.name}`);
+    } catch (error) {
+      logger.error(`Failed to create initial snapshot for ${guild.name}:`, error);
+      console.error(`Failed to create initial snapshot for ${guild.name}:`, error.message);
     }
   },
 };

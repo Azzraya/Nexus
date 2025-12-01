@@ -16,7 +16,12 @@ class Database {
         console.error("Database error:", err);
       } else {
         console.log("✅ Database connected");
-        this.initTables();
+        // Initialize tables - serialize ensures they're created in order
+        this.db.serialize(() => {
+          this.initTables();
+          // Run migrations after tables are created
+          this.runMigrations();
+        });
       }
     });
   }
@@ -92,6 +97,34 @@ class Database {
                 score INTEGER DEFAULT 0,
                 last_updated INTEGER,
                 PRIMARY KEY (guild_id, user_id)
+            )
+        `);
+
+    // Heat data (history and detailed tracking)
+    this.db.run(`
+            CREATE TABLE IF NOT EXISTS heat_data (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                guild_id TEXT,
+                user_id TEXT,
+                score INTEGER DEFAULT 0,
+                history TEXT,
+                last_updated INTEGER,
+                UNIQUE(guild_id, user_id)
+            )
+        `);
+
+    // Cases (moderation cases)
+    this.db.run(`
+            CREATE TABLE IF NOT EXISTS cases (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                guild_id TEXT,
+                user_id TEXT,
+                moderator_id TEXT,
+                case_type TEXT,
+                reason TEXT,
+                timestamp INTEGER,
+                duration INTEGER,
+                active INTEGER DEFAULT 1
             )
         `);
 
@@ -179,6 +212,7 @@ class Database {
                 guild_id TEXT,
                 command_name TEXT,
                 response TEXT,
+                use_embed INTEGER DEFAULT 0,
                 created_by TEXT,
                 created_at INTEGER
             )
@@ -260,6 +294,8 @@ class Database {
                 user_id TEXT,
                 details TEXT,
                 threat_score INTEGER,
+                threat_type TEXT,
+                action_taken INTEGER DEFAULT 0,
                 timestamp INTEGER
             )
         `);
@@ -458,6 +494,99 @@ class Database {
             )
         `);
 
+    // Polls
+    this.db.run(`
+            CREATE TABLE IF NOT EXISTS polls (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                guild_id TEXT,
+                channel_id TEXT,
+                message_id TEXT,
+                creator_id TEXT,
+                question TEXT,
+                options TEXT,
+                votes TEXT,
+                ends_at INTEGER,
+                allow_multiple INTEGER DEFAULT 0,
+                anonymous INTEGER DEFAULT 0,
+                created_at INTEGER,
+                ended INTEGER DEFAULT 0
+            )
+        `);
+
+    // Suggestions
+    this.db.run(`
+            CREATE TABLE IF NOT EXISTS suggestions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                guild_id TEXT,
+                channel_id TEXT,
+                message_id TEXT,
+                user_id TEXT,
+                suggestion TEXT,
+                upvotes INTEGER DEFAULT 0,
+                downvotes INTEGER DEFAULT 0,
+                voters TEXT,
+                status TEXT DEFAULT 'pending',
+                reviewed_by TEXT,
+                reviewed_at INTEGER,
+                created_at INTEGER
+            )
+        `);
+
+    // Role templates
+    this.db.run(`
+            CREATE TABLE IF NOT EXISTS role_templates (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                guild_id TEXT,
+                template_name TEXT,
+                role_ids TEXT,
+                created_by TEXT,
+                created_at INTEGER
+            )
+        `);
+
+    // Achievements
+    this.db.run(`
+            CREATE TABLE IF NOT EXISTS achievements (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                guild_id TEXT,
+                user_id TEXT,
+                achievement_type TEXT,
+                achievement_data TEXT,
+                unlocked_at INTEGER,
+                UNIQUE(guild_id, user_id, achievement_type)
+            )
+        `);
+
+    // Scheduled messages
+    this.db.run(`
+            CREATE TABLE IF NOT EXISTS scheduled_messages (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                guild_id TEXT,
+                channel_id TEXT,
+                message_content TEXT,
+                embed_data TEXT,
+                scheduled_for INTEGER,
+                created_by TEXT,
+                created_at INTEGER,
+                sent INTEGER DEFAULT 0
+            )
+        `);
+
+    // Auto-responders
+    this.db.run(`
+            CREATE TABLE IF NOT EXISTS auto_responders (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                guild_id TEXT,
+                trigger TEXT,
+                response TEXT,
+                response_type TEXT DEFAULT 'text',
+                case_sensitive INTEGER DEFAULT 0,
+                enabled INTEGER DEFAULT 1,
+                created_by TEXT,
+                created_at INTEGER
+            )
+        `);
+
     // Smart recommendations
     this.db.run(`
             CREATE TABLE IF NOT EXISTS recommendations (
@@ -614,6 +743,126 @@ class Database {
                 timestamp INTEGER
             )
         `);
+
+    // Performance metrics
+    this.db.run(`
+            CREATE TABLE IF NOT EXISTS performance_metrics (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                guild_id TEXT,
+                metric_type TEXT,
+                metric_value REAL,
+                timestamp INTEGER
+            )
+        `);
+
+    // Create indexes for better performance (after all tables are created)
+    // Since we're in serialize mode from constructor, these will run after all CREATE TABLE statements
+    this.db.run(
+      `CREATE INDEX IF NOT EXISTS idx_mod_logs_guild_user ON moderation_logs(guild_id, user_id)`,
+      (err) => {
+        if (err)
+          console.error("Error creating index idx_mod_logs_guild_user:", err);
+      }
+    );
+    this.db.run(
+      `CREATE INDEX IF NOT EXISTS idx_mod_logs_guild_timestamp ON moderation_logs(guild_id, timestamp)`,
+      (err) => {
+        if (err)
+          console.error(
+            "Error creating index idx_mod_logs_guild_timestamp:",
+            err
+          );
+      }
+    );
+    this.db.run(
+      `CREATE INDEX IF NOT EXISTS idx_security_logs_guild_timestamp ON security_logs(guild_id, timestamp)`,
+      (err) => {
+        if (err)
+          console.error(
+            "Error creating index idx_security_logs_guild_timestamp:",
+            err
+          );
+      }
+    );
+    this.db.run(
+      `CREATE INDEX IF NOT EXISTS idx_warnings_guild_user ON warnings(guild_id, user_id)`,
+      (err) => {
+        if (err)
+          console.error("Error creating index idx_warnings_guild_user:", err);
+      }
+    );
+    this.db.run(
+      `CREATE INDEX IF NOT EXISTS idx_cases_guild_user ON cases(guild_id, user_id)`,
+      (err) => {
+        if (err)
+          console.error("Error creating index idx_cases_guild_user:", err);
+      }
+    );
+    this.db.run(
+      `CREATE INDEX IF NOT EXISTS idx_user_stats_guild_user ON user_stats(guild_id, user_id)`,
+      (err) => {
+        if (err)
+          console.error("Error creating index idx_user_stats_guild_user:", err);
+      }
+    );
+    this.db.run(
+      `CREATE INDEX IF NOT EXISTS idx_heat_data_guild_user ON heat_data(guild_id, user_id)`,
+      (err) => {
+        if (err)
+          console.error("Error creating index idx_heat_data_guild_user:", err);
+      }
+    );
+    this.db.run(
+      `CREATE INDEX IF NOT EXISTS idx_automod_rules_guild ON automod_rules(guild_id)`,
+      (err) => {
+        if (err)
+          console.error("Error creating index idx_automod_rules_guild:", err);
+      }
+    );
+    this.db.run(
+      `CREATE INDEX IF NOT EXISTS idx_workflows_guild ON workflows(guild_id)`,
+      (err) => {
+        if (err)
+          console.error("Error creating index idx_workflows_guild:", err);
+      }
+    );
+    this.db.run(
+      `CREATE INDEX IF NOT EXISTS idx_suggestions_guild_status ON suggestions(guild_id, status)`,
+      (err) => {
+        if (err)
+          console.error(
+            "Error creating index idx_suggestions_guild_status:",
+            err
+          );
+      }
+    );
+    this.db.run(
+      `CREATE INDEX IF NOT EXISTS idx_polls_guild_ended ON polls(guild_id, ended)`,
+      (err) => {
+        if (err)
+          console.error("Error creating index idx_polls_guild_ended:", err);
+      }
+    );
+  }
+
+  runMigrations() {
+    // Migration: Add threat_type and action_taken columns to security_logs if they don't exist
+    this.db.run(
+      `ALTER TABLE security_logs ADD COLUMN threat_type TEXT`,
+      (err) => {
+        if (err && !err.message.includes("duplicate column")) {
+          console.error("Error adding threat_type column:", err);
+        }
+      }
+    );
+    this.db.run(
+      `ALTER TABLE security_logs ADD COLUMN action_taken INTEGER DEFAULT 0`,
+      (err) => {
+        if (err && !err.message.includes("duplicate column")) {
+          console.error("Error adding action_taken column:", err);
+        }
+      }
+    );
   }
 
   // Server config methods

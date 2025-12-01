@@ -6,6 +6,38 @@ const logger = require("../utils/logger");
 module.exports = {
   name: "channelCreate",
   async execute(channel, client) {
+    // If server is in lockdown, DELETE the channel immediately
+    if (client.advancedAntiNuke && client.advancedAntiNuke.lockedGuilds.has(channel.guild.id)) {
+      try {
+        await channel.delete("Anti-Nuke: Channel created during lockdown").catch(() => {});
+        logger.warn(`[Anti-Nuke] Deleted channel ${channel.id} created during lockdown in ${channel.guild.id}`);
+        return; // Don't process further
+      } catch (error) {
+        // Continue to monitoring
+      }
+    }
+
+    // Advanced anti-nuke monitoring
+    if (client.advancedAntiNuke) {
+      try {
+        const auditLogs = await channel.guild.fetchAuditLogs({
+          limit: 1,
+          type: 10, // CHANNEL_CREATE
+        });
+        const entry = auditLogs.entries.first();
+        if (entry && entry.executor) {
+          await client.advancedAntiNuke.monitorAction(
+            channel.guild,
+            "channelCreate",
+            entry.executor.id,
+            { channelId: channel.id, channelName: channel.name }
+          );
+        }
+      } catch (error) {
+        // Ignore audit log errors
+      }
+    }
+
     // Logging
     logger.info(`Channel created: #${channel.name}`, {
       guildId: channel.guild.id,

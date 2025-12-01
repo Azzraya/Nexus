@@ -48,7 +48,15 @@ module.exports = {
           );
         }
 
+        // Track performance
+        const startTime = Date.now();
         await command.execute(interaction);
+        const executionTime = Date.now() - startTime;
+        
+        if (client.performanceMonitor) {
+          client.performanceMonitor.trackCommand(command.data.name, executionTime);
+        }
+
         await db.updateUserStats(
           interaction.guild.id,
           interaction.user.id,
@@ -168,6 +176,51 @@ module.exports = {
             }
             return;
           }
+        }
+
+        // Handle poll votes
+        if (
+          interaction.customId &&
+          interaction.customId.startsWith("poll_vote_")
+        ) {
+          const pollCommand = client.commands.get("poll");
+          if (pollCommand && pollCommand.handlePollVote) {
+            try {
+              await pollCommand.handlePollVote(interaction);
+            } catch (error) {
+              logger.error("Error handling poll vote:", error);
+              const ErrorHandler = require("../utils/errorHandler");
+              ErrorHandler.logError(
+                error,
+                "interactionCreate",
+                "Handle poll vote"
+              );
+            }
+          }
+          return;
+        }
+
+        // Handle suggestion votes
+        if (
+          interaction.customId &&
+          (interaction.customId === "suggest_upvote" ||
+            interaction.customId === "suggest_downvote")
+        ) {
+          const suggestCommand = client.commands.get("suggest");
+          if (suggestCommand && suggestCommand.handleSuggestionVote) {
+            try {
+              await suggestCommand.handleSuggestionVote(interaction);
+            } catch (error) {
+              logger.error("Error handling suggestion vote:", error);
+              const ErrorHandler = require("../utils/errorHandler");
+              ErrorHandler.logError(
+                error,
+                "interactionCreate",
+                "Handle suggestion vote"
+              );
+            }
+          }
+          return;
         }
 
         // Handle dashboard buttons

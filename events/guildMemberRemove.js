@@ -4,6 +4,28 @@ const ErrorHandler = require("../utils/errorHandler");
 module.exports = {
   name: "guildMemberRemove",
   async execute(member, client) {
+    // Advanced anti-nuke monitoring (check if it was a kick)
+    if (client.advancedAntiNuke) {
+      try {
+        const auditLogs = await member.guild.fetchAuditLogs({
+          limit: 1,
+          type: 20, // MEMBER_KICK
+        });
+        const entry = auditLogs.entries.first();
+        // Check if this was a kick (not a leave) and happened recently
+        if (entry && entry.executor && Date.now() - entry.createdTimestamp < 5000) {
+          await client.advancedAntiNuke.monitorAction(
+            member.guild,
+            "memberRemove",
+            entry.executor.id,
+            { kickedUserId: member.id }
+          );
+        }
+      } catch (error) {
+        // Ignore audit log errors
+      }
+    }
+
     // Get server config once
     const config = await db.getServerConfig(member.guild.id);
 

@@ -88,6 +88,14 @@ module.exports = {
         "workflow",
         "logs",
         "report",
+        "poll",
+        "suggest",
+        "roletemplate",
+        "achievement",
+        "schedule",
+        "autoresponder",
+        "performance",
+        "unlock",
         "queue",
         "behavior",
         "invite",
@@ -100,8 +108,9 @@ module.exports = {
         "reactionrole",
         "customcommand",
         "autorole",
-        "report",
-        "automod",
+        "poll",
+        "suggest",
+        "achievement",
       ],
     };
 
@@ -197,7 +206,6 @@ module.exports = {
           "• Multi-algorithm anti-raid\n• Predictive security\n• Heat-based moderation\n• Auto-moderation\n• Real-time threat detection\n• Cross-server intelligence\n• Intelligent auto-tuning",
         inline: false,
       });
-
     }
 
     await interaction.reply({ embeds: [embed] });
