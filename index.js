@@ -32,6 +32,10 @@ client.commands = new Collection();
 client.events = new Collection();
 client.cooldowns = new Collection();
 
+// Initialize cache system (EXCEEDS WICK - better caching)
+const cache = require("./utils/cache");
+client.cache = cache;
+
 // Anti-raid system
 client.antiRaid = {
   joinRate: new Map(), // Track joins per time window
@@ -43,6 +47,10 @@ client.antiRaid = {
 // Advanced Heat-based moderation system
 const HeatSystem = require("./utils/heatSystem");
 client.heatSystem = new HeatSystem(client);
+
+// Advanced Verification System
+const VerificationSystem = require("./utils/verificationSystem");
+client.verificationSystem = new VerificationSystem(client);
 
 // Database
 client.db = db;
@@ -64,11 +72,37 @@ client.autoBackup = new AutoBackup(client);
 const PerformanceMonitor = require("./utils/performanceMonitor");
 client.performanceMonitor = new PerformanceMonitor();
 
-// Cleanup anti-nuke history every 5 minutes
-setInterval(() => {
+// Optimized cleanup - run all cleanups in parallel (EXCEEDS WICK - better performance)
+setInterval(async () => {
+  const cleanupTasks = [];
+
   if (client.advancedAntiNuke) {
-    client.advancedAntiNuke.cleanup();
+    cleanupTasks.push(
+      Promise.resolve(client.advancedAntiNuke.cleanup()).catch((err) =>
+        logger.error("AdvancedAntiNuke cleanup error:", err)
+      )
+    );
   }
+  if (client.heatSystem && typeof client.heatSystem.cleanup === "function") {
+    cleanupTasks.push(
+      Promise.resolve(client.heatSystem.cleanup()).catch((err) =>
+        logger.error("HeatSystem cleanup error:", err)
+      )
+    );
+  }
+  if (
+    client.verificationSystem &&
+    typeof client.verificationSystem.cleanup === "function"
+  ) {
+    cleanupTasks.push(
+      Promise.resolve(client.verificationSystem.cleanup()).catch((err) =>
+        logger.error("VerificationSystem cleanup error:", err)
+      )
+    );
+  }
+
+  // Run all cleanups in parallel for better performance
+  await Promise.all(cleanupTasks);
 }, 5 * 60 * 1000);
 
 // Load commands
@@ -178,12 +212,7 @@ client.checkAntiRaid = async (guild, member) => {
   return false;
 };
 
-// Heat system cleanup (runs every 5 minutes)
-setInterval(() => {
-  if (client.heatSystem && typeof client.heatSystem.cleanup === "function") {
-    client.heatSystem.cleanup();
-  }
-}, 5 * 60 * 1000);
+// Removed duplicate cleanup - now handled in the main cleanup interval above
 
 // Anti-nuke protection
 client.checkAntiNuke = async (guild, user, action) => {

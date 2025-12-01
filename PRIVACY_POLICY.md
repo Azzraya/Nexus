@@ -15,7 +15,7 @@ Nexus Bot ("we", "our", "us") is committed to protecting your privacy. This Priv
 - Server settings and configurations
 - Moderation logs and actions
 - Security events and threat data
-- **Recovery snapshots** (channel structures, role configurations, permission overwrites)
+- **Recovery snapshots** (channel structures, role configurations, permission overwrites, webhooks, emojis, stickers, server settings including icon and banner)
 - Server lockdown state (temporary, during security incidents)
 
 ### User Information
@@ -26,6 +26,8 @@ Nexus Bot ("we", "our", "us") is committed to protecting your privacy. This Priv
 - Moderation history
 - Behavioral patterns (for threat detection)
 - **Role and permission data** (stored in recovery snapshots for restoration purposes)
+- **Whitelist data** (user IDs exempt from anti-nuke monitoring)
+- **Predictive threat patterns** (behavioral patterns and confidence scores for threat prediction)
 
 ### Technical Information
 
@@ -80,6 +82,8 @@ Nexus Bot ("we", "our", "us") is committed to protecting your privacy. This Priv
 - Message content: Not stored permanently (only processed in real-time for moderation)
 - Behavioral patterns: 90 days (anonymized after 30 days)
 - **Security logs with threat types**: 90 days (includes threat classification and actions taken)
+- **Whitelist data**: Retained while bot is in server, deleted 30 days after bot removal
+- **Predictive threat patterns**: 90 days (anonymized after 30 days)
 
 ## Auto-Recovery System
 
@@ -90,6 +94,10 @@ Nexus Bot includes an automatic server recovery system that creates snapshots of
 - **Channel Data**: Channel IDs, names, types, positions, parent categories, and permission overwrites (including role/user IDs and specific permissions)
 - **Role Data**: Role IDs, names, colors, permissions, positions, mentionable status, and hoist settings
 - **Permission Overwrites**: Detailed permission settings for channels, including which roles/users have specific permissions
+- **Webhook Data**: Webhook IDs, names, channel associations, and avatars (for restoration purposes)
+- **Emoji Data**: Emoji IDs, names, animated status, and image URLs (for restoration purposes)
+- **Sticker Data**: Sticker IDs, names, descriptions, formats, and image URLs (for restoration purposes)
+- **Server Settings**: Server name, description, icon, banner, splash, verification level, notification settings, AFK settings, system channels, and locale preferences
 
 ### Purpose:
 
@@ -388,6 +396,12 @@ We may update this Privacy Policy from time to time. We will:
 - Notify servers of significant changes
 - Update the "Last Updated" date
 - Post changes in our support server
+
+## Version History
+
+- **December 1, 2025** - Added enhanced recovery features (webhooks, emojis, stickers, server settings), whitelist system, predictive threat detection documentation
+- **December 1, 2025** - Added auto-recovery snapshots documentation, performance metrics, enhanced security logging, server lockdown features
+- **December 1, 2025** - Initial comprehensive privacy policy with GDPR, CCPA, and Discord ToS compliance
 
 ## Contact
 

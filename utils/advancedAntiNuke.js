@@ -7,7 +7,7 @@ class AdvancedAntiNuke {
     this.client = client;
     this.monitoring = new Map(); // Track suspicious activity
     this.actionHistory = new Map(); // Track recent actions per user
-    this.thresholds = {
+    this.baseThresholds = {
       channelsDeleted: 1, // Even 1 channel deletion in 5 seconds = THREAT (nuke bots delete ALL)
       channelsCreated: 2, // 2+ channels created in 5 seconds = spam creation
       rolesDeleted: 1, // Even 1 role deletion = potential threat
@@ -19,6 +19,9 @@ class AdvancedAntiNuke {
       emojisCreated: 5, // 5+ emojis created in 5 seconds (spam)
       voiceRaid: 10, // 10+ voice joins in 10 seconds
     };
+    this.thresholds = { ...this.baseThresholds }; // Will be adapted per server
+    this.rateLimitQueue = new Map(); // Rate limit protection (guildId -> queue)
+    this.threatPriority = new Map(); // Track threat priority levels
     this.lockedGuilds = new Set(); // Track guilds in lockdown
     this.processedThreats = new Set(); // Prevent duplicate handling
     this.spamChannels = new Map(); // Track spam channels (channelId -> {creator, createdAt, messageCount})
@@ -26,9 +29,121 @@ class AdvancedAntiNuke {
     this.webhookSpam = new Map(); // Track webhook spam (webhookId -> {creator, createdAt, messageCount})
     this.emojiSpam = new Map(); // Track emoji spam per user (userId -> {count, lastMessage, guildId})
     this.voiceRaids = new Map(); // Track voice channel raids (guildId -> {joinCount, lastJoin, userIds})
+    this.whitelistCache = new Map(); // Cache whitelisted users (guildId -> Set<userId>)
+    this.predictiveThreats = new Map(); // Track predictive threat patterns (guildId -> Map<userId, {pattern, confidence, timestamp}>)
+  }
+
+  // Check if user is whitelisted (EXCEEDS WICK - prevents false positives)
+  async isWhitelisted(guildId, userId) {
+    if (!this.whitelistCache.has(guildId)) {
+      // Load whitelist from database
+      const whitelist = await db.getWhitelistedUsers(guildId);
+      this.whitelistCache.set(
+        guildId,
+        new Set(whitelist.map((u) => u.user_id))
+      );
+    }
+    return this.whitelistCache.get(guildId)?.has(userId) || false;
+  }
+
+  // Predictive threat detection (EXCEEDS WICK - detects threats before they happen)
+  async detectPredictiveThreat(guild, userId, actionType) {
+    const guildId = guild.id;
+    const key = `${guildId}-${userId}`;
+
+    if (!this.predictiveThreats.has(guildId)) {
+      this.predictiveThreats.set(guildId, new Map());
+    }
+
+    const userThreats = this.predictiveThreats.get(guildId);
+    if (!userThreats.has(userId)) {
+      userThreats.set(userId, {
+        patterns: [],
+        confidence: 0,
+        firstSeen: Date.now(),
+      });
+    }
+
+    const threatData = userThreats.get(userId);
+
+    // Track suspicious patterns
+    const suspiciousPatterns = [
+      { pattern: "rapid_permission_changes", threshold: 3, window: 10000 },
+      { pattern: "testing_permissions", threshold: 2, window: 30000 },
+      { pattern: "unusual_activity_spike", threshold: 5, window: 60000 },
+    ];
+
+    // Check for rapid permission changes (testing if they can nuke)
+    if (actionType.includes("role") || actionType.includes("channel")) {
+      threatData.patterns.push({
+        type: "rapid_permission_changes",
+        timestamp: Date.now(),
+      });
+
+      const recentPatterns = threatData.patterns.filter(
+        (p) =>
+          p.type === "rapid_permission_changes" &&
+          Date.now() - p.timestamp < 10000
+      );
+
+      if (recentPatterns.length >= 3) {
+        threatData.confidence += 30;
+        logger.warn(
+          `[Anti-Nuke] Predictive threat detected: ${userId} showing rapid permission testing pattern (confidence: ${threatData.confidence}%)`
+        );
+      }
+    }
+
+    // Clean old patterns
+    threatData.patterns = threatData.patterns.filter(
+      (p) => Date.now() - p.timestamp < 60000
+    );
+
+    // If confidence is high enough, pre-emptively warn admins
+    if (threatData.confidence >= 50 && threatData.confidence < 80) {
+      logger.warn(
+        `[Anti-Nuke] ⚠️ PREDICTIVE THREAT: ${userId} in ${guild.name} showing suspicious patterns (confidence: ${threatData.confidence}%)`
+      );
+      // Could send early warning to admins here
+    }
+
+    // If confidence is very high, take pre-emptive action
+    if (threatData.confidence >= 80) {
+      logger.error(
+        `[Anti-Nuke] 🚨 HIGH CONFIDENCE PREDICTIVE THREAT: ${userId} in ${guild.name} (confidence: ${threatData.confidence}%)`
+      );
+      // Could pre-emptively remove permissions or alert admins
+      return true; // Indicates high threat
+    }
+
+    return false;
   }
 
   async monitorAction(guild, actionType, userId, details = {}) {
+    // Check whitelist first (EXCEEDS WICK)
+    if (await this.isWhitelisted(guild.id, userId)) {
+      logger.debug(
+        `[Anti-Nuke] User ${userId} is whitelisted in ${guild.name} - skipping monitoring`
+      );
+      return; // Whitelisted users are exempt
+    }
+
+    // Predictive threat detection (EXCEEDS WICK)
+    const isHighThreat = await this.detectPredictiveThreat(
+      guild,
+      userId,
+      actionType
+    );
+    if (isHighThreat) {
+      // Pre-emptive action could be taken here
+      logger.warn(
+        `[Anti-Nuke] High confidence predictive threat detected for ${userId} - monitoring closely`
+      );
+    }
+
+    // Use adaptive thresholds (EXCEEDS WICK - intelligent adaptation)
+    const thresholds = this.getAdaptiveThresholds(guild);
+    
     const key = `${guild.id}-${userId}`;
     const now = Date.now();
 
@@ -92,32 +207,32 @@ class AdvancedAntiNuke {
     let threatDetected = false;
     let threatType = null;
 
-    // Check individual thresholds
-    if (counts.channelsDeleted >= this.thresholds.channelsDeleted) {
+    // Check individual thresholds (using adaptive thresholds - EXCEEDS WICK)
+    if (counts.channelsDeleted >= thresholds.channelsDeleted) {
       threatDetected = true;
       threatType = "mass_channel_deletion";
-    } else if (counts.channelsCreated >= this.thresholds.channelsCreated) {
+    } else if (counts.channelsCreated >= thresholds.channelsCreated) {
       threatDetected = true;
       threatType = "mass_channel_creation";
-    } else if (counts.rolesDeleted >= this.thresholds.rolesDeleted) {
+    } else if (counts.rolesDeleted >= thresholds.rolesDeleted) {
       threatDetected = true;
       threatType = "mass_role_deletion";
-    } else if (counts.rolesCreated >= this.thresholds.rolesCreated) {
+    } else if (counts.rolesCreated >= thresholds.rolesCreated) {
       threatDetected = true;
       threatType = "mass_role_creation";
-    } else if (counts.membersBanned >= this.thresholds.membersBanned) {
+    } else if (counts.membersBanned >= thresholds.membersBanned) {
       threatDetected = true;
       threatType = "mass_ban";
-    } else if (counts.membersKicked >= this.thresholds.membersKicked) {
+    } else if (counts.membersKicked >= thresholds.membersKicked) {
       threatDetected = true;
       threatType = "mass_kick";
-    } else if (counts.webhooksCreated >= this.thresholds.webhooksCreated) {
+    } else if (counts.webhooksCreated >= thresholds.webhooksCreated) {
       threatDetected = true;
       threatType = "mass_webhook_creation";
-    } else if (counts.emojisDeleted >= this.thresholds.emojisDeleted) {
+    } else if (counts.emojisDeleted >= thresholds.emojisDeleted) {
       threatDetected = true;
       threatType = "mass_emoji_deletion";
-    } else if (counts.emojisCreated >= this.thresholds.emojisCreated) {
+    } else if (counts.emojisCreated >= thresholds.emojisCreated) {
       threatDetected = true;
       threatType = "mass_emoji_creation";
     } else if (counts.voiceRaid >= 1) {
@@ -392,8 +507,8 @@ class AdvancedAntiNuke {
           }
         }
 
-        // Wait a moment for Discord to process
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        // Reduced wait time (EXCEEDS WICK - faster response)
+        await new Promise((resolve) => setTimeout(resolve, 500));
       }
 
       // Remove ALL roles from attacker (this will strip admin if we couldn't remove it from the role)
@@ -445,8 +560,8 @@ class AdvancedAntiNuke {
           );
         }
 
-        // Wait longer for Discord to process role removal
-        await new Promise((resolve) => setTimeout(resolve, 2000));
+        // Reduced wait time (EXCEEDS WICK - faster response)
+        await new Promise((resolve) => setTimeout(resolve, 1000));
 
         // Refresh member to get updated permissions
         try {
@@ -590,22 +705,24 @@ class AdvancedAntiNuke {
         }
       }
 
-      // Log threat
-      await this.logThreat(guild, userId, threatType, counts, removed);
+      // Log threat and alert admins in parallel (EXCEEDS WICK - faster response)
+      await Promise.all([
+        this.logThreat(guild, userId, threatType, counts, removed),
+        this.alertAdmins(guild, userId, threatType, counts),
+      ]);
 
-      // Alert admins first (so they know what's happening)
-      await this.alertAdmins(guild, userId, threatType, counts);
-
-      // Wait a moment for Discord to process the ban/kick and for cleanup to complete
-      await new Promise((resolve) => setTimeout(resolve, 3000));
-
-      // Attempt auto-recovery AFTER attacker is removed
-      // Only recover if we successfully removed the attacker (or at least tried)
+      // Reduced wait time - only wait if we need to (EXCEEDS WICK - faster recovery)
       if (removed) {
+        // Only wait 1 second instead of 3 (optimized for speed)
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        
         logger.info(
           `[Anti-Nuke] Attacker ${userId} was successfully removed, starting server recovery...`
         );
-        await this.attemptRecovery(guild, threatType, counts);
+        // Start recovery immediately (don't wait for full cleanup)
+        this.attemptRecovery(guild, threatType, counts).catch((error) => {
+          logger.error(`[Anti-Nuke] Recovery failed:`, error);
+        });
       } else {
         logger.warn(
           `[Anti-Nuke] Attacker ${userId} was not removed - skipping recovery to prevent interference`
@@ -639,25 +756,50 @@ class AdvancedAntiNuke {
         }
       }
 
-      // Delete spam channels in parallel for speed
-      await Promise.all(
-        spamChannelIds.map(async (channelId) => {
-          try {
-            const channel = await guild.channels
-              .fetch(channelId)
-              .catch(() => null);
-            if (channel) {
-              await channel.delete(
-                "Anti-Nuke: Spam channel cleanup during lockdown"
-              );
-              deletedSpamChannels++;
+      // Delete spam channels in parallel batches with rate limit protection (EXCEEDS WICK)
+      const spamBatchSize = 5; // Process 5 at a time to avoid rate limits
+      for (let i = 0; i < spamChannelIds.length; i += spamBatchSize) {
+        const batch = spamChannelIds.slice(i, i + spamBatchSize);
+        await Promise.all(
+          batch.map(async (channelId) => {
+            try {
+              const channel = await guild.channels
+                .fetch(channelId)
+                .catch(() => null);
+              if (channel) {
+                await channel.delete(
+                  "Anti-Nuke: Spam channel cleanup during lockdown"
+                ).catch((error) => {
+                  // Handle rate limits gracefully (EXCEEDS WICK)
+                  if (error.code === 429 || error.status === 429) {
+                    logger.warn(`[Anti-Nuke] Rate limited while deleting spam channel ${channelId}, will retry`);
+                    // Retry after delay
+                    setTimeout(async () => {
+                      try {
+                        await channel.delete("Anti-Nuke: Spam channel cleanup (retry)");
+                        deletedSpamChannels++;
+                      } catch (retryError) {
+                        // Give up after retry
+                      }
+                    }, (error.retryAfter || 1) * 1000);
+                  }
+                });
+                deletedSpamChannels++;
+              }
+            } catch (error) {
+              // Continue
+              if (error.code === 429 || error.status === 429) {
+                logger.warn(`[Anti-Nuke] Rate limited during spam channel cleanup`);
+              }
             }
-          } catch (error) {
-            // Continue
-          }
-          this.spamChannels.delete(channelId);
-        })
-      );
+            this.spamChannels.delete(channelId);
+          })
+        );
+        // Small delay between batches to avoid rate limits
+        if (i + spamBatchSize < spamChannelIds.length) {
+          await new Promise((resolve) => setTimeout(resolve, 100));
+        }
+      }
 
       // Also delete ANY channel created in the last 60 seconds (aggressive cleanup)
       const allChannels = Array.from(guild.channels.cache.values()).filter(
@@ -667,21 +809,38 @@ class AdvancedAntiNuke {
         }
       );
 
-      // Delete in parallel for speed
-      await Promise.all(
-        allChannels.map(async (channel) => {
-          try {
-            // Don't delete system channels or categories
-            if (channel.type === 4 || channel.type === 15) return; // Category or Forum
-            await channel
-              .delete("Anti-Nuke: Recent channel cleanup")
-              .catch(() => {});
-            deletedSpamChannels++;
-          } catch (error) {
-            // Continue
-          }
-        })
-      );
+      // Delete in parallel batches with rate limit protection (EXCEEDS WICK)
+      const channelBatchSize = 5; // Process 5 at a time to avoid rate limits
+      const channelArray = Array.from(allChannels);
+      for (let i = 0; i < channelArray.length; i += channelBatchSize) {
+        const batch = channelArray.slice(i, i + channelBatchSize);
+        await Promise.all(
+          batch.map(async (channel) => {
+            try {
+              // Don't delete system channels or categories
+              if (channel.type === 4 || channel.type === 15) return; // Category or Forum
+              await channel
+                .delete("Anti-Nuke: Recent channel cleanup")
+                .catch((error) => {
+                  // Handle rate limits gracefully (EXCEEDS WICK)
+                  if (error.code === 429 || error.status === 429) {
+                    logger.warn(`[Anti-Nuke] Rate limited while deleting channel ${channel.id}`);
+                  }
+                });
+              deletedSpamChannels++;
+            } catch (error) {
+              // Continue
+              if (error.code === 429 || error.status === 429) {
+                logger.warn(`[Anti-Nuke] Rate limited during channel cleanup`);
+              }
+            }
+          })
+        );
+        // Small delay between batches to avoid rate limits
+        if (i + channelBatchSize < channelArray.length) {
+          await new Promise((resolve) => setTimeout(resolve, 100));
+        }
+      }
 
       if (deletedSpamChannels > 0) {
         logger.info(
@@ -858,11 +1017,26 @@ class AdvancedAntiNuke {
 
       if (snapshots.length === 0) {
         logger.warn(
-          `[Anti-Nuke] No recovery snapshots found for ${guild.id} created before the attack - cannot auto-recover`
+          `[Anti-Nuke] No recovery snapshots found for ${guild.id} created before the attack - attempting fallback recovery from memory/Discord`
         );
-        logger.warn(
-          `[Anti-Nuke] Consider using /backup create to create a backup snapshot before an attack occurs`
+
+        // Fallback: Try to restore from memory/Discord (like Wick does when imaging is disabled)
+        // This is finicky and may not restore everything, but it's better than nothing
+        const fallbackResult = await this.attemptFallbackRecovery(
+          guild,
+          threatType,
+          counts
         );
+
+        if (fallbackResult.recovered > 0) {
+          logger.info(
+            `[Anti-Nuke] Fallback recovery completed: ${fallbackResult.recovered} items recovered from memory/Discord`
+          );
+        } else {
+          logger.warn(
+            `[Anti-Nuke] Fallback recovery failed - no items could be recovered. Consider using /backup create to create a backup snapshot before an attack occurs`
+          );
+        }
         return;
       }
 
@@ -962,16 +1136,33 @@ class AdvancedAntiNuke {
         adminMembers.set(owner.id, owner);
       }
 
-      // Send DMs in parallel
-      await Promise.all(
-        Array.from(adminMembers.values()).map(async (admin) => {
-          try {
-            await admin.send({ embeds: [dmEmbed] }).catch(() => {});
-          } catch (error) {
-            // Continue if DM fails (DMs disabled, etc.)
-          }
-        })
-      );
+      // Send DMs in parallel batches with rate limit protection (EXCEEDS WICK)
+      const adminArray = Array.from(adminMembers.values());
+      const dmBatchSize = 3; // Process 3 DMs at a time to avoid rate limits
+      for (let i = 0; i < adminArray.length; i += dmBatchSize) {
+        const batch = adminArray.slice(i, i + dmBatchSize);
+        await Promise.all(
+          batch.map(async (admin) => {
+            try {
+              await admin.send({ embeds: [dmEmbed] }).catch((error) => {
+                // Handle rate limits gracefully (EXCEEDS WICK)
+                if (error.code === 429 || error.status === 429) {
+                  logger.warn(`[Anti-Nuke] Rate limited while sending DM to ${admin.id}`);
+                }
+              });
+            } catch (error) {
+              // Continue if DM fails (DMs disabled, etc.)
+              if (error.code === 429 || error.status === 429) {
+                logger.warn(`[Anti-Nuke] Rate limited during admin DM alerts`);
+              }
+            }
+          })
+        );
+        // Small delay between batches to avoid rate limits
+        if (i + dmBatchSize < adminArray.length) {
+          await new Promise((resolve) => setTimeout(resolve, 200));
+        }
+      }
 
       logger.info(
         `[Anti-Nuke] Sent DM alerts to ${adminMembers.size} admins for threat in ${guild.id}`
@@ -1101,6 +1292,90 @@ class AdvancedAntiNuke {
     }
   }
 
+  // Fallback recovery from memory/Discord (when no snapshots exist)
+  async attemptFallbackRecovery(guild, threatType, counts) {
+    const recovered = [];
+    const skipped = [];
+
+    try {
+      logger.info(
+        `[Anti-Nuke] Attempting fallback recovery for ${guild.name} (no snapshots available)`
+      );
+
+      // Fetch current state from Discord
+      await guild.channels.fetch().catch(() => {});
+      await guild.roles.fetch().catch(() => {});
+
+      // Try to restore based on what we know was deleted
+      // This is limited because we don't have full snapshot data
+      // This is the "finicky" part Wick mentions - we can't restore everything perfectly
+
+      if (
+        threatType === "mass_channel_deletion" ||
+        threatType === "mass_channel_creation"
+      ) {
+        // Try to restore basic channel structure
+        // Create a general channel if none exist
+        const textChannels = guild.channels.cache.filter(
+          (c) => c.isTextBased() && !c.isThread()
+        );
+
+        if (textChannels.size === 0) {
+          try {
+            const generalChannel = await guild.channels.create({
+              name: "general",
+              type: 0, // Text channel
+              reason: "Fallback recovery: Restore basic channel structure",
+            });
+            recovered.push({
+              type: "channel",
+              id: generalChannel.id,
+              name: generalChannel.name,
+            });
+            logger.info(
+              `[Anti-Nuke] Created fallback channel: #${generalChannel.name}`
+            );
+          } catch (error) {
+            logger.error(
+              `[Anti-Nuke] Failed to create fallback channel:`,
+              error
+            );
+          }
+        }
+      }
+
+      if (threatType === "mass_role_deletion") {
+        // Try to restore basic roles
+        // We can't restore exact permissions, but we can create basic roles
+        // This is very limited without snapshot data
+        logger.warn(
+          `[Anti-Nuke] Fallback recovery cannot restore deleted roles without snapshot data - permissions and exact structure are unknown`
+        );
+      }
+
+      logger.info(
+        `[Anti-Nuke] Fallback recovery complete: ${recovered.length} items recovered, ${skipped.length} items skipped (limited recovery - snapshots recommended)`
+      );
+
+      return {
+        success: recovered.length > 0,
+        recovered: recovered.length,
+        skipped: skipped.length,
+        items: recovered,
+        limited: true, // Indicates this is a limited recovery
+      };
+    } catch (error) {
+      logger.error(`[Anti-Nuke] Error in fallback recovery:`, error);
+      return {
+        success: false,
+        recovered: 0,
+        skipped: 0,
+        items: [],
+        limited: true,
+      };
+    }
+  }
+
   // Clean old history (run periodically)
   cleanup() {
     const now = Date.now();
@@ -1146,6 +1421,42 @@ class AdvancedAntiNuke {
         this.voiceRaids.delete(guildId);
       }
     }
+
+    // Clean old predictive threat patterns (EXCEEDS WICK - memory optimization)
+    for (const [guildId, userThreats] of this.predictiveThreats.entries()) {
+      for (const [userId, threatData] of userThreats.entries()) {
+        // Remove if inactive for 5 minutes
+        if (now - threatData.firstSeen > 300000) {
+          userThreats.delete(userId);
+        } else {
+          // Clean old patterns
+          threatData.patterns = threatData.patterns.filter(
+            (p) => now - p.timestamp < 60000
+          );
+        }
+      }
+      if (userThreats.size === 0) {
+        this.predictiveThreats.delete(guildId);
+      }
+    }
+
+    // Clean empty rate limit queues (EXCEEDS WICK - memory optimization)
+    for (const [guildId, queue] of this.rateLimitQueue.entries()) {
+      if (queue.length === 0 && !queue.processing) {
+        this.rateLimitQueue.delete(guildId);
+      }
+    }
+
+    // Clean processed threats set (prevent memory buildup)
+    if (this.processedThreats.size > 1000) {
+      // Keep only recent 500 entries
+      const entries = Array.from(this.processedThreats);
+      this.processedThreats.clear();
+      entries.slice(-500).forEach((entry) => this.processedThreats.add(entry));
+    }
+
+    // Clean locked guilds if lockdown expired (should be handled elsewhere, but safety check)
+    // This is a safety net - actual unlock happens in unlockServer
   }
 
   // Monitor emoji spam in messages

@@ -37,19 +37,21 @@ module.exports = {
     if (subcommand === "create") {
       await interaction.deferReply();
 
-      // Backup server config
-      const config = await db.getServerConfig(interaction.guild.id);
-      const modLogs = await db.getModLogs(interaction.guild.id, null, 1000);
-      const warnings = await new Promise((resolve, reject) => {
-        db.db.all(
-          "SELECT * FROM warnings WHERE guild_id = ?",
-          [interaction.guild.id],
-          (err, rows) => {
-            if (err) reject(err);
-            else resolve(rows || []);
-          }
-        );
-      });
+      // Fetch all backup data in parallel for better performance (EXCEEDS WICK)
+      const [config, modLogs, warnings] = await Promise.all([
+        db.getServerConfig(interaction.guild.id),
+        db.getModLogs(interaction.guild.id, null, 1000),
+        new Promise((resolve, reject) => {
+          db.db.all(
+            "SELECT * FROM warnings WHERE guild_id = ?",
+            [interaction.guild.id],
+            (err, rows) => {
+              if (err) reject(err);
+              else resolve(rows || []);
+            }
+          );
+        }),
+      ]);
       const automodRules = await new Promise((resolve, reject) => {
         db.db.all(
           "SELECT * FROM automod_rules WHERE guild_id = ?",

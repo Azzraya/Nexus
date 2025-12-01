@@ -7,9 +7,24 @@ const logger = require("../utils/logger");
 module.exports = {
   name: "guildMemberAdd",
   async execute(member, client) {
-    // Check threat intelligence network
+    // Run initial checks in parallel for better performance (EXCEEDS WICK)
     const ThreatIntelligence = require("../utils/threatIntelligence");
-    const threatCheck = await ThreatIntelligence.checkThreat(member.user.id);
+    const initialChecks = await Promise.all([
+      ThreatIntelligence.checkThreat(member.user.id).catch(() => ({ hasThreat: false, riskScore: 0 })),
+      JoinGate.checkMember(member, member.guild).catch(() => ({ filtered: false })),
+      client.workflows 
+        ? client.workflows.checkTriggers(member.guild.id, "guildMemberAdd", {
+            user: member.user,
+            member: member,
+            guild: member.guild,
+          }).catch(() => {})
+        : Promise.resolve()
+    ]);
+    
+    const threatCheck = initialChecks[0];
+    const joinGateCheck = initialChecks[1];
+    
+    // Handle high threat immediately
     if (threatCheck.hasThreat && threatCheck.riskScore >= 50) {
       const Notifications = require("../utils/notifications");
       await Notifications.send(
@@ -21,19 +36,8 @@ module.exports = {
           details: `User has ${threatCheck.threatCount} threat reports in network`,
         },
         client
-      );
+      ).catch(() => {});
     }
-
-    // Check workflows first
-    if (client.workflows) {
-      await client.workflows.checkTriggers(member.guild.id, "guildMemberAdd", {
-        user: member.user,
-        member: member,
-        guild: member.guild,
-      });
-    }
-    // Check Join Gate first (instant filtering)
-    const joinGateCheck = await JoinGate.checkMember(member, member.guild);
     if (joinGateCheck.filtered) {
       // Execute action based on join gate
       if (joinGateCheck.action === "ban") {
@@ -127,19 +131,27 @@ module.exports = {
       return;
     }
 
-    // Check verification requirement
+    // Advanced Verification System
     const config = await db.getServerConfig(member.guild.id);
     if (config && config.verification_enabled && config.verification_role) {
-      // Remove verified role if they have it (they need to verify again)
-      const verifiedRole = member.guild.roles.cache.get(
-        config.verification_role
-      );
-      if (verifiedRole && member.roles.cache.has(verifiedRole.id)) {
-        await ErrorHandler.safeExecute(
-          member.roles.remove(verifiedRole),
-          `guildMemberAdd [${member.guild.id}]`,
-          `Remove verification role from ${member.user.id}`
-        );
+      // Initialize verification system if not already done
+      if (!client.verificationSystem) {
+        const VerificationSystem = require("../utils/verificationSystem");
+        client.verificationSystem = new VerificationSystem(client);
+      }
+
+      // Start verification process
+      try {
+        const verificationResult =
+          await client.verificationSystem.startVerification(member, config);
+
+        if (verificationResult && !verificationResult.sent) {
+          logger.warn(
+            `[Verification] Failed to send verification to ${member.user.id} in ${member.guild.id}: ${verificationResult.reason}`
+          );
+        }
+      } catch (error) {
+        logger.error(`[Verification] Error starting verification:`, error);
       }
     }
 

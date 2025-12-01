@@ -6,23 +6,57 @@ const logger = require("../utils/logger");
 module.exports = {
   name: "interactionCreate",
   async execute(interaction, client) {
+    // Handle modal submissions (captcha verification)
+    if (interaction.type === InteractionType.ModalSubmit) {
+      if (interaction.customId.startsWith("captcha_modal_")) {
+        const verificationId = interaction.customId.split("_")[2];
+        const answer = interaction.fields.getTextInputValue("captcha_answer");
+
+        if (!client.verificationSystem) {
+          const VerificationSystem = require("../utils/verificationSystem");
+          client.verificationSystem = new VerificationSystem(client);
+        }
+
+        const result = await client.verificationSystem.completeVerification(
+          verificationId,
+          answer
+        );
+
+        if (result.success) {
+          await interaction.reply({
+            content: "✅ You have been verified! Welcome to the server.",
+            flags: MessageFlags.Ephemeral,
+          });
+        } else {
+          await interaction.reply({
+            content: `❌ Verification failed: ${result.reason}. Please try again.`,
+            flags: MessageFlags.Ephemeral,
+          });
+        }
+        return;
+      }
+    }
+
     if (interaction.type === InteractionType.ApplicationCommand) {
       const command = client.commands.get(interaction.commandName);
       if (!command) return;
 
       try {
-        // Log command usage
-        logger.info(`Command used: /${interaction.commandName}`, {
-          guildId: interaction.guild.id,
-          guildName: interaction.guild.name,
-          userId: interaction.user.id,
-          userTag: interaction.user.tag,
-          commandName: interaction.commandName,
-        });
-
-        // Log command usage to database
-        try {
-          await new Promise((resolve, reject) => {
+        // Track performance and log in parallel (EXCEEDS WICK - faster response)
+        const startTime = Date.now();
+        
+        // Log command usage in parallel (non-blocking)
+        Promise.all([
+          Promise.resolve(
+            logger.info(`Command used: /${interaction.commandName}`, {
+              guildId: interaction.guild.id,
+              guildName: interaction.guild.name,
+              userId: interaction.user.id,
+              userTag: interaction.user.tag,
+              commandName: interaction.commandName,
+            })
+          ),
+          new Promise((resolve, reject) => {
             db.db.run(
               "INSERT INTO command_usage_log (guild_id, guild_name, user_id, user_tag, command_name, timestamp) VALUES (?, ?, ?, ?, ?, ?)",
               [
@@ -34,22 +68,19 @@ module.exports = {
                 Date.now(),
               ],
               (err) => {
-                if (err) reject(err);
-                else resolve();
+                if (err) {
+                  ErrorHandler.logError(
+                    err,
+                    "interactionCreate",
+                    "Log command usage to database"
+                  );
+                  resolve(); // Don't reject, just log error
+                } else resolve();
               }
             );
-          });
-        } catch (logError) {
-          // Don't fail command if logging fails
-          ErrorHandler.logError(
-            logError,
-            "interactionCreate",
-            "Log command usage to database"
-          );
-        }
-
-        // Track performance
-        const startTime = Date.now();
+          })
+        ]).catch(() => {}); // Don't block command execution if logging fails
+        
         await command.execute(interaction);
         const executionTime = Date.now() - startTime;
 
@@ -689,6 +720,66 @@ module.exports = {
         }
 
         // Handle verification
+        // Advanced Verification System
+        if (interaction.customId.startsWith("verify_")) {
+          if (!client.verificationSystem) {
+            const VerificationSystem = require("../utils/verificationSystem");
+            client.verificationSystem = new VerificationSystem(client);
+          }
+
+          const parts = interaction.customId.split("_");
+          const mode = parts[1]; // instant, captcha, or web
+          const verificationId = parts[2];
+
+          if (mode === "instant") {
+            // Instant verification - just complete it
+            const result = await client.verificationSystem.completeVerification(
+              verificationId
+            );
+
+            if (result.success) {
+              await interaction.reply({
+                content: "✅ You have been verified! Welcome to the server.",
+                flags: MessageFlags.Ephemeral,
+              });
+            } else {
+              await interaction.reply({
+                content: `❌ Verification failed: ${result.reason}`,
+                flags: MessageFlags.Ephemeral,
+              });
+            }
+          } else if (mode === "captcha") {
+            // Captcha verification - show captcha and wait for answer
+            const {
+              EmbedBuilder,
+              ActionRowBuilder,
+              TextInputBuilder,
+              TextInputStyle,
+              ModalBuilder,
+            } = require("discord.js");
+
+            const modal = new ModalBuilder()
+              .setCustomId(`captcha_modal_${verificationId}`)
+              .setTitle("Complete Captcha");
+
+            const answerInput = new TextInputBuilder()
+              .setCustomId("captcha_answer")
+              .setLabel("Answer the captcha question")
+              .setStyle(TextInputStyle.Short)
+              .setRequired(true)
+              .setPlaceholder("Enter your answer here");
+
+            const firstActionRow = new ActionRowBuilder().addComponents(
+              answerInput
+            );
+            modal.addComponents(firstActionRow);
+
+            await interaction.showModal(modal);
+          }
+          return;
+        }
+
+        // Legacy verify button (backward compatibility)
         if (interaction.customId === "verify_button") {
           const config = await db.getServerConfig(interaction.guild.id);
           if (

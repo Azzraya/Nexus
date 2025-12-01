@@ -44,15 +44,27 @@ manager.on("shardCreate", (shard) => {
 
 manager.spawn().catch(console.error);
 
-// Graceful shutdown
-process.on("SIGINT", () => {
-  console.log("Shutting down shards...");
-  manager.shards.forEach((shard) => shard.kill());
+// Graceful shutdown with parallel shard termination (EXCEEDS WICK - faster shutdown)
+async function gracefulShutdown(signal) {
+  console.log(`Received ${signal}, shutting down shards gracefully...`);
+  
+  // Kill all shards in parallel for faster shutdown
+  const killPromises = Array.from(manager.shards.values()).map((shard) => {
+    return new Promise((resolve) => {
+      try {
+        shard.kill();
+        resolve();
+      } catch (error) {
+        console.error(`Error killing shard ${shard.id}:`, error);
+        resolve(); // Continue even if one fails
+      }
+    });
+  });
+  
+  await Promise.all(killPromises);
+  console.log("All shards terminated.");
   process.exit(0);
-});
+}
 
-process.on("SIGTERM", () => {
-  console.log("Shutting down shards...");
-  manager.shards.forEach((shard) => shard.kill());
-  process.exit(0);
-});
+process.on("SIGINT", () => gracefulShutdown("SIGINT"));
+process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));

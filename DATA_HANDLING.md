@@ -14,7 +14,7 @@ This document explains how Nexus Bot handles, stores, and protects data.
 - Server configurations and settings
 - Moderation logs and actions
 - Security events and threat data
-- **Recovery snapshots** (channel structures, role configurations, permission overwrites)
+- **Recovery snapshots** (channel structures, role configurations, permission overwrites, webhooks, emojis, stickers, server settings including icon and banner)
 - Server lockdown state (temporary, during security incidents)
 
 **User Data:**
@@ -24,6 +24,8 @@ This document explains how Nexus Bot handles, stores, and protects data.
 - Moderation history
 - Behavioral patterns (anonymized for AI)
 - **Role and permission data** (stored in recovery snapshots for restoration purposes)
+- **Whitelist data** (user IDs exempt from anti-nuke monitoring)
+- **Predictive threat patterns** (behavioral patterns and confidence scores for threat prediction)
 
 **Technical Data:**
 
@@ -62,6 +64,8 @@ This document explains how Nexus Bot handles, stores, and protects data.
 - Configurations: Deleted 30 days after bot removal
 - Moderation logs: 90 days (configurable per server, minimum 30 days)
 - **Recovery snapshots**: Deleted 30 days after bot removal (90 days retention while bot is active)
+- **Whitelist data**: Deleted 30 days after bot removal
+- **Predictive threat patterns**: 90 days (anonymized after 30 days, deleted 30 days after bot removal)
 - Logs (other): 30 days
 - Analytics: 1 year (anonymized after 90 days)
 - **Performance metrics**: 90 days (deleted 30 days after bot removal)
@@ -274,6 +278,10 @@ Recovery snapshots contain complete server structure data:
 - **Channel Data**: IDs, names, types, positions, parent categories, and permission overwrites (including role/user IDs and specific permissions)
 - **Role Data**: IDs, names, colors, permissions, positions, mentionable status, and hoist settings
 - **Permission Overwrites**: Detailed permission settings for channels
+- **Webhook Data**: Webhook IDs, names, channel associations, and avatars (for restoration purposes)
+- **Emoji Data**: Emoji IDs, names, animated status, and image URLs (for restoration purposes)
+- **Sticker Data**: Sticker IDs, names, descriptions, formats, and image URLs (for restoration purposes)
+- **Server Settings**: Server name, description, icon, banner, splash, verification level, notification settings, AFK settings, system channels, and locale preferences
 
 ### When Snapshots are Created:
 
@@ -292,6 +300,8 @@ Recovery snapshots contain complete server structure data:
 
 - Restore deleted channels and roles after nuke attacks
 - Recover server structure and permissions
+- Restore webhooks, emojis, and stickers when available
+- Restore server settings (icon, banner, verification level, etc.)
 - Maintain server functionality after security incidents
 
 ### Security:
@@ -303,6 +313,7 @@ Recovery snapshots contain complete server structure data:
 
 ## Version History
 
+- **December 1, 2025** - Added enhanced recovery features (webhooks, emojis, stickers, server settings), whitelist system, predictive threat detection, parallel processing optimizations
 - **December 1, 2025** - Added auto-recovery snapshots documentation, performance metrics, enhanced security logging, server lockdown features
 - **December 1, 2025** - Updated data sharing disclosure, added threat intelligence details, added AI processing information
 - **November 30, 2025** - Initial version

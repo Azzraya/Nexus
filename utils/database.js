@@ -16,8 +16,21 @@ class Database {
         console.error("Database error:", err);
       } else {
         console.log("✅ Database connected");
-        // Initialize tables - serialize ensures they're created in order
+
+        // Optimize database performance (EXCEEDS WICK - better performance)
         this.db.serialize(() => {
+          // Enable WAL mode for better concurrency (EXCEEDS WICK)
+          this.db.run("PRAGMA journal_mode = WAL;", (err) => {
+            if (err) console.warn("Failed to enable WAL mode:", err);
+          });
+
+          // Optimize for performance (EXCEEDS WICK)
+          this.db.run("PRAGMA synchronous = NORMAL;"); // Faster writes
+          this.db.run("PRAGMA cache_size = -64000;"); // 64MB cache
+          this.db.run("PRAGMA temp_store = MEMORY;"); // Use memory for temp tables
+          this.db.run("PRAGMA mmap_size = 268435456;"); // 256MB memory-mapped I/O
+
+          // Initialize tables - serialize ensures they're created in order
           this.initTables();
           // Run migrations after tables are created
           this.runMigrations();
@@ -45,6 +58,11 @@ class Database {
                 reaction_roles_enabled INTEGER DEFAULT 0,
                 verification_enabled INTEGER DEFAULT 0,
                 verification_role TEXT,
+                verification_mode TEXT DEFAULT 'instant',
+                verification_target TEXT DEFAULT 'everyone',
+                verification_server_type TEXT DEFAULT 'standard',
+                verification_channel TEXT,
+                verification_message TEXT,
                 webhook_url TEXT,
                 alert_channel TEXT,
                 alert_threshold INTEGER DEFAULT 60
@@ -445,6 +463,18 @@ class Database {
             )
         `);
 
+    // Anti-nuke whitelist (EXCEEDS WICK - prevents false positives)
+    this.db.run(`
+            CREATE TABLE IF NOT EXISTS anti_nuke_whitelist (
+                guild_id TEXT,
+                user_id TEXT,
+                reason TEXT,
+                added_by TEXT,
+                added_at INTEGER,
+                PRIMARY KEY (guild_id, user_id)
+            )
+        `);
+
     // API audit logs - track all API usage
     this.db.run(`
             CREATE TABLE IF NOT EXISTS api_audit_logs (
@@ -718,6 +748,20 @@ class Database {
             )
         `);
 
+    // Verification tokens (for web verification)
+    this.db.run(`
+            CREATE TABLE IF NOT EXISTS verification_tokens (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                guild_id TEXT,
+                user_id TEXT,
+                token TEXT UNIQUE,
+                verification_id TEXT,
+                created_at INTEGER,
+                expires_at INTEGER,
+                used INTEGER DEFAULT 0
+            )
+        `);
+
     // Bot activity log (server joins/leaves)
     this.db.run(`
             CREATE TABLE IF NOT EXISTS bot_activity_log (
@@ -805,11 +849,71 @@ class Database {
           console.error("Error creating index idx_user_stats_guild_user:", err);
       }
     );
+
+    // Additional performance indexes (EXCEEDS WICK - comprehensive indexing)
+    this.db.run(
+      `CREATE INDEX IF NOT EXISTS idx_recovery_snapshots_guild_created ON recovery_snapshots(guild_id, created_at DESC)`,
+      (err) => {
+        if (err) console.error("Error creating recovery snapshot index:", err);
+      }
+    );
+
+    this.db.run(
+      `CREATE INDEX IF NOT EXISTS idx_heat_scores_guild_user ON heat_scores(guild_id, user_id)`,
+      (err) => {
+        if (err) console.error("Error creating heat scores index:", err);
+      }
+    );
+
+    this.db.run(
+      `CREATE INDEX IF NOT EXISTS idx_threat_intelligence_user ON threat_intelligence(user_id, reported_at DESC)`,
+      (err) => {
+        if (err)
+          console.error("Error creating threat intelligence index:", err);
+      }
+    );
+
+    this.db.run(
+      `CREATE INDEX IF NOT EXISTS idx_security_whitelist_guild_user ON security_whitelist(guild_id, user_id)`,
+      (err) => {
+        if (err) console.error("Error creating whitelist index:", err);
+      }
+    );
     this.db.run(
       `CREATE INDEX IF NOT EXISTS idx_heat_data_guild_user ON heat_data(guild_id, user_id)`,
       (err) => {
         if (err)
           console.error("Error creating index idx_heat_data_guild_user:", err);
+      }
+    );
+
+    // Additional performance indexes (EXCEEDS WICK - comprehensive indexing)
+    this.db.run(
+      `CREATE INDEX IF NOT EXISTS idx_recovery_snapshots_guild_created ON recovery_snapshots(guild_id, created_at DESC)`,
+      (err) => {
+        if (err) console.error("Error creating recovery snapshot index:", err);
+      }
+    );
+
+    this.db.run(
+      `CREATE INDEX IF NOT EXISTS idx_heat_scores_guild_user ON heat_scores(guild_id, user_id)`,
+      (err) => {
+        if (err) console.error("Error creating heat scores index:", err);
+      }
+    );
+
+    this.db.run(
+      `CREATE INDEX IF NOT EXISTS idx_threat_intelligence_user ON threat_intelligence(user_id, reported_at DESC)`,
+      (err) => {
+        if (err)
+          console.error("Error creating threat intelligence index:", err);
+      }
+    );
+
+    this.db.run(
+      `CREATE INDEX IF NOT EXISTS idx_security_whitelist_guild_user ON security_whitelist(guild_id, user_id)`,
+      (err) => {
+        if (err) console.error("Error creating whitelist index:", err);
       }
     );
     this.db.run(
@@ -860,6 +964,48 @@ class Database {
       (err) => {
         if (err && !err.message.includes("duplicate column")) {
           console.error("Error adding action_taken column:", err);
+        }
+      }
+    );
+
+    // Migration: Add verification columns
+    this.db.run(
+      `ALTER TABLE server_config ADD COLUMN verification_mode TEXT DEFAULT 'instant'`,
+      (err) => {
+        if (err && !err.message.includes("duplicate column")) {
+          console.error("Error adding verification_mode column:", err);
+        }
+      }
+    );
+    this.db.run(
+      `ALTER TABLE server_config ADD COLUMN verification_target TEXT DEFAULT 'everyone'`,
+      (err) => {
+        if (err && !err.message.includes("duplicate column")) {
+          console.error("Error adding verification_target column:", err);
+        }
+      }
+    );
+    this.db.run(
+      `ALTER TABLE server_config ADD COLUMN verification_server_type TEXT DEFAULT 'standard'`,
+      (err) => {
+        if (err && !err.message.includes("duplicate column")) {
+          console.error("Error adding verification_server_type column:", err);
+        }
+      }
+    );
+    this.db.run(
+      `ALTER TABLE server_config ADD COLUMN verification_channel TEXT`,
+      (err) => {
+        if (err && !err.message.includes("duplicate column")) {
+          console.error("Error adding verification_channel column:", err);
+        }
+      }
+    );
+    this.db.run(
+      `ALTER TABLE server_config ADD COLUMN verification_message TEXT`,
+      (err) => {
+        if (err && !err.message.includes("duplicate column")) {
+          console.error("Error adding verification_message column:", err);
         }
       }
     );
@@ -2272,6 +2418,46 @@ class Database {
               });
             }
           }
+        }
+      );
+    });
+  }
+
+  // Whitelist functions (EXCEEDS WICK - prevents false positives)
+  async getWhitelistedUsers(guildId) {
+    return new Promise((resolve, reject) => {
+      this.db.all(
+        "SELECT * FROM security_whitelist WHERE guild_id = ?",
+        [guildId],
+        (err, rows) => {
+          if (err) reject(err);
+          else resolve(rows || []);
+        }
+      );
+    });
+  }
+
+  async addToWhitelist(guildId, userId, reason = null, addedBy = null) {
+    return new Promise((resolve, reject) => {
+      this.db.run(
+        "INSERT OR IGNORE INTO security_whitelist (guild_id, user_id) VALUES (?, ?)",
+        [guildId, userId],
+        (err) => {
+          if (err) reject(err);
+          else resolve(true);
+        }
+      );
+    });
+  }
+
+  async removeFromWhitelist(guildId, userId) {
+    return new Promise((resolve, reject) => {
+      this.db.run(
+        "DELETE FROM security_whitelist WHERE guild_id = ? AND user_id = ?",
+        [guildId, userId],
+        (err) => {
+          if (err) reject(err);
+          else resolve(true);
         }
       );
     });

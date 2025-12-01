@@ -8,26 +8,28 @@ module.exports = {
     // Ignore bots
     if (message.author.bot) return;
 
-    // Advanced anti-nuke: Monitor spam in newly created channels
+    // Run security checks in parallel for better performance (EXCEEDS WICK)
+    const securityChecks = [];
     if (client.advancedAntiNuke && message.channel) {
-      await client.advancedAntiNuke.monitorChannelMessage(
-        message.channel,
-        message.author.id
+      securityChecks.push(
+        client.advancedAntiNuke
+          .monitorChannelMessage(message.channel, message.author.id)
+          .catch(() => {})
       );
-
-      // Emoji spam protection
-      await client.advancedAntiNuke.monitorEmojiSpam(
-        message,
-        message.author.id
+      securityChecks.push(
+        client.advancedAntiNuke
+          .monitorEmojiSpam(message, message.author.id)
+          .catch(() => {})
       );
     }
 
-    // Update user stats
-    await db.updateUserStats(
-      message.guild.id,
-      message.author.id,
-      "messages_sent"
-    );
+    // Run security checks and stats update in parallel
+    await Promise.all([
+      ...securityChecks,
+      db
+        .updateUserStats(message.guild.id, message.author.id, "messages_sent")
+        .catch(() => {}),
+    ]);
 
     // Add XP for leveling (1-5 random XP per message)
     const Leveling = require("../utils/leveling");

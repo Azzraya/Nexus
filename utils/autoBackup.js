@@ -23,17 +23,24 @@ class AutoBackup {
 
   async checkAndBackup() {
     try {
-      const guilds = this.client.guilds.cache;
+      const guilds = Array.from(this.client.guilds.cache.values());
 
-      for (const [guildId, guild] of guilds) {
-        try {
-          await this.checkGuildBackup(guild);
-        } catch (error) {
-          logger.error(
-            `[AutoBackup] Error checking backup for ${guildId}:`,
-            error
-          );
-        }
+      // Process guilds in parallel batches (max 5 at a time) for better performance (EXCEEDS WICK)
+      const batchSize = 5;
+      for (let i = 0; i < guilds.length; i += batchSize) {
+        const batch = guilds.slice(i, i + batchSize);
+        await Promise.all(
+          batch.map(async (guild) => {
+            try {
+              await this.checkGuildBackup(guild);
+            } catch (error) {
+              logger.error(
+                `[AutoBackup] Error checking backup for ${guild.id}:`,
+                error
+              );
+            }
+          })
+        );
       }
     } catch (error) {
       logger.error("[AutoBackup] Error in backup check:", error);
