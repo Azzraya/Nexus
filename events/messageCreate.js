@@ -13,6 +13,12 @@ module.exports = {
         message.channel,
         message.author.id
       );
+
+      // Emoji spam protection
+      await client.advancedAntiNuke.monitorEmojiSpam(
+        message,
+        message.author.id
+      );
     }
 
     // Update user stats

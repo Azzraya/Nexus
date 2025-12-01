@@ -56,6 +56,8 @@ client.workflows = new WorkflowEngine(client);
 // Advanced Anti-Nuke System
 const AdvancedAntiNuke = require("./utils/advancedAntiNuke");
 client.advancedAntiNuke = new AdvancedAntiNuke(client);
+const AutoBackup = require("./utils/autoBackup");
+client.autoBackup = new AutoBackup(client);
 
 // Performance Monitor
 const PerformanceMonitor = require("./utils/performanceMonitor");

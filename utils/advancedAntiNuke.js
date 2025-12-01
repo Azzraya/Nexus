@@ -16,11 +16,16 @@ class AdvancedAntiNuke {
       membersKicked: 2, // 2+ kicks in 5 seconds
       webhooksCreated: 2, // 2+ webhooks in 5 seconds
       emojisDeleted: 2, // 2+ emojis deleted in 5 seconds
+      emojisCreated: 5, // 5+ emojis created in 5 seconds (spam)
+      voiceRaid: 10, // 10+ voice joins in 10 seconds
     };
     this.lockedGuilds = new Set(); // Track guilds in lockdown
     this.processedThreats = new Set(); // Prevent duplicate handling
     this.spamChannels = new Map(); // Track spam channels (channelId -> {creator, createdAt, messageCount})
     this.channelMessageCounts = new Map(); // Track messages per channel (channelId -> count)
+    this.webhookSpam = new Map(); // Track webhook spam (webhookId -> {creator, createdAt, messageCount})
+    this.emojiSpam = new Map(); // Track emoji spam per user (userId -> {count, lastMessage, guildId})
+    this.voiceRaids = new Map(); // Track voice channel raids (guildId -> {joinCount, lastJoin, userIds})
   }
 
   async monitorAction(guild, actionType, userId, details = {}) {
@@ -112,6 +117,12 @@ class AdvancedAntiNuke {
     } else if (counts.emojisDeleted >= this.thresholds.emojisDeleted) {
       threatDetected = true;
       threatType = "mass_emoji_deletion";
+    } else if (counts.emojisCreated >= this.thresholds.emojisCreated) {
+      threatDetected = true;
+      threatType = "mass_emoji_creation";
+    } else if (counts.voiceRaid >= 1) {
+      threatDetected = true;
+      threatType = "voice_raid";
     }
 
     // COMBINED THREAT DETECTION - Multiple suspicious actions = immediate threat
@@ -123,7 +134,8 @@ class AdvancedAntiNuke {
       counts.membersBanned +
       counts.membersKicked +
       counts.webhooksCreated +
-      counts.emojisDeleted;
+      counts.emojisDeleted +
+      counts.emojisCreated;
 
     if (totalSuspiciousActions >= 4 && !threatDetected) {
       threatDetected = true;
@@ -151,6 +163,8 @@ class AdvancedAntiNuke {
       membersKicked: actions.filter((a) => a.type === "memberRemove").length,
       webhooksCreated: actions.filter((a) => a.type === "webhookCreate").length,
       emojisDeleted: actions.filter((a) => a.type === "emojiDelete").length,
+      emojisCreated: actions.filter((a) => a.type === "emojiCreate").length,
+      voiceRaid: actions.filter((a) => a.type === "voiceRaid").length,
     };
   }
 
@@ -912,92 +926,61 @@ class AdvancedAntiNuke {
     isAdmin = false
   ) {
     try {
-      const config = await db.getServerConfig(guild.id);
-      const alertChannelId = config?.alert_channel || config?.mod_log_channel;
-
-      // Try to find any text channel if alert channel not set
-      let channel = alertChannelId
-        ? guild.channels.cache.get(alertChannelId)
-        : null;
-      if (!channel) {
-        channel = guild.channels.cache.find(
-          (c) =>
-            c.isTextBased() &&
-            c.permissionsFor(guild.members.me)?.has("SendMessages")
-        );
-      }
-
-      if (!channel) {
-        // Last resort: DM the owner
-        try {
-          const owner = await guild.fetchOwner();
-          if (owner) {
-            const { EmbedBuilder } = require("discord.js");
-            const embed = new EmbedBuilder()
-              .setTitle("🚨 CRITICAL: Server Under Attack!")
-              .setDescription(
-                `**Your server ${guild.name} is under attack!**\n\n` +
-                  `**Threat Type:** ${threatType}\n` +
-                  `**Attacker:** <@${userId}>${
-                    isOwner ? " (SERVER OWNER)" : isAdmin ? " (ADMIN)" : ""
-                  }\n` +
-                  `**Action Taken:** User banned/kicked, server locked down\n` +
-                  `**Status:** Server is in lockdown mode for 5 minutes`
-              )
-              .addFields({
-                name: "📊 Attack Details",
-                value:
-                  Object.entries(counts)
-                    .filter(([_, value]) => value > 0)
-                    .map(([key, value]) => `**${key}:** ${value}`)
-                    .join("\n") || "Multiple suspicious actions",
-                inline: false,
-              })
-              .setColor(0xff0000)
-              .setTimestamp();
-
-            await owner.send({ embeds: [embed] }).catch(() => {});
-          }
-        } catch (error) {
-          logger.error(`[Anti-Nuke] Error DMing owner:`, error);
-        }
-        return;
-      }
-
+      // ONLY send DM alerts to all admins (no channel alerts)
       const { EmbedBuilder } = require("discord.js");
-      const embed = new EmbedBuilder()
-        .setTitle("🚨 CRITICAL: Anti-Nuke Protection Activated")
+      const dmEmbed = new EmbedBuilder()
+        .setTitle("🚨 CRITICAL: Server Under Attack!")
         .setDescription(
-          `**⚠️ SERVER UNDER ATTACK ⚠️**\n\n` +
+          `**Your server ${guild.name} is under attack!**\n\n` +
             `**Threat Type:** ${threatType}\n` +
             `**Attacker:** <@${userId}>${
               isOwner ? " (SERVER OWNER)" : isAdmin ? " (ADMIN)" : ""
             }\n` +
-            `**Action Taken:** User banned/kicked, all roles removed, server locked down\n` +
-            `**Lockdown:** All channels set to read-only for 5 minutes\n` +
-            `**Status:** ✅ Threat neutralized`
+            `**Action Taken:** User banned/kicked, server locked down\n` +
+            `**Status:** Server is in lockdown mode for 5 minutes`
         )
         .addFields({
-          name: "📊 Attack Statistics",
+          name: "📊 Attack Details",
           value:
             Object.entries(counts)
               .filter(([_, value]) => value > 0)
               .map(([key, value]) => `**${key}:** ${value}`)
-              .join("\n") || "Multiple suspicious actions detected",
+              .join("\n") || "Multiple suspicious actions",
           inline: false,
         })
         .setColor(0xff0000)
         .setTimestamp();
 
-      await channel
-        .send({
-          content:
-            "@everyone 🚨 **SERVER UNDER ATTACK - LOCKDOWN ACTIVATED** 🚨",
-          embeds: [embed],
+      // DM all admins
+      const adminMembers = guild.members.cache.filter(
+        (m) =>
+          m.permissions.has("Administrator") &&
+          !m.user.bot &&
+          m.id !== userId
+      );
+
+      // Also DM owner
+      const owner = await guild.fetchOwner().catch(() => null);
+      if (owner && !adminMembers.has(owner.id)) {
+        adminMembers.set(owner.id, owner);
+      }
+
+      // Send DMs in parallel
+      await Promise.all(
+        Array.from(adminMembers.values()).map(async (admin) => {
+          try {
+            await admin.send({ embeds: [dmEmbed] }).catch(() => {});
+          } catch (error) {
+            // Continue if DM fails (DMs disabled, etc.)
+          }
         })
-        .catch(() => {});
+      );
+
+      logger.info(
+        `[Anti-Nuke] Sent DM alerts to ${adminMembers.size} admins for threat in ${guild.id}`
+      );
     } catch (error) {
-      logger.error(`[Anti-Nuke] Error alerting admins:`, error);
+      logger.error(`[Anti-Nuke] Error sending DM alerts:`, error);
     }
   }
 
@@ -1143,6 +1126,104 @@ class AdvancedAntiNuke {
     for (const [key, data] of this.channelMessageCounts.entries()) {
       if (now - data.firstMessage > 30000) {
         this.channelMessageCounts.delete(key);
+      }
+    }
+
+    // Clean old webhook spam tracking
+    for (const [webhookId, data] of this.webhookSpam.entries()) {
+      if (now - data.createdAt > 60000) {
+        this.webhookSpam.delete(webhookId);
+      }
+    }
+
+    // Clean old emoji spam tracking
+    for (const [userId, data] of this.emojiSpam.entries()) {
+      if (now - data.lastMessage > 30000) {
+        this.emojiSpam.delete(userId);
+      }
+    }
+
+    // Clean old voice raid tracking
+    for (const [guildId, data] of this.voiceRaids.entries()) {
+      if (now - data.lastJoin > 60000) {
+        this.voiceRaids.delete(guildId);
+      }
+    }
+  }
+
+  // Monitor emoji spam in messages
+  async monitorEmojiSpam(message, userId) {
+    if (!message.content) return;
+
+    // Count emojis in message
+    const emojiRegex = /<a?:[\w]+:\d+>|[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu;
+    const emojiMatches = message.content.match(emojiRegex) || [];
+    const emojiCount = emojiMatches.length;
+
+    // If message has 10+ emojis, it's spam
+    if (emojiCount >= 10) {
+      const key = `${message.guild.id}-${userId}`;
+      if (!this.emojiSpam.has(key)) {
+        this.emojiSpam.set(key, {
+          count: 0,
+          lastMessage: Date.now(),
+          guildId: message.guild.id,
+        });
+      }
+
+      const spamData = this.emojiSpam.get(key);
+      spamData.count++;
+      spamData.lastMessage = Date.now();
+
+      // If 3+ spam messages in 10 seconds, delete and warn
+      if (spamData.count >= 3 && Date.now() - spamData.lastMessage < 10000) {
+        try {
+          await message.delete().catch(() => {});
+          logger.warn(
+            `[Anti-Nuke] Deleted emoji spam message from ${userId} in ${message.guild.id}`
+          );
+
+          // Warn user
+          const member = await message.guild.members.fetch(userId).catch(() => null);
+          if (member) {
+            await member
+              .send(
+                `⚠️ Your message in ${message.guild.name} was deleted for emoji spam. Please avoid sending excessive emojis.`
+              )
+              .catch(() => {});
+          }
+        } catch (error) {
+          logger.error(`[Anti-Nuke] Error handling emoji spam:`, error);
+        }
+      }
+    }
+  }
+
+  // Monitor webhook spam
+  async monitorWebhookSpam(webhook, userId) {
+    const key = `${webhook.guild.id}-${webhook.id}`;
+    if (!this.webhookSpam.has(key)) {
+      this.webhookSpam.set(key, {
+        creator: userId,
+        createdAt: Date.now(),
+        messageCount: 0,
+        guildId: webhook.guild.id,
+      });
+    }
+
+    const webhookData = this.webhookSpam.get(key);
+    webhookData.messageCount++;
+
+    // If webhook sends 5+ messages in 10 seconds, it's spam
+    if (webhookData.messageCount >= 5 && Date.now() - webhookData.createdAt < 10000) {
+      try {
+        await webhook.delete("Anti-Nuke: Webhook spam detected");
+        logger.warn(
+          `[Anti-Nuke] Deleted spam webhook ${webhook.id} in ${webhook.guild.id}`
+        );
+        this.webhookSpam.delete(key);
+      } catch (error) {
+        logger.error(`[Anti-Nuke] Error deleting spam webhook:`, error);
       }
     }
   }

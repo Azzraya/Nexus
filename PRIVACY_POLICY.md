@@ -158,6 +158,7 @@ Our Threat Intelligence Network is a security feature that allows servers to sha
 ### Purpose:
 
 This data sharing allows servers to:
+
 - Prevent known bad actors from causing harm across multiple servers
 - Identify coordinated attacks and raids
 - Protect communities through collective security
@@ -171,6 +172,7 @@ This data sharing allows servers to:
 ### Legal Basis (GDPR):
 
 We process threat intelligence data under **legitimate interest** for the purpose of:
+
 - Preventing fraud and criminal activity
 - Protecting the security of our service and users
 - Ensuring network safety
@@ -198,6 +200,7 @@ Nexus Bot does not use cookies or tracking technologies in the Discord applicati
 ### Data Processing
 
 Our AI features use machine learning to:
+
 - Analyze behavioral patterns for threat detection
 - Generate security recommendations
 - Predict potential security risks
@@ -212,11 +215,13 @@ Our AI features use machine learning to:
 ### Automated Decision-Making
 
 AI features may make automated decisions such as:
+
 - Threat risk scoring
 - Moderation recommendations
 - Security alerts
 
 **Your Rights:**
+
 - Request human review of automated decisions (GDPR Article 22)
 - Opt-out of AI-based features
 - Receive explanations of automated decisions
@@ -239,6 +244,7 @@ You have the right to request your data in a portable format.
 ### Format:
 
 Data will be provided in JSON format including:
+
 - Server configurations
 - Moderation logs
 - User data (if applicable)
@@ -256,6 +262,7 @@ Your data is stored on secure servers. If your data is stored outside the United
 ### UK GDPR and EU GDPR Compliance
 
 If you are in the United Kingdom or European Union:
+
 - We are compliant with UK GDPR and EU GDPR regulations
 - We provide appropriate safeguards for international data transfers
 - You maintain all GDPR rights regardless of data location
@@ -332,7 +339,7 @@ We process your personal data under the following legal bases:
 If a data breach occurs that may affect your privacy:
 
 - **Timeline:** We will notify affected servers within 72 hours of discovery (GDPR requirement)
-- **Method:** 
+- **Method:**
   - Discord direct message to server administrators
   - Announcement in our support server
   - Email (if provided)
@@ -369,6 +376,7 @@ Nexus Bot is not intended for users under 13 years of age (Discord's minimum age
 ### Reporting:
 
 If you believe we have collected data from a user under 13:
+
 1. Contact us immediately via our support server
 2. Provide the user ID or relevant information
 3. We will investigate and delete the data within 24 hours
@@ -393,6 +401,7 @@ For privacy concerns, data requests, or questions:
 ### Data Protection Officer and ICO
 
 If you are in the UK or EU and have GDPR-related concerns, you can:
+
 - Contact us via the methods above
 - Contact the UK Information Commissioner's Office (ICO) if you are in the UK: https://ico.org.uk/make-a-complaint/
 - Contact your local data protection authority if you are in the EU
@@ -402,6 +411,7 @@ If you are in the UK or EU and have GDPR-related concerns, you can:
 ### UK GDPR and EU GDPR
 
 We are compliant with both UK GDPR and the EU's General Data Protection Regulation:
+
 - ✅ Full data subject rights (access, deletion, portability, etc.)
 - ✅ Lawful basis for processing disclosed
 - ✅ Data breach notification procedures
@@ -412,6 +422,7 @@ We are compliant with both UK GDPR and the EU's General Data Protection Regulati
 ### CCPA/CPRA (California Consumer Privacy Act)
 
 We are compliant with California privacy laws:
+
 - ✅ "Do Not Sell" - We do not sell your personal information
 - ✅ Right to know what data is collected
 - ✅ Right to delete personal information
