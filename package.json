@@ -6,7 +6,10 @@
   "scripts": {
     "start": "node shard.js",
     "dev": "node index.js",
-    "shard": "node shard.js"
+    "shard": "node shard.js",
+    "git:pull": "scripts\\pull.bat",
+    "git:push": "scripts\\push.bat",
+    "git:sync": "scripts\\sync.bat"
   },
   "keywords": [
     "discord",
