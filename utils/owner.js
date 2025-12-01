@@ -1,5 +1,10 @@
 // Owner utility for bot owner checks
-const OWNER_ID = process.env.OWNER_ID || "1392165977793368124";
+// IMPORTANT: Set OWNER_ID in .env file for production
+const OWNER_ID = process.env.OWNER_ID;
+
+if (!OWNER_ID) {
+  console.error("⚠️ WARNING: OWNER_ID not set in .env file! Owner-only commands will not work.");
+}
 
 class Owner {
   /**

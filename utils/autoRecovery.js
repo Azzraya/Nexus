@@ -13,12 +13,12 @@ class AutoRecovery {
         type: channel.type,
         parent: channel.parentId,
         position: channel.position,
-        permissions: channel.permissionOverwrites.cache.map((overwrite) => ({
+        permissions: channel.permissionOverwrites?.cache?.map((overwrite) => ({
           id: overwrite.id,
           type: overwrite.type,
           allow: overwrite.allow.toArray(),
           deny: overwrite.deny.toArray(),
-        })),
+        })) || [],
       }));
     } else if (snapshotType === "roles") {
       snapshotData.roles = guild.roles.cache
@@ -46,12 +46,12 @@ class AutoRecovery {
         type: channel.type,
         parent: channel.parentId,
         position: channel.position,
-        permissions: channel.permissionOverwrites.cache.map((overwrite) => ({
+        permissions: channel.permissionOverwrites?.cache?.map((overwrite) => ({
           id: overwrite.id,
           type: overwrite.type,
           allow: overwrite.allow.toArray(),
           deny: overwrite.deny.toArray(),
-        })),
+        })) || [],
       }));
       
       // Ensure roles are fetched if cache is empty

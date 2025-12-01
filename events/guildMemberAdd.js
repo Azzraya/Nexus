@@ -237,31 +237,56 @@ module.exports = {
       const welcomeChannel = member.guild.channels.cache.get(
         config.welcome_channel
       );
-      if (welcomeChannel) {
-        const message = config.welcome_message
-          .replace(/{user}/g, member.toString())
-          .replace(/{server}/g, member.guild.name)
-          .replace(/{membercount}/g, member.guild.memberCount);
+      if (welcomeChannel && welcomeChannel.isTextBased()) {
+        // Check if bot has permission to send messages in this channel
+        const botMember = member.guild.members.me;
+        const canSend = welcomeChannel.permissionsFor(botMember)?.has([
+          "ViewChannel",
+          "SendMessages",
+        ]);
 
-        welcomeChannel
-          .send({
-            embeds: [
-              {
-                title: "👋 Welcome!",
-                description: message,
-                color: 0x00ff00,
-                thumbnail: {
-                  url: member.user.displayAvatarURL({ dynamic: true }),
+        if (canSend) {
+          const message = config.welcome_message
+            .replace(/{user}/g, member.toString())
+            .replace(/{server}/g, member.guild.name)
+            .replace(/{membercount}/g, member.guild.memberCount);
+
+          welcomeChannel
+            .send({
+              embeds: [
+                {
+                  title: "👋 Welcome!",
+                  description: message,
+                  color: 0x00ff00,
+                  thumbnail: {
+                    url: member.user.displayAvatarURL({ dynamic: true }),
+                  },
                 },
-              },
-            ],
-          })
-          .catch(
-            ErrorHandler.createSafeCatch(
-              `guildMemberAdd [${member.guild.id}]`,
-              `Send welcome message for ${member.user.id}`
-            )
+              ],
+            })
+            .catch(
+              ErrorHandler.createSafeCatch(
+                `guildMemberAdd [${member.guild.id}]`,
+                `Send welcome message for ${member.user.id}`
+              )
+            );
+        } else {
+          // Silently skip if bot doesn't have permissions (don't log as error)
+          logger.debug(
+            `[guildMemberAdd] Skipping welcome message - bot lacks permissions in channel ${config.welcome_channel} for guild ${member.guild.id}`
           );
+        }
+      } else {
+        // Channel doesn't exist, isn't accessible, or isn't text-based - silently skip
+        if (welcomeChannel && !welcomeChannel.isTextBased()) {
+          logger.debug(
+            `[guildMemberAdd] Welcome channel ${config.welcome_channel} is not a text channel for guild ${member.guild.id}`
+          );
+        } else {
+          logger.debug(
+            `[guildMemberAdd] Welcome channel ${config.welcome_channel} not found or inaccessible for guild ${member.guild.id}`
+          );
+        }
       }
     }
 

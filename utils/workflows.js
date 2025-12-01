@@ -252,14 +252,16 @@ class WorkflowEngine {
             `Fetch member for quarantine action`
           );
           if (member) {
-            const roles = member.roles.cache.filter(r => r.id !== guild.id);
+            const roles = member.roles.cache.filter((r) => r.id !== guild.id);
             await ErrorHandler.safeExecute(
               member.roles.set([], config.reason || "Workflow automation"),
               `workflows [${guild.id}]`,
               `Quarantine: Clear roles for ${eventData.user.id}`
             );
             if (config.quarantine_role_id) {
-              const quarantineRole = guild.roles.cache.get(config.quarantine_role_id);
+              const quarantineRole = guild.roles.cache.get(
+                config.quarantine_role_id
+              );
               if (quarantineRole) {
                 await ErrorHandler.safeExecute(
                   member.roles.add(quarantineRole),

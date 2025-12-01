@@ -131,6 +131,9 @@ module.exports = {
           ],
         });
       } else if (type === "channels") {
+        // Defer reply since this might take a while
+        await interaction.deferReply();
+
         // Lock all public channels
         const publicChannels = interaction.guild.channels.cache.filter(
           (ch) =>
@@ -142,6 +145,7 @@ module.exports = {
 
         const everyone = interaction.guild.roles.everyone;
         let locked = 0;
+        let failed = 0;
 
         for (const channel of publicChannels.values()) {
           try {
@@ -160,6 +164,7 @@ module.exports = {
             });
             locked++;
           } catch (error) {
+            failed++;
             const ErrorHandler = require("../utils/errorHandler");
             ErrorHandler.logError(
               error,
@@ -169,11 +174,11 @@ module.exports = {
           }
         }
 
-        await interaction.reply({
+        await interaction.editReply({
           embeds: [
             {
               title: "✅ All Public Channels Locked",
-              description: `Locked ${locked} channel(s).`,
+              description: `Locked ${locked} channel(s).${failed > 0 ? ` Failed to lock ${failed} channel(s) (missing permissions).` : ''}`,
               color: 0xff0000,
             },
           ],
