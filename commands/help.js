@@ -87,6 +87,7 @@ module.exports = {
         "search",
         "workflow",
         "logs",
+        "vote",
         "report",
         "poll",
         "suggest",

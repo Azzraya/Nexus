@@ -690,6 +690,17 @@ class Database {
             )
         `);
 
+    // Botlist voting links
+    this.db.run(`
+            CREATE TABLE IF NOT EXISTS botlist_links (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT UNIQUE NOT NULL,
+                url TEXT NOT NULL,
+                added_by TEXT,
+                added_at INTEGER
+            )
+        `);
+
     // Auto-recovery snapshots
     this.db.run(`
             CREATE TABLE IF NOT EXISTS recovery_snapshots (
