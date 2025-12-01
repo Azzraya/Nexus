@@ -14,12 +14,16 @@ module.exports = {
       securityChecks.push(
         client.advancedAntiNuke
           .monitorChannelMessage(message.channel, message.author.id)
-          .catch(() => {})
+          .catch((err) => {
+            logger.debug(`[messageCreate] Channel message monitoring failed:`, err.message);
+          })
       );
       securityChecks.push(
         client.advancedAntiNuke
           .monitorEmojiSpam(message, message.author.id)
-          .catch(() => {})
+          .catch((err) => {
+            logger.debug(`[messageCreate] Emoji spam monitoring failed:`, err.message);
+          })
       );
     }
 
@@ -28,7 +32,9 @@ module.exports = {
       ...securityChecks,
       db
         .updateUserStats(message.guild.id, message.author.id, "messages_sent")
-        .catch(() => {}),
+        .catch((err) => {
+          logger.debug(`[messageCreate] User stats update failed:`, err.message);
+        }),
     ]);
 
     // Add XP for leveling (1-5 random XP per message)

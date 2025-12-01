@@ -654,7 +654,9 @@ class AutoRecovery {
                   Buffer.from(iconBuffer),
                   "Auto-recovery: Restore server icon"
                 )
-                .catch(() => {});
+                .catch((err) => {
+                  logger.debug(`[AutoRecovery] Failed to restore server icon:`, err.message);
+                });
             } catch (error) {
               logger.warn(
                 `[AutoRecovery] Failed to restore server icon:`,
@@ -672,7 +674,9 @@ class AutoRecovery {
                   Buffer.from(bannerBuffer),
                   "Auto-recovery: Restore server banner"
                 )
-                .catch(() => {});
+                .catch((err) => {
+                  logger.debug(`[AutoRecovery] Failed to restore server banner:`, err.message);
+                });
             } catch (error) {
               logger.warn(
                 `[AutoRecovery] Failed to restore server banner:`,

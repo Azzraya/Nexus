@@ -2,6 +2,7 @@ const crypto = require("crypto");
 const { authenticator } = require("otplib");
 const QRCode = require("qrcode");
 const db = require("./database");
+const logger = require("./logger");
 
 class RescueKey {
   /**
@@ -46,7 +47,7 @@ class RescueKey {
     try {
       qrCodeDataUrl = await QRCode.toDataURL(otpauth);
     } catch (error) {
-      console.error("Failed to generate QR code:", error);
+      logger.error("Failed to generate QR code:", error);
     }
 
     return new Promise((resolve, reject) => {
@@ -159,7 +160,7 @@ class RescueKey {
     try {
       return await QRCode.toDataURL(otpauth);
     } catch (error) {
-      console.error("Failed to generate QR code:", error);
+      logger.error("Failed to generate QR code:", error);
       return null;
     }
   }

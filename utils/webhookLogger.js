@@ -1,5 +1,6 @@
 const { WebhookClient } = require("discord.js");
 const db = require("./database");
+const logger = require("./logger");
 
 class WebhookLogger {
   static async log(guild, type, data) {
@@ -19,7 +20,7 @@ class WebhookLogger {
 
       await webhook.send({ embeds: [embed] });
     } catch (error) {
-      console.error("Webhook logging failed:", error.message);
+      logger.error("Webhook logging failed:", error.message);
     }
   }
 

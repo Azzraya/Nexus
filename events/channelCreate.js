@@ -14,7 +14,9 @@ module.exports = {
       try {
         await channel
           .delete("Anti-Nuke: Channel created during lockdown")
-          .catch(() => {});
+          .catch((err) => {
+            logger.debug(`[channelCreate] Failed to delete channel during lockdown:`, err.message);
+          });
         logger.warn(
           `[Anti-Nuke] Deleted channel ${channel.id} created during lockdown in ${channel.guild.id}`
         );

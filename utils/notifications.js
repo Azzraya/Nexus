@@ -1,5 +1,6 @@
 const db = require("./database");
 const axios = require("axios");
+const logger = require("./logger");
 
 class Notifications {
   static async send(guildId, type, data, client = null) {
@@ -22,7 +23,7 @@ class Notifications {
           await this.sendWebhookNotification(config.webhook_url, type, data);
         }
       } catch (error) {
-        console.error(`Failed to send notification:`, error);
+        logger.error(`Failed to send notification:`, error);
       }
     }
   }
@@ -42,7 +43,7 @@ class Notifications {
 
       await channel.send({ embeds: [embed] });
     } catch (error) {
-      console.error("Failed to send Discord notification:", error);
+      logger.error("Failed to send Discord notification:", error);
     }
   }
 

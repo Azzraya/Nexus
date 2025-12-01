@@ -179,7 +179,7 @@ client.checkAntiRaid = async (guild, member) => {
           await susMember.roles.add(config.quarantineRole);
         }
       } catch (err) {
-        console.error(`Failed to ${config.action} ${susMember.id}:`, err);
+        logger.error(`Failed to ${config.action} ${susMember.id}:`, err);
       }
     }
 
@@ -257,9 +257,9 @@ client.checkAntiNuke = async (guild, user, action) => {
       }
 
       return true;
-    } catch (err) {
-      console.error("Anti-nuke action failed:", err);
-    }
+      } catch (err) {
+        logger.error("Anti-nuke action failed:", err);
+      }
   }
 
   client.antiRaid.suspiciousUsers.set(key, data);
@@ -272,13 +272,13 @@ client.checkAntiNuke = async (guild, user, action) => {
 if (!process.env.USING_SHARDING) {
   // Single shard mode - login directly
   if (!process.env.DISCORD_TOKEN) {
-    console.error("❌ DISCORD_TOKEN not found in .env file!");
+    logger.error("❌ DISCORD_TOKEN not found in .env file!");
     process.exit(1);
   }
   client.login(process.env.DISCORD_TOKEN).catch((error) => {
-    console.error("❌ Failed to login:", error.message);
+    logger.error("❌ Failed to login:", error.message);
     if (error.message.includes("Invalid token")) {
-      console.error("⚠️ Check your DISCORD_TOKEN in .env file");
+      logger.error("⚠️ Check your DISCORD_TOKEN in .env file");
     }
     process.exit(1);
   });
@@ -287,18 +287,11 @@ if (!process.env.USING_SHARDING) {
 
 // Error handling
 process.on("unhandledRejection", (error) => {
-  console.error("Unhandled promise rejection:", error);
-  // Log to file if logger is available
-  if (logger) {
-    logger.error("Unhandled promise rejection:", error);
-  }
+  logger.error("Unhandled promise rejection:", error);
 });
 
 process.on("uncaughtException", (error) => {
-  console.error("Uncaught exception:", error);
-  if (logger) {
-    logger.error("Uncaught exception:", error);
-  }
+  logger.error("Uncaught exception:", error);
   // Don't exit - let the process manager handle it
 });
 

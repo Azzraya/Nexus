@@ -1,6 +1,7 @@
 const sqlite3 = require("sqlite3").verbose();
 const path = require("path");
 const fs = require("fs");
+const logger = require("./logger");
 
 class Database {
   constructor() {
@@ -13,15 +14,15 @@ class Database {
 
     this.db = new sqlite3.Database(dbPath, (err) => {
       if (err) {
-        console.error("Database error:", err);
+        logger.error("Database connection error:", err);
       } else {
-        console.log("✅ Database connected");
+        logger.info("✅ Database connected");
 
         // Optimize database performance (EXCEEDS WICK - better performance)
         this.db.serialize(() => {
           // Enable WAL mode for better concurrency (EXCEEDS WICK)
           this.db.run("PRAGMA journal_mode = WAL;", (err) => {
-            if (err) console.warn("Failed to enable WAL mode:", err);
+            if (err) logger.warn("Failed to enable WAL mode:", err);
           });
 
           // Optimize for performance (EXCEEDS WICK)
@@ -816,14 +817,14 @@ class Database {
       `CREATE INDEX IF NOT EXISTS idx_mod_logs_guild_user ON moderation_logs(guild_id, user_id)`,
       (err) => {
         if (err)
-          console.error("Error creating index idx_mod_logs_guild_user:", err);
+          logger.error("Error creating index idx_mod_logs_guild_user:", err);
       }
     );
     this.db.run(
       `CREATE INDEX IF NOT EXISTS idx_mod_logs_guild_timestamp ON moderation_logs(guild_id, timestamp)`,
       (err) => {
         if (err)
-          console.error(
+          logger.error(
             "Error creating index idx_mod_logs_guild_timestamp:",
             err
           );
@@ -833,7 +834,7 @@ class Database {
       `CREATE INDEX IF NOT EXISTS idx_security_logs_guild_timestamp ON security_logs(guild_id, timestamp)`,
       (err) => {
         if (err)
-          console.error(
+          logger.error(
             "Error creating index idx_security_logs_guild_timestamp:",
             err
           );
@@ -843,21 +844,21 @@ class Database {
       `CREATE INDEX IF NOT EXISTS idx_warnings_guild_user ON warnings(guild_id, user_id)`,
       (err) => {
         if (err)
-          console.error("Error creating index idx_warnings_guild_user:", err);
+          logger.error("Error creating index idx_warnings_guild_user:", err);
       }
     );
     this.db.run(
       `CREATE INDEX IF NOT EXISTS idx_cases_guild_user ON cases(guild_id, user_id)`,
       (err) => {
         if (err)
-          console.error("Error creating index idx_cases_guild_user:", err);
+          logger.error("Error creating index idx_cases_guild_user:", err);
       }
     );
     this.db.run(
       `CREATE INDEX IF NOT EXISTS idx_user_stats_guild_user ON user_stats(guild_id, user_id)`,
       (err) => {
         if (err)
-          console.error("Error creating index idx_user_stats_guild_user:", err);
+          logger.error("Error creating index idx_user_stats_guild_user:", err);
       }
     );
 
@@ -865,14 +866,14 @@ class Database {
     this.db.run(
       `CREATE INDEX IF NOT EXISTS idx_recovery_snapshots_guild_created ON recovery_snapshots(guild_id, created_at DESC)`,
       (err) => {
-        if (err) console.error("Error creating recovery snapshot index:", err);
+        if (err) logger.error("Error creating recovery snapshot index:", err);
       }
     );
 
     this.db.run(
       `CREATE INDEX IF NOT EXISTS idx_heat_scores_guild_user ON heat_scores(guild_id, user_id)`,
       (err) => {
-        if (err) console.error("Error creating heat scores index:", err);
+        if (err) logger.error("Error creating heat scores index:", err);
       }
     );
 
@@ -880,21 +881,21 @@ class Database {
       `CREATE INDEX IF NOT EXISTS idx_threat_intelligence_user ON threat_intelligence(user_id, reported_at DESC)`,
       (err) => {
         if (err)
-          console.error("Error creating threat intelligence index:", err);
+          logger.error("Error creating threat intelligence index:", err);
       }
     );
 
     this.db.run(
       `CREATE INDEX IF NOT EXISTS idx_security_whitelist_guild_user ON security_whitelist(guild_id, user_id)`,
       (err) => {
-        if (err) console.error("Error creating whitelist index:", err);
+        if (err) logger.error("Error creating whitelist index:", err);
       }
     );
     this.db.run(
       `CREATE INDEX IF NOT EXISTS idx_heat_data_guild_user ON heat_data(guild_id, user_id)`,
       (err) => {
         if (err)
-          console.error("Error creating index idx_heat_data_guild_user:", err);
+          logger.error("Error creating index idx_heat_data_guild_user:", err);
       }
     );
 
@@ -902,14 +903,14 @@ class Database {
     this.db.run(
       `CREATE INDEX IF NOT EXISTS idx_recovery_snapshots_guild_created ON recovery_snapshots(guild_id, created_at DESC)`,
       (err) => {
-        if (err) console.error("Error creating recovery snapshot index:", err);
+        if (err) logger.error("Error creating recovery snapshot index:", err);
       }
     );
 
     this.db.run(
       `CREATE INDEX IF NOT EXISTS idx_heat_scores_guild_user ON heat_scores(guild_id, user_id)`,
       (err) => {
-        if (err) console.error("Error creating heat scores index:", err);
+        if (err) logger.error("Error creating heat scores index:", err);
       }
     );
 
@@ -917,35 +918,35 @@ class Database {
       `CREATE INDEX IF NOT EXISTS idx_threat_intelligence_user ON threat_intelligence(user_id, reported_at DESC)`,
       (err) => {
         if (err)
-          console.error("Error creating threat intelligence index:", err);
+          logger.error("Error creating threat intelligence index:", err);
       }
     );
 
     this.db.run(
       `CREATE INDEX IF NOT EXISTS idx_security_whitelist_guild_user ON security_whitelist(guild_id, user_id)`,
       (err) => {
-        if (err) console.error("Error creating whitelist index:", err);
+        if (err) logger.error("Error creating whitelist index:", err);
       }
     );
     this.db.run(
       `CREATE INDEX IF NOT EXISTS idx_automod_rules_guild ON automod_rules(guild_id)`,
       (err) => {
         if (err)
-          console.error("Error creating index idx_automod_rules_guild:", err);
+          logger.error("Error creating index idx_automod_rules_guild:", err);
       }
     );
     this.db.run(
       `CREATE INDEX IF NOT EXISTS idx_workflows_guild ON workflows(guild_id)`,
       (err) => {
         if (err)
-          console.error("Error creating index idx_workflows_guild:", err);
+          logger.error("Error creating index idx_workflows_guild:", err);
       }
     );
     this.db.run(
       `CREATE INDEX IF NOT EXISTS idx_suggestions_guild_status ON suggestions(guild_id, status)`,
       (err) => {
         if (err)
-          console.error(
+          logger.error(
             "Error creating index idx_suggestions_guild_status:",
             err
           );
@@ -955,7 +956,7 @@ class Database {
       `CREATE INDEX IF NOT EXISTS idx_polls_guild_ended ON polls(guild_id, ended)`,
       (err) => {
         if (err)
-          console.error("Error creating index idx_polls_guild_ended:", err);
+          logger.error("Error creating index idx_polls_guild_ended:", err);
       }
     );
   }
@@ -966,7 +967,7 @@ class Database {
       `ALTER TABLE security_logs ADD COLUMN threat_type TEXT`,
       (err) => {
         if (err && !err.message.includes("duplicate column")) {
-          console.error("Error adding threat_type column:", err);
+          logger.error("Error adding threat_type column:", err);
         }
       }
     );
@@ -974,7 +975,7 @@ class Database {
       `ALTER TABLE security_logs ADD COLUMN action_taken INTEGER DEFAULT 0`,
       (err) => {
         if (err && !err.message.includes("duplicate column")) {
-          console.error("Error adding action_taken column:", err);
+          logger.error("Error adding action_taken column:", err);
         }
       }
     );
@@ -984,7 +985,7 @@ class Database {
       `ALTER TABLE server_config ADD COLUMN verification_mode TEXT DEFAULT 'instant'`,
       (err) => {
         if (err && !err.message.includes("duplicate column")) {
-          console.error("Error adding verification_mode column:", err);
+          logger.error("Error adding verification_mode column:", err);
         }
       }
     );
@@ -992,7 +993,7 @@ class Database {
       `ALTER TABLE server_config ADD COLUMN verification_target TEXT DEFAULT 'everyone'`,
       (err) => {
         if (err && !err.message.includes("duplicate column")) {
-          console.error("Error adding verification_target column:", err);
+          logger.error("Error adding verification_target column:", err);
         }
       }
     );
@@ -1000,7 +1001,7 @@ class Database {
       `ALTER TABLE server_config ADD COLUMN verification_server_type TEXT DEFAULT 'standard'`,
       (err) => {
         if (err && !err.message.includes("duplicate column")) {
-          console.error("Error adding verification_server_type column:", err);
+          logger.error("Error adding verification_server_type column:", err);
         }
       }
     );
@@ -1008,7 +1009,7 @@ class Database {
       `ALTER TABLE server_config ADD COLUMN verification_channel TEXT`,
       (err) => {
         if (err && !err.message.includes("duplicate column")) {
-          console.error("Error adding verification_channel column:", err);
+          logger.error("Error adding verification_channel column:", err);
         }
       }
     );
@@ -1016,7 +1017,7 @@ class Database {
       `ALTER TABLE server_config ADD COLUMN verification_message TEXT`,
       (err) => {
         if (err && !err.message.includes("duplicate column")) {
-          console.error("Error adding verification_message column:", err);
+          logger.error("Error adding verification_message column:", err);
         }
       }
     );

@@ -1,6 +1,7 @@
 const db = require("./database");
 const Moderation = require("./moderation");
 const Security = require("./security");
+const logger = require("./logger");
 
 class WorkflowEngine {
   constructor(client) {
@@ -147,7 +148,7 @@ class WorkflowEngine {
       try {
         await this.executeAction(action, eventData, guild);
       } catch (error) {
-        console.error(`Error executing workflow action ${action.type}:`, error);
+        logger.error(`Error executing workflow action ${action.type}:`, error);
       }
     }
   }
@@ -275,7 +276,7 @@ class WorkflowEngine {
         break;
 
       default:
-        console.warn(`Unknown workflow action type: ${type}`);
+        logger.warn(`Unknown workflow action type: ${type}`);
     }
   }
 }

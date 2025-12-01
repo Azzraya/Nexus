@@ -2,15 +2,16 @@ const { REST, Routes } = require("discord.js");
 const fs = require("fs");
 const path = require("path");
 require("dotenv").config();
+const logger = require("./logger");
 
 async function registerCommands(client) {
   if (!process.env.DISCORD_TOKEN) {
-    console.error("❌ DISCORD_TOKEN not found in .env file!");
+    logger.error("❌ DISCORD_TOKEN not found in .env file!");
     return;
   }
 
   if (!client.user) {
-    console.error("❌ Client not ready yet!");
+    logger.error("❌ Client not ready yet!");
     return;
   }
 
@@ -29,21 +30,21 @@ async function registerCommands(client) {
         commands.push(command.data.toJSON());
       }
     } catch (error) {
-      console.error(`⚠️ Failed to load command ${file}:`, error.message);
+      logger.error(`⚠️ Failed to load command ${file}:`, error.message);
     }
   }
 
   const rest = new REST({ version: "10" }).setToken(process.env.DISCORD_TOKEN);
 
   try {
-    console.log(`🔄 Registering ${commands.length} slash commands...`);
+    logger.info(`🔄 Registering ${commands.length} slash commands...`);
 
     // FIRST: Clear all global commands to prevent duplicates
     try {
       await rest.put(Routes.applicationCommands(client.user.id), { body: [] });
-      console.log("✅ Cleared global commands");
+      logger.info("✅ Cleared global commands");
     } catch (error) {
-      console.error("⚠️ Failed to clear global commands:", error.message);
+      logger.error("⚠️ Failed to clear global commands:", error.message);
     }
 
     // THEN: Register commands per-guild only (instant, no duplicates)
@@ -58,7 +59,7 @@ async function registerCommands(client) {
         );
         successCount++;
       } catch (error) {
-        console.error(
+        logger.error(
           `❌ Failed to register commands for ${guild.name}:`,
           error.message
         );
@@ -66,13 +67,13 @@ async function registerCommands(client) {
       }
     }
 
-    console.log(
+    logger.info(
       `✅ Registered commands for ${successCount} servers${
         failCount > 0 ? `, ${failCount} failed` : ""
       }`
     );
   } catch (error) {
-    console.error("❌ Error registering commands:", error);
+    logger.error("❌ Error registering commands:", error);
   }
 }
 

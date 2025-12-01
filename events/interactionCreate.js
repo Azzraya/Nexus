@@ -79,7 +79,9 @@ module.exports = {
               }
             );
           })
-        ]).catch(() => {}); // Don't block command execution if logging fails
+        ]).catch((err) => {
+          logger.debug(`[interactionCreate] Command logging failed (non-blocking):`, err.message);
+        }); // Don't block command execution if logging fails
         
         await command.execute(interaction);
         const executionTime = Date.now() - startTime;

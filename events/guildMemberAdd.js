@@ -17,7 +17,9 @@ module.exports = {
             user: member.user,
             member: member,
             guild: member.guild,
-          }).catch(() => {})
+          }).catch((err) => {
+            logger.debug(`[guildMemberAdd] Workflow trigger failed:`, err.message);
+          })
         : Promise.resolve()
     ]);
     
@@ -36,7 +38,9 @@ module.exports = {
           details: `User has ${threatCheck.threatCount} threat reports in network`,
         },
         client
-      ).catch(() => {});
+      ).catch((err) => {
+        logger.debug(`[guildMemberAdd] Notification send failed:`, err.message);
+      });
     }
     if (joinGateCheck.filtered) {
       // Execute action based on join gate

@@ -165,7 +165,9 @@ class AdvancedAntiNuke {
           if (channel) {
             await channel
               .delete("Anti-Nuke: Channel created during lockdown")
-              .catch(() => {});
+              .catch((err) => {
+                logger.debug(`[Anti-Nuke] Failed to delete channel ${channel.id} during lockdown:`, err.message);
+              });
             this.spamChannels.delete(details.channelId);
             logger.warn(
               `[Anti-Nuke] Immediately deleted channel ${details.channelId} created during lockdown`
@@ -888,7 +890,9 @@ class AdvancedAntiNuke {
           ]);
           await everyoneRole
             .setPermissions(newPerms, "Anti-Nuke: Prevent channel creation")
-            .catch(() => {});
+            .catch((err) => {
+              logger.debug(`[Anti-Nuke] Failed to update @everyone permissions:`, err.message);
+            });
         }
       } catch (error) {
         logger.error(`[Anti-Nuke] Error preventing channel creation:`, error);
@@ -1303,8 +1307,12 @@ class AdvancedAntiNuke {
       );
 
       // Fetch current state from Discord
-      await guild.channels.fetch().catch(() => {});
-      await guild.roles.fetch().catch(() => {});
+      await guild.channels.fetch().catch((err) => {
+        logger.debug(`[Anti-Nuke] Failed to fetch channels for fallback recovery:`, err.message);
+      });
+      await guild.roles.fetch().catch((err) => {
+        logger.debug(`[Anti-Nuke] Failed to fetch roles for fallback recovery:`, err.message);
+      });
 
       // Try to restore based on what we know was deleted
       // This is limited because we don't have full snapshot data
@@ -1487,7 +1495,9 @@ class AdvancedAntiNuke {
       // If 3+ spam messages in 10 seconds, delete and warn
       if (spamData.count >= 3 && Date.now() - spamData.lastMessage < 10000) {
         try {
-          await message.delete().catch(() => {});
+          await message.delete().catch((err) => {
+            logger.debug(`[Anti-Nuke] Failed to delete emoji spam message:`, err.message);
+          });
           logger.warn(
             `[Anti-Nuke] Deleted emoji spam message from ${userId} in ${message.guild.id}`
           );
@@ -1501,7 +1511,9 @@ class AdvancedAntiNuke {
               .send(
                 `⚠️ Your message in ${message.guild.name} was deleted for emoji spam. Please avoid sending excessive emojis.`
               )
-              .catch(() => {});
+              .catch((err) => {
+                logger.debug(`[Anti-Nuke] Failed to send DM warning for emoji spam:`, err.message);
+              });
           }
         } catch (error) {
           logger.error(`[Anti-Nuke] Error handling emoji spam:`, error);
