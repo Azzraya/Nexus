@@ -211,7 +211,7 @@ The Bot includes AI-powered features that may make automated decisions:
 
 For questions about these Terms:
 - **Discord Support Server:** https://discord.gg/UHNcUKheZP (Preferred method)
-- **Legal/Privacy Email:** privacy@nexusbot.org (For formal legal inquiries)
+- **Legal/Privacy Email:** ashlynnadams635@gmail.com (For formal legal inquiries)
 - **General Contact:** Open a ticket in our support server
 - **GitHub Issues:** https://github.com/Azzraya/Nexus/issues (For code-related questions)
 

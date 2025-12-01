@@ -334,7 +334,7 @@ We may update this Privacy Policy from time to time. We will:
 For privacy concerns, data requests, or questions:
 
 - **Discord Support Server:** https://discord.gg/UHNcUKheZP (Preferred method)
-- **Privacy Email:** privacy@nexusbot.org (For formal privacy requests)
+- **Privacy Email:** ashlynnadams635@gmail.com (For formal privacy requests)
 - **General Contact:** Open a ticket in our support server
 - **GitHub Issues:** https://github.com/Azzraya/Nexus/issues (For code-related questions)
 

@@ -98,7 +98,7 @@ module.exports = {
           {
             name: "📧 Contact",
             value:
-              "For privacy concerns: privacy@nexusbot.org or join our [Support Server](https://discord.gg/UHNcUKheZP)",
+              "For privacy concerns: ashlynnadams635@gmail.com or join our [Support Server](https://discord.gg/UHNcUKheZP)",
             inline: false,
           }
         )
