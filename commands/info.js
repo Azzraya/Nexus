@@ -22,6 +22,11 @@ module.exports = {
             .setDescription("User to view info for")
             .setRequired(false)
         )
+    )
+    .addSubcommand((subcommand) =>
+      subcommand
+        .setName("bot")
+        .setDescription("View information about Nexus Bot")
     ),
 
   async execute(interaction) {
@@ -135,6 +140,77 @@ module.exports = {
           inline: true,
         });
       }
+
+      await interaction.reply({ embeds: [embed] });
+    } else if (subcommand === "bot") {
+      const packageJson = require("../package.json");
+      const bot = interaction.client.user;
+      const uptime = process.uptime();
+      const uptimeHours = Math.floor(uptime / 3600);
+      const uptimeMinutes = Math.floor((uptime % 3600) / 60);
+      const uptimeSeconds = Math.floor(uptime % 60);
+
+      const embed = new EmbedBuilder()
+        .setTitle(`🤖 ${bot.username}`)
+        .setThumbnail(bot.displayAvatarURL({ dynamic: true }))
+        .setDescription(
+          packageJson.description ||
+            "Advanced Discord security and moderation bot"
+        )
+        .addFields(
+          {
+            name: "📦 Version",
+            value: packageJson.version || "1.6.0",
+            inline: true,
+          },
+          { name: "🆔 Bot ID", value: bot.id, inline: true },
+          {
+            name: "📅 Created",
+            value: `<t:${Math.floor(bot.createdTimestamp / 1000)}:R>`,
+            inline: true,
+          },
+          {
+            name: "⏱️ Uptime",
+            value: `${uptimeHours}h ${uptimeMinutes}m ${uptimeSeconds}s`,
+            inline: true,
+          },
+          {
+            name: "🖥️ Node.js",
+            value: process.version,
+            inline: true,
+          },
+          {
+            name: "📚 Discord.js",
+            value: require("discord.js").version || "14.14.1",
+            inline: true,
+          },
+          {
+            name: "🌐 Servers",
+            value: `${interaction.client.guilds.cache.size}`,
+            inline: true,
+          },
+          {
+            name: "👥 Users",
+            value: `${interaction.client.guilds.cache.reduce(
+              (acc, guild) => acc + guild.memberCount,
+              0
+            )}`,
+            inline: true,
+          },
+          {
+            name: "💾 Memory",
+            value: `${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(
+              2
+            )} MB`,
+            inline: true,
+          }
+        )
+        .setColor(0x5865f2)
+        .setTimestamp()
+        .setFooter({
+          text: `Nexus Bot - Exceeding Wick in every way`,
+          iconURL: bot.displayAvatarURL({ dynamic: true }),
+        });
 
       await interaction.reply({ embeds: [embed] });
     }

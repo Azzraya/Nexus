@@ -102,8 +102,9 @@ module.exports = {
         );
       });
 
+      const packageJson = require("../package.json");
       const exportData = {
-        version: "1.0",
+        version: packageJson.version || "1.6.0",
         exportDate: new Date().toISOString(),
         guildId: interaction.guild.id,
         guildName: interaction.guild.name,

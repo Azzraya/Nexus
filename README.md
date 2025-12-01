@@ -2,6 +2,8 @@
 
 **The Modern Security Bot That Outperforms Wick**
 
+**Current Version: 1.6.0**
+
 Nexus is a Discord security bot that combines all of Wick's features with cutting-edge AI, better performance, and a superior user experience.
 
 ## 🚀 Why Choose Nexus Over Wick?
