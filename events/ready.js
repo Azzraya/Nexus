@@ -25,6 +25,21 @@ module.exports = {
       console.log(`👥 Watching ${client.users.cache.size} users`);
     }
 
+    // List all guilds
+    console.log(`\n📋 Guilds (${client.guilds.cache.size}):`);
+    const guilds = Array.from(client.guilds.cache.values()).sort((a, b) => 
+      (b.memberCount || 0) - (a.memberCount || 0)
+    );
+    guilds.forEach((guild, index) => {
+      const memberCount = guild.memberCount || 0;
+      const owner = guild.members.cache.get(guild.ownerId);
+      const ownerTag = owner?.user?.tag || "Unknown";
+      console.log(
+        `  ${index + 1}. ${guild.name} (${guild.id}) - ${memberCount} members - Owner: ${ownerTag}`
+      );
+    });
+    console.log(""); // Empty line for spacing
+
     // Get total stats if sharded
     if (shardInfo.isSharded) {
       try {
@@ -89,6 +104,7 @@ module.exports = {
     // Create recovery snapshots for all servers (if auto-recovery is enabled)
     const AutoRecovery = require("../utils/autoRecovery");
     const logger = require("../utils/logger");
+    const db = client.db;
     for (const guild of client.guilds.cache.values()) {
       try {
         const config = await db.getServerConfig(guild.id);
