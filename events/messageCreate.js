@@ -118,17 +118,37 @@ module.exports = {
             "⚠️ Warning: Your message was flagged. Please follow server rules."
           );
         } else if (heatResult.action === "mute") {
-          message.member
-            .timeout(600000, "Auto-mute: High heat score")
-            .catch(() => {});
-          message.delete().catch(() => {});
+          const ErrorHandler = require("../utils/errorHandler");
+          const constants = require("../utils/constants");
+          await ErrorHandler.safeExecute(
+            message.member.timeout(constants.TIME.MINUTE * 10, "Auto-mute: High heat score"),
+            `messageCreate [${message.guild.id}]`,
+            `Auto-mute for heat score ${heatResult.score}`
+          );
+          await ErrorHandler.safeExecute(
+            message.delete(),
+            `messageCreate [${message.guild.id}]`,
+            `Delete message after mute action`
+          );
         } else if (heatResult.action === "kick") {
-          message.member.kick("Auto-kick: Excessive spam").catch(() => {});
-          message.delete().catch(() => {});
+          const ErrorHandler = require("../utils/errorHandler");
+          await ErrorHandler.safeExecute(
+            message.member.kick("Auto-kick: Excessive spam"),
+            `messageCreate [${message.guild.id}]`,
+            `Auto-kick for heat score ${heatResult.score}`
+          );
+          await ErrorHandler.safeExecute(
+            message.delete(),
+            `messageCreate [${message.guild.id}]`,
+            `Delete message after kick action`
+          );
         } else if (heatResult.action === "ban") {
-          message.member
-            .ban({ reason: "Auto-ban: Extreme spam", deleteMessageDays: 1 })
-            .catch(() => {});
+          const ErrorHandler = require("../utils/errorHandler");
+          await ErrorHandler.safeExecute(
+            message.member.ban({ reason: "Auto-ban: Extreme spam", deleteMessageDays: 1 }),
+            `messageCreate [${message.guild.id}]`,
+            `Auto-ban for heat score ${heatResult.score}`
+          );
         }
       }
     }

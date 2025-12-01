@@ -34,7 +34,14 @@ module.exports = {
           .fetch(join.user_id)
           .catch(() => null);
         if (member) members.push(member);
-      } catch {}
+      } catch (error) {
+        const ErrorHandler = require("../utils/errorHandler");
+        ErrorHandler.logError(
+          error,
+          `predict [${interaction.guild.id}]`,
+          `Fetch member ${userId}`
+        );
+      }
     }
 
     const predictions = await IntelligentDetection.predictAttack(

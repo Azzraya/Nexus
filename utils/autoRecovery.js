@@ -1,4 +1,6 @@
 const db = require("./database");
+const ErrorHandler = require("./errorHandler");
+const logger = require("./logger");
 
 class AutoRecovery {
   static async createSnapshot(guild, snapshotType, reason) {
@@ -94,7 +96,10 @@ class AutoRecovery {
                     allow: perm.allow,
                     deny: perm.deny,
                   })
-                  .catch(() => {});
+                  .catch(ErrorHandler.createSafeCatch(
+                    `autoRecovery [${guild.id}]`,
+                    `Restore permission overwrite for ${perm.id}`
+                  ));
               }
             }
 
@@ -105,9 +110,10 @@ class AutoRecovery {
             });
           }
         } catch (error) {
-          console.error(
-            `Failed to recover channel ${channelData.name}:`,
-            error
+          ErrorHandler.logError(
+            error,
+            `autoRecovery [${guild.id}]`,
+            `Recover channel ${channelData.name}`
           );
         }
       }
@@ -133,7 +139,10 @@ class AutoRecovery {
             if (roleData.position !== undefined) {
               await newRole
                 .setPosition(roleData.position, { reason: "Auto-recovery" })
-                .catch(() => {});
+                .catch(ErrorHandler.createSafeCatch(
+                  `autoRecovery [${guild.id}]`,
+                  `Set role position for ${newRole.name}`
+                ));
             }
 
             recovered.push({
@@ -143,7 +152,11 @@ class AutoRecovery {
             });
           }
         } catch (error) {
-          console.error(`Failed to recover role ${roleData.name}:`, error);
+          ErrorHandler.logError(
+            error,
+            `autoRecovery [${guild.id}]`,
+            `Recover role ${roleData.name}`
+          );
         }
       }
     }

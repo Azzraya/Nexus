@@ -1,5 +1,6 @@
 const db = require("../utils/database");
 const { EmbedBuilder, ChannelType } = require("discord.js");
+const ErrorHandler = require("../utils/errorHandler");
 
 module.exports = {
   name: "channelUpdate",
@@ -150,7 +151,12 @@ module.exports = {
           .setColor(0xffa500)
           .setTimestamp();
 
-        logChannel.send({ embeds: [embed] }).catch(() => {});
+        logChannel.send({ embeds: [embed] }).catch(
+          ErrorHandler.createSafeCatch(
+            `channelUpdate [${newChannel.guild.id}]`,
+            `Send mod log for channel update`
+          )
+        );
       }
     }
   },

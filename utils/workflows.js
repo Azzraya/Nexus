@@ -245,14 +245,27 @@ class WorkflowEngine {
       case "quarantine":
         if (eventData.user) {
           // Quarantine by removing all roles and adding quarantine role
-          const member = await guild.members.fetch(eventData.user.id).catch(() => null);
+          const ErrorHandler = require("./errorHandler");
+          const member = await ErrorHandler.safeExecute(
+            guild.members.fetch(eventData.user.id),
+            `workflows [${guild.id}]`,
+            `Fetch member for quarantine action`
+          );
           if (member) {
             const roles = member.roles.cache.filter(r => r.id !== guild.id);
-            await member.roles.set([], config.reason || "Workflow automation").catch(() => {});
+            await ErrorHandler.safeExecute(
+              member.roles.set([], config.reason || "Workflow automation"),
+              `workflows [${guild.id}]`,
+              `Quarantine: Clear roles for ${eventData.user.id}`
+            );
             if (config.quarantine_role_id) {
               const quarantineRole = guild.roles.cache.get(config.quarantine_role_id);
               if (quarantineRole) {
-                await member.roles.add(quarantineRole).catch(() => {});
+                await ErrorHandler.safeExecute(
+                  member.roles.add(quarantineRole),
+                  `workflows [${guild.id}]`,
+                  `Quarantine: Add role to ${eventData.user.id}`
+                );
               }
             }
           }

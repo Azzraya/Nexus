@@ -1,5 +1,6 @@
 const db = require("../utils/database");
 const { EmbedBuilder } = require("discord.js");
+const ErrorHandler = require("../utils/errorHandler");
 
 module.exports = {
   name: "roleUpdate",
@@ -103,7 +104,12 @@ module.exports = {
           .setColor(newRole.color || 0xffa500)
           .setTimestamp();
 
-        logChannel.send({ embeds: [embed] }).catch(() => {});
+        logChannel.send({ embeds: [embed] }).catch(
+          ErrorHandler.createSafeCatch(
+            `roleUpdate [${newRole.guild.id}]`,
+            `Send mod log for role update`
+          )
+        );
       }
     }
   },

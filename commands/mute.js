@@ -30,9 +30,9 @@ module.exports = {
     const reason =
       interaction.options.getString("reason") || "No reason provided";
 
+    const constants = require("../utils/constants");
     const duration = ms(durationStr);
-    if (!duration || duration < 1000 || duration > 2419200000) {
-      // Max 28 days
+    if (!duration || duration < constants.MUTE.MIN_DURATION || duration > constants.MUTE.MAX_DURATION) {
       return interaction.reply({
         content:
           "❌ Invalid duration! Use format like: 1h, 30m, 1d (max 28 days)",

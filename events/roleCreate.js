@@ -1,13 +1,18 @@
 const db = require("../utils/database");
 const { EmbedBuilder } = require("discord.js");
+const ErrorHandler = require("../utils/errorHandler");
+const logger = require("../utils/logger");
 
 module.exports = {
   name: "roleCreate",
   async execute(role, client) {
-    // Console logging
-    console.log(
-      `➕ [${role.guild.name} (${role.guild.id})] Role created: ${role.name} (${role.id})`
-    );
+    // Logging
+    logger.info(`Role created: ${role.name}`, {
+      guildId: role.guild.id,
+      guildName: role.guild.name,
+      roleId: role.id,
+      roleName: role.name,
+    });
 
     // Enhanced logging
     const EnhancedLogging = require("../utils/enhancedLogging");
@@ -66,7 +71,12 @@ module.exports = {
           .setColor(role.color || 0x00ff00)
           .setTimestamp();
 
-        logChannel.send({ embeds: [embed] }).catch(() => {});
+        logChannel.send({ embeds: [embed] }).catch(
+          ErrorHandler.createSafeCatch(
+            `roleCreate [${role.guild.id}]`,
+            `Send mod log for role create`
+          )
+        );
       }
     }
   },

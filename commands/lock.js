@@ -159,7 +159,14 @@ module.exports = {
               );
             });
             locked++;
-          } catch {}
+          } catch (error) {
+            const ErrorHandler = require("../utils/errorHandler");
+            ErrorHandler.logError(
+              error,
+              `lock [${interaction.guild.id}]`,
+              `Lock channel ${channel.id}`
+            );
+          }
         }
 
         await interaction.reply({
@@ -280,7 +287,14 @@ module.exports = {
                 SendMessages: null,
               });
               unlocked++;
-            } catch {}
+            } catch (error) {
+            const ErrorHandler = require("../utils/errorHandler");
+            ErrorHandler.logError(
+              error,
+              `lock [${interaction.guild.id}]`,
+              `Lock channel ${channel.id}`
+            );
+          }
           }
         }
 

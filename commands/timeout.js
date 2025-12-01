@@ -69,8 +69,9 @@ module.exports = {
         });
       }
 
+      const constants = require("../utils/constants");
       const duration = ms(durationStr);
-      if (!duration || duration < 1000 || duration > 2419200000) {
+      if (!duration || duration < constants.MUTE.MIN_DURATION || duration > constants.MUTE.MAX_DURATION) {
         return interaction.reply({
           content:
             "❌ Invalid duration! Use format like: 1h, 30m, 1d (max 28 days)",

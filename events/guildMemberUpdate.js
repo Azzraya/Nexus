@@ -1,5 +1,6 @@
 const db = require("../utils/database");
 const { EmbedBuilder } = require("discord.js");
+const ErrorHandler = require("../utils/errorHandler");
 
 module.exports = {
   name: "guildMemberUpdate",
@@ -81,17 +82,27 @@ module.exports = {
             .setThumbnail(newMember.user.displayAvatarURL())
             .setTimestamp();
 
-          logChannel.send({ embeds: [embed] }).catch(() => {});
+          logChannel.send({ embeds: [embed] }).catch(
+            ErrorHandler.createSafeCatch(
+              `guildMemberUpdate [${newMember.guild.id}]`,
+              `Send mod log for role update`
+            )
+          );
         }
       }
     }
 
     // Check for nickname changes
     if (oldMember.nickname !== newMember.nickname) {
-      // Console logging
-      console.log(
-        `📝 [${newMember.guild.name} (${newMember.guild.id})] Nickname changed for ${newMember.user.tag} (${newMember.id}): "${oldMember.nickname || "None"}" → "${newMember.nickname || "None"}"`
-      );
+      // Logging
+      const logger = require("../utils/logger");
+      logger.info(`Nickname changed for ${newMember.user.tag}`, {
+        guildId: newMember.guild.id,
+        guildName: newMember.guild.name,
+        userId: newMember.id,
+        oldNickname: oldMember.nickname || "None",
+        newNickname: newMember.nickname || "None",
+      });
 
       const EnhancedLogging = require("../utils/enhancedLogging");
       await EnhancedLogging.log(
@@ -140,7 +151,12 @@ module.exports = {
             .setThumbnail(newMember.user.displayAvatarURL())
             .setTimestamp();
 
-          logChannel.send({ embeds: [embed] }).catch(() => {});
+          logChannel.send({ embeds: [embed] }).catch(
+            ErrorHandler.createSafeCatch(
+              `guildMemberUpdate [${newMember.guild.id}]`,
+              `Send mod log for nickname change`
+            )
+          );
         }
       }
     }

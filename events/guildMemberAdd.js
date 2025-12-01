@@ -1,6 +1,8 @@
 const db = require("../utils/database");
 const AdvancedAntiRaid = require("../utils/advancedAntiRaid");
 const JoinGate = require("../utils/joinGate");
+const ErrorHandler = require("../utils/errorHandler");
+const logger = require("../utils/logger");
 
 module.exports = {
   name: "guildMemberAdd",
@@ -35,23 +37,32 @@ module.exports = {
     if (joinGateCheck.filtered) {
       // Execute action based on join gate
       if (joinGateCheck.action === "ban") {
-        await member
-          .ban({
+        await ErrorHandler.safeExecute(
+          member.ban({
             reason: `Join Gate: ${joinGateCheck.reason}`,
             deleteMessageDays: 1,
-          })
-          .catch(() => {});
+          }),
+          `guildMemberAdd [${member.guild.id}]`,
+          `Join Gate ban for ${member.user.id}`
+        );
         return;
       } else if (joinGateCheck.action === "kick") {
-        await member.kick(`Join Gate: ${joinGateCheck.reason}`).catch(() => {});
+        await ErrorHandler.safeExecute(
+          member.kick(`Join Gate: ${joinGateCheck.reason}`),
+          `guildMemberAdd [${member.guild.id}]`,
+          `Join Gate kick for ${member.user.id}`
+        );
         return;
       } else if (joinGateCheck.action === "timeout") {
-        await member
-          .timeout(
-            7 * 24 * 60 * 60 * 1000,
+        const constants = require("../utils/constants");
+        await ErrorHandler.safeExecute(
+          member.timeout(
+            constants.JOIN_GATE.DEFAULT_TIMEOUT_DURATION,
             `Join Gate: ${joinGateCheck.reason}`
-          )
-          .catch(() => {});
+          ),
+          `guildMemberAdd [${member.guild.id}]`,
+          `Join Gate timeout for ${member.user.id}`
+        );
       }
     }
 
@@ -108,7 +119,11 @@ module.exports = {
     // Check if server is in lockdown
     if (client.antiRaid.lockdown.get(member.guild.id)) {
       // Auto-kick during lockdown
-      member.kick("Server is in lockdown mode").catch(() => {});
+      await ErrorHandler.safeExecute(
+        member.kick("Server is in lockdown mode"),
+        `guildMemberAdd [${member.guild.id}]`,
+        `Lockdown kick for ${member.user.id}`
+      );
       return;
     }
 
@@ -120,7 +135,11 @@ module.exports = {
         config.verification_role
       );
       if (verifiedRole && member.roles.cache.has(verifiedRole.id)) {
-        await member.roles.remove(verifiedRole).catch(() => {});
+        await ErrorHandler.safeExecute(
+          member.roles.remove(verifiedRole),
+          `guildMemberAdd [${member.guild.id}]`,
+          `Remove verification role from ${member.user.id}`
+        );
       }
     }
 
@@ -182,24 +201,33 @@ module.exports = {
                   },
                 ],
               })
-              .catch(() => {});
+              .catch(
+                ErrorHandler.createSafeCatch(
+                  `guildMemberAdd [${member.guild.id}]`,
+                  `Send security alert for ${member.user.id}`
+                )
+              );
           }
         }
       }
 
       // Auto-action based on threat
       if (threat.score >= 80 && threat.action === "ban") {
-        await member
-          .ban({
+        await ErrorHandler.safeExecute(
+          member.ban({
             reason: `Security threat detected (Score: ${threat.score})`,
             deleteMessageDays: 1,
-          })
-          .catch(() => {});
+          }),
+          `guildMemberAdd [${member.guild.id}]`,
+          `Auto-ban for threat score ${threat.score}`
+        );
         return;
       } else if (threat.score >= 60 && threat.action === "kick") {
-        await member
-          .kick(`Security threat detected (Score: ${threat.score})`)
-          .catch(() => {});
+        await ErrorHandler.safeExecute(
+          member.kick(`Security threat detected (Score: ${threat.score})`),
+          `guildMemberAdd [${member.guild.id}]`,
+          `Auto-kick for threat score ${threat.score}`
+        );
         return;
       }
     }
@@ -228,7 +256,12 @@ module.exports = {
               },
             ],
           })
-          .catch(() => {});
+          .catch(
+            ErrorHandler.createSafeCatch(
+              `guildMemberAdd [${member.guild.id}]`,
+              `Send welcome message for ${member.user.id}`
+            )
+          );
       }
     }
 
@@ -251,7 +284,11 @@ module.exports = {
           await member.roles.add(role);
         }
       } catch (error) {
-        // Role doesn't exist or can't assign
+        ErrorHandler.logError(
+          error,
+          `guildMemberAdd [${member.guild.id}]`,
+          `Assign auto-role ${autoRole.role_id} to ${member.user.id}`
+        );
       }
     }
 
@@ -279,14 +316,20 @@ module.exports = {
 
     // Check for mod log channel (reuse config from above)
     if (config && config.mod_log_channel) {
-      const logChannel = member.guild.channels.cache.get(config.mod_log_channel);
+      const logChannel = member.guild.channels.cache.get(
+        config.mod_log_channel
+      );
       if (logChannel) {
         const { EmbedBuilder } = require("discord.js");
         const embed = new EmbedBuilder()
           .setTitle("✅ Member Joined")
           .setDescription(`**${member.user.tag}** joined the server`)
           .addFields(
-            { name: "User", value: `${member.user} (${member.user.id})`, inline: true },
+            {
+              name: "User",
+              value: `${member.user} (${member.user.id})`,
+              inline: true,
+            },
             {
               name: "Account Created",
               value: `<t:${Math.floor(member.user.createdTimestamp / 1000)}:R>`,
@@ -294,7 +337,9 @@ module.exports = {
             },
             {
               name: "Account Age",
-              value: `${Math.floor((Date.now() - member.user.createdTimestamp) / 86400000)} days`,
+              value: `${Math.floor(
+                (Date.now() - member.user.createdTimestamp) / 86400000
+              )} days`,
               inline: true,
             }
           )
@@ -302,7 +347,14 @@ module.exports = {
           .setThumbnail(member.user.displayAvatarURL())
           .setTimestamp();
 
-        logChannel.send({ embeds: [embed] }).catch(() => {});
+        logChannel
+          .send({ embeds: [embed] })
+          .catch(
+            ErrorHandler.createSafeCatch(
+              `guildMemberAdd [${member.guild.id}]`,
+              `Send mod log for member join`
+            )
+          );
       }
     }
   },

@@ -1,5 +1,6 @@
 const db = require("../utils/database");
 const { EmbedBuilder } = require("discord.js");
+const ErrorHandler = require("../utils/errorHandler");
 
 module.exports = {
   name: "guildUpdate",
@@ -157,7 +158,9 @@ module.exports = {
 
     // Console logging
     console.log(
-      `⚙️ [${newGuild.name} (${newGuild.id})] Server settings updated: ${changes.map((c) => c.name).join(", ")}`
+      `⚙️ [${newGuild.name} (${newGuild.id})] Server settings updated: ${changes
+        .map((c) => c.name)
+        .join(", ")}`
     );
 
     // Enhanced logging
@@ -192,7 +195,14 @@ module.exports = {
           )
           .setTimestamp();
 
-        logChannel.send({ embeds: [embed] }).catch(() => {});
+        logChannel
+          .send({ embeds: [embed] })
+          .catch(
+            ErrorHandler.createSafeCatch(
+              `guildUpdate [${newGuild.id}]`,
+              `Send mod log for guild update`
+            )
+          );
       }
     }
   },

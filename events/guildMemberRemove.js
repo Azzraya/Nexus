@@ -1,4 +1,5 @@
 const db = require("../utils/database");
+const ErrorHandler = require("../utils/errorHandler");
 
 module.exports = {
   name: "guildMemberRemove",
@@ -26,7 +27,10 @@ module.exports = {
               },
             ],
           })
-          .catch(() => {});
+          .catch(ErrorHandler.createSafeCatch(
+            `guildMemberRemove [${member.guild.id}]`,
+            `Send leave message for ${member.user.id}`
+          ));
       }
     }
 
@@ -87,7 +91,12 @@ module.exports = {
           .setThumbnail(member.user.displayAvatarURL())
           .setTimestamp();
 
-        logChannel.send({ embeds: [embed] }).catch(() => {});
+        logChannel.send({ embeds: [embed] }).catch(
+          ErrorHandler.createSafeCatch(
+            `guildMemberRemove [${member.guild.id}]`,
+            `Send mod log for member leave`
+          )
+        );
       }
     }
   },

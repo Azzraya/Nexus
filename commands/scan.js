@@ -82,7 +82,14 @@ module.exports = {
           } else {
             safe++;
           }
-        } catch {}
+        } catch (error) {
+          const ErrorHandler = require("../utils/errorHandler");
+          ErrorHandler.logError(
+            error,
+            `scan [${interaction.guild.id}]`,
+            `Scan user ${userId}`
+          );
+        }
       }
     }
 

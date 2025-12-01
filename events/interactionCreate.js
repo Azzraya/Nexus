@@ -1,5 +1,7 @@
 const { InteractionType, MessageFlags } = require("discord.js");
 const db = require("../utils/database");
+const ErrorHandler = require("../utils/errorHandler");
+const logger = require("../utils/logger");
 
 module.exports = {
   name: "interactionCreate",
@@ -9,10 +11,14 @@ module.exports = {
       if (!command) return;
 
       try {
-        // Log command usage to console
-        console.log(
-          `📝 [${interaction.guild.name} (${interaction.guild.id})] ${interaction.user.tag} (${interaction.user.id}) used /${interaction.commandName}`
-        );
+        // Log command usage
+        logger.info(`Command used: /${interaction.commandName}`, {
+          guildId: interaction.guild.id,
+          guildName: interaction.guild.name,
+          userId: interaction.user.id,
+          userTag: interaction.user.tag,
+          commandName: interaction.commandName,
+        });
 
         // Log command usage to database
         try {
@@ -35,7 +41,11 @@ module.exports = {
           });
         } catch (logError) {
           // Don't fail command if logging fails
-          console.error("Failed to log command usage:", logError.message);
+          ErrorHandler.logError(
+            logError,
+            "interactionCreate",
+            "Log command usage to database"
+          );
         }
 
         await command.execute(interaction);
@@ -45,7 +55,12 @@ module.exports = {
           "commands_used"
         );
       } catch (error) {
-        console.error(`Error executing ${interaction.commandName}:`, error);
+        // Log error with full context
+        ErrorHandler.logError(
+          error,
+          "interactionCreate",
+          `Execute command ${interaction.commandName}`
+        );
 
         // Handle different error types
         let errorMessage = "❌ An error occurred while executing this command!";
@@ -56,23 +71,24 @@ module.exports = {
           errorMessage = "❌ Missing required permissions.";
         } else if (error.status === 429 || error.code === 429) {
           errorMessage = "⏳ Rate limited. Please try again in a moment.";
-        } else if (error.message) {
-          // Don't expose internal errors, but log them
-          console.error("Full error:", error);
         }
 
         // Try to reply, but don't crash if that fails too
         if (interaction.replied || interaction.deferred) {
-          await interaction
-            .editReply({ content: errorMessage })
-            .catch(() => {});
+          await ErrorHandler.safeExecute(
+            interaction.editReply({ content: errorMessage }),
+            "interactionCreate",
+            `Edit error reply for ${interaction.commandName}`
+          );
         } else {
-          await interaction
-            .reply({
+          await ErrorHandler.safeExecute(
+            interaction.reply({
               content: errorMessage,
               flags: MessageFlags.Ephemeral,
-            })
-            .catch(() => {});
+            }),
+            "interactionCreate",
+            `Reply with error for ${interaction.commandName}`
+          );
         }
       }
     } else if (interaction.type === InteractionType.MessageComponent) {

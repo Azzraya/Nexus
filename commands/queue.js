@@ -9,6 +9,7 @@ const {
 } = require("discord.js");
 const ModerationQueue = require("../utils/moderationQueue");
 const Moderation = require("../utils/moderation");
+const constants = require("../utils/constants");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -127,7 +128,7 @@ module.exports = {
             user,
             interaction.user,
             item.reason,
-            3600000
+            constants.TIME.HOUR
           );
         } else if (action === "warn") {
           await Moderation.warn(

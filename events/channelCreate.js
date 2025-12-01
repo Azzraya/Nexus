@@ -1,13 +1,18 @@
 const db = require("../utils/database");
 const { EmbedBuilder, ChannelType } = require("discord.js");
+const ErrorHandler = require("../utils/errorHandler");
+const logger = require("../utils/logger");
 
 module.exports = {
   name: "channelCreate",
   async execute(channel, client) {
-    // Console logging
-    console.log(
-      `➕ [${channel.guild.name} (${channel.guild.id})] Channel created: #${channel.name} (${channel.id})`
-    );
+    // Logging
+    logger.info(`Channel created: #${channel.name}`, {
+      guildId: channel.guild.id,
+      guildName: channel.guild.name,
+      channelId: channel.id,
+      channelName: channel.name,
+    });
 
     // Enhanced logging
     const EnhancedLogging = require("../utils/enhancedLogging");
@@ -70,7 +75,12 @@ module.exports = {
           .setColor(0x00ff00)
           .setTimestamp();
 
-        logChannel.send({ embeds: [embed] }).catch(() => {});
+        logChannel.send({ embeds: [embed] }).catch(
+          ErrorHandler.createSafeCatch(
+            `channelCreate [${channel.guild.id}]`,
+            `Send mod log for channel create`
+          )
+        );
       }
     }
   },

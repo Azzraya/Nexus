@@ -68,8 +68,13 @@ module.exports = {
         "✅ Ticket closed. Channel will be deleted in 5 seconds..."
       );
 
+      const ErrorHandler = require("../utils/errorHandler");
       setTimeout(() => {
-        interaction.channel.delete().catch(() => {});
+        ErrorHandler.safeExecute(
+          interaction.channel.delete(),
+          `ticket [${interaction.guild.id}]`,
+          `Delete ticket channel ${interaction.channel.id}`
+        );
       }, 5000);
     }
   },

@@ -1,4 +1,9 @@
-const { SlashCommandBuilder, EmbedBuilder, codeBlock, MessageFlags } = require("discord.js");
+const {
+  SlashCommandBuilder,
+  EmbedBuilder,
+  codeBlock,
+  MessageFlags,
+} = require("discord.js");
 const Owner = require("../utils/owner");
 
 module.exports = {
@@ -17,6 +22,20 @@ module.exports = {
         .setDescription("Only show output if there's an error")
         .setRequired(false)
     ),
+
+  /**
+   * Helper function to ensure field values don't exceed Discord's 1024 char limit
+   * codeBlock adds "```js\n" and "\n```" = ~10 chars, so limit to 990 to be safe
+   */
+  ensureFieldLength(text, maxChars) {
+    const constants = require("../utils/constants");
+    if (maxChars === undefined) maxChars = constants.DISCORD.EMBED_FIELD_VALUE_SAFE;
+    if (typeof text !== "string") text = String(text);
+    if (text.length > maxChars) {
+      return text.substring(0, maxChars) + "... (truncated)";
+    }
+    return text;
+  },
 
   async execute(interaction) {
     // Owner check
@@ -73,30 +92,21 @@ module.exports = {
       );
 
       // Convert result to string, handling circular references and depth limits
+      const constants = require("../utils/constants");
       let output =
         typeof result === "string"
           ? result
           : require("util").inspect(result, {
               depth: 2,
-              maxArrayLength: 100,
+              maxArrayLength: constants.DATABASE.QUERY_LIMIT_DEFAULT,
               compact: false,
               breakLength: 60,
               showHidden: false,
             });
 
-      // Helper function to ensure field values don't exceed Discord's 1024 char limit
-      // codeBlock adds "```js\n" and "\n```" = ~10 chars, so limit to 990 to be safe
-      const ensureFieldLength = (text, maxChars = 990) => {
-        if (typeof text !== "string") text = String(text);
-        if (text.length > maxChars) {
-          return text.substring(0, maxChars) + "... (truncated)";
-        }
-        return text;
-      };
-
       // Limit output and code display lengths
-      output = ensureFieldLength(output, 990);
-      const codeDisplay = ensureFieldLength(code, 990);
+      output = this.ensureFieldLength(output, 990);
+      const codeDisplay = this.ensureFieldLength(code, 990);
 
       // Create field values with codeBlock - ensure they're strings and within limits
       let inputValue, outputValue, typeValue;
@@ -143,7 +153,10 @@ module.exports = {
         .setFooter({ text: `Executed by ${user.tag}` });
 
       if (silent) {
-        return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
+        return interaction.reply({
+          embeds: [embed],
+          flags: MessageFlags.Ephemeral,
+        });
       } else {
         return interaction.editReply({ embeds: [embed] });
       }
@@ -153,19 +166,9 @@ module.exports = {
         errorOutput = error.stack;
       }
 
-      // Helper function to ensure field values don't exceed Discord's 1024 char limit
-      // codeBlock adds "```js\n" and "\n```" = ~10 chars, so limit to 990 to be safe
-      const ensureFieldLength = (text, maxChars = 990) => {
-        if (typeof text !== 'string') text = String(text);
-        if (text.length > maxChars) {
-          return text.substring(0, maxChars) + "... (truncated)";
-        }
-        return text;
-      };
-
       // Limit error output and code display lengths
-      errorOutput = ensureFieldLength(errorOutput, 990);
-      const codeDisplay = ensureFieldLength(code, 990);
+      errorOutput = this.ensureFieldLength(errorOutput, 990);
+      const codeDisplay = this.ensureFieldLength(code, 990);
 
       // Create field values with codeBlock - ensure they're strings and within limits
       let inputValue, errorValue;
@@ -203,7 +206,10 @@ module.exports = {
         .setFooter({ text: `Executed by ${user.tag}` });
 
       if (silent) {
-        return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
+        return interaction.reply({
+          embeds: [embed],
+          flags: MessageFlags.Ephemeral,
+        });
       } else {
         return interaction.editReply({ embeds: [embed] });
       }

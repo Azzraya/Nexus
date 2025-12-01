@@ -1,6 +1,7 @@
 const db = require("../utils/database");
 const Notifications = require("../utils/notifications");
 const AutoRecovery = require("../utils/autoRecovery");
+const ErrorHandler = require("../utils/errorHandler");
 
 module.exports = {
   name: "roleDelete",
@@ -84,7 +85,12 @@ module.exports = {
           .setColor(0xff0000)
           .setTimestamp();
 
-        logChannel.send({ embeds: [embed] }).catch(() => {});
+        logChannel.send({ embeds: [embed] }).catch(
+          ErrorHandler.createSafeCatch(
+            `roleDelete [${role.guild.id}]`,
+            `Send mod log for role delete`
+          )
+        );
       }
     }
 

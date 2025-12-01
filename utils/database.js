@@ -825,6 +825,16 @@ class Database {
 
   // User stats
   async updateUserStats(guildId, userId, field, increment = 1) {
+    // Whitelist allowed fields to prevent SQL injection
+    const allowedFields = ["messages_sent", "commands_used"];
+    if (!allowedFields.includes(field)) {
+      return Promise.reject(
+        new Error(
+          `Invalid field: ${field}. Allowed fields: ${allowedFields.join(", ")}`
+        )
+      );
+    }
+
     return new Promise((resolve, reject) => {
       this.db.run(
         `INSERT INTO user_stats (guild_id, user_id, ${field}, last_active) 

@@ -48,10 +48,12 @@ This document explains how Nexus Bot handles, stores, and protects data.
 - Data retained while bot is in server
 - Deleted 30 days after bot removal
 
-**Inactive Servers:**
-- Configurations: 90 days
-- Logs: 30 days
-- Analytics: 1 year (anonymized)
+**Inactive Servers (Bot Removed):**
+- Configurations: Deleted 30 days after bot removal
+- Moderation logs: 90 days (configurable per server, minimum 30 days)
+- Logs (other): 30 days
+- Analytics: 1 year (anonymized after 90 days)
+- Threat intelligence: 30 days
 
 ## Data Usage
 
@@ -75,15 +77,41 @@ This document explains how Nexus Bot handles, stores, and protects data.
 
 ## Data Sharing
 
-### We Share:
-- **Anonymized threat intelligence** - User IDs and server IDs removed
-- **Aggregate statistics** - No personal information
+### Threat Intelligence Network:
+
+We share threat intelligence data across servers to protect communities:
+
+**What is Shared:**
+- User IDs (Discord snowflakes) - To identify reported threats
+- Threat type and severity
+- Source guild ID - For verification purposes
+- Threat metadata (contextual information)
+
+**What is NOT Shared:**
+- Server names or configurations
+- Full moderation logs
+- Message content
+- User usernames (only IDs)
+- Non-threat-related data
+
+**Purpose:** Network security and threat prevention
+
+**Your Control:** You can opt-out of threat intelligence sharing via bot configuration
+
+### Aggregate Statistics:
+
+- **Aggregate statistics only** - No personal information
+- Anonymized usage patterns
+- Overall bot performance metrics
 
 ### We DON'T Share:
-- Personal user information
-- Server-specific data
-- Moderation logs
+
+- Personal user information for commercial purposes
+- Server-specific configuration data
+- Full moderation logs
 - Private messages
+- Email addresses or contact information
+- Payment information (we don't collect this)
 
 ## Data Security
 
@@ -120,11 +148,19 @@ This document explains how Nexus Bot handles, stores, and protects data.
 
 ## Compliance
 
-### GDPR (EU)
+### UK GDPR
 - Right to access
-- Right to deletion
+- Right to deletion (Right to be forgotten)
 - Right to data portability
 - Right to object
+- Right to rectification
+- Right to restrict processing
+- Compliance with UK Data Protection Act 2018
+
+### EU GDPR
+- Full GDPR compliance for EU users
+- All data subject rights as above
+- Cross-border data transfer safeguards
 
 ### CCPA (California)
 - Right to know
@@ -145,14 +181,58 @@ Since Nexus Bot is open source:
 - You can verify our practices
 - Community can audit code
 
+## Third-Party Services
+
+### Discord API
+- We use Discord's API as permitted by Discord's Terms of Service
+- Data processing follows Discord's API guidelines
+
+### Hosting Providers
+- Secure hosting with industry-standard security
+- Data protection agreements in place
+- Encrypted storage and transmission
+
+### No Other Third Parties
+- No analytics platforms (Google Analytics, etc.)
+- No advertising networks
+- No data brokers or resellers
+
+## AI and Machine Learning Processing
+
+### Server-Specific AI
+- AI models trained on your server's data only
+- No cross-server training data mixing
+- Models stay within your server's context
+
+### Aggregated Analytics
+- Anonymized, aggregated data may be used for general improvements
+- No personal identifiers in aggregated data
+- You can opt-out of AI features
+
+### Automated Decisions
+- AI may make automated decisions (threat scoring, recommendations)
+- You can request human review (GDPR right)
+- Final decisions are your responsibility as administrator
+
 ## Contact
 
-For data-related questions:
-- Discord: https://discord.gg/UHNcUKheZP
-- Email: Contact us via our support server
-- GitHub: https://github.com/Azzraya/Nexus
+For data-related questions, data requests, or concerns:
+
+- **Discord Support Server:** https://discord.gg/UHNcUKheZP (Preferred method)
+- **Privacy Email:** privacy@nexusbot.org (For formal data requests)
+- **General Contact:** Open a ticket in our support server
+- **GitHub:** https://github.com/Azzraya/Nexus (For code-related questions)
+
+**UK Data Protection Authority:**
+- Information Commissioner's Office (ICO): https://ico.org.uk/make-a-complaint/
+- If you are in the EU, contact your local data protection authority
+
+## Version History
+
+- **December 1, 2025** - Updated data sharing disclosure, added threat intelligence details, added AI processing information
+- **November 30, 2025** - Initial version
 
 ---
 
-_Data Handling Policy - Last Updated: November 30, 2025_
+_Data Handling Policy - Last Updated: December 1, 2025_
 
