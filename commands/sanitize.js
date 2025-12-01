@@ -2,6 +2,7 @@ const {
   SlashCommandBuilder,
   PermissionFlagsBits,
   EmbedBuilder,
+  MessageFlags,
 } = require("discord.js");
 
 module.exports = {
@@ -28,14 +29,14 @@ module.exports = {
     if (!member) {
       return interaction.reply({
         content: "❌ User not found in this server!",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
 
     if (!member.manageable) {
       return interaction.reply({
         content: "❌ I cannot manage this member's nickname!",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
 
@@ -61,7 +62,7 @@ module.exports = {
     if (sanitized === currentNick) {
       return interaction.reply({
         content: `✅ ${user.tag}'s nickname is already clean!`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
 
@@ -97,7 +98,7 @@ module.exports = {
     } catch (error) {
       await interaction.reply({
         content: `❌ Failed to sanitize nickname: ${error.message}`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
   },

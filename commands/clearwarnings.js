@@ -2,6 +2,7 @@ const {
   SlashCommandBuilder,
   PermissionFlagsBits,
   EmbedBuilder,
+  MessageFlags,
 } = require("discord.js");
 const db = require("../utils/database");
 
@@ -19,6 +20,22 @@ module.exports = {
 
   async execute(interaction) {
     const user = interaction.options.getUser("user");
+
+    // Prevent self-moderation
+    if (user.id === interaction.user.id) {
+      return interaction.reply({
+        content: "❌ You cannot clear your own warnings!",
+        flags: MessageFlags.Ephemeral,
+      });
+    }
+
+    // Prevent moderating the server owner
+    if (user.id === interaction.guild.ownerId) {
+      return interaction.reply({
+        content: "❌ You cannot moderate the server owner!",
+        flags: MessageFlags.Ephemeral,
+      });
+    }
 
     await db.clearWarnings(interaction.guild.id, user.id);
 

@@ -31,31 +31,35 @@ module.exports = {
       return;
     }
 
+    // Ensure history exists (backward compatibility)
+    const history = heatData.history || [];
+    const score = heatData.score || 0;
+
     const embed = new EmbedBuilder()
       .setTitle(`🔥 Heat Score: ${target.tag}`)
       .addFields(
-        { name: "Current Score", value: `${heatData.score}`, inline: true },
+        { name: "Current Score", value: `${score}`, inline: true },
         {
           name: "Recent Actions",
-          value: `${heatData.history.length}`,
+          value: `${history.length}`,
           inline: true,
         }
       )
       .setColor(
-        heatData.score > 150
+        score > 150
           ? 0xff0000
-          : heatData.score > 100
+          : score > 100
           ? 0xffaa00
           : 0xffff00
       )
       .setTimestamp();
 
-    if (heatData.history.length > 0) {
-      const recent = heatData.history.slice(-5).reverse();
+    if (history.length > 0) {
+      const recent = history.slice(-5).reverse();
       embed.addFields({
         name: "Recent History",
         value:
-          recent.map((h) => `+${h.amount} - ${h.reason}`).join("\n") || "None",
+          recent.map((h) => `+${h.amount || 0} - ${h.reason || "Unknown"}`).join("\n") || "None",
       });
     }
 

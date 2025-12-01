@@ -2,6 +2,7 @@ const {
   SlashCommandBuilder,
   PermissionFlagsBits,
   EmbedBuilder,
+  MessageFlags,
 } = require("discord.js");
 const db = require("../utils/database");
 const cron = require("node-cron");
@@ -79,7 +80,7 @@ module.exports = {
         if (!ms) {
           return interaction.reply({
             content: "❌ Invalid time format! Use 'in 1h', 'in 7d', etc.",
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
           });
         }
         executeAt = Date.now() + ms;
@@ -88,7 +89,7 @@ module.exports = {
         if (isNaN(executeAt)) {
           return interaction.reply({
             content: "❌ Invalid date format!",
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
           });
         }
       }
@@ -96,7 +97,7 @@ module.exports = {
       if (executeAt <= Date.now()) {
         return interaction.reply({
           content: "❌ Scheduled time must be in the future!",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 
@@ -145,7 +146,7 @@ module.exports = {
       if (scheduled.length === 0) {
         return interaction.reply({
           content: "❌ No scheduled actions found!",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 
@@ -182,13 +183,13 @@ module.exports = {
       if (result === 0) {
         return interaction.reply({
           content: "❌ Scheduled action not found!",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 
       await interaction.reply({
         content: `✅ Cancelled scheduled action #${id}`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
   },

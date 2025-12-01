@@ -2,6 +2,7 @@ const {
   SlashCommandBuilder,
   PermissionFlagsBits,
   EmbedBuilder,
+  MessageFlags,
 } = require("discord.js");
 const db = require("../utils/database");
 const Owner = require("../utils/owner");
@@ -60,7 +61,7 @@ module.exports = {
       if (!Owner.isOwner(interaction.user.id)) {
         return interaction.reply({
           content: "❌ Only the bot owner can view server activity logs!",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 
@@ -80,7 +81,7 @@ module.exports = {
       if (logs.length === 0) {
         return interaction.reply({
           content: "❌ No server activity logs found!",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 
@@ -119,7 +120,7 @@ module.exports = {
       if (!Owner.isOwner(interaction.user.id)) {
         return interaction.reply({
           content: "❌ Only the bot owner can view command usage logs!",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 
@@ -153,7 +154,7 @@ module.exports = {
       if (logs.length === 0) {
         return interaction.reply({
           content: "❌ No command usage logs found!",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 

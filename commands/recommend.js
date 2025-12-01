@@ -2,6 +2,7 @@ const {
   SlashCommandBuilder,
   PermissionFlagsBits,
   EmbedBuilder,
+  MessageFlags,
 } = require("discord.js");
 const SmartRecommendations = require("../utils/smartRecommendations");
 const db = require("../utils/database");
@@ -108,7 +109,7 @@ module.exports = {
         return interaction.reply({
           content:
             "✅ No unacknowledged recommendations. Use `/recommend analyze` to generate new ones.",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 
@@ -139,7 +140,7 @@ module.exports = {
 
       await interaction.reply({
         content: `✅ Recommendation #${id} acknowledged`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
   },

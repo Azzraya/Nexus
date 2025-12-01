@@ -2,6 +2,7 @@ const {
   SlashCommandBuilder,
   PermissionFlagsBits,
   EmbedBuilder,
+  MessageFlags,
 } = require("discord.js");
 
 module.exports = {
@@ -72,7 +73,7 @@ module.exports = {
         if (channel.type !== 2) {
           return interaction.reply({
             content: "❌ Target must be a voice channel!",
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
           });
         }
 
@@ -123,7 +124,7 @@ module.exports = {
     } catch (error) {
       await interaction.reply({
         content: `❌ Failed: ${error.message}`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
   },

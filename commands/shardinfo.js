@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
+const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require("discord.js");
 const ShardManager = require("../utils/shardManager");
 const Owner = require("../utils/owner");
 
@@ -12,7 +12,7 @@ module.exports = {
     if (!Owner.isOwner(interaction.user.id)) {
       return interaction.reply({
         content: "❌ Only the bot owner can view shard information!",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
     const shardInfo = ShardManager.getShardInfo(interaction.client);

@@ -2,6 +2,7 @@ const {
   SlashCommandBuilder,
   PermissionFlagsBits,
   EmbedBuilder,
+  MessageFlags,
 } = require("discord.js");
 const db = require("../utils/database");
 
@@ -77,7 +78,7 @@ module.exports = {
         if (!caseData) {
           return interaction.reply({
             content: "❌ Case not found!",
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
           });
         }
 
@@ -147,7 +148,7 @@ module.exports = {
             content: user
               ? `❌ No cases found for ${user.tag}!`
               : "❌ No cases found!",
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
           });
         }
 
@@ -198,7 +199,7 @@ module.exports = {
       if (!caseData) {
         return interaction.reply({
           content: "❌ Case not found!",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 

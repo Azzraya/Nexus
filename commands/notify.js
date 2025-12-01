@@ -2,6 +2,7 @@ const {
   SlashCommandBuilder,
   PermissionFlagsBits,
   EmbedBuilder,
+  MessageFlags,
 } = require("discord.js");
 const db = require("../utils/database");
 
@@ -70,7 +71,7 @@ module.exports = {
       if (!channel && !webhook) {
         return interaction.reply({
           content: "❌ You must provide either a channel or webhook URL",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 
@@ -84,7 +85,7 @@ module.exports = {
 
       await interaction.reply({
         content: `✅ Notification configured for ${type.replace(/_/g, " ")}`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     } else if (subcommand === "list") {
       const notifications = await db.getNotifications(interaction.guild.id);
@@ -93,7 +94,7 @@ module.exports = {
         return interaction.reply({
           content:
             "❌ No notifications configured. Use `/notify setup` to create one.",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 
@@ -130,7 +131,7 @@ module.exports = {
 
       await interaction.reply({
         content: `✅ Notification #${id} removed`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
   },

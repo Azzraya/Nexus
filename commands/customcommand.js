@@ -2,6 +2,7 @@ const {
   SlashCommandBuilder,
   PermissionFlagsBits,
   EmbedBuilder,
+  MessageFlags,
 } = require("discord.js");
 const db = require("../utils/database");
 
@@ -67,7 +68,7 @@ module.exports = {
       if (existing) {
         return interaction.reply({
           content: "❌ A command with that name already exists!",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 
@@ -113,7 +114,7 @@ module.exports = {
 
       await interaction.reply({
         content: `✅ Command \`${name}\` deleted!`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     } else if (subcommand === "list") {
       const commands = await new Promise((resolve, reject) => {
@@ -130,7 +131,7 @@ module.exports = {
       if (commands.length === 0) {
         return interaction.reply({
           content: "❌ No custom commands found!",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 

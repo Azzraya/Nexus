@@ -2,6 +2,7 @@ const {
   SlashCommandBuilder,
   PermissionFlagsBits,
   EmbedBuilder,
+  MessageFlags,
 } = require("discord.js");
 const db = require("../utils/database");
 
@@ -76,7 +77,7 @@ module.exports = {
       } catch (error) {
         await interaction.reply({
           content: `❌ Failed to set slowmode: ${error.message}`,
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
     } else if (subcommand === "remove") {
@@ -96,12 +97,12 @@ module.exports = {
 
         await interaction.reply({
           content: `✅ Slowmode removed from ${channel}`,
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       } catch (error) {
         await interaction.reply({
           content: `❌ Failed to remove slowmode: ${error.message}`,
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
     }

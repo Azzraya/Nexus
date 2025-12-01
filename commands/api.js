@@ -2,6 +2,7 @@ const {
   SlashCommandBuilder,
   PermissionFlagsBits,
   EmbedBuilder,
+  MessageFlags,
 } = require("discord.js");
 const crypto = require("crypto");
 const db = require("../utils/database");
@@ -56,7 +57,7 @@ module.exports = {
     if (!Owner.isOwner(interaction.user.id)) {
       return interaction.reply({
         content: "❌ Only the bot owner can manage API keys!",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
 
@@ -103,14 +104,14 @@ module.exports = {
           text: "Use this key in the Authorization header: Bearer <key>",
         });
 
-      await interaction.reply({ embeds: [embed], ephemeral: true });
+      await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
     } else if (subcommand === "list") {
       const keys = await db.getAPIKeys(interaction.guild.id);
 
       if (keys.length === 0) {
         return interaction.reply({
           content: "❌ No API keys found. Create one with `/api create`",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 
@@ -135,7 +136,7 @@ module.exports = {
         .setColor(0x0099ff)
         .setFooter({ text: `Total: ${keys.length} keys` });
 
-      await interaction.reply({ embeds: [embed], ephemeral: true });
+      await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
     } else if (subcommand === "revoke") {
       const keyId = interaction.options.getString("key_id");
 
@@ -144,7 +145,7 @@ module.exports = {
 
       await interaction.reply({
         content: `✅ API key #${keyId} revoked`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
   },

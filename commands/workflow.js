@@ -5,6 +5,7 @@ const {
   ActionRowBuilder,
   StringSelectMenuBuilder,
   StringSelectMenuOptionBuilder,
+  MessageFlags,
 } = require("discord.js");
 const db = require("../utils/database");
 
@@ -62,7 +63,7 @@ module.exports = {
       await interaction.reply({
         content:
           "🔄 Workflow creation is interactive. Use `/workflow create` and follow the prompts, or use the web dashboard for advanced workflow building.",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
 
       // Simplified workflow creation
@@ -110,7 +111,7 @@ module.exports = {
       if (workflows.length === 0) {
         return interaction.reply({
           content: "❌ No workflows found. Create one with `/workflow create`",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 
@@ -136,7 +137,7 @@ module.exports = {
 
       await interaction.reply({
         content: `✅ Workflow #${id} deleted`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     } else if (subcommand === "toggle") {
       const id = interaction.options.getInteger("id");
@@ -146,7 +147,7 @@ module.exports = {
       if (!workflow) {
         return interaction.reply({
           content: "❌ Workflow not found",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 
@@ -156,7 +157,7 @@ module.exports = {
         content: `✅ Workflow #${id} ${
           !workflow.enabled ? "enabled" : "disabled"
         }`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
   },

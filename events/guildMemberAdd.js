@@ -260,5 +260,50 @@ module.exports = {
       user_id: member.id,
       account_age_days: daysOld,
     });
+
+    // Enhanced logging
+    const EnhancedLogging = require("../utils/enhancedLogging");
+    await EnhancedLogging.log(member.guild.id, "member_join", "member", {
+      userId: member.id,
+      action: "join",
+      details: `Member joined: ${member.user.tag} (${member.user.id})`,
+      metadata: {
+        username: member.user.username,
+        discriminator: member.user.discriminator,
+        accountAge: Date.now() - member.user.createdTimestamp,
+        hasAvatar: !!member.user.avatar,
+        isBot: member.user.bot,
+      },
+      severity: "info",
+    });
+
+    // Check for mod log channel (reuse config from above)
+    if (config && config.mod_log_channel) {
+      const logChannel = member.guild.channels.cache.get(config.mod_log_channel);
+      if (logChannel) {
+        const { EmbedBuilder } = require("discord.js");
+        const embed = new EmbedBuilder()
+          .setTitle("✅ Member Joined")
+          .setDescription(`**${member.user.tag}** joined the server`)
+          .addFields(
+            { name: "User", value: `${member.user} (${member.user.id})`, inline: true },
+            {
+              name: "Account Created",
+              value: `<t:${Math.floor(member.user.createdTimestamp / 1000)}:R>`,
+              inline: true,
+            },
+            {
+              name: "Account Age",
+              value: `${Math.floor((Date.now() - member.user.createdTimestamp) / 86400000)} days`,
+              inline: true,
+            }
+          )
+          .setColor(0x00ff00)
+          .setThumbnail(member.user.displayAvatarURL())
+          .setTimestamp();
+
+        logChannel.send({ embeds: [embed] }).catch(() => {});
+      }
+    }
   },
 };

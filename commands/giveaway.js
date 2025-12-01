@@ -5,6 +5,7 @@ const {
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
+  MessageFlags,
 } = require("discord.js");
 const db = require("../utils/database");
 
@@ -113,7 +114,7 @@ module.exports = {
       await this.endGiveaway(interaction.client, messageId);
       await interaction.reply({
         content: "✅ Giveaway ended!",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
   },

@@ -2,6 +2,7 @@ const {
   SlashCommandBuilder,
   PermissionFlagsBits,
   EmbedBuilder,
+  MessageFlags,
 } = require("discord.js");
 const db = require("../utils/database");
 
@@ -81,14 +82,14 @@ module.exports = {
     if (userIds.length === 0) {
       return interaction.reply({
         content: "❌ No valid user IDs provided!",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
 
     if (userIds.length > 50) {
       return interaction.reply({
         content: "❌ Maximum 50 users at once!",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
 
@@ -112,6 +113,13 @@ module.exports = {
         if (userId === interaction.client.user.id) {
           failed++;
           errors.push(`${userId}: Cannot ${subcommand} the bot`);
+          continue;
+        }
+        
+        // Prevent moderating the server owner
+        if (userId === interaction.guild.ownerId) {
+          failed++;
+          errors.push(`${userId}: Cannot ${subcommand} the server owner`);
           continue;
         }
 

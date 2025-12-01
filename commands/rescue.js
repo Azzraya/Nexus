@@ -3,6 +3,7 @@ const {
   PermissionFlagsBits,
   EmbedBuilder,
   AttachmentBuilder,
+  MessageFlags,
 } = require("discord.js");
 const RescueKey = require("../utils/rescueKey");
 const Owner = require("../utils/owner");
@@ -55,11 +56,11 @@ module.exports = {
       if (!Owner.isOwner(interaction.user.id)) {
         return interaction.reply({
           content: "❌ Only the bot owner can set up the rescue key!",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 
-      await interaction.deferReply({ ephemeral: true });
+      await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
       const result = await RescueKey.setKey(
         interaction.guild.id,
@@ -112,11 +113,11 @@ module.exports = {
       if (!Owner.isOwner(interaction.user.id)) {
         return interaction.reply({
           content: "❌ Only the bot owner can view the rescue key!",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 
-      await interaction.deferReply({ ephemeral: true });
+      await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
       let rescueKey = await RescueKey.getKey(interaction.guild.id);
 
@@ -165,11 +166,11 @@ module.exports = {
       if (!Owner.isOwner(interaction.user.id)) {
         return interaction.reply({
           content: "❌ Only the bot owner can regenerate the rescue key!",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 
-      await interaction.deferReply({ ephemeral: true });
+      await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
       const result = await RescueKey.regenerateKey(
         interaction.guild.id,
@@ -213,7 +214,7 @@ module.exports = {
       if (!/^\d{17,19}$/.test(serverId)) {
         return interaction.reply({
           content: "❌ Invalid server ID format!",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 
@@ -221,11 +222,11 @@ module.exports = {
       if (!/^\d{6}$/.test(code)) {
         return interaction.reply({
           content: "❌ Invalid code format! Must be 6 digits.",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 
-      await interaction.deferReply({ ephemeral: true });
+      await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
       // Check if user is in the server
       let targetGuild;

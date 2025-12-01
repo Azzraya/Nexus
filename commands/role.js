@@ -2,6 +2,7 @@ const {
   SlashCommandBuilder,
   PermissionFlagsBits,
   EmbedBuilder,
+  MessageFlags,
 } = require("discord.js");
 const db = require("../utils/database");
 
@@ -86,7 +87,7 @@ module.exports = {
       } catch (error) {
         await interaction.reply({
           content: `❌ Failed to add role: ${error.message}`,
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
     } else if (subcommand === "remove") {
@@ -109,7 +110,7 @@ module.exports = {
       } catch (error) {
         await interaction.reply({
           content: `❌ Failed to remove role: ${error.message}`,
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
     } else if (subcommand === "all") {

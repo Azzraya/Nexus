@@ -2,6 +2,7 @@ const {
   SlashCommandBuilder,
   PermissionFlagsBits,
   EmbedBuilder,
+  MessageFlags,
 } = require("discord.js");
 const db = require("../utils/database");
 const fs = require("fs");
@@ -271,7 +272,7 @@ module.exports = {
       if (backups.length === 0) {
         return interaction.reply({
           content: "❌ No backups found!",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 
@@ -305,7 +306,7 @@ module.exports = {
       if (!backupRecord) {
         return interaction.reply({
           content: "❌ Backup not found!",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 

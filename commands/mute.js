@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, PermissionFlagsBits } = require("discord.js");
+const { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } = require("discord.js");
 const Moderation = require("../utils/moderation");
 const db = require("../utils/database");
 const ms = require("ms");
@@ -36,7 +36,23 @@ module.exports = {
       return interaction.reply({
         content:
           "❌ Invalid duration! Use format like: 1h, 30m, 1d (max 28 days)",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
+      });
+    }
+
+    // Prevent self-moderation
+    if (user.id === interaction.user.id) {
+      return interaction.reply({
+        content: "❌ You cannot mute yourself!",
+        flags: MessageFlags.Ephemeral,
+      });
+    }
+
+    // Prevent moderating the server owner
+    if (user.id === interaction.guild.ownerId) {
+      return interaction.reply({
+        content: "❌ You cannot moderate the server owner!",
+        flags: MessageFlags.Ephemeral,
       });
     }
 
@@ -46,7 +62,7 @@ module.exports = {
     if (!member) {
       return interaction.reply({
         content: "❌ User not found in this server!",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
 
@@ -57,7 +73,7 @@ module.exports = {
     if (!member.moderatable) {
       return interaction.reply({
         content: "❌ I cannot mute this user (they have a higher role than me or are the server owner)!",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
     
@@ -65,7 +81,7 @@ module.exports = {
     if (!isOwner && member.roles.highest.position >= interaction.member.roles.highest.position) {
       return interaction.reply({
         content: "❌ You cannot mute someone with equal or higher roles!",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
 
@@ -99,7 +115,7 @@ module.exports = {
     } else {
       await interaction.reply({
         content: `❌ ${result.message}`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
   },

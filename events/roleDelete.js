@@ -1,3 +1,4 @@
+const db = require("../utils/database");
 const Notifications = require("../utils/notifications");
 const AutoRecovery = require("../utils/autoRecovery");
 
@@ -16,7 +17,27 @@ module.exports = {
       );
     });
 
-    // Log the deletion
+    // Console logging
+    console.log(
+      `🗑️ [${role.guild.name} (${role.guild.id})] Role deleted: ${role.name} (${role.id})`
+    );
+
+    // Enhanced logging
+    const EnhancedLogging = require("../utils/enhancedLogging");
+    await EnhancedLogging.log(role.guild.id, "role_delete", "server", {
+      userId: null,
+      moderatorId: null,
+      action: "role_deleted",
+      details: `Role deleted: ${role.name}`,
+      metadata: {
+        roleId: role.id,
+        roleName: role.name,
+        color: role.color,
+      },
+      severity: "warning",
+    });
+
+    // Also use old method for compatibility
     await client.db.addEnhancedLog(
       role.guild.id,
       "moderation",
@@ -28,6 +49,44 @@ module.exports = {
       { roleId: role.id, roleName: role.name },
       "warning"
     );
+
+    // Check for mod log channel
+    const config = await db.getServerConfig(role.guild.id);
+    if (config && config.mod_log_channel) {
+      const logChannel = role.guild.channels.cache.get(config.mod_log_channel);
+      if (logChannel) {
+        const { EmbedBuilder } = require("discord.js");
+        const embed = new EmbedBuilder()
+          .setTitle("🗑️ Role Deleted")
+          .setDescription(`**${role.name}** role was deleted`)
+          .addFields(
+            {
+              name: "Role Name",
+              value: role.name,
+              inline: true,
+            },
+            {
+              name: "Role ID",
+              value: role.id,
+              inline: true,
+            },
+            {
+              name: "Color",
+              value: `#${role.color.toString(16).padStart(6, "0")}`,
+              inline: true,
+            },
+            {
+              name: "Members Affected",
+              value: `${role.members.size} member(s)`,
+              inline: true,
+            }
+          )
+          .setColor(0xff0000)
+          .setTimestamp();
+
+        logChannel.send({ embeds: [embed] }).catch(() => {});
+      }
+    }
 
     // If multiple deletions in short time, potential nuke
     if (recentDeletions >= 3) {

@@ -2,6 +2,7 @@ const {
   SlashCommandBuilder,
   PermissionFlagsBits,
   EmbedBuilder,
+  MessageFlags,
 } = require("discord.js");
 const Moderation = require("../utils/moderation");
 const db = require("../utils/database");
@@ -26,13 +27,29 @@ module.exports = {
     const reason =
       interaction.options.getString("reason") || "No reason provided";
 
+    // Prevent self-moderation
+    if (user.id === interaction.user.id) {
+      return interaction.reply({
+        content: "❌ You cannot kick yourself!",
+        flags: MessageFlags.Ephemeral,
+      });
+    }
+
+    // Prevent moderating the server owner
+    if (user.id === interaction.guild.ownerId) {
+      return interaction.reply({
+        content: "❌ You cannot moderate the server owner!",
+        flags: MessageFlags.Ephemeral,
+      });
+    }
+
     const member = await interaction.guild.members
       .fetch(user.id)
       .catch(() => null);
     if (!member) {
       return interaction.reply({
         content: "❌ User not found in this server!",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
 
@@ -43,7 +60,7 @@ module.exports = {
     if (!member.kickable) {
       return interaction.reply({
         content: "❌ I cannot kick this user (they have a higher role than me or are the server owner)!",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
     
@@ -51,7 +68,7 @@ module.exports = {
     if (!isOwner && member.roles.highest.position >= interaction.member.roles.highest.position) {
       return interaction.reply({
         content: "❌ You cannot kick someone with equal or higher roles!",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
 
@@ -83,7 +100,7 @@ module.exports = {
     } else {
       await interaction.reply({
         content: `❌ ${result.message}`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
   },

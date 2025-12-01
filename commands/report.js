@@ -3,6 +3,7 @@ const {
   PermissionFlagsBits,
   EmbedBuilder,
   AttachmentBuilder,
+  MessageFlags,
 } = require("discord.js");
 const Reporting = require("../utils/reporting");
 const db = require("../utils/database");
@@ -136,7 +137,7 @@ module.exports = {
       if (reports.length === 0) {
         return interaction.reply({
           content: "❌ No reports found. Generate one with `/report generate`",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 

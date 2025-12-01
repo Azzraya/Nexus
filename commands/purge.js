@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, PermissionFlagsBits } = require("discord.js");
+const { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } = require("discord.js");
 const Moderation = require("../utils/moderation");
 
 module.exports = {
@@ -32,7 +32,7 @@ module.exports = {
     ) {
       return interaction.reply({
         content: '❌ I need "Manage Messages" permission!',
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
 
@@ -48,12 +48,12 @@ module.exports = {
         content: `✅ Deleted ${result.deleted} message(s)${
           user ? ` from ${user.tag}` : ""
         }`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     } else {
       await interaction.reply({
         content: `❌ ${result.message}`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
   },

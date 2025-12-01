@@ -2,6 +2,7 @@ const {
   SlashCommandBuilder,
   PermissionFlagsBits,
   EmbedBuilder,
+  MessageFlags,
 } = require("discord.js");
 const db = require("../utils/database");
 
@@ -127,7 +128,7 @@ module.exports = {
             color: 0x00ff00,
           },
         ],
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     } else if (subcommand === "modify") {
       const user = interaction.options.getUser("user");
@@ -148,7 +149,7 @@ module.exports = {
       if (!noteData) {
         return interaction.reply({
           content: "❌ Note not found!",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 
@@ -171,7 +172,7 @@ module.exports = {
             color: 0x00ff00,
           },
         ],
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     } else if (subcommand === "remove") {
       const user = interaction.options.getUser("user");
@@ -191,13 +192,13 @@ module.exports = {
       if (result === 0) {
         return interaction.reply({
           content: "❌ Note not found!",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 
       await interaction.reply({
         content: `✅ Removed note #${noteId} from ${user.tag}`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     } else if (subcommand === "view") {
       const user = interaction.options.getUser("user");
@@ -224,7 +225,7 @@ module.exports = {
           content: user
             ? `❌ No notes found for ${user.tag}!`
             : "❌ No notes found!",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 
@@ -276,7 +277,7 @@ module.exports = {
         content: `✅ Deleted ${result} note(s)${
           user ? ` for ${user.tag}` : " from the server"
         }`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
   },

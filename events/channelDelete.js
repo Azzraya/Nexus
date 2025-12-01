@@ -1,3 +1,4 @@
+const db = require("../utils/database");
 const Notifications = require("../utils/notifications");
 const AutoRecovery = require("../utils/autoRecovery");
 
@@ -16,7 +17,27 @@ module.exports = {
       );
     });
 
-    // Log the deletion
+    // Console logging
+    console.log(
+      `🗑️ [${channel.guild.name} (${channel.guild.id})] Channel deleted: #${channel.name} (${channel.id})`
+    );
+
+    // Enhanced logging
+    const EnhancedLogging = require("../utils/enhancedLogging");
+    await EnhancedLogging.log(channel.guild.id, "channel_delete", "server", {
+      userId: null,
+      moderatorId: null,
+      action: "channel_deleted",
+      details: `Channel deleted: ${channel.name}`,
+      metadata: {
+        channelId: channel.id,
+        channelName: channel.name,
+        channelType: channel.type,
+      },
+      severity: "warning",
+    });
+
+    // Also use old method for compatibility
     await client.db.addEnhancedLog(
       channel.guild.id,
       "moderation",
@@ -28,6 +49,55 @@ module.exports = {
       { channelId: channel.id, channelName: channel.name },
       "warning"
     );
+
+    // Check for mod log channel
+    const config = await db.getServerConfig(channel.guild.id);
+    if (config && config.mod_log_channel) {
+      const logChannel = channel.guild.channels.cache.get(
+        config.mod_log_channel
+      );
+      if (logChannel) {
+        const { EmbedBuilder, ChannelType } = require("discord.js");
+        const channelTypeNames = {
+          [ChannelType.GuildText]: "Text Channel",
+          [ChannelType.GuildVoice]: "Voice Channel",
+          [ChannelType.GuildCategory]: "Category",
+          [ChannelType.GuildAnnouncement]: "Announcement Channel",
+          [ChannelType.GuildForum]: "Forum Channel",
+          [ChannelType.GuildStageVoice]: "Stage Channel",
+        };
+
+        const embed = new EmbedBuilder()
+          .setTitle("🗑️ Channel Deleted")
+          .setDescription(`**${channel.name}** channel was deleted`)
+          .addFields(
+            {
+              name: "Channel Name",
+              value: channel.name,
+              inline: true,
+            },
+            {
+              name: "Channel ID",
+              value: channel.id,
+              inline: true,
+            },
+            {
+              name: "Type",
+              value: channelTypeNames[channel.type] || "Unknown",
+              inline: true,
+            },
+            {
+              name: "Category",
+              value: channel.parent?.name || "None",
+              inline: true,
+            }
+          )
+          .setColor(0xff0000)
+          .setTimestamp();
+
+        logChannel.send({ embeds: [embed] }).catch(() => {});
+      }
+    }
 
     // If multiple deletions in short time, potential nuke
     if (recentDeletions >= 3) {

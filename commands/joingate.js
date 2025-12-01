@@ -2,6 +2,7 @@ const {
   SlashCommandBuilder,
   PermissionFlagsBits,
   EmbedBuilder,
+  MessageFlags,
 } = require("discord.js");
 const JoinGate = require("../utils/joinGate");
 const db = require("../utils/database");
@@ -126,7 +127,7 @@ module.exports = {
             color: 0x00ff00,
           },
         ],
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     } else if (subcommand === "disable") {
       await JoinGate.setConfig(interaction.guild.id, { enabled: false });
@@ -138,7 +139,7 @@ module.exports = {
             color: 0xff0000,
           },
         ],
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     } else if (subcommand === "config") {
       const setting = interaction.options.getString("setting");
@@ -165,7 +166,7 @@ module.exports = {
             color: 0x00ff00,
           },
         ],
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     } else if (subcommand === "age") {
       const days = interaction.options.getInteger("days");
@@ -181,7 +182,7 @@ module.exports = {
             color: 0x00ff00,
           },
         ],
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     } else if (subcommand === "action") {
       const actionType = interaction.options.getString("action_type");
@@ -195,7 +196,7 @@ module.exports = {
             color: 0x00ff00,
           },
         ],
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     } else if (subcommand === "word") {
       const type = interaction.options.getString("type");
@@ -214,13 +215,13 @@ module.exports = {
         if (!word) {
           return interaction.reply({
             content: "❌ Please provide a word/pattern to add!",
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
           });
         }
         if (words.includes(word)) {
           return interaction.reply({
             content: "❌ This word/pattern is already in the list!",
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
           });
         }
         words.push(word);
@@ -234,20 +235,20 @@ module.exports = {
               color: 0x00ff00,
             },
           ],
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       } else if (action === "remove") {
         if (!word) {
           return interaction.reply({
             content: "❌ Please provide a word/pattern to remove!",
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
           });
         }
         const index = words.indexOf(word);
         if (index === -1) {
           return interaction.reply({
             content: "❌ Word/pattern not found in list!",
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
           });
         }
         words.splice(index, 1);
@@ -261,13 +262,13 @@ module.exports = {
               color: 0x00ff00,
             },
           ],
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       } else if (action === "list") {
         if (words.length === 0) {
           return interaction.reply({
             content: `❌ No ${type} words configured!`,
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
           });
         }
 
@@ -277,7 +278,7 @@ module.exports = {
           .setColor(0x0099ff)
           .setTimestamp();
 
-        await interaction.reply({ embeds: [embed], ephemeral: true });
+        await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
       }
     } else if (subcommand === "view") {
       const config = await JoinGate.getConfig(interaction.guild.id);
@@ -291,7 +292,7 @@ module.exports = {
               color: 0xff0000,
             },
           ],
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 
@@ -345,7 +346,7 @@ module.exports = {
         });
       }
 
-      await interaction.reply({ embeds: [embed], ephemeral: true });
+      await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
     }
   },
 };

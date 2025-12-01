@@ -5,6 +5,7 @@ const {
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
+  MessageFlags,
 } = require("discord.js");
 const ModerationQueue = require("../utils/moderationQueue");
 const Moderation = require("../utils/moderation");
@@ -58,7 +59,7 @@ module.exports = {
       if (queue.length === 0) {
         return interaction.reply({
           content: "✅ Moderation queue is empty",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 
@@ -82,7 +83,7 @@ module.exports = {
 
       await interaction.reply({ embeds: [embed] });
     } else if (subcommand === "process") {
-      await interaction.deferReply({ ephemeral: true });
+      await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
       const queueId = interaction.options.getInteger("id");
       const action = interaction.options.getString("action");

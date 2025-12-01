@@ -2,6 +2,7 @@ const {
   SlashCommandBuilder,
   PermissionFlagsBits,
   EmbedBuilder,
+  MessageFlags,
 } = require("discord.js");
 const ms = require("ms");
 const Moderation = require("../utils/moderation");
@@ -52,12 +53,28 @@ module.exports = {
       const reason =
         interaction.options.getString("reason") || "No reason provided";
 
+      // Prevent self-moderation
+      if (user.id === interaction.user.id) {
+        return interaction.reply({
+          content: "❌ You cannot timeout yourself!",
+          flags: MessageFlags.Ephemeral,
+        });
+      }
+
+      // Prevent moderating the server owner
+      if (user.id === interaction.guild.ownerId) {
+        return interaction.reply({
+          content: "❌ You cannot moderate the server owner!",
+          flags: MessageFlags.Ephemeral,
+        });
+      }
+
       const duration = ms(durationStr);
       if (!duration || duration < 1000 || duration > 2419200000) {
         return interaction.reply({
           content:
             "❌ Invalid duration! Use format like: 1h, 30m, 1d (max 28 days)",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 
@@ -81,7 +98,7 @@ module.exports = {
       } else {
         await interaction.reply({
           content: `❌ ${result.message}`,
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
     } else if (subcommand === "remove") {
@@ -103,7 +120,7 @@ module.exports = {
       } catch (error) {
         await interaction.reply({
           content: `❌ Failed to remove timeout: ${error.message}`,
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
     }

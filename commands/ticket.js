@@ -6,6 +6,7 @@ const {
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
+  MessageFlags,
 } = require("discord.js");
 const db = require("../utils/database");
 
@@ -58,7 +59,7 @@ module.exports = {
       if (!ticket) {
         return interaction.reply({
           content: "❌ This is not a ticket channel!",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 

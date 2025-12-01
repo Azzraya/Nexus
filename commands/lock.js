@@ -3,6 +3,7 @@ const {
   PermissionFlagsBits,
   EmbedBuilder,
   ChannelType,
+  MessageFlags,
 } = require("discord.js");
 const db = require("../utils/database");
 
@@ -99,7 +100,7 @@ module.exports = {
         if (!channel) {
           return interaction.reply({
             content: "❌ Please specify a channel!",
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
           });
         }
 
@@ -191,7 +192,7 @@ module.exports = {
         if (!role) {
           return interaction.reply({
             content: "❌ Please specify a role!",
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
           });
         }
 
@@ -225,7 +226,7 @@ module.exports = {
         if (!channel) {
           return interaction.reply({
             content: "❌ Please specify a channel!",
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
           });
         }
 
@@ -323,7 +324,7 @@ module.exports = {
         if (!role) {
           return interaction.reply({
             content: "❌ Please specify a role!",
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
           });
         }
 
@@ -377,7 +378,7 @@ module.exports = {
 
       await interaction.reply({
         content: `✅ Announcement sent to ${announcementsChannel}`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     } else if (subcommand === "view") {
       const lockedChannels = await new Promise((resolve, reject) => {

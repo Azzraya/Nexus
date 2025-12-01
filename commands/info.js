@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
+const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require("discord.js");
 const db = require("../utils/database");
 
 module.exports = {
@@ -82,7 +82,7 @@ module.exports = {
       if (!member) {
         return interaction.reply({
           content: "❌ User not found in this server!",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 

@@ -5,6 +5,7 @@ const {
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
+  MessageFlags,
 } = require("discord.js");
 const AutoRecovery = require("../utils/autoRecovery");
 const db = require("../utils/database");
@@ -74,7 +75,7 @@ module.exports = {
       if (snapshots.length === 0) {
         return interaction.reply({
           content: "❌ No snapshots found. Create one with `/recover snapshot`",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 
@@ -95,7 +96,7 @@ module.exports = {
 
       await interaction.reply({ embeds: [embed] });
     } else if (subcommand === "restore") {
-      await interaction.deferReply({ ephemeral: true });
+      await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
       const snapshotId = interaction.options.getInteger("snapshot_id");
 

@@ -2,6 +2,7 @@ const {
   SlashCommandBuilder,
   PermissionFlagsBits,
   EmbedBuilder,
+  MessageFlags,
 } = require("discord.js");
 const Moderation = require("../utils/moderation");
 const db = require("../utils/database");
@@ -63,14 +64,22 @@ module.exports = {
       if (user.id === interaction.user.id) {
         return interaction.reply({
           content: "❌ You cannot ban yourself!",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 
       if (user.id === interaction.client.user.id) {
         return interaction.reply({
           content: "❌ I cannot ban myself!",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
+        });
+      }
+
+      // Prevent moderating the server owner
+      if (user.id === interaction.guild.ownerId) {
+        return interaction.reply({
+          content: "❌ You cannot moderate the server owner!",
+          flags: MessageFlags.Ephemeral,
         });
       }
 
@@ -87,7 +96,7 @@ module.exports = {
         if (!member.manageable) {
           return interaction.reply({
             content: "❌ I cannot ban this user (they have a higher role than me or are the server owner)!",
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
           });
         }
         
@@ -95,7 +104,7 @@ module.exports = {
         if (!isOwner && member.roles.highest.position >= interaction.member.roles.highest.position) {
           return interaction.reply({
             content: "❌ You cannot ban someone with equal or higher roles!",
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
           });
         }
       }
@@ -130,7 +139,7 @@ module.exports = {
       } else {
         await interaction.reply({
           content: `❌ ${result.message}`,
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
     } else if (subcommand === "remove") {
@@ -160,7 +169,7 @@ module.exports = {
       } catch (error) {
         await interaction.reply({
           content: `❌ Failed to unban user: ${error.message}`,
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
     }

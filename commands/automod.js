@@ -173,16 +173,28 @@ module.exports = {
         ],
       });
     } else if (subcommand === "test") {
-      const message = interaction.options.getString("message");
+      const messageText = interaction.options.getString("message");
       const rules = await AutoMod.getRules(interaction.guild.id);
+
+      // Create a mock message object for testing
+      const mockMessage = {
+        content: messageText,
+        author: {
+          bot: false,
+          id: interaction.user.id,
+        },
+        guild: interaction.guild,
+        mentions: {
+          users: {
+            size: (messageText.match(/<@!?\d+>/g) || []).length,
+          },
+        },
+      };
 
       const matchedRules = [];
       for (const rule of rules) {
-        const wouldTrigger = await AutoMod.checkMessage(
-          message,
-          rule,
-          interaction.guild.id
-        );
+        if (!rule.enabled) continue;
+        const wouldTrigger = await AutoMod.checkRule(mockMessage, rule);
         if (wouldTrigger) {
           matchedRules.push(rule);
         }
@@ -193,7 +205,7 @@ module.exports = {
         .addFields(
           {
             name: "Test Message",
-            value: message,
+            value: messageText,
             inline: false,
           },
           {

@@ -5,6 +5,7 @@ const {
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
+  MessageFlags,
 } = require("discord.js");
 const db = require("../utils/database");
 
@@ -85,7 +86,7 @@ module.exports = {
       if (roles.length === 0) {
         return interaction.reply({
           content: "❌ You need to provide at least one role!",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 
@@ -124,7 +125,7 @@ module.exports = {
 
       await interaction.followUp({
         content: "✅ Reaction role message created!",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
   },

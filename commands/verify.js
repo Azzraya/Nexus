@@ -5,6 +5,7 @@ const {
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
+  MessageFlags,
 } = require("discord.js");
 const db = require("../utils/database");
 
@@ -70,7 +71,7 @@ module.exports = {
 
       await interaction.reply({
         content: "✅ Verification system disabled",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
   },

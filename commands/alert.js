@@ -2,6 +2,7 @@ const {
   SlashCommandBuilder,
   PermissionFlagsBits,
   EmbedBuilder,
+  MessageFlags,
 } = require("discord.js");
 const db = require("../utils/database");
 
@@ -61,7 +62,7 @@ module.exports = {
 
       await interaction.reply({
         content: "✅ Security alerts disabled",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
   },

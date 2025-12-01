@@ -2,6 +2,7 @@ const {
   SlashCommandBuilder,
   PermissionFlagsBits,
   EmbedBuilder,
+  MessageFlags,
 } = require("discord.js");
 const StatsTracker = require("../utils/statsTracker");
 const Owner = require("../utils/owner");
@@ -28,7 +29,7 @@ module.exports = {
       if (!Owner.isOwner(interaction.user.id)) {
         return interaction.reply({
           content: "❌ Only the bot owner can view global statistics!",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
     }

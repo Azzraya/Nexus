@@ -2,6 +2,7 @@ const {
   SlashCommandBuilder,
   PermissionFlagsBits,
   EmbedBuilder,
+  MessageFlags,
 } = require("discord.js");
 const db = require("../utils/database");
 
@@ -88,7 +89,7 @@ module.exports = {
             color: 0x00ff00,
           },
         ],
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     } else if (subcommand === "disable") {
       await db.setServerConfig(interaction.guild.id, {
@@ -103,7 +104,7 @@ module.exports = {
             color: 0xff0000,
           },
         ],
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     } else if (subcommand === "config") {
       const threshold = interaction.options.getInteger("threshold");
@@ -138,7 +139,7 @@ module.exports = {
             color: 0x0099ff,
           },
         ],
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     } else if (subcommand === "status") {
       const isEnabled = config?.anti_raid_enabled !== 0;

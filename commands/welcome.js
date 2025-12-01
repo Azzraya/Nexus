@@ -2,6 +2,7 @@ const {
   SlashCommandBuilder,
   PermissionFlagsBits,
   EmbedBuilder,
+  MessageFlags,
 } = require("discord.js");
 const db = require("../utils/database");
 
@@ -52,7 +53,7 @@ module.exports = {
       if (!channel.isTextBased()) {
         return interaction.reply({
           content: "❌ Please select a text channel!",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 
@@ -108,7 +109,7 @@ module.exports = {
         return interaction.reply({
           content:
             "❌ Welcome messages are not configured! Use `/welcome setup` first.",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 
@@ -118,7 +119,7 @@ module.exports = {
       if (!channel) {
         return interaction.reply({
           content: "❌ Welcome channel not found! Please reconfigure.",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 
@@ -146,12 +147,12 @@ module.exports = {
 
         await interaction.reply({
           content: `✅ Test welcome message sent to ${channel}!`,
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       } catch (error) {
         await interaction.reply({
           content: `❌ Failed to send test message: ${error.message}`,
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
     } else if (subcommand === "preview") {
@@ -159,7 +160,7 @@ module.exports = {
         return interaction.reply({
           content:
             "❌ Welcome messages are not configured! Use `/welcome setup` first.",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 

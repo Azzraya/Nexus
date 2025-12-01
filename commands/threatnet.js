@@ -2,6 +2,7 @@ const {
   SlashCommandBuilder,
   PermissionFlagsBits,
   EmbedBuilder,
+  MessageFlags,
 } = require("discord.js");
 const ThreatIntelligence = require("../utils/threatIntelligence");
 const db = require("../utils/database");
@@ -159,7 +160,7 @@ module.exports = {
 
       await interaction.reply({
         content: `✅ Threat reported to network: ${user.tag} (${type}, ${severity})`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     } else if (subcommand === "check") {
       await interaction.deferReply();
@@ -225,7 +226,7 @@ module.exports = {
 
       await interaction.reply({
         content: `✅ Threat #${threatId} verified`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     } else if (subcommand === "sensitivity") {
       await interaction.deferReply();

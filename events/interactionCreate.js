@@ -1,4 +1,4 @@
-const { InteractionType } = require("discord.js");
+const { InteractionType, MessageFlags } = require("discord.js");
 const db = require("../utils/database");
 
 module.exports = {
@@ -70,7 +70,7 @@ module.exports = {
           await interaction
             .reply({
               content: errorMessage,
-              ephemeral: true,
+              flags: MessageFlags.Ephemeral,
             })
             .catch(() => {});
         }
@@ -473,7 +473,7 @@ module.exports = {
             console.error("Error handling dashboard button:", error);
             await interaction.followUp({
               content: "❌ An error occurred while loading the dashboard view.",
-              ephemeral: true,
+              flags: MessageFlags.Ephemeral,
             });
           }
         }
@@ -485,7 +485,7 @@ module.exports = {
             return interaction.reply({
               content:
                 "❌ Ticket system not configured! Use `/ticket setup` first.",
-              ephemeral: true,
+              flags: MessageFlags.Ephemeral,
             });
           }
 
@@ -495,7 +495,7 @@ module.exports = {
           if (!category) {
             return interaction.reply({
               content: "❌ Ticket category not found!",
-              ephemeral: true,
+              flags: MessageFlags.Ephemeral,
             });
           }
 
@@ -523,7 +523,7 @@ module.exports = {
 
           await interaction.reply({
             content: `✅ Ticket created: ${ticketChannel}`,
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
           });
 
           await ticketChannel.send({
@@ -550,7 +550,7 @@ module.exports = {
           ) {
             return interaction.reply({
               content: "❌ Verification system not configured!",
-              ephemeral: true,
+              flags: MessageFlags.Ephemeral,
             });
           }
 
@@ -560,7 +560,7 @@ module.exports = {
           if (!role) {
             return interaction.reply({
               content: "❌ Verification role not found!",
-              ephemeral: true,
+              flags: MessageFlags.Ephemeral,
             });
           }
 
@@ -568,12 +568,12 @@ module.exports = {
             await interaction.member.roles.add(role);
             await interaction.reply({
               content: "✅ You have been verified!",
-              ephemeral: true,
+              flags: MessageFlags.Ephemeral,
             });
           } catch (error) {
             await interaction.reply({
               content: "❌ Failed to verify. Please contact an administrator.",
-              ephemeral: true,
+              flags: MessageFlags.Ephemeral,
             });
           }
           return;
@@ -587,7 +587,7 @@ module.exports = {
           if (!role) {
             return interaction.reply({
               content: "❌ Role not found!",
-              ephemeral: true,
+              flags: MessageFlags.Ephemeral,
             });
           }
 
@@ -595,13 +595,13 @@ module.exports = {
             await interaction.member.roles.remove(role);
             await interaction.reply({
               content: `✅ Removed role: ${role.name}`,
-              ephemeral: true,
+              flags: MessageFlags.Ephemeral,
             });
           } else {
             await interaction.member.roles.add(role);
             await interaction.reply({
               content: `✅ Added role: ${role.name}`,
-              ephemeral: true,
+              flags: MessageFlags.Ephemeral,
             });
           }
           return;
@@ -616,7 +616,7 @@ module.exports = {
           if (!interaction.member.permissions.has("ModerateMembers")) {
             return interaction.reply({
               content: "❌ You don't have permission to moderate!",
-              ephemeral: true,
+              flags: MessageFlags.Ephemeral,
             });
           }
 
@@ -626,7 +626,7 @@ module.exports = {
           if (!user) {
             return interaction.reply({
               content: "❌ User not found!",
-              ephemeral: true,
+              flags: MessageFlags.Ephemeral,
             });
           }
 
@@ -675,7 +675,7 @@ module.exports = {
                 ? "Report dismissed"
                 : `${action}ed ${user.tag}`
             }`,
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
           });
           return;
         }
@@ -696,14 +696,14 @@ module.exports = {
           if (!giveawayData) {
             return interaction.reply({
               content: "❌ Giveaway not found!",
-              ephemeral: true,
+              flags: MessageFlags.Ephemeral,
             });
           }
 
           if (Date.now() > giveawayData.ends_at) {
             return interaction.reply({
               content: "❌ This giveaway has ended!",
-              ephemeral: true,
+              flags: MessageFlags.Ephemeral,
             });
           }
 
@@ -711,7 +711,7 @@ module.exports = {
           if (entries.includes(interaction.user.id)) {
             return interaction.reply({
               content: "❌ You're already entered!",
-              ephemeral: true,
+              flags: MessageFlags.Ephemeral,
             });
           }
 
@@ -729,7 +729,7 @@ module.exports = {
 
           await interaction.reply({
             content: "✅ You've entered the giveaway!",
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
           });
           return;
         }

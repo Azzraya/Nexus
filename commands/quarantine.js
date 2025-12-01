@@ -3,6 +3,7 @@ const {
   PermissionFlagsBits,
   EmbedBuilder,
   ChannelType,
+  MessageFlags,
 } = require("discord.js");
 const db = require("../utils/database");
 
@@ -54,14 +55,22 @@ module.exports = {
       if (user.id === interaction.user.id) {
         return interaction.reply({
           content: "❌ You cannot quarantine yourself!",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 
       if (user.id === interaction.client.user.id) {
         return interaction.reply({
           content: "❌ I cannot quarantine myself!",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
+        });
+      }
+
+      // Prevent moderating the server owner
+      if (user.id === interaction.guild.ownerId) {
+        return interaction.reply({
+          content: "❌ You cannot moderate the server owner!",
+          flags: MessageFlags.Ephemeral,
         });
       }
 
@@ -72,7 +81,7 @@ module.exports = {
       if (!member) {
         return interaction.reply({
           content: "❌ User not found in this server!",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 
@@ -88,7 +97,7 @@ module.exports = {
         return interaction.reply({
           content:
             "❌ You cannot quarantine someone with equal or higher roles!",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 
@@ -100,7 +109,7 @@ module.exports = {
         return interaction.reply({
           content:
             "❌ I cannot manage this user (they have a higher role than me or are the server owner)!",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 
@@ -299,7 +308,7 @@ module.exports = {
       if (!quarantineData) {
         return interaction.reply({
           content: "❌ User is not in quarantine!",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 

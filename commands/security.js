@@ -2,6 +2,7 @@ const {
   SlashCommandBuilder,
   PermissionFlagsBits,
   EmbedBuilder,
+  MessageFlags,
 } = require("discord.js");
 const Security = require("../utils/security");
 const db = require("../utils/database");
@@ -148,7 +149,7 @@ module.exports = {
         if (!user) {
           return interaction.reply({
             content: "❌ Please specify a user!",
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
           });
         }
 
@@ -176,7 +177,7 @@ module.exports = {
         if (!user) {
           return interaction.reply({
             content: "❌ Please specify a user!",
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
           });
         }
 
@@ -193,7 +194,7 @@ module.exports = {
 
         await interaction.reply({
           content: `✅ Removed ${user.tag} from whitelist`,
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       } else if (action === "list") {
         const whitelisted = await new Promise((resolve, reject) => {
@@ -210,7 +211,7 @@ module.exports = {
         if (whitelisted.length === 0) {
           return interaction.reply({
             content: "❌ No users whitelisted!",
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
           });
         }
 
