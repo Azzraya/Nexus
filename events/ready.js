@@ -3,7 +3,7 @@ const ShardManager = require("../utils/shardManager");
 const { registerCommands } = require("../utils/registerCommands");
 
 module.exports = {
-  name: "ready",
+  name: "clientReady",
   once: true,
   async execute(client) {
     const shardInfo = ShardManager.getShardInfo(client);
