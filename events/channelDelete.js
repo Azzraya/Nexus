@@ -117,12 +117,14 @@ module.exports = {
           .setColor(0xff0000)
           .setTimestamp();
 
-        logChannel.send({ embeds: [embed] }).catch(
-          ErrorHandler.createSafeCatch(
-            `channelDelete [${channel.guild.id}]`,
-            `Send mod log for channel delete`
-          )
-        );
+        logChannel
+          .send({ embeds: [embed] })
+          .catch(
+            ErrorHandler.createSafeCatch(
+              `channelDelete [${channel.guild.id}]`,
+              `Send mod log for channel delete`
+            )
+          );
       }
     }
 

@@ -105,12 +105,14 @@ module.exports = {
           .setColor(0xff0000)
           .setTimestamp();
 
-        logChannel.send({ embeds: [embed] }).catch(
-          ErrorHandler.createSafeCatch(
-            `roleDelete [${role.guild.id}]`,
-            `Send mod log for role delete`
-          )
-        );
+        logChannel
+          .send({ embeds: [embed] })
+          .catch(
+            ErrorHandler.createSafeCatch(
+              `roleDelete [${role.guild.id}]`,
+              `Send mod log for role delete`
+            )
+          );
       }
     }
 

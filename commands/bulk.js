@@ -115,7 +115,7 @@ module.exports = {
           errors.push(`${userId}: Cannot ${subcommand} the bot`);
           continue;
         }
-        
+
         // Prevent moderating the server owner
         if (userId === interaction.guild.ownerId) {
           failed++;
@@ -127,9 +127,15 @@ module.exports = {
         const member = await interaction.guild.members.fetch(userId);
 
         // Check role hierarchy (unless moderator is owner)
-        if (!isOwner && member.roles.highest.position >= interaction.member.roles.highest.position) {
+        if (
+          !isOwner &&
+          member.roles.highest.position >=
+            interaction.member.roles.highest.position
+        ) {
           failed++;
-          errors.push(`${userId}: Cannot ${subcommand} user with equal or higher roles`);
+          errors.push(
+            `${userId}: Cannot ${subcommand} user with equal or higher roles`
+          );
           continue;
         }
 

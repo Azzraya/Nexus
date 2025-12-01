@@ -29,7 +29,10 @@ class AutoBackup {
         try {
           await this.checkGuildBackup(guild);
         } catch (error) {
-          logger.error(`[AutoBackup] Error checking backup for ${guildId}:`, error);
+          logger.error(
+            `[AutoBackup] Error checking backup for ${guildId}:`,
+            error
+          );
         }
       }
     } catch (error) {
@@ -41,7 +44,7 @@ class AutoBackup {
     try {
       // Get server config
       const config = await db.getServerConfig(guild.id);
-      
+
       // Check if auto-backup is enabled (default: true)
       if (config && config.auto_backup_enabled === 0) {
         return; // Auto-backup disabled
@@ -68,9 +71,11 @@ class AutoBackup {
 
       if (lastSnapshotAge >= backupInterval) {
         logger.info(
-          `[AutoBackup] Creating scheduled backup for ${guild.name} (last backup: ${Math.round(lastSnapshotAge / 3600000)} hours ago)`
+          `[AutoBackup] Creating scheduled backup for ${
+            guild.name
+          } (last backup: ${Math.round(lastSnapshotAge / 3600000)} hours ago)`
         );
-        
+
         await AutoRecovery.createSnapshot(
           guild,
           "full",
@@ -78,10 +83,15 @@ class AutoBackup {
         );
 
         // Log backup creation
-        logger.info(`[AutoBackup] ✅ Backup created for ${guild.name} (${guild.id})`);
+        logger.info(
+          `[AutoBackup] ✅ Backup created for ${guild.name} (${guild.id})`
+        );
       }
     } catch (error) {
-      logger.error(`[AutoBackup] Error creating backup for ${guild.id}:`, error);
+      logger.error(
+        `[AutoBackup] Error creating backup for ${guild.id}:`,
+        error
+      );
     }
   }
 
@@ -99,4 +109,3 @@ class AutoBackup {
 }
 
 module.exports = AutoBackup;
-

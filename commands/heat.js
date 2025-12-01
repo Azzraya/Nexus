@@ -45,13 +45,7 @@ module.exports = {
           inline: true,
         }
       )
-      .setColor(
-        score > 150
-          ? 0xff0000
-          : score > 100
-          ? 0xffaa00
-          : 0xffff00
-      )
+      .setColor(score > 150 ? 0xff0000 : score > 100 ? 0xffaa00 : 0xffff00)
       .setTimestamp();
 
     if (history.length > 0) {
@@ -59,7 +53,9 @@ module.exports = {
       embed.addFields({
         name: "Recent History",
         value:
-          recent.map((h) => `+${h.amount || 0} - ${h.reason || "Unknown"}`).join("\n") || "None",
+          recent
+            .map((h) => `+${h.amount || 0} - ${h.reason || "Unknown"}`)
+            .join("\n") || "None",
       });
     }
 

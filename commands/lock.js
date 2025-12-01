@@ -178,7 +178,11 @@ module.exports = {
           embeds: [
             {
               title: "✅ All Public Channels Locked",
-              description: `Locked ${locked} channel(s).${failed > 0 ? ` Failed to lock ${failed} channel(s) (missing permissions).` : ''}`,
+              description: `Locked ${locked} channel(s).${
+                failed > 0
+                  ? ` Failed to lock ${failed} channel(s) (missing permissions).`
+                  : ""
+              }`,
               color: 0xff0000,
             },
           ],
@@ -293,13 +297,13 @@ module.exports = {
               });
               unlocked++;
             } catch (error) {
-            const ErrorHandler = require("../utils/errorHandler");
-            ErrorHandler.logError(
-              error,
-              `lock [${interaction.guild.id}]`,
-              `Lock channel ${channel.id}`
-            );
-          }
+              const ErrorHandler = require("../utils/errorHandler");
+              ErrorHandler.logError(
+                error,
+                `lock [${interaction.guild.id}]`,
+                `Lock channel ${channel.id}`
+              );
+            }
           }
         }
 

@@ -1,4 +1,8 @@
-const { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } = require("discord.js");
+const {
+  SlashCommandBuilder,
+  PermissionFlagsBits,
+  MessageFlags,
+} = require("discord.js");
 const Moderation = require("../utils/moderation");
 const db = require("../utils/database");
 const ms = require("ms");
@@ -32,7 +36,11 @@ module.exports = {
 
     const constants = require("../utils/constants");
     const duration = ms(durationStr);
-    if (!duration || duration < constants.MUTE.MIN_DURATION || duration > constants.MUTE.MAX_DURATION) {
+    if (
+      !duration ||
+      duration < constants.MUTE.MIN_DURATION ||
+      duration > constants.MUTE.MAX_DURATION
+    ) {
       return interaction.reply({
         content:
           "❌ Invalid duration! Use format like: 1h, 30m, 1d (max 28 days)",
@@ -68,17 +76,21 @@ module.exports = {
 
     // Check if moderator is server owner (owners can mute anyone)
     const isOwner = interaction.member.id === interaction.guild.ownerId;
-    
+
     // Check if member is manageable
     if (!member.moderatable) {
       return interaction.reply({
-        content: "❌ I cannot mute this user (they have a higher role than me or are the server owner)!",
+        content:
+          "❌ I cannot mute this user (they have a higher role than me or are the server owner)!",
         flags: MessageFlags.Ephemeral,
       });
     }
-    
+
     // Check role hierarchy (unless moderator is owner)
-    if (!isOwner && member.roles.highest.position >= interaction.member.roles.highest.position) {
+    if (
+      !isOwner &&
+      member.roles.highest.position >= interaction.member.roles.highest.position
+    ) {
       return interaction.reply({
         content: "❌ You cannot mute someone with equal or higher roles!",
         flags: MessageFlags.Ephemeral,

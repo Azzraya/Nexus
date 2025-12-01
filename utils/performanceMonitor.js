@@ -152,4 +152,3 @@ class PerformanceMonitor {
 }
 
 module.exports = PerformanceMonitor;
-

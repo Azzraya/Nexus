@@ -7,10 +7,17 @@ module.exports = {
   name: "channelCreate",
   async execute(channel, client) {
     // If server is in lockdown, DELETE the channel immediately
-    if (client.advancedAntiNuke && client.advancedAntiNuke.lockedGuilds.has(channel.guild.id)) {
+    if (
+      client.advancedAntiNuke &&
+      client.advancedAntiNuke.lockedGuilds.has(channel.guild.id)
+    ) {
       try {
-        await channel.delete("Anti-Nuke: Channel created during lockdown").catch(() => {});
-        logger.warn(`[Anti-Nuke] Deleted channel ${channel.id} created during lockdown in ${channel.guild.id}`);
+        await channel
+          .delete("Anti-Nuke: Channel created during lockdown")
+          .catch(() => {});
+        logger.warn(
+          `[Anti-Nuke] Deleted channel ${channel.id} created during lockdown in ${channel.guild.id}`
+        );
         return; // Don't process further
       } catch (error) {
         // Continue to monitoring
@@ -107,12 +114,14 @@ module.exports = {
           .setColor(0x00ff00)
           .setTimestamp();
 
-        logChannel.send({ embeds: [embed] }).catch(
-          ErrorHandler.createSafeCatch(
-            `channelCreate [${channel.guild.id}]`,
-            `Send mod log for channel create`
-          )
-        );
+        logChannel
+          .send({ embeds: [embed] })
+          .catch(
+            ErrorHandler.createSafeCatch(
+              `channelCreate [${channel.guild.id}]`,
+              `Send mod log for channel create`
+            )
+          );
       }
     }
   },

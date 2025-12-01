@@ -64,9 +64,11 @@ class ThreatIntelligence {
     const verifiedThreats = threats.filter((t) => t.verified);
 
     verifiedThreats.forEach((threat) => {
-      if (threat.severity === "critical") riskScore += settings.severity_critical;
+      if (threat.severity === "critical")
+        riskScore += settings.severity_critical;
       else if (threat.severity === "high") riskScore += settings.severity_high;
-      else if (threat.severity === "medium") riskScore += settings.severity_medium;
+      else if (threat.severity === "medium")
+        riskScore += settings.severity_medium;
       else riskScore += settings.severity_low;
     });
 

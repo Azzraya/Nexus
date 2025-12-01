@@ -11,9 +11,7 @@ module.exports = {
     .setName("joinraid")
     .setDescription("Configure Join Raid detection (advanced anti-raid)")
     .addSubcommand((subcommand) =>
-      subcommand
-        .setName("enable")
-        .setDescription("Enable Join Raid detection")
+      subcommand.setName("enable").setDescription("Enable Join Raid detection")
     )
     .addSubcommand((subcommand) =>
       subcommand
@@ -110,13 +108,13 @@ module.exports = {
       const threshold = interaction.options.getInteger("threshold");
       const window = interaction.options.getInteger("window");
       const action = interaction.options.getString("action");
-      const patternDetection = interaction.options.getBoolean("pattern_detection");
+      const patternDetection =
+        interaction.options.getBoolean("pattern_detection");
       const behavioralDetection = interaction.options.getBoolean(
         "behavioral_detection"
       );
-      const networkDetection = interaction.options.getBoolean(
-        "network_detection"
-      );
+      const networkDetection =
+        interaction.options.getBoolean("network_detection");
 
       const updates = {};
       if (threshold) updates.anti_raid_max_joins = threshold;
@@ -227,4 +225,3 @@ module.exports = {
     }
   },
 };
-

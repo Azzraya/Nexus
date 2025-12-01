@@ -14,7 +14,8 @@ class ErrorHelper {
     if (errorCode === 50001) {
       return {
         message: "❌ Missing permissions to execute this command.",
-        solution: "Make sure the bot has the required permissions. Use `/help` to see required permissions.",
+        solution:
+          "Make sure the bot has the required permissions. Use `/help` to see required permissions.",
         help: "Check bot permissions in Server Settings > Roles > Nexus Bot",
       };
     }
@@ -22,7 +23,8 @@ class ErrorHelper {
     if (errorCode === 50013) {
       return {
         message: "❌ Missing required permissions.",
-        solution: "The bot needs additional permissions. Check Server Settings > Roles.",
+        solution:
+          "The bot needs additional permissions. Check Server Settings > Roles.",
         help: "Common missing permissions: Manage Messages, Ban Members, Manage Roles",
       };
     }
@@ -30,7 +32,8 @@ class ErrorHelper {
     if (errorCode === 429 || error.status === 429) {
       return {
         message: "⏳ Rate limited. Please try again in a moment.",
-        solution: "You're sending commands too quickly. Wait a few seconds and try again.",
+        solution:
+          "You're sending commands too quickly. Wait a few seconds and try again.",
         help: "Rate limits reset after a short cooldown period.",
       };
     }
@@ -38,7 +41,8 @@ class ErrorHelper {
     if (errorCode === 10008) {
       return {
         message: "❌ Message not found.",
-        solution: "The message you're trying to interact with may have been deleted.",
+        solution:
+          "The message you're trying to interact with may have been deleted.",
         help: "Try the command again with a different message.",
       };
     }
@@ -52,19 +56,27 @@ class ErrorHelper {
     }
 
     // Database errors
-    if (error.message?.includes("SQLITE") || error.message?.includes("database")) {
+    if (
+      error.message?.includes("SQLITE") ||
+      error.message?.includes("database")
+    ) {
       return {
         message: "❌ Database error occurred.",
-        solution: "There was an issue accessing the database. This has been logged.",
+        solution:
+          "There was an issue accessing the database. This has been logged.",
         help: "If this persists, contact support with the error details.",
       };
     }
 
     // Network errors
-    if (error.message?.includes("ECONNREFUSED") || error.message?.includes("timeout")) {
+    if (
+      error.message?.includes("ECONNREFUSED") ||
+      error.message?.includes("timeout")
+    ) {
       return {
         message: "❌ Connection error.",
-        solution: "Unable to connect to Discord's servers. Please try again in a moment.",
+        solution:
+          "Unable to connect to Discord's servers. Please try again in a moment.",
         help: "Check your internet connection and Discord's status.",
       };
     }
@@ -72,7 +84,8 @@ class ErrorHelper {
     // Generic error
     return {
       message: "❌ An error occurred while executing this command.",
-      solution: "This error has been logged. Please try again, or contact support if it persists.",
+      solution:
+        "This error has been logged. Please try again, or contact support if it persists.",
       help: `Error: ${error.message || "Unknown error"}`,
     };
   }
@@ -100,7 +113,9 @@ class ErrorHelper {
         }
       )
       .setColor(0xff0000)
-      .setFooter({ text: "Need more help? Use /support or join our support server" })
+      .setFooter({
+        text: "Need more help? Use /support or join our support server",
+      })
       .setTimestamp();
 
     return embed;
@@ -129,4 +144,3 @@ class ErrorHelper {
 }
 
 module.exports = ErrorHelper;
-

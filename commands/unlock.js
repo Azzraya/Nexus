@@ -21,7 +21,11 @@ module.exports = {
     }
 
     // Check if server is actually locked
-    if (!interaction.client.advancedAntiNuke.lockedGuilds.has(interaction.guild.id)) {
+    if (
+      !interaction.client.advancedAntiNuke.lockedGuilds.has(
+        interaction.guild.id
+      )
+    ) {
       return interaction.reply({
         content: "✅ Server is not in lockdown mode!",
         flags: MessageFlags.Ephemeral,
@@ -33,18 +37,22 @@ module.exports = {
     try {
       // Unlock all channels
       const channels = interaction.guild.channels.cache.filter(
-        (c) => c.isTextBased() && c.permissionsFor(interaction.guild.roles.everyone)
+        (c) =>
+          c.isTextBased() && c.permissionsFor(interaction.guild.roles.everyone)
       );
 
       let unlockedCount = 0;
       for (const channel of channels.values()) {
         try {
-          await channel.permissionOverwrites.edit(interaction.guild.roles.everyone, {
-            SendMessages: null, // Reset to default
-            AddReactions: null,
-            CreatePublicThreads: null,
-            CreatePrivateThreads: null,
-          });
+          await channel.permissionOverwrites.edit(
+            interaction.guild.roles.everyone,
+            {
+              SendMessages: null, // Reset to default
+              AddReactions: null,
+              CreatePublicThreads: null,
+              CreatePrivateThreads: null,
+            }
+          );
           unlockedCount++;
         } catch (error) {
           // Continue with other channels
@@ -52,13 +60,15 @@ module.exports = {
       }
 
       // Remove from locked guilds
-      interaction.client.advancedAntiNuke.lockedGuilds.delete(interaction.guild.id);
+      interaction.client.advancedAntiNuke.lockedGuilds.delete(
+        interaction.guild.id
+      );
 
       const embed = new EmbedBuilder()
         .setTitle("✅ Server Unlocked")
         .setDescription(
           `**${unlockedCount}** channels have been unlocked.\n\n` +
-          `The server is now back to normal operation.`
+            `The server is now back to normal operation.`
         )
         .setColor(0x00ff00)
         .setTimestamp();
@@ -71,4 +81,3 @@ module.exports = {
     }
   },
 };
-

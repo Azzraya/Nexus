@@ -3,7 +3,9 @@
 const OWNER_ID = process.env.OWNER_ID;
 
 if (!OWNER_ID) {
-  console.error("⚠️ WARNING: OWNER_ID not set in .env file! Owner-only commands will not work.");
+  console.error(
+    "⚠️ WARNING: OWNER_ID not set in .env file! Owner-only commands will not work."
+  );
 }
 
 class Owner {

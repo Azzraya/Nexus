@@ -45,12 +45,16 @@ module.exports = {
         },
         {
           name: "📊 Commands",
-          value: `**Total Executed:** ${stats.commands.total}\n**Avg Time:** ${stats.commands.averageTime.toFixed(2)}ms`,
+          value: `**Total Executed:** ${
+            stats.commands.total
+          }\n**Avg Time:** ${stats.commands.averageTime.toFixed(2)}ms`,
           inline: true,
         },
         {
           name: "🗄️ Database",
-          value: `**Total Queries:** ${stats.database.totalQueries}\n**Avg Time:** ${stats.database.averageTime.toFixed(2)}ms`,
+          value: `**Total Queries:** ${
+            stats.database.totalQueries
+          }\n**Avg Time:** ${stats.database.averageTime.toFixed(2)}ms`,
           inline: true,
         },
         {

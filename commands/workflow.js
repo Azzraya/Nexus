@@ -12,9 +12,7 @@ const db = require("../utils/database");
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("workflow")
-    .setDescription(
-      "Create and manage custom automation workflows "
-    )
+    .setDescription("Create and manage custom automation workflows ")
     .addSubcommand((subcommand) =>
       subcommand
         .setName("create")

@@ -74,11 +74,19 @@ module.exports = {
     try {
       const AutoRecovery = require("../utils/autoRecovery");
       await AutoRecovery.autoSnapshot(guild, "Initial snapshot on bot join");
-      logger.info(`📸 Created initial recovery snapshot for ${guild.name} (${guild.id})`);
+      logger.info(
+        `📸 Created initial recovery snapshot for ${guild.name} (${guild.id})`
+      );
       console.log(`📸 Created initial recovery snapshot for ${guild.name}`);
     } catch (error) {
-      logger.error(`Failed to create initial snapshot for ${guild.name}:`, error);
-      console.error(`Failed to create initial snapshot for ${guild.name}:`, error.message);
+      logger.error(
+        `Failed to create initial snapshot for ${guild.name}:`,
+        error
+      );
+      console.error(
+        `Failed to create initial snapshot for ${guild.name}:`,
+        error.message
+      );
     }
   },
 };

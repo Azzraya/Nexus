@@ -594,12 +594,7 @@ class AdvancedAntiNuke {
       await this.logThreat(guild, userId, threatType, counts, removed);
 
       // Alert admins first (so they know what's happening)
-      await this.alertAdmins(
-        guild,
-        userId,
-        threatType,
-        counts
-      );
+      await this.alertAdmins(guild, userId, threatType, counts);
 
       // Wait a moment for Discord to process the ban/kick and for cleanup to complete
       await new Promise((resolve) => setTimeout(resolve, 3000));
@@ -812,7 +807,7 @@ class AdvancedAntiNuke {
       // Get the attack start time (when threat was first detected)
       // We need snapshots created BEFORE the attack started
       const attackStartTime = Date.now() - (this.windowMs || 10000); // Approximate attack start (10 seconds before now)
-      
+
       // Try to get the actual threat detection time from security logs
       const threatLog = await new Promise((resolve, reject) => {
         db.db.get(
@@ -826,10 +821,14 @@ class AdvancedAntiNuke {
       }).catch(() => null);
 
       // Use threat log timestamp if available, otherwise use approximate
-      const minSnapshotTime = threatLog ? threatLog.timestamp - 5000 : attackStartTime - 60000; // 5 seconds before threat, or 1 minute before now
+      const minSnapshotTime = threatLog
+        ? threatLog.timestamp - 5000
+        : attackStartTime - 60000; // 5 seconds before threat, or 1 minute before now
 
       logger.info(
-        `[Anti-Nuke] Looking for snapshots created before ${new Date(minSnapshotTime).toISOString()}`
+        `[Anti-Nuke] Looking for snapshots created before ${new Date(
+          minSnapshotTime
+        ).toISOString()}`
       );
 
       // Get snapshots created BEFORE the attack started (try "full" first, then "auto", then any)
@@ -954,9 +953,7 @@ class AdvancedAntiNuke {
       // DM all admins
       const adminMembers = guild.members.cache.filter(
         (m) =>
-          m.permissions.has("Administrator") &&
-          !m.user.bot &&
-          m.id !== userId
+          m.permissions.has("Administrator") && !m.user.bot && m.id !== userId
       );
 
       // Also DM owner
@@ -1156,7 +1153,8 @@ class AdvancedAntiNuke {
     if (!message.content) return;
 
     // Count emojis in message
-    const emojiRegex = /<a?:[\w]+:\d+>|[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu;
+    const emojiRegex =
+      /<a?:[\w]+:\d+>|[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu;
     const emojiMatches = message.content.match(emojiRegex) || [];
     const emojiCount = emojiMatches.length;
 
@@ -1184,7 +1182,9 @@ class AdvancedAntiNuke {
           );
 
           // Warn user
-          const member = await message.guild.members.fetch(userId).catch(() => null);
+          const member = await message.guild.members
+            .fetch(userId)
+            .catch(() => null);
           if (member) {
             await member
               .send(
@@ -1215,7 +1215,10 @@ class AdvancedAntiNuke {
     webhookData.messageCount++;
 
     // If webhook sends 5+ messages in 10 seconds, it's spam
-    if (webhookData.messageCount >= 5 && Date.now() - webhookData.createdAt < 10000) {
+    if (
+      webhookData.messageCount >= 5 &&
+      Date.now() - webhookData.createdAt < 10000
+    ) {
       try {
         await webhook.delete("Anti-Nuke: Webhook spam detected");
         logger.warn(

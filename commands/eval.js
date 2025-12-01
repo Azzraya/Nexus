@@ -29,7 +29,8 @@ module.exports = {
    */
   ensureFieldLength(text, maxChars) {
     const constants = require("../utils/constants");
-    if (maxChars === undefined) maxChars = constants.DISCORD.EMBED_FIELD_VALUE_SAFE;
+    if (maxChars === undefined)
+      maxChars = constants.DISCORD.EMBED_FIELD_VALUE_SAFE;
     if (typeof text !== "string") text = String(text);
     if (text.length > maxChars) {
       return text.substring(0, maxChars) + "... (truncated)";

@@ -9,9 +9,7 @@ const EnhancedLogging = require("../utils/enhancedLogging");
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("logs")
-    .setDescription(
-      "Advanced log management with search and export "
-    )
+    .setDescription("Advanced log management with search and export ")
     .addSubcommand((subcommand) =>
       subcommand
         .setName("search")

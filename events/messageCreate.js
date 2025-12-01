@@ -1,5 +1,6 @@
 const AutoMod = require("../utils/automod");
 const db = require("../utils/database");
+const logger = require("../utils/logger");
 
 module.exports = {
   name: "messageCreate",
@@ -108,102 +109,125 @@ module.exports = {
     // Check auto-moderation
     await AutoMod.checkMessage(message, client);
 
-    // Check for spam patterns
-    const content = message.content.toLowerCase();
-    const spamPatterns = [
-      /(discord\.gg|discord\.com\/invite)\/\w+/g, // Invite links
-      /(http|https):\/\/\S+/g, // URLs
-      /@everyone|@here/g, // Mentions
-    ];
+    // Advanced Heat System
+    if (
+      client.heatSystem &&
+      typeof client.heatSystem.calculateHeat === "function"
+    ) {
+      try {
+        // Get server config for heat system
+        const config = await db.getServerConfig(message.guild.id);
+        const heatConfig = {
+          heatThreshold: config?.heat_threshold || 100,
+          heatCap: config?.heat_cap || 150,
+          firstTimeoutDuration: config?.first_timeout_duration || 86400000, // 1 day
+          capTimeoutDuration: config?.cap_timeout_duration || 1209600000, // 14 days
+          panicModeRaiders: config?.panic_mode_raiders || 3,
+          panicModeDuration: config?.panic_mode_duration || 600000, // 10 minutes
+          panicTimeoutDuration: config?.panic_timeout_duration || 600000, // 10 minutes
+          pingRaidThreshold: config?.ping_raid_threshold || 50,
+          pingRaidTimeWindow: config?.ping_raid_time_window || 30000, // 30 seconds
+          blacklistedWords: config?.blacklisted_words
+            ? JSON.parse(config.blacklisted_words)
+            : [],
+          blacklistedLinks: config?.blacklisted_links
+            ? JSON.parse(config.blacklisted_links)
+            : [],
+        };
 
-    let spamScore = 0;
-    for (const pattern of spamPatterns) {
-      const matches = message.content.match(pattern);
-      if (matches) spamScore += matches.length * 5;
-    }
+        // Calculate heat for this message
+        const heatAmount = client.heatSystem.calculateHeat(message, heatConfig);
 
-    // Check for repeated characters (spam)
-    if (/(.)\1{10,}/.test(message.content)) {
-      spamScore += 20;
-    }
-
-    // Check message length
-    if (message.content.length > 2000) {
-      spamScore += 15;
-    }
-
-    // Check for rapid messages
-    const userKey = `${message.guild.id}-${message.author.id}`;
-    const userData = client.heatSystem.get(userKey) || {
-      lastMessage: 0,
-      messageCount: 0,
-    };
-    const timeSinceLastMessage = Date.now() - userData.lastMessage;
-
-    if (timeSinceLastMessage < 1000) {
-      spamScore += 10;
-    }
-
-    if (spamScore > 0) {
-      const heatResult = await client.addHeat(
-        message.guild.id,
-        message.author.id,
-        spamScore,
-        "Spam detection"
-      );
-
-      if (heatResult.action) {
-        // Auto-moderate based on heat
-        if (heatResult.action === "warn") {
-          message.reply(
-            "⚠️ Warning: Your message was flagged. Please follow server rules."
+        if (heatAmount > 0) {
+          // Add heat to user
+          const heatScore = await client.heatSystem.addHeat(
+            message.guild.id,
+            message.author.id,
+            heatAmount,
+            "Message heat calculation"
           );
-        } else if (heatResult.action === "mute") {
-          const ErrorHandler = require("../utils/errorHandler");
-          const constants = require("../utils/constants");
-          await ErrorHandler.safeExecute(
-            message.member.timeout(
-              constants.TIME.MINUTE * 10,
-              "Auto-mute: High heat score"
-            ),
-            `messageCreate [${message.guild.id}]`,
-            `Auto-mute for heat score ${heatResult.score}`
+
+          // Check for ping raid (mentions)
+          const mentionCount =
+            message.mentions.users.size + message.mentions.roles.size;
+          if (mentionCount > 0) {
+            await client.heatSystem.checkPingRaid(
+              message.guild.id,
+              message.author.id,
+              mentionCount,
+              heatConfig
+            );
+          }
+
+          // Check if punishment is needed
+          const punishment = await client.heatSystem.checkPunishment(
+            message.guild.id,
+            message.author.id,
+            heatScore,
+            heatConfig
           );
-          await ErrorHandler.safeExecute(
-            message.delete(),
-            `messageCreate [${message.guild.id}]`,
-            `Delete message after mute action`
-          );
-        } else if (heatResult.action === "kick") {
-          const ErrorHandler = require("../utils/errorHandler");
-          await ErrorHandler.safeExecute(
-            message.member.kick("Auto-kick: Excessive spam"),
-            `messageCreate [${message.guild.id}]`,
-            `Auto-kick for heat score ${heatResult.score}`
-          );
-          await ErrorHandler.safeExecute(
-            message.delete(),
-            `messageCreate [${message.guild.id}]`,
-            `Delete message after kick action`
-          );
-        } else if (heatResult.action === "ban") {
-          const ErrorHandler = require("../utils/errorHandler");
-          await ErrorHandler.safeExecute(
-            message.member.ban({
-              reason: "Auto-ban: Extreme spam",
-              deleteMessageDays: 1,
-            }),
-            `messageCreate [${message.guild.id}]`,
-            `Auto-ban for heat score ${heatResult.score}`
-          );
+
+          if (punishment) {
+            const ErrorHandler = require("../utils/errorHandler");
+            const member = await message.guild.members
+              .fetch(message.author.id)
+              .catch(() => null);
+
+            if (member && punishment.action === "timeout") {
+              // Apply timeout with multiplier
+              await ErrorHandler.safeExecute(
+                member.timeout(punishment.duration, punishment.reason),
+                `messageCreate [${message.guild.id}]`,
+                `Timeout for heat score ${heatScore} (duration: ${punishment.duration}ms)`
+              );
+
+              // Delete message if needed
+              if (punishment.purgeMessages) {
+                await ErrorHandler.safeExecute(
+                  message.delete(),
+                  `messageCreate [${message.guild.id}]`,
+                  `Delete message after timeout (cap reached)`
+                );
+              }
+
+              // Mark as raider if in panic mode
+              if (client.heatSystem.heatPanicMode.has(message.guild.id)) {
+                client.heatSystem.markRaider(
+                  message.guild.id,
+                  message.author.id
+                );
+              }
+
+              // Increase multiplier for next violation
+              client.heatSystem.increaseTimeoutMultiplier(
+                message.guild.id,
+                message.author.id
+              );
+            }
+          }
+
+          // Check for heat panic mode trigger (multiple raiders)
+          // This would need to track raiders across multiple users
+          // For now, we'll trigger it if a single user reaches cap multiple times
+          if (heatScore >= heatConfig.heatCap) {
+            // Check if we should trigger panic mode
+            const raiderCount = Array.from(
+              client.heatSystem.raiderDetection.values()
+            ).filter((r) => r.guildId === message.guild.id).length;
+
+            if (raiderCount >= heatConfig.panicModeRaiders) {
+              client.heatSystem.triggerHeatPanicMode(
+                message.guild.id,
+                raiderCount,
+                heatConfig
+              );
+            }
+          }
         }
+      } catch (error) {
+        logger.error(`[HeatSystem] Error processing message heat:`, error);
       }
     }
-
-    // Update user data
-    userData.lastMessage = Date.now();
-    userData.messageCount++;
-    client.heatSystem.set(userKey, userData);
 
     // Track behavior
     const BehavioralAnalysis = require("../utils/behavioralAnalysis");

@@ -93,14 +93,17 @@ class JoinGate {
 
       // Adjust suspicious threshold based on sensitivity (less sensitive = higher threshold needed)
       const baseSuspiciousThreshold = config.suspicious_threshold || 60;
-      const adjustedSuspiciousThreshold = Math.ceil(baseSuspiciousThreshold * sensitivityMultiplier);
+      const adjustedSuspiciousThreshold = Math.ceil(
+        baseSuspiciousThreshold * sensitivityMultiplier
+      );
       const banThreshold = Math.ceil(80 * sensitivityMultiplier);
 
       if (threat.score >= adjustedSuspiciousThreshold) {
         checks.push({
           filtered: true,
           reason: `Suspicious account (threat score: ${threat.score})`,
-          action: threat.score >= banThreshold ? "ban" : config.action || "kick",
+          action:
+            threat.score >= banThreshold ? "ban" : config.action || "kick",
         });
       }
     }

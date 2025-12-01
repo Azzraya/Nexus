@@ -13,7 +13,11 @@ module.exports = {
         });
         const entry = auditLogs.entries.first();
         // Check if this was a kick (not a leave) and happened recently
-        if (entry && entry.executor && Date.now() - entry.createdTimestamp < 5000) {
+        if (
+          entry &&
+          entry.executor &&
+          Date.now() - entry.createdTimestamp < 5000
+        ) {
           await client.advancedAntiNuke.monitorAction(
             member.guild,
             "memberRemove",
@@ -49,10 +53,12 @@ module.exports = {
               },
             ],
           })
-          .catch(ErrorHandler.createSafeCatch(
-            `guildMemberRemove [${member.guild.id}]`,
-            `Send leave message for ${member.user.id}`
-          ));
+          .catch(
+            ErrorHandler.createSafeCatch(
+              `guildMemberRemove [${member.guild.id}]`,
+              `Send leave message for ${member.user.id}`
+            )
+          );
       }
     }
 
@@ -79,14 +85,20 @@ module.exports = {
 
     // Check for mod log channel
     if (config && config.mod_log_channel) {
-      const logChannel = member.guild.channels.cache.get(config.mod_log_channel);
+      const logChannel = member.guild.channels.cache.get(
+        config.mod_log_channel
+      );
       if (logChannel) {
         const { EmbedBuilder } = require("discord.js");
         const embed = new EmbedBuilder()
           .setTitle("👋 Member Left")
           .setDescription(`**${member.user.tag}** left the server`)
           .addFields(
-            { name: "User", value: `${member.user} (${member.user.id})`, inline: true },
+            {
+              name: "User",
+              value: `${member.user} (${member.user.id})`,
+              inline: true,
+            },
             {
               name: "Account Created",
               value: `<t:${Math.floor(member.user.createdTimestamp / 1000)}:R>`,
@@ -113,12 +125,14 @@ module.exports = {
           .setThumbnail(member.user.displayAvatarURL())
           .setTimestamp();
 
-        logChannel.send({ embeds: [embed] }).catch(
-          ErrorHandler.createSafeCatch(
-            `guildMemberRemove [${member.guild.id}]`,
-            `Send mod log for member leave`
-          )
-        );
+        logChannel
+          .send({ embeds: [embed] })
+          .catch(
+            ErrorHandler.createSafeCatch(
+              `guildMemberRemove [${member.guild.id}]`,
+              `Send mod log for member leave`
+            )
+          );
       }
     }
   },

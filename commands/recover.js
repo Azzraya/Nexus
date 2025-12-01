@@ -13,9 +13,7 @@ const db = require("../utils/database");
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("recover")
-    .setDescription(
-      "Auto-recovery system for server restoration "
-    )
+    .setDescription("Auto-recovery system for server restoration ")
     .addSubcommand((subcommand) =>
       subcommand
         .setName("snapshot")

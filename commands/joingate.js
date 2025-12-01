@@ -12,14 +12,10 @@ module.exports = {
     .setName("joingate")
     .setDescription("Configure Join Gate - Filter new members")
     .addSubcommand((subcommand) =>
-      subcommand
-        .setName("enable")
-        .setDescription("Enable Join Gate")
+      subcommand.setName("enable").setDescription("Enable Join Gate")
     )
     .addSubcommand((subcommand) =>
-      subcommand
-        .setName("disable")
-        .setDescription("Disable Join Gate")
+      subcommand.setName("disable").setDescription("Disable Join Gate")
     )
     .addSubcommand((subcommand) =>
       subcommand
@@ -162,7 +158,9 @@ module.exports = {
         embeds: [
           {
             title: "✅ Setting Updated",
-            description: `**${setting.replace(/_/g, " ").toUpperCase()}** is now ${enabled ? "enabled" : "disabled"}`,
+            description: `**${setting
+              .replace(/_/g, " ")
+              .toUpperCase()}** is now ${enabled ? "enabled" : "disabled"}`,
             color: 0x00ff00,
           },
         ],
@@ -278,7 +276,10 @@ module.exports = {
           .setColor(0x0099ff)
           .setTimestamp();
 
-        await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
+        await interaction.reply({
+          embeds: [embed],
+          flags: MessageFlags.Ephemeral,
+        });
       }
     } else if (subcommand === "view") {
       const config = await JoinGate.getConfig(interaction.guild.id);
@@ -317,12 +318,22 @@ module.exports = {
           {
             name: "Detection Filters",
             value: [
-              config.target_unauthorized_bots ? "✅ Unauthorized Bots" : "❌ Unauthorized Bots",
-              config.target_new_accounts ? "✅ New Accounts" : "❌ New Accounts",
+              config.target_unauthorized_bots
+                ? "✅ Unauthorized Bots"
+                : "❌ Unauthorized Bots",
+              config.target_new_accounts
+                ? "✅ New Accounts"
+                : "❌ New Accounts",
               config.target_no_avatar ? "✅ No Avatar" : "❌ No Avatar",
-              config.target_unverified_bots ? "✅ Unverified Bots" : "❌ Unverified Bots",
-              config.target_invite_usernames ? "✅ Invite Usernames" : "❌ Invite Usernames",
-              config.target_suspicious ? "✅ Suspicious Accounts" : "❌ Suspicious Accounts",
+              config.target_unverified_bots
+                ? "✅ Unverified Bots"
+                : "❌ Unverified Bots",
+              config.target_invite_usernames
+                ? "✅ Invite Usernames"
+                : "❌ Invite Usernames",
+              config.target_suspicious
+                ? "✅ Suspicious Accounts"
+                : "❌ Suspicious Accounts",
             ].join("\n"),
             inline: false,
           }
@@ -346,8 +357,10 @@ module.exports = {
         });
       }
 
-      await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
+      await interaction.reply({
+        embeds: [embed],
+        flags: MessageFlags.Ephemeral,
+      });
     }
   },
 };
-

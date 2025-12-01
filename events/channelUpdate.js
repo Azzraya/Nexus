@@ -112,7 +112,11 @@ module.exports = {
 
     // Console logging
     console.log(
-      `🔧 [${newChannel.guild.name} (${newChannel.guild.id})] Channel updated: #${newChannel.name} - ${changes.map((c) => c.name).join(", ")}`
+      `🔧 [${newChannel.guild.name} (${
+        newChannel.guild.id
+      })] Channel updated: #${newChannel.name} - ${changes
+        .map((c) => c.name)
+        .join(", ")}`
     );
 
     // Enhanced logging
@@ -151,12 +155,14 @@ module.exports = {
           .setColor(0xffa500)
           .setTimestamp();
 
-        logChannel.send({ embeds: [embed] }).catch(
-          ErrorHandler.createSafeCatch(
-            `channelUpdate [${newChannel.guild.id}]`,
-            `Send mod log for channel update`
-          )
-        );
+        logChannel
+          .send({ embeds: [embed] })
+          .catch(
+            ErrorHandler.createSafeCatch(
+              `channelUpdate [${newChannel.guild.id}]`,
+              `Send mod log for channel update`
+            )
+          );
       }
     }
   },

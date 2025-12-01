@@ -1,4 +1,8 @@
-const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require("discord.js");
+const {
+  SlashCommandBuilder,
+  EmbedBuilder,
+  MessageFlags,
+} = require("discord.js");
 const ShardManager = require("../utils/shardManager");
 const Owner = require("../utils/owner");
 

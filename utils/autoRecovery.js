@@ -13,12 +13,13 @@ class AutoRecovery {
         type: channel.type,
         parent: channel.parentId,
         position: channel.position,
-        permissions: channel.permissionOverwrites?.cache?.map((overwrite) => ({
-          id: overwrite.id,
-          type: overwrite.type,
-          allow: overwrite.allow.toArray(),
-          deny: overwrite.deny.toArray(),
-        })) || [],
+        permissions:
+          channel.permissionOverwrites?.cache?.map((overwrite) => ({
+            id: overwrite.id,
+            type: overwrite.type,
+            allow: overwrite.allow.toArray(),
+            deny: overwrite.deny.toArray(),
+          })) || [],
       }));
     } else if (snapshotType === "roles") {
       snapshotData.roles = guild.roles.cache
@@ -36,31 +37,38 @@ class AutoRecovery {
       // Ensure channels are fetched if cache is empty
       let channels = guild.channels.cache;
       if (channels.size === 0) {
-        logger.warn(`[AutoRecovery] Channel cache is empty, fetching channels for ${guild.name}`);
-        channels = await guild.channels.fetch().catch(() => guild.channels.cache);
+        logger.warn(
+          `[AutoRecovery] Channel cache is empty, fetching channels for ${guild.name}`
+        );
+        channels = await guild.channels
+          .fetch()
+          .catch(() => guild.channels.cache);
       }
-      
+
       snapshotData.channels = Array.from(channels.values()).map((channel) => ({
         id: channel.id,
         name: channel.name,
         type: channel.type,
         parent: channel.parentId,
         position: channel.position,
-        permissions: channel.permissionOverwrites?.cache?.map((overwrite) => ({
-          id: overwrite.id,
-          type: overwrite.type,
-          allow: overwrite.allow.toArray(),
-          deny: overwrite.deny.toArray(),
-        })) || [],
+        permissions:
+          channel.permissionOverwrites?.cache?.map((overwrite) => ({
+            id: overwrite.id,
+            type: overwrite.type,
+            allow: overwrite.allow.toArray(),
+            deny: overwrite.deny.toArray(),
+          })) || [],
       }));
-      
+
       // Ensure roles are fetched if cache is empty
       let roles = guild.roles.cache;
       if (roles.size === 0) {
-        logger.warn(`[AutoRecovery] Role cache is empty, fetching roles for ${guild.name}`);
+        logger.warn(
+          `[AutoRecovery] Role cache is empty, fetching roles for ${guild.name}`
+        );
         roles = await guild.roles.fetch().catch(() => guild.roles.cache);
       }
-      
+
       snapshotData.roles = Array.from(roles.values())
         .filter((role) => role.id !== guild.id)
         .map((role) => ({
@@ -72,8 +80,10 @@ class AutoRecovery {
           mentionable: role.mentionable,
           hoist: role.hoist,
         }));
-      
-      logger.info(`[AutoRecovery] Snapshot created: ${snapshotData.channels.length} channels, ${snapshotData.roles.length} roles`);
+
+      logger.info(
+        `[AutoRecovery] Snapshot created: ${snapshotData.channels.length} channels, ${snapshotData.roles.length} roles`
+      );
     }
 
     await db.createRecoverySnapshot(

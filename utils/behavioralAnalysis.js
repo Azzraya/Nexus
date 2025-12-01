@@ -51,7 +51,7 @@ class BehavioralAnalysis {
         try {
           // Handle if data is already an object or a JSON string
           let data = b.data;
-          if (typeof data === 'string') {
+          if (typeof data === "string") {
             // Try to parse JSON
             try {
               data = JSON.parse(data);
@@ -61,7 +61,7 @@ class BehavioralAnalysis {
             }
           }
           // If data is an object, extract content
-          if (typeof data === 'object' && data !== null) {
+          if (typeof data === "object" && data !== null) {
             return data.content || "";
           }
           return "";
@@ -131,19 +131,19 @@ class BehavioralAnalysis {
   }
 
   static analyzeModerationPatterns(behaviors) {
-    const actions = behaviors.map(
-      (b) => {
-        try {
-          let data = b.data;
-          if (typeof data === 'string') {
-            data = JSON.parse(data);
-          }
-          return (typeof data === 'object' && data !== null) ? (data.action || "") : "";
-        } catch {
-          return "";
+    const actions = behaviors.map((b) => {
+      try {
+        let data = b.data;
+        if (typeof data === "string") {
+          data = JSON.parse(data);
         }
+        return typeof data === "object" && data !== null
+          ? data.action || ""
+          : "";
+      } catch {
+        return "";
       }
-    );
+    });
 
     const actionCounts = {};
     actions.forEach((action) => {

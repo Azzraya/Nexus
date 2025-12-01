@@ -61,22 +61,29 @@ module.exports = {
     const member = await interaction.guild.members
       .fetch(user.id)
       .catch(() => null);
-    
+
     // Check if moderator is server owner (owners can ban anyone)
     const isOwner = interaction.member.id === interaction.guild.ownerId;
-    
+
     // Check if member is manageable (bot can ban them)
     if (member) {
-      const botMember = await interaction.guild.members.fetch(interaction.client.user.id);
+      const botMember = await interaction.guild.members.fetch(
+        interaction.client.user.id
+      );
       if (!member.manageable) {
         return interaction.reply({
-          content: "❌ I cannot ban this user (they have a higher role than me or are the server owner)!",
+          content:
+            "❌ I cannot ban this user (they have a higher role than me or are the server owner)!",
           flags: MessageFlags.Ephemeral,
         });
       }
-      
+
       // Check role hierarchy (unless moderator is owner)
-      if (!isOwner && member.roles.highest.position >= interaction.member.roles.highest.position) {
+      if (
+        !isOwner &&
+        member.roles.highest.position >=
+          interaction.member.roles.highest.position
+      ) {
         return interaction.reply({
           content: "❌ You cannot ban someone with equal or higher roles!",
           flags: MessageFlags.Ephemeral,

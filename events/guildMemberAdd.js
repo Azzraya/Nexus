@@ -240,10 +240,9 @@ module.exports = {
       if (welcomeChannel && welcomeChannel.isTextBased()) {
         // Check if bot has permission to send messages in this channel
         const botMember = member.guild.members.me;
-        const canSend = welcomeChannel.permissionsFor(botMember)?.has([
-          "ViewChannel",
-          "SendMessages",
-        ]);
+        const canSend = welcomeChannel
+          .permissionsFor(botMember)
+          ?.has(["ViewChannel", "SendMessages"]);
 
         if (canSend) {
           const message = config.welcome_message

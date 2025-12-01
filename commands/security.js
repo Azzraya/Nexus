@@ -28,7 +28,9 @@ module.exports = {
     .addSubcommand((subcommand) =>
       subcommand
         .setName("rolecheck")
-        .setDescription("Check if bot role is positioned correctly for anti-nuke protection")
+        .setDescription(
+          "Check if bot role is positioned correctly for anti-nuke protection"
+        )
     )
     .addSubcommand((subcommand) =>
       subcommand
@@ -243,21 +245,26 @@ module.exports = {
       await interaction.deferReply();
 
       try {
-        const botMember = await interaction.guild.members.fetch(interaction.client.user.id);
+        const botMember = await interaction.guild.members.fetch(
+          interaction.client.user.id
+        );
         const botRole = botMember.roles.highest;
-        
+
         // Get all roles (excluding @everyone) as an array
         const allRoles = Array.from(interaction.guild.roles.cache.values())
-          .filter(r => r.id !== interaction.guild.id)
+          .filter((r) => r.id !== interaction.guild.id)
           .sort((a, b) => b.position - a.position);
 
-        const botRoleIndex = allRoles.findIndex(r => r.id === botRole.id);
+        const botRoleIndex = allRoles.findIndex((r) => r.id === botRole.id);
         const totalRoles = allRoles.length;
         const position = botRoleIndex + 1; // 1-indexed for user display
 
         // Check for other bots with admin
-        const otherBots = interaction.guild.members.cache.filter(m => 
-          m.user.bot && m.id !== interaction.client.user.id && m.permissions.has("Administrator")
+        const otherBots = interaction.guild.members.cache.filter(
+          (m) =>
+            m.user.bot &&
+            m.id !== interaction.client.user.id &&
+            m.permissions.has("Administrator")
         );
 
         const embed = new EmbedBuilder()
@@ -273,30 +280,40 @@ module.exports = {
             },
             {
               name: "🛡️ Protection Status",
-              value: botRoleIndex === 0 
-                ? "✅ **OPTIMAL**\nBot role is at highest position"
-                : botRoleIndex <= 2
-                ? "⚠️ **GOOD**\nBot role is in top 3 positions"
-                : "❌ **RISK**\nBot role is too low - may not be able to moderate admin bots",
+              value:
+                botRoleIndex === 0
+                  ? "✅ **OPTIMAL**\nBot role is at highest position"
+                  : botRoleIndex <= 2
+                  ? "⚠️ **GOOD**\nBot role is in top 3 positions"
+                  : "❌ **RISK**\nBot role is too low - may not be able to moderate admin bots",
               inline: true,
             },
             {
               name: "🤖 Other Admin Bots",
-              value: otherBots.size > 0
-                ? `⚠️ Found ${otherBots.size} bot(s) with Administrator permission:\n${otherBots.map(b => `• ${b.user.tag}`).join("\n")}`
-                : "✅ No other admin bots found",
+              value:
+                otherBots.size > 0
+                  ? `⚠️ Found ${
+                      otherBots.size
+                    } bot(s) with Administrator permission:\n${otherBots
+                      .map((b) => `• ${b.user.tag}`)
+                      .join("\n")}`
+                  : "✅ No other admin bots found",
               inline: false,
             }
           )
           .setColor(
-            botRoleIndex === 0 ? 0x00ff00 : botRoleIndex <= 2 ? 0xffff00 : 0xff0000
+            botRoleIndex === 0
+              ? 0x00ff00
+              : botRoleIndex <= 2
+              ? 0xffff00
+              : 0xff0000
           )
           .setTimestamp();
 
         if (botRoleIndex > 2) {
           embed.addFields({
             name: "⚠️ Action Required",
-            value: 
+            value:
               "**To fix this:**\n" +
               "1. Go to Server Settings → Roles\n" +
               "2. Find your bot's role\n" +
@@ -309,7 +326,8 @@ module.exports = {
         } else if (botRoleIndex === 0) {
           embed.addFields({
             name: "✅ Perfect Setup",
-            value: "Your bot's role is at the highest position. It can moderate any user or bot, even those with Administrator permission.",
+            value:
+              "Your bot's role is at the highest position. It can moderate any user or bot, even those with Administrator permission.",
             inline: false,
           });
         }

@@ -19,15 +19,19 @@ module.exports = {
         );
       }
 
-      logger.info(`Emoji deleted: ${emoji.name} (${emoji.id}) in ${emoji.guild?.name || "DM"}`, {
-        emojiId: emoji.id,
-        emojiName: emoji.name,
-        animated: emoji.animated,
-        guildId: emoji.guild?.id,
-      });
+      logger.info(
+        `Emoji deleted: ${emoji.name} (${emoji.id}) in ${
+          emoji.guild?.name || "DM"
+        }`,
+        {
+          emojiId: emoji.id,
+          emojiName: emoji.name,
+          animated: emoji.animated,
+          guildId: emoji.guild?.id,
+        }
+      );
     } catch (error) {
       logger.error("Error in emojiDelete event:", error);
     }
   },
 };
-

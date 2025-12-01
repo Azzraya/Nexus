@@ -28,19 +28,27 @@ class IntelligentDetection {
 
     // Analyze recent joins
     if (recentJoins.length >= 3) {
-      const accountAges = recentJoins.map(j => Date.now() - j.createdTimestamp);
-      const avgAge = accountAges.reduce((a, b) => a + b, 0) / accountAges.length;
-      
+      const accountAges = recentJoins.map(
+        (j) => Date.now() - j.createdTimestamp
+      );
+      const avgAge =
+        accountAges.reduce((a, b) => a + b, 0) / accountAges.length;
+
       // Very new accounts = higher raid risk
-      if (avgAge < 86400000) { // Less than 1 day old
+      if (avgAge < 86400000) {
+        // Less than 1 day old
         predictions.raidLikelihood += 40;
       }
-      
+
       // Check for patterns
-      const patterns = await Security.detectSuspiciousPatterns(guild, recentJoins);
+      const patterns = await Security.detectSuspiciousPatterns(
+        guild,
+        recentJoins
+      );
       if (patterns.similarUsernames > 0) predictions.raidLikelihood += 20;
       if (patterns.similarCreationDates > 0) predictions.raidLikelihood += 20;
-      if (patterns.noAvatars / recentJoins.length > 0.7) predictions.raidLikelihood += 20;
+      if (patterns.noAvatars / recentJoins.length > 0.7)
+        predictions.raidLikelihood += 20;
     }
 
     // Check historical data
@@ -112,4 +120,3 @@ class IntelligentDetection {
 }
 
 module.exports = IntelligentDetection;
-

@@ -52,9 +52,12 @@ module.exports = {
         const startTime = Date.now();
         await command.execute(interaction);
         const executionTime = Date.now() - startTime;
-        
+
         if (client.performanceMonitor) {
-          client.performanceMonitor.trackCommand(command.data.name, executionTime);
+          client.performanceMonitor.trackCommand(
+            command.data.name,
+            executionTime
+          );
         }
 
         await db.updateUserStats(

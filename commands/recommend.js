@@ -10,9 +10,7 @@ const db = require("../utils/database");
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("recommend")
-    .setDescription(
-      "Get AI-powered security recommendations "
-    )
+    .setDescription("Get AI-powered security recommendations ")
     .addSubcommand((subcommand) =>
       subcommand
         .setName("analyze")

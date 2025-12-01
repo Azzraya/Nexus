@@ -19,16 +19,20 @@ module.exports = {
         );
       }
 
-      logger.info(`Webhook created: ${webhook.name} (${webhook.id}) in ${webhook.guild?.name || "DM"}`, {
-        webhookId: webhook.id,
-        webhookName: webhook.name,
-        channelId: webhook.channelId,
-        guildId: webhook.guild?.id,
-        ownerId: webhook.owner?.id,
-      });
+      logger.info(
+        `Webhook created: ${webhook.name} (${webhook.id}) in ${
+          webhook.guild?.name || "DM"
+        }`,
+        {
+          webhookId: webhook.id,
+          webhookName: webhook.name,
+          channelId: webhook.channelId,
+          guildId: webhook.guild?.id,
+          ownerId: webhook.owner?.id,
+        }
+      );
     } catch (error) {
       logger.error("Error in webhookCreate event:", error);
     }
   },
 };
-

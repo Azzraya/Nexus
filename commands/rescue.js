@@ -87,10 +87,7 @@ module.exports = {
 
       // Send QR code as attachment if available
       if (result.qrCode) {
-        const buffer = Buffer.from(
-          result.qrCode.split(",")[1],
-          "base64"
-        );
+        const buffer = Buffer.from(result.qrCode.split(",")[1], "base64");
         const attachment = new AttachmentBuilder(buffer, {
           name: "rescue-qr.png",
         });
@@ -186,10 +183,7 @@ module.exports = {
         .setTimestamp();
 
       if (result.qrCode) {
-        const buffer = Buffer.from(
-          result.qrCode.split(",")[1],
-          "base64"
-        );
+        const buffer = Buffer.from(result.qrCode.split(",")[1], "base64");
         const attachment = new AttachmentBuilder(buffer, {
           name: "rescue-qr.png",
         });

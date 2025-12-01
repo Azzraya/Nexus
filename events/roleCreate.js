@@ -92,14 +92,15 @@ module.exports = {
           .setColor(role.color || 0x00ff00)
           .setTimestamp();
 
-        logChannel.send({ embeds: [embed] }).catch(
-          ErrorHandler.createSafeCatch(
-            `roleCreate [${role.guild.id}]`,
-            `Send mod log for role create`
-          )
-        );
+        logChannel
+          .send({ embeds: [embed] })
+          .catch(
+            ErrorHandler.createSafeCatch(
+              `roleCreate [${role.guild.id}]`,
+              `Send mod log for role create`
+            )
+          );
       }
     }
   },
 };
-

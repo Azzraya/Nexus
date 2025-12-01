@@ -68,7 +68,8 @@ module.exports = {
         icon: interaction.guild.iconURL(),
         banner: interaction.guild.bannerURL(),
         verificationLevel: interaction.guild.verificationLevel,
-        defaultMessageNotifications: interaction.guild.defaultMessageNotifications,
+        defaultMessageNotifications:
+          interaction.guild.defaultMessageNotifications,
         explicitContentFilter: interaction.guild.explicitContentFilter,
         mfaLevel: interaction.guild.mfaLevel,
         preferredLocale: interaction.guild.preferredLocale,
@@ -139,15 +140,17 @@ module.exports = {
         }
 
         // Backup permission overwrites (if available)
-        if (channel.permissionOverwrites && channel.permissionOverwrites.cache) {
-          channelData.permissionOverwrites = channel.permissionOverwrites.cache.map(
-            (overwrite) => ({
+        if (
+          channel.permissionOverwrites &&
+          channel.permissionOverwrites.cache
+        ) {
+          channelData.permissionOverwrites =
+            channel.permissionOverwrites.cache.map((overwrite) => ({
               id: overwrite.id,
               type: overwrite.type,
               allow: overwrite.allow.bitfield.toString(),
               deny: overwrite.deny.bitfield.toString(),
-            })
-          );
+            }));
         } else {
           channelData.permissionOverwrites = [];
         }
@@ -164,21 +167,23 @@ module.exports = {
             name: category.name,
             position: category.position,
           };
-          
+
           // Backup permission overwrites (if available)
-          if (category.permissionOverwrites && category.permissionOverwrites.cache) {
-            categoryData.permissionOverwrites = category.permissionOverwrites.cache.map(
-              (overwrite) => ({
+          if (
+            category.permissionOverwrites &&
+            category.permissionOverwrites.cache
+          ) {
+            categoryData.permissionOverwrites =
+              category.permissionOverwrites.cache.map((overwrite) => ({
                 id: overwrite.id,
                 type: overwrite.type,
                 allow: overwrite.allow.bitfield.toString(),
                 deny: overwrite.deny.bitfield.toString(),
-              })
-            );
+              }));
           } else {
             categoryData.permissionOverwrites = [];
           }
-          
+
           return categoryData;
         })
         .sort((a, b) => a.position - b.position);

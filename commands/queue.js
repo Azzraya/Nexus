@@ -14,9 +14,7 @@ const constants = require("../utils/constants");
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("queue")
-    .setDescription(
-      "Smart moderation queue with AI suggestions "
-    )
+    .setDescription("Smart moderation queue with AI suggestions ")
     .addSubcommand((subcommand) =>
       subcommand.setName("view").setDescription("View moderation queue")
     )

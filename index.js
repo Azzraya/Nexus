@@ -40,8 +40,9 @@ client.antiRaid = {
   config: new Map(), // Per-server config
 };
 
-// Heat-based moderation system
-client.heatSystem = new Map(); // Track user "heat" scores
+// Advanced Heat-based moderation system
+const HeatSystem = require("./utils/heatSystem");
+client.heatSystem = new HeatSystem(client);
 
 // Database
 client.db = db;
@@ -177,50 +178,12 @@ client.checkAntiRaid = async (guild, member) => {
   return false;
 };
 
-// Heat-based moderation
-client.addHeat = async (guildId, userId, amount, reason) => {
-  const key = `${guildId}-${userId}`;
-  let current = client.heatSystem.get(key);
-  
-  // Ensure current has the correct structure
-  if (!current || typeof current !== 'object' || !Array.isArray(current.history)) {
-    current = { score: 0, history: [] };
+// Heat system cleanup (runs every 5 minutes)
+setInterval(() => {
+  if (client.heatSystem && typeof client.heatSystem.cleanup === "function") {
+    client.heatSystem.cleanup();
   }
-
-  current.score += amount;
-  if (!current.history) {
-    current.history = [];
-  }
-  current.history.push({ amount, reason, timestamp: Date.now() });
-
-  // Decay heat over time (remove old entries)
-  const oneHourAgo = Date.now() - 3600000;
-  current.history = current.history.filter((h) => h.timestamp > oneHourAgo);
-  current.score = current.history.reduce((sum, h) => sum + h.amount, 0);
-
-  client.heatSystem.set(key, current);
-
-  // Persist to database
-  await db.setHeatScore(guildId, userId, current.score);
-
-  // Auto-action based on heat
-  const thresholds = {
-    50: "warn",
-    100: "mute",
-    150: "kick",
-    200: "ban",
-  };
-
-  for (const [threshold, action] of Object.entries(thresholds).sort(
-    (a, b) => b[0] - a[0]
-  )) {
-    if (current.score >= threshold) {
-      return { action, score: current.score };
-    }
-  }
-
-  return { action: null, score: current.score };
-};
+}, 5 * 60 * 1000);
 
 // Anti-nuke protection
 client.checkAntiNuke = async (guild, user, action) => {

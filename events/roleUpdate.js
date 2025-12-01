@@ -20,7 +20,11 @@ module.exports = {
     if (oldRole.color !== newRole.color) {
       changes.push({
         name: "Color Changed",
-        value: `**Old:** #${oldRole.color.toString(16).padStart(6, "0")}\n**New:** #${newRole.color.toString(16).padStart(6, "0")}`,
+        value: `**Old:** #${oldRole.color
+          .toString(16)
+          .padStart(6, "0")}\n**New:** #${newRole.color
+          .toString(16)
+          .padStart(6, "0")}`,
         inline: true,
       });
     }
@@ -35,7 +39,11 @@ module.exports = {
       if (addedPerms.length > 0 || removedPerms.length > 0) {
         changes.push({
           name: "Permissions Changed",
-          value: `**Added:** ${addedPerms.length > 0 ? addedPerms.join(", ") : "None"}\n**Removed:** ${removedPerms.length > 0 ? removedPerms.join(", ") : "None"}`,
+          value: `**Added:** ${
+            addedPerms.length > 0 ? addedPerms.join(", ") : "None"
+          }\n**Removed:** ${
+            removedPerms.length > 0 ? removedPerms.join(", ") : "None"
+          }`,
           inline: false,
         });
       }
@@ -64,7 +72,9 @@ module.exports = {
 
     // Console logging
     console.log(
-      `🔧 [${newRole.guild.name} (${newRole.guild.id})] Role updated: ${newRole.name} - ${changes.map((c) => c.name).join(", ")}`
+      `🔧 [${newRole.guild.name} (${newRole.guild.id})] Role updated: ${
+        newRole.name
+      } - ${changes.map((c) => c.name).join(", ")}`
     );
 
     // Enhanced logging
@@ -104,14 +114,15 @@ module.exports = {
           .setColor(newRole.color || 0xffa500)
           .setTimestamp();
 
-        logChannel.send({ embeds: [embed] }).catch(
-          ErrorHandler.createSafeCatch(
-            `roleUpdate [${newRole.guild.id}]`,
-            `Send mod log for role update`
-          )
-        );
+        logChannel
+          .send({ embeds: [embed] })
+          .catch(
+            ErrorHandler.createSafeCatch(
+              `roleUpdate [${newRole.guild.id}]`,
+              `Send mod log for role update`
+            )
+          );
       }
     }
   },
 };
-

@@ -245,7 +245,7 @@ module.exports = {
             );
           }
         }
-        
+
         // Explicitly deny access to ALL channels they couldn't view
         // This prevents them from seeing hidden channels
         const allChannels = interaction.guild.channels.cache.filter(
@@ -254,13 +254,13 @@ module.exports = {
             ch.type === ChannelType.GuildVoice ||
             ch.type === ChannelType.GuildForum
         );
-        
+
         for (const channel of allChannels.values()) {
           // Skip channels they can already view (handled above)
           if (viewableChannels.includes(channel.id)) {
             continue;
           }
-          
+
           try {
             // Explicitly deny viewing for channels they couldn't see
             // This is critical to prevent seeing hidden channels
@@ -334,10 +334,10 @@ module.exports = {
         // Restore original roles
         // Handle both old format (array) and new format (object with roles property)
         const parsedData = JSON.parse(quarantineData.original_roles || "[]");
-        const originalRoles = Array.isArray(parsedData) 
-          ? parsedData 
-          : (parsedData.roles || []);
-        
+        const originalRoles = Array.isArray(parsedData)
+          ? parsedData
+          : parsedData.roles || [];
+
         const rolesToAdd = originalRoles.filter((roleId) => {
           const role = interaction.guild.roles.cache.get(roleId);
           return role && role.position < botMember.roles.highest.position;
