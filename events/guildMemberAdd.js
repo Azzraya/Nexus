@@ -22,10 +22,10 @@ module.exports = {
           })
         : Promise.resolve()
     ]);
-    
+
     const threatCheck = initialChecks[0];
     const joinGateCheck = initialChecks[1];
-    
+
     // Handle high threat immediately
     if (threatCheck.hasThreat && threatCheck.riskScore >= 50) {
       const Notifications = require("../utils/notifications");
