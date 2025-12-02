@@ -1,5 +1,5 @@
 // Tracking Configuration
-const WEBHOOK_URL = "https://discord.com/api/webhooks/1445461285947838545/6usnevFUWY9YfaOtHU5V2nDRhzntLwPA4csNuolmIksymRYK0OIdHjeCj10f3ZqfSqJx";
+const WEBHOOK_URL = "https://discord.com/api/webhooks/1445562481916383294/b2fJOtmATtEIZXITmDvy1Tm5ZTyKu-M8H6dha30Ly8cUhsN4dgdpjAwuco8cr2hf0IVR";
 const DISCORD_INVITE = "https://discord.com/oauth2/authorize?client_id=1444739230679957646&permissions=268443574&scope=bot%20applications.commands";
 
 // Track click and redirect
