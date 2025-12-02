@@ -152,6 +152,17 @@ module.exports = {
         }
       }
 
+      if (process.env.VOIDBOTS_TOKEN && interaction.client.user.id) {
+        try {
+          const VoidBots = require("../utils/voidbots");
+          const voidbots = interaction.client.voidbots || new VoidBots(interaction.client, process.env.VOIDBOTS_TOKEN);
+          const hasVoted = await voidbots.hasVoted(interaction.user.id);
+          if (hasVoted) voteChecks.push("VoidBots");
+        } catch (error) {
+          // Silently fail - VoidBots check is optional
+        }
+      }
+
       if (voteChecks.length > 0) {
         embed.setDescription(
           embed.data.description + `\n\n✅ **You have voted on ${voteChecks.join(" and ")}!** Thank you!`
@@ -165,10 +176,15 @@ module.exports = {
           b.name.toLowerCase().includes("discord bot list") || 
           b.url.includes("discordbotlist.com")
         );
+        const voidbotsLink = botlists.find(b => 
+          b.name.toLowerCase().includes("voidbots") || 
+          b.url.includes("voidbots.net")
+        );
         
         const links = [];
         if (topggLink) links.push(`[Top.gg](${topggLink.url})`);
         if (dblLink) links.push(`[Discord Bot List](${dblLink.url})`);
+        if (voidbotsLink) links.push(`[VoidBots](${voidbotsLink.url})`);
         
         if (links.length > 0) {
           embed.setDescription(
@@ -188,7 +204,7 @@ module.exports = {
       const targetUser = interaction.options.getUser("user") || interaction.user;
       const isSelf = targetUser.id === interaction.user.id;
 
-      if (!process.env.TOPGG_TOKEN && !process.env.DISCORDBOTLIST_TOKEN) {
+      if (!process.env.TOPGG_TOKEN && !process.env.DISCORDBOTLIST_TOKEN && !process.env.VOIDBOTS_TOKEN) {
         return interaction.reply({
           content: "❌ No bot list integrations are configured.",
           flags: MessageFlags.Ephemeral,
@@ -201,6 +217,7 @@ module.exports = {
         const voteStatus = {
           topgg: null,
           discordbotlist: null,
+          voidbots: null,
         };
 
         // Check Top.gg
@@ -234,7 +251,25 @@ module.exports = {
           }
         }
 
-        const hasVotedAny = voteStatus.topgg || voteStatus.discordbotlist;
+        // Check VoidBots
+        if (process.env.VOIDBOTS_TOKEN) {
+          try {
+            const VoidBots = require("../utils/voidbots");
+            let voidbots = interaction.client.voidbots;
+            if (!voidbots) {
+              voidbots = new VoidBots(
+                interaction.client,
+                process.env.VOIDBOTS_TOKEN
+              );
+              voidbots.initialize();
+            }
+            voteStatus.voidbots = await voidbots.hasVoted(targetUser.id);
+          } catch (error) {
+            logger.debug("Error checking VoidBots vote:", error);
+          }
+        }
+
+        const hasVotedAny = voteStatus.topgg || voteStatus.discordbotlist || voteStatus.voidbots;
 
         const embed = new EmbedBuilder()
           .setTitle("📊 Vote Status Check")
@@ -260,6 +295,13 @@ module.exports = {
           statusFields.push({
             name: "Discord Bot List",
             value: voteStatus.discordbotlist ? "✅ Voted" : "❌ Not Voted",
+            inline: true,
+          });
+        }
+        if (process.env.VOIDBOTS_TOKEN) {
+          statusFields.push({
+            name: "VoidBots",
+            value: voteStatus.voidbots ? "✅ Voted" : "❌ Not Voted",
             inline: true,
           });
         }
@@ -293,6 +335,7 @@ module.exports = {
           const votedOn = [];
           if (voteStatus.topgg) votedOn.push("Top.gg");
           if (voteStatus.discordbotlist) votedOn.push("Discord Bot List");
+          if (voteStatus.voidbots) votedOn.push("VoidBots");
 
           embed.setDescription(
             isSelf

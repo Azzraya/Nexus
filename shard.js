@@ -149,6 +149,108 @@ if (process.env.DISCORDBOTLIST_TOKEN) {
   );
 }
 
+// Initialize VoidBots stats posting (if token is provided)
+// Note: For sharded mode, we'll use manual posting since the package doesn't directly support ShardingManager
+if (process.env.VOIDBOTS_TOKEN) {
+  let voidbotsInterval = null;
+  let botId = null;
+
+  // Wait for manager to be ready, then start posting stats
+  manager.once("shardCreate", async (shard) => {
+    shard.once("ready", async () => {
+      if (!botId) {
+        try {
+          // Get bot ID from the first ready shard
+          const clientValues = await manager.fetchClientValues("user.id");
+          botId = clientValues[0];
+        } catch (error) {
+          console.error("❌ [VoidBots] Failed to get bot ID:", error.message);
+          return;
+        }
+      }
+
+      if (!voidbotsInterval) {
+        let lastPostTime = 0;
+        const MIN_POST_INTERVAL = 180000; // 3 minutes minimum per API (180000ms)
+        // Note: We post every 15 minutes to match package requirement, but API allows 3 minutes
+
+        const postStats = async () => {
+          // Rate limiting: ensure at least 3 minutes between posts
+          const now = Date.now();
+          const timeSinceLastPost = now - lastPostTime;
+          
+          if (timeSinceLastPost < MIN_POST_INTERVAL) {
+            const waitTime = MIN_POST_INTERVAL - timeSinceLastPost;
+            console.log(
+              `⏳ [VoidBots] Rate limited, waiting ${Math.ceil(waitTime / 1000)}s before posting...`
+            );
+            setTimeout(postStats, waitTime);
+            return;
+          }
+
+          try {
+            const axios = require("axios");
+            const guilds = await manager.fetchClientValues("guilds.cache.size");
+            const totalGuilds = guilds.reduce((acc, count) => acc + count, 0);
+            const shardCount = manager.totalShards;
+
+            await axios.post(
+              `https://api.voidbots.net/bot/stats/${botId}`,
+              {
+                server_count: totalGuilds,
+                shard_count: shardCount,
+              },
+              {
+                headers: {
+                  Authorization: process.env.VOIDBOTS_TOKEN,
+                  "Content-Type": "application/json",
+                },
+              }
+            );
+
+            lastPostTime = Date.now();
+            console.log(
+              `📊 [VoidBots] Posted stats: ${totalGuilds} servers, ${shardCount} shards`
+            );
+          } catch (error) {
+            console.error("❌ [VoidBots] Error posting stats:", error.message);
+            if (error.response) {
+              console.error(
+                `❌ [VoidBots] API Error: ${error.response.status} - ${JSON.stringify(error.response.data)}`
+              );
+              
+              // If rate limited (429), wait longer before retrying
+              if (error.response.status === 429) {
+                const retryAfter = error.response.headers["retry-after"] 
+                  ? parseInt(error.response.headers["retry-after"]) * 1000 
+                  : MIN_POST_INTERVAL;
+                console.log(
+                  `⏳ [VoidBots] Rate limited, waiting ${retryAfter / 1000}s before retry...`
+                );
+                lastPostTime = Date.now();
+                setTimeout(postStats, retryAfter);
+                return;
+              }
+            }
+          }
+        };
+
+        // Post after initial delay (don't post immediately to avoid rate limits)
+        // Wait 15 minutes before first post, then post every 15 minutes
+        // Note: Package requires 15 minute minimum, but API allows 3 minutes
+        setTimeout(() => {
+          postStats();
+          voidbotsInterval = setInterval(postStats, 900000); // 15 minutes (900000ms)
+        }, 900000); // Initial 15 minute delay
+
+        console.log("✅ [VoidBots] Stats posting initialized");
+      }
+    });
+  });
+} else {
+  console.log("ℹ️  [VoidBots] No VOIDBOTS_TOKEN found, skipping stats posting");
+}
+
 // Initialize Top.gg webhook server (runs once, not per shard)
 // The webhook server will be started in index.js when shard 0 is ready
 

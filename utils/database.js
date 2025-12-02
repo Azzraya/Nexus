@@ -1002,6 +1002,19 @@ class Database {
         }
       }
     );
+
+    // Migration: Add use_embed column to custom_commands if it doesn't exist
+    this.db.run(
+      `ALTER TABLE custom_commands ADD COLUMN use_embed INTEGER DEFAULT 0`,
+      (err) => {
+        if (err && !err.message.includes("duplicate column")) {
+          logger.error(
+            "Error adding use_embed column to custom_commands:",
+            err
+          );
+        }
+      }
+    );
     this.db.run(
       `ALTER TABLE server_config ADD COLUMN verification_channel TEXT`,
       (err) => {

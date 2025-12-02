@@ -83,7 +83,12 @@ class AutoRecovery {
 
       // Capture webhooks (EXCEEDS WICK - they don't restore webhooks)
       try {
-        const webhooks = await guild.fetchWebhooks().catch(() => []);
+        const webhooksCollection = await guild
+          .fetchWebhooks()
+          .catch(() => null);
+        const webhooks = webhooksCollection
+          ? Array.from(webhooksCollection.values())
+          : [];
         snapshotData.webhooks = webhooks.map((webhook) => ({
           id: webhook.id,
           name: webhook.name,
@@ -655,7 +660,10 @@ class AutoRecovery {
                   "Auto-recovery: Restore server icon"
                 )
                 .catch((err) => {
-                  logger.debug(`[AutoRecovery] Failed to restore server icon:`, err.message);
+                  logger.debug(
+                    `[AutoRecovery] Failed to restore server icon:`,
+                    err.message
+                  );
                 });
             } catch (error) {
               logger.warn(
@@ -675,7 +683,10 @@ class AutoRecovery {
                   "Auto-recovery: Restore server banner"
                 )
                 .catch((err) => {
-                  logger.debug(`[AutoRecovery] Failed to restore server banner:`, err.message);
+                  logger.debug(
+                    `[AutoRecovery] Failed to restore server banner:`,
+                    err.message
+                  );
                 });
             } catch (error) {
               logger.warn(
