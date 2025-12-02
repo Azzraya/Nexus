@@ -8,6 +8,8 @@ class VoidBots {
     this.baseURL = "https://api.voidbots.net";
     this.lastPostTime = 0; // Track last post time for rate limiting
     this.minPostInterval = 3 * 60 * 1000; // 3 minutes minimum (180000ms)
+    this.initialized = false; // Prevent multiple initializations
+    this.postInterval = null; // Store interval reference
   }
 
   /**
@@ -21,9 +23,11 @@ class VoidBots {
     // Rate limit check - Void Bots requires 3 minutes between posts
     const now = Date.now();
     const timeSinceLastPost = now - this.lastPostTime;
-    
+
     if (timeSinceLastPost < this.minPostInterval && this.lastPostTime > 0) {
-      const waitTime = Math.ceil((this.minPostInterval - timeSinceLastPost) / 1000);
+      const waitTime = Math.ceil(
+        (this.minPostInterval - timeSinceLastPost) / 1000
+      );
       logger.debug(
         `[Void Bots] Rate limited, skipping post (wait ${waitTime}s)`
       );
@@ -56,8 +60,20 @@ class VoidBots {
     } catch (error) {
       // If we get 429, update last post time to prevent spam
       if (error.response?.status === 429) {
+        // Check if API provides retry-after header (in seconds)
+        const retryAfter =
+          error.response?.headers?.["retry-after"] ||
+          error.response?.headers?.["Retry-After"];
+        const retrySeconds = retryAfter ? parseInt(retryAfter, 10) : 180; // Default to 3 minutes
+        const retryMinutes = Math.ceil(retrySeconds / 60);
+
+        // Update last post time to respect the retry-after period
         this.lastPostTime = Date.now();
-        logger.warn("[Void Bots] Rate limited - will retry in 3 minutes");
+
+        // Only log at debug level to reduce noise - rate limiting is expected behavior
+        logger.debug(
+          `[Void Bots] Rate limited - will retry in ${retryMinutes} minute(s) (${retrySeconds}s)`
+        );
       } else {
         logger.error("[Void Bots] Error posting stats:", {
           message: error.message,
@@ -74,10 +90,17 @@ class VoidBots {
    * Initialize automatic stats posting
    */
   initialize() {
+    if (this.initialized) {
+      logger.warn("[Void Bots] Already initialized, skipping duplicate initialization");
+      return;
+    }
+
     if (!this.token) {
       logger.warn("[Void Bots] No token provided, skipping integration");
       return;
     }
+
+    this.initialized = true;
 
     // Don't post immediately - wait 3 minutes to respect rate limit
     // This prevents double-posting on startup
@@ -86,11 +109,13 @@ class VoidBots {
     }, this.minPostInterval);
 
     // Post every 30 minutes (well above the 3-minute minimum)
-    setInterval(() => {
+    this.postInterval = setInterval(() => {
       this.postStats();
     }, 30 * 60 * 1000);
 
-    logger.info("[Void Bots] Stats posting initialized (first post in 3 minutes)");
+    logger.info(
+      "[Void Bots] Stats posting initialized (first post in 3 minutes)"
+    );
   }
 
   /**
@@ -113,9 +138,16 @@ class VoidBots {
 
       return response.data.voted === true;
     } catch (error) {
-      logger.error("[Void Bots] Error checking vote status:", error.message || error);
+      logger.error(
+        "[Void Bots] Error checking vote status:",
+        error.message || error
+      );
       if (error.response) {
-        logger.error("[Void Bots] API Response:", error.response.status, error.response.data);
+        logger.error(
+          "[Void Bots] API Response:",
+          error.response.status,
+          error.response.data
+        );
       }
       return false;
     }
@@ -141,9 +173,16 @@ class VoidBots {
 
       return response.data;
     } catch (error) {
-      logger.error("[Void Bots] Error fetching bot info:", error.message || error);
+      logger.error(
+        "[Void Bots] Error fetching bot info:",
+        error.message || error
+      );
       if (error.response) {
-        logger.error("[Void Bots] API Response:", error.response.status, error.response.data);
+        logger.error(
+          "[Void Bots] API Response:",
+          error.response.status,
+          error.response.data
+        );
       }
       throw error;
     }
@@ -151,4 +190,3 @@ class VoidBots {
 }
 
 module.exports = VoidBots;
-

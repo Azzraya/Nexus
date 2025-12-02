@@ -8,10 +8,26 @@ class VoteRewards {
       // Reward tiers based on vote streak
       streakRewards: [
         { streak: 7, reward: "7-day-voter", description: "🔥 7 Day Streak!" },
-        { streak: 14, reward: "14-day-voter", description: "⚡ 2 Week Streak!" },
-        { streak: 30, reward: "30-day-voter", description: "💎 1 Month Streak!" },
-        { streak: 60, reward: "60-day-voter", description: "👑 2 Month Streak!" },
-        { streak: 90, reward: "90-day-voter", description: "🌟 3 Month Streak!" },
+        {
+          streak: 14,
+          reward: "14-day-voter",
+          description: "⚡ 2 Week Streak!",
+        },
+        {
+          streak: 30,
+          reward: "30-day-voter",
+          description: "💎 1 Month Streak!",
+        },
+        {
+          streak: 60,
+          reward: "60-day-voter",
+          description: "👑 2 Month Streak!",
+        },
+        {
+          streak: 90,
+          reward: "90-day-voter",
+          description: "🌟 3 Month Streak!",
+        },
       ],
       // Basic rewards for every vote
       perVoteReward: {
@@ -23,7 +39,8 @@ class VoteRewards {
     this.lastCheckedVotes = new Map(); // Track last checked time per user
     this.checkInterval = 5 * 60 * 1000; // Check every 5 minutes
     // Hardcoded webhook URL for vote notifications
-    this.voteWebhookUrl = "https://discord.com/api/webhooks/1445461285947838545/6usnevFUWY9YfaOtHU5V2nDRhzntLwPA4csNuolmIksymRYK0OIdHjeCj10f3ZqfSqJx";
+    this.voteWebhookUrl =
+      "https://discord.com/api/webhooks/1445461285947838545/6usnevFUWY9YfaOtHU5V2nDRhzntLwPA4csNuolmIksymRYK0OIdHjeCj10f3ZqfSqJx";
     // Only create roles and give rewards in this guild
     this.targetGuildId = "1444737803660558396";
   }
@@ -39,7 +56,13 @@ class VoteRewards {
       await new Promise((resolve, reject) => {
         db.db.run(
           "INSERT INTO vote_rewards (user_id, guild_id, botlist, voted_at, reward_expires) VALUES (?, ?, ?, ?, ?)",
-          [userId, guildId, botlist, now, now + this.rewardConfig.perVoteReward.duration],
+          [
+            userId,
+            guildId,
+            botlist,
+            now,
+            now + this.rewardConfig.perVoteReward.duration,
+          ],
           (err) => {
             if (err) reject(err);
             else resolve();
@@ -113,13 +136,28 @@ class VoteRewards {
     let newStreak = currentStreak.current_streak;
     let streakStarted = currentStreak.streak_started;
 
+    // Check if we've already incremented the streak today
+    // This prevents multiple votes on different bot lists from incrementing the streak multiple times
+    const lastVoteDate = new Date(currentStreak.last_vote_at);
+    const currentDate = new Date(now);
+    const sameDay =
+      lastVoteDate.getUTCFullYear() === currentDate.getUTCFullYear() &&
+      lastVoteDate.getUTCMonth() === currentDate.getUTCMonth() &&
+      lastVoteDate.getUTCDate() === currentDate.getUTCDate();
+
     if (currentStreak.last_vote_at < twoDaysAgo) {
       // Streak broken, reset
       newStreak = 1;
       streakStarted = now;
     } else if (currentStreak.last_vote_at >= oneDayAgo) {
-      // Voted within last 24 hours, continue streak
-      newStreak = currentStreak.current_streak + 1;
+      // Voted within last 24 hours
+      if (!sameDay) {
+        // Different day, increment streak
+        newStreak = currentStreak.current_streak + 1;
+      } else {
+        // Same day, don't increment (already counted today)
+        newStreak = currentStreak.current_streak;
+      }
     } else {
       // Voted within 24-48 hours, maintain streak without incrementing
       newStreak = currentStreak.current_streak;
@@ -132,7 +170,14 @@ class VoteRewards {
     await new Promise((resolve, reject) => {
       db.db.run(
         "UPDATE vote_streaks SET current_streak = ?, longest_streak = ?, total_votes = ?, last_vote_at = ?, streak_started = ? WHERE user_id = ?",
-        [newStreak, newLongestStreak, newTotalVotes, now, streakStarted, userId],
+        [
+          newStreak,
+          newLongestStreak,
+          newTotalVotes,
+          now,
+          streakStarted,
+          userId,
+        ],
         (err) => {
           if (err) reject(err);
           else resolve();
@@ -366,38 +411,65 @@ class VoteRewards {
         const votedOn = await this.checkAllBotLists(userId);
 
         if (votedOn.length > 0) {
-          // User has voted! Give rewards
-          for (const botlist of votedOn) {
-            await this.recordVote(userId, guild.id, botlist);
-          }
+          // Check which votes are already recorded (within last 12 hours to avoid duplicates)
+          const now = Date.now();
+          const twelveHoursAgo = now - 12 * 60 * 60 * 1000;
 
-          // Add temporary reward role
-          if (voteRoleId && !member.roles.cache.has(voteRoleId)) {
-            try {
-              await member.roles.add(
-                voteRoleId,
-                "Vote reward - expires in 12 hours"
-              );
-              logger.info(
-                `[Vote Rewards] Added reward role to ${member.user.tag}`
-              );
-            } catch (error) {
-              logger.error(
-                `[Vote Rewards] Failed to add role to ${member.user.tag}:`,
-                error.message
+          const existingVotes = await new Promise((resolve, reject) => {
+            db.db.all(
+              "SELECT botlist FROM vote_rewards WHERE user_id = ? AND guild_id = ? AND voted_at > ?",
+              [userId, guild.id, twelveHoursAgo],
+              (err, rows) => {
+                if (err) reject(err);
+                else resolve(rows ? rows.map((r) => r.botlist) : []);
+              }
+            );
+          });
+
+          // Filter out votes that have already been recorded
+          const newVotes = votedOn.filter(
+            (botlist) => !existingVotes.includes(botlist)
+          );
+
+          if (newVotes.length > 0) {
+            // User has new votes! Give rewards
+            for (const botlist of newVotes) {
+              await this.recordVote(userId, guild.id, botlist);
+            }
+
+            // Add temporary reward role
+            if (voteRoleId && !member.roles.cache.has(voteRoleId)) {
+              try {
+                await member.roles.add(
+                  voteRoleId,
+                  "Vote reward - expires in 12 hours"
+                );
+                logger.info(
+                  `[Vote Rewards] Added reward role to ${member.user.tag}`
+                );
+              } catch (error) {
+                logger.error(
+                  `[Vote Rewards] Failed to add role to ${member.user.tag}:`,
+                  error.message
+                );
+              }
+            }
+
+            // Send webhook notification only for new votes
+            if (webhookUrl) {
+              await this.sendVoteWebhook(
+                webhookUrl,
+                member.user,
+                newVotes,
+                guild
               );
             }
-          }
 
-          // Send webhook notification
-          if (webhookUrl) {
-            await this.sendVoteWebhook(webhookUrl, member.user, votedOn, guild);
-          }
-
-          // Give streak milestone roles
-          const stats = await this.getVoteStats(member.id);
-          if (stats.current_streak >= 7) {
-            await this.giveStreakRoles(member, stats.current_streak);
+            // Give streak milestone roles
+            const stats = await this.getVoteStats(member.id);
+            if (stats.current_streak >= 7) {
+              await this.giveStreakRoles(member, stats.current_streak);
+            }
           }
         }
       }
@@ -428,7 +500,10 @@ class VoteRewards {
     if (process.env.DISCORDBOTLIST_TOKEN) {
       try {
         const DiscordBotList = require("./discordbotlist");
-        const dbl = new DiscordBotList(this.client, process.env.DISCORDBOTLIST_TOKEN);
+        const dbl = new DiscordBotList(
+          this.client,
+          process.env.DISCORDBOTLIST_TOKEN
+        );
         const vote = await dbl.hasVoted(userId, this.client.user.id);
         if (vote) votedOn.push("Discord Bot List");
       } catch (error) {
@@ -440,7 +515,9 @@ class VoteRewards {
     if (process.env.VOIDBOTS_TOKEN) {
       try {
         const VoidBots = require("./voidbots");
-        const voidBots = this.client.voidBots || new VoidBots(this.client, process.env.VOIDBOTS_TOKEN);
+        const voidBots =
+          this.client.voidBots ||
+          new VoidBots(this.client, process.env.VOIDBOTS_TOKEN);
         const hasVoted = await voidBots.hasVoted(userId);
         if (hasVoted) votedOn.push("Void Bots");
       } catch (error) {
@@ -452,7 +529,9 @@ class VoteRewards {
     if (process.env.DISCORDBOTS_TOKEN) {
       try {
         const DiscordBots = require("./discordbots");
-        const discordBots = this.client.discordBots || new DiscordBots(this.client, process.env.DISCORDBOTS_TOKEN);
+        const discordBots =
+          this.client.discordBots ||
+          new DiscordBots(this.client, process.env.DISCORDBOTS_TOKEN);
         const hasVoted = await discordBots.hasVoted(userId);
         if (hasVoted) votedOn.push("Discord Bots");
       } catch (error) {
@@ -464,7 +543,9 @@ class VoteRewards {
     if (process.env.BOTSONDICORD_TOKEN) {
       try {
         const BotsOnDiscord = require("./botsondicord");
-        const botsOnDiscord = this.client.botsOnDiscord || new BotsOnDiscord(this.client, process.env.BOTSONDICORD_TOKEN);
+        const botsOnDiscord =
+          this.client.botsOnDiscord ||
+          new BotsOnDiscord(this.client, process.env.BOTSONDICORD_TOKEN);
         const hasVoted = await botsOnDiscord.hasVoted(userId);
         if (hasVoted) votedOn.push("Bots on Discord");
       } catch (error) {
@@ -481,7 +562,7 @@ class VoteRewards {
   async sendVoteWebhook(webhookUrl, user, botlists, guild) {
     try {
       const axios = require("axios");
-      
+
       await axios.post(webhookUrl, {
         embeds: [
           {
@@ -589,7 +670,11 @@ class VoteRewards {
         return [];
       }
       const rolesToCreate = [
-        { name: "Voter", color: 0xffd700, reason: "Vote reward role (12 hours)" },
+        {
+          name: "Voter",
+          color: 0xffd700,
+          reason: "Vote reward role (12 hours)",
+        },
         { name: "7-Day Voter", color: 0xff6b35, reason: "7-day vote streak" },
         { name: "14-Day Voter", color: 0xff4500, reason: "14-day vote streak" },
         { name: "30-Day Voter", color: 0x9b59b6, reason: "30-day vote streak" },
@@ -646,7 +731,10 @@ class VoteRewards {
                 (err) => {
                   if (err) {
                     // If columns don't exist, try to add them and retry
-                    logger.error("[Vote Rewards] Error updating config:", err.message);
+                    logger.error(
+                      "[Vote Rewards] Error updating config:",
+                      err.message
+                    );
                     reject(err);
                   } else {
                     resolve();
@@ -658,7 +746,10 @@ class VoteRewards {
               `[Vote Rewards] Auto-configured Voter role in ${guild.name}`
             );
           } catch (error) {
-            logger.error("[Vote Rewards] Failed to auto-configure:", error.message);
+            logger.error(
+              "[Vote Rewards] Failed to auto-configure:",
+              error.message
+            );
           }
         }
       }
@@ -702,7 +793,10 @@ class VoteRewards {
       );
 
       if (role && !member.roles.cache.has(role.id)) {
-        await member.roles.add(role, `Earned ${highestQualifiedRole} milestone`);
+        await member.roles.add(
+          role,
+          `Earned ${highestQualifiedRole} milestone`
+        );
         logger.info(
           `[Vote Rewards] Gave ${highestQualifiedRole} to ${member.user.tag}`
         );
@@ -755,9 +849,10 @@ class VoteRewards {
       this.removeExpiredRoles(guild);
     }, 60 * 60 * 1000);
 
-    logger.info(`[Vote Rewards] Started auto-checking for ${guild.name} (checks every 5 minutes)`);
+    logger.info(
+      `[Vote Rewards] Started auto-checking for ${guild.name} (checks every 5 minutes)`
+    );
   }
 }
 
 module.exports = VoteRewards;
-

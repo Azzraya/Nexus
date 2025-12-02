@@ -354,20 +354,6 @@ if (!process.env.USING_SHARDING && process.env.BOTSONDICORD_TOKEN) {
   });
 }
 
-// Initialize VoidBots stats posting (for non-sharded mode)
-// Note: For sharded mode, VoidBots is initialized in shard.js
-if (!process.env.USING_SHARDING && process.env.VOIDBOTS_TOKEN) {
-  client.once("clientReady", () => {
-    try {
-      const VoidBots = require("./utils/voidbots");
-      const voidbots = new VoidBots(client, process.env.VOIDBOTS_TOKEN);
-      voidbots.initialize();
-      client.voidbots = voidbots;
-    } catch (error) {
-      logger.error("[VoidBots] Failed to initialize:", error);
-    }
-  });
-}
 
 // Top.gg webhook server removed - not using webhooks
 

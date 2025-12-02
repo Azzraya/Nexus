@@ -172,7 +172,6 @@ if (process.env.VOIDBOTS_TOKEN) {
       if (!voidbotsInterval) {
         let lastPostTime = 0;
         const MIN_POST_INTERVAL = 180000; // 3 minutes minimum per API (180000ms)
-        // Note: We post every 15 minutes to match package requirement, but API allows 3 minutes
 
         const postStats = async () => {
           // Rate limiting: ensure at least 3 minutes between posts
@@ -236,12 +235,12 @@ if (process.env.VOIDBOTS_TOKEN) {
         };
 
         // Post after initial delay (don't post immediately to avoid rate limits)
-        // Wait 15 minutes before first post, then post every 15 minutes
-        // Note: Package requires 15 minute minimum, but API allows 3 minutes
+        // Wait 3 minutes before first post, then post every 15 minutes
+        // Note: API requires 3 minute minimum between posts
         setTimeout(() => {
           postStats();
-          voidbotsInterval = setInterval(postStats, 900000); // 15 minutes (900000ms)
-        }, 900000); // Initial 15 minute delay
+          voidbotsInterval = setInterval(postStats, 15 * 60 * 1000); // 15 minutes (post less frequently than minimum)
+        }, 180000); // Initial 3 minute delay
 
         console.log("✅ [VoidBots] Stats posting initialized");
       }
