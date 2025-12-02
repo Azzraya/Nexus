@@ -8,6 +8,41 @@ module.exports = {
     // Skip if not a guild channel
     if (!newChannel.guild) return;
 
+    // Track permission changes in anti-nuke system
+    try {
+      const auditLogs = await newChannel.guild.fetchAuditLogs({
+        type: 12, // CHANNEL_UPDATE
+        limit: 1,
+      });
+      const channelUpdate = auditLogs.entries.first();
+      
+      if (channelUpdate && channelUpdate.target.id === newChannel.id) {
+        const executor = channelUpdate.executor;
+        
+        // Check for permission overwrite changes
+        const oldOverwrites = oldChannel.permissionOverwrites.cache;
+        const newOverwrites = newChannel.permissionOverwrites.cache;
+        
+        if (oldOverwrites.size !== newOverwrites.size || 
+            JSON.stringify([...oldOverwrites.keys()]) !== JSON.stringify([...newOverwrites.keys()])) {
+          
+          if (client.advancedAntiNuke) {
+            await client.advancedAntiNuke.monitorAction(
+              newChannel.guild,
+              "channel_permission_update",
+              executor.id,
+              {
+                targetId: newChannel.id,
+                targetType: "channel",
+              }
+            );
+          }
+        }
+      }
+    } catch (error) {
+      // Silently fail - permission tracking is non-critical
+    }
+
     const changes = [];
 
     // Check for name change

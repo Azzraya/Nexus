@@ -221,10 +221,11 @@ class AutoRecovery {
         `[AutoRecovery] Attempting to recover ${snapshotData.channels.length} channels (parallel processing enabled)`
       );
 
-      // Process channels in parallel batches (max 5 at a time to avoid rate limits)
+      // Process channels in parallel batches (max 10 at a time - optimized for speed)
+      // EXCEEDS WICK - Faster parallel processing (10 concurrent vs sequential)
       const channelBatches = [];
-      for (let i = 0; i < snapshotData.channels.length; i += 5) {
-        channelBatches.push(snapshotData.channels.slice(i, i + 5));
+      for (let i = 0; i < snapshotData.channels.length; i += 10) {
+        channelBatches.push(snapshotData.channels.slice(i, i + 10));
       }
 
       for (const batch of channelBatches) {
@@ -288,10 +289,11 @@ class AutoRecovery {
         `[AutoRecovery] Attempting to recover ${snapshotData.roles.length} roles (parallel processing enabled)`
       );
 
-      // Process roles in parallel batches (max 3 at a time to avoid rate limits)
+      // Process roles in parallel batches (max 5 at a time - optimized for speed)
+      // EXCEEDS WICK - Faster parallel processing (5 concurrent vs sequential)
       const roleBatches = [];
-      for (let i = 0; i < snapshotData.roles.length; i += 3) {
-        roleBatches.push(snapshotData.roles.slice(i, i + 3));
+      for (let i = 0; i < snapshotData.roles.length; i += 5) {
+        roleBatches.push(snapshotData.roles.slice(i, i + 5));
       }
 
       for (const batch of roleBatches) {

@@ -1,83 +1,41 @@
-const VoidBotsClient = require("voidbots");
+const axios = require("axios");
 const logger = require("./logger");
 
 class VoidBots {
   constructor(client, token) {
     this.client = client;
     this.token = token;
-    this.voidbots = null;
-    this.isSharded = client.shard !== null;
+    this.baseURL = "https://api.voidbots.net";
+    this.lastPostTime = 0; // Track last post time for rate limiting
+    this.minPostInterval = 3 * 60 * 1000; // 3 minutes minimum (180000ms)
   }
 
   /**
-   * Initialize VoidBots stats posting
-   * Works with both regular clients and ShardingManager
+   * Post bot statistics to Void Bots
    */
-  initialize() {
-    if (!this.token) {
-      logger.warn("[VoidBots] No token provided, skipping VoidBots integration");
-      return;
+  async postStats() {
+    if (!this.token || !this.client.user) {
+      return false;
+    }
+
+    // Rate limit check - Void Bots requires 3 minutes between posts
+    const now = Date.now();
+    const timeSinceLastPost = now - this.lastPostTime;
+    
+    if (timeSinceLastPost < this.minPostInterval && this.lastPostTime > 0) {
+      const waitTime = Math.ceil((this.minPostInterval - timeSinceLastPost) / 1000);
+      logger.debug(
+        `[Void Bots] Rate limited, skipping post (wait ${waitTime}s)`
+      );
+      return false;
     }
 
     try {
-      // VoidBotsClient works with both regular clients and ShardingManager
-      // autoPost: true enables automatic stats posting
-      // statsInterval: 900000 (15 minutes) - Package requires minimum 15 minutes
-      // Note: API allows posting every 3 minutes, but package enforces 15 minute minimum
-      // webhookEnabled: false since we're not using webhooks
-      this.voidbots = new VoidBotsClient(this.token, {
-        autoPost: true,
-        statsInterval: 900000, // 15 minutes (900000ms) - package minimum requirement
-        webhookEnabled: false,
-      }, this.client);
-
-      this.voidbots.on("posted", () => {
-        logger.info("[VoidBots] Server count posted successfully");
-      });
-
-      this.voidbots.on("error", (error) => {
-        logger.error("[VoidBots] Error:", error);
-      });
-
-      // Note: 'voted' event is only available when webhookEnabled is true
-      // Since we're not using webhooks, we'll check votes via API instead
-
-      logger.info("[VoidBots] Stats posting initialized");
-    } catch (error) {
-      logger.error("[VoidBots] Failed to initialize:", error);
-    }
-  }
-
-  /**
-   * Post bot statistics manually
-   * @param {number} serverCount - Number of servers
-   * @param {number} shardCount - Number of shards (optional)
-   */
-  async postStats(serverCount, shardCount = 0) {
-    if (!this.token) {
-      throw new Error("VoidBots token not configured");
-    }
-
-    try {
-      // Use the package's method if available
-      if (this.voidbots && typeof this.voidbots.postStats === "function") {
-        await this.voidbots.postStats(serverCount, shardCount);
-        logger.info(
-          `[VoidBots] Posted stats: ${serverCount} servers, ${shardCount} shards`
-        );
-        return true;
-      }
-
-      // Fallback to direct API call if package not initialized
-      const axios = require("axios");
-      const botId = this.client.user?.id || this.client.userId;
-      
-      if (!botId) {
-        throw new Error("Bot ID not available");
-      }
+      const serverCount = this.client.guilds.cache.size;
+      const shardCount = this.client.shard ? this.client.shard.count : 1;
 
       await axios.post(
-        `https://api.voidbots.net/bot/stats/${botId}`,
+        `${this.baseURL}/bot/stats/${this.client.user.id}`,
         {
           server_count: serverCount,
           shard_count: shardCount,
@@ -90,37 +48,62 @@ class VoidBots {
         }
       );
 
+      this.lastPostTime = Date.now(); // Update last post time on success
       logger.info(
-        `[VoidBots] Posted stats: ${serverCount} servers, ${shardCount} shards`
+        `[Void Bots] Posted stats: ${serverCount} servers, ${shardCount} shards`
       );
       return true;
     } catch (error) {
-      logger.error("[VoidBots] Error posting stats:", error);
-      throw error;
+      // If we get 429, update last post time to prevent spam
+      if (error.response?.status === 429) {
+        this.lastPostTime = Date.now();
+        logger.warn("[Void Bots] Rate limited - will retry in 3 minutes");
+      } else {
+        logger.error("[Void Bots] Error posting stats:", {
+          message: error.message,
+          status: error.response?.status,
+          data: error.response?.data,
+          url: `${this.baseURL}/bot/stats/${this.client.user.id}`,
+        });
+      }
+      return false;
     }
   }
 
   /**
-   * Check if a user has voted for the bot
-   * @param {string} userId - User ID to check
-   * @returns {Promise<boolean>} - True if user has voted, false otherwise
+   * Initialize automatic stats posting
+   */
+  initialize() {
+    if (!this.token) {
+      logger.warn("[Void Bots] No token provided, skipping integration");
+      return;
+    }
+
+    // Don't post immediately - wait 3 minutes to respect rate limit
+    // This prevents double-posting on startup
+    setTimeout(() => {
+      this.postStats();
+    }, this.minPostInterval);
+
+    // Post every 30 minutes (well above the 3-minute minimum)
+    setInterval(() => {
+      this.postStats();
+    }, 30 * 60 * 1000);
+
+    logger.info("[Void Bots] Stats posting initialized (first post in 3 minutes)");
+  }
+
+  /**
+   * Check if a user has voted
    */
   async hasVoted(userId) {
-    if (!this.token) {
+    if (!this.token || !this.client.user) {
       return false;
     }
 
     try {
-      // Use direct API call instead of package method (package has a bug with GET requests)
-      const axios = require("axios");
-      const botId = this.client.user?.id || this.client.userId;
-      
-      if (!botId) {
-        return false;
-      }
-
       const response = await axios.get(
-        `https://api.voidbots.net/bot/voted/${botId}/${userId}`,
+        `${this.baseURL}/bot/voted/${this.client.user.id}/${userId}`,
         {
           headers: {
             Authorization: this.token,
@@ -128,45 +111,27 @@ class VoidBots {
         }
       );
 
-      // Parse the response
-      const data = typeof response.data === "string" 
-        ? JSON.parse(response.data) 
-        : response.data;
-      
-      return data.voted === true || data.voted === "true";
+      return response.data.voted === true;
     } catch (error) {
-      logger.error("[VoidBots] Error checking vote status:", error);
+      logger.error("[Void Bots] Error checking vote status:", error.message || error);
+      if (error.response) {
+        logger.error("[Void Bots] API Response:", error.response.status, error.response.data);
+      }
       return false;
     }
   }
 
   /**
-   * Get bot info from VoidBots API
-   * @param {string} botId - Bot ID to get info for (optional, defaults to client's bot ID)
-   * @returns {Promise<Object|null>} - Bot info object or null on error
+   * Get bot information
    */
-  async getBotInfo(botId = null) {
-    if (!this.token) {
-      throw new Error("VoidBots token not configured");
+  async getBotInfo() {
+    if (!this.token || !this.client.user) {
+      throw new Error("Void Bots token not configured");
     }
 
     try {
-      const targetBotId = botId || this.client.user?.id || this.client.userId;
-      
-      if (!targetBotId) {
-        throw new Error("Bot ID not available");
-      }
-
-      // Use the package's method if available
-      if (this.voidbots && typeof this.voidbots.getBot === "function") {
-        const botInfo = await this.voidbots.getBot(targetBotId);
-        return botInfo;
-      }
-
-      // Fallback to direct API call
-      const axios = require("axios");
       const response = await axios.get(
-        `https://api.voidbots.net/bot/info/${targetBotId}`,
+        `${this.baseURL}/bot/info/${this.client.user.id}`,
         {
           headers: {
             Authorization: this.token,
@@ -176,13 +141,11 @@ class VoidBots {
 
       return response.data;
     } catch (error) {
-      logger.error("[VoidBots] Error fetching bot info:", error);
+      logger.error("[Void Bots] Error fetching bot info:", error.message || error);
       if (error.response) {
-        logger.error(
-          `[VoidBots] API Error: ${error.response.status} - ${JSON.stringify(error.response.data)}`
-        );
+        logger.error("[Void Bots] API Response:", error.response.status, error.response.data);
       }
-      return null;
+      throw error;
     }
   }
 }

@@ -31,6 +31,7 @@ class AdvancedAntiNuke {
     this.voiceRaids = new Map(); // Track voice channel raids (guildId -> {joinCount, lastJoin, userIds})
     this.whitelistCache = new Map(); // Cache whitelisted users (guildId -> Set<userId>)
     this.predictiveThreats = new Map(); // Track predictive threat patterns (guildId -> Map<userId, {pattern, confidence, timestamp}>)
+    this.permissionChanges = new Map(); // Track permission changes per user (userId-guildId -> {changes: [], firstChange, count})
   }
 
   // Check if user is whitelisted (EXCEEDS WICK - prevents false positives)
@@ -119,13 +120,165 @@ class AdvancedAntiNuke {
     return false;
   }
 
+  // Permission change rate limiting (EXCEEDS WICK - prevents permission testing)
+  async trackPermissionChange(guild, userId, changeType, targetId, targetType) {
+    const key = `${userId}-${guild.id}`;
+    const now = Date.now();
+    
+    if (!this.permissionChanges.has(key)) {
+      this.permissionChanges.set(key, {
+        changes: [],
+        firstChange: now,
+        count: 0,
+      });
+    }
+
+    const data = this.permissionChanges.get(key);
+    
+    // Add this change
+    data.changes.push({
+      type: changeType,
+      targetId,
+      targetType,
+      timestamp: now,
+    });
+    data.count++;
+
+    // Clean old changes (older than 30 seconds)
+    data.changes = data.changes.filter(c => now - c.timestamp < 30000);
+    
+    // Reset if no activity for 30 seconds
+    if (data.changes.length > 0 && now - data.changes[0].timestamp > 30000) {
+      data.firstChange = now;
+      data.count = 1;
+    }
+
+    // Check for suspicious permission testing patterns
+    const recentChanges = data.changes.filter(c => now - c.timestamp < 10000);
+    
+    // Pattern 1: Rapid permission changes (3+ in 10 seconds)
+    if (recentChanges.length >= 3) {
+      logger.warn(
+        `[Anti-Nuke] Permission testing detected: ${userId} made ${recentChanges.length} permission changes in 10 seconds`
+      );
+      return {
+        suspicious: true,
+        reason: "rapid_permission_changes",
+        count: recentChanges.length,
+        confidence: 40 + (recentChanges.length * 10),
+      };
+    }
+
+    // Pattern 2: Testing on multiple targets (5+ different targets in 30 seconds)
+    const uniqueTargets = new Set(data.changes.map(c => c.targetId));
+    if (uniqueTargets.size >= 5) {
+      logger.warn(
+        `[Anti-Nuke] Permission testing detected: ${userId} modified permissions on ${uniqueTargets.size} different targets`
+      );
+      return {
+        suspicious: true,
+        reason: "multiple_target_testing",
+        count: uniqueTargets.size,
+        confidence: 50 + (uniqueTargets.size * 5),
+      };
+    }
+
+    // Pattern 3: Escalation pattern (creating/modifying admin roles)
+    const escalations = recentChanges.filter(c => 
+      c.type === "role_create" || 
+      (c.type === "role_update" && c.targetType === "admin")
+    );
+    if (escalations.length >= 2) {
+      logger.warn(
+        `[Anti-Nuke] Permission escalation detected: ${userId} attempting to create/modify admin permissions`
+      );
+      return {
+        suspicious: true,
+        reason: "permission_escalation",
+        count: escalations.length,
+        confidence: 70,
+      };
+    }
+
+    return { suspicious: false };
+  }
+
   async monitorAction(guild, actionType, userId, details = {}) {
+    // Skip monitoring the bot itself (prevents false positives when bot creates roles)
+    if (userId === this.client.user.id) {
+      return;
+    }
+
     // Check whitelist first (EXCEEDS WICK)
     if (await this.isWhitelisted(guild.id, userId)) {
       logger.debug(
         `[Anti-Nuke] User ${userId} is whitelisted in ${guild.name} - skipping monitoring`
       );
       return; // Whitelisted users are exempt
+    }
+
+    // Track permission changes if this is a permission-related action
+    if (
+      actionType.includes("role") || 
+      actionType.includes("channel") || 
+      actionType.includes("permission")
+    ) {
+      const permCheck = await this.trackPermissionChange(
+        guild,
+        userId,
+        actionType,
+        details.targetId,
+        details.targetType
+      );
+      
+      if (permCheck.suspicious) {
+        logger.error(
+          `[Anti-Nuke] 🚨 PERMISSION TESTING DETECTED: ${userId} in ${guild.name} - ${permCheck.reason} (confidence: ${permCheck.confidence}%)`
+        );
+        
+        // If confidence is high enough, take action
+        if (permCheck.confidence >= 60) {
+          try {
+            const member = await guild.members.fetch(userId);
+            
+            // Remove dangerous permissions immediately
+            const roles = member.roles.cache.filter(r => 
+              r.permissions.has("Administrator") ||
+              r.permissions.has("ManageGuild") ||
+              r.permissions.has("ManageRoles") ||
+              r.permissions.has("ManageChannels")
+            );
+            
+            for (const [, role] of roles) {
+              try {
+                await member.roles.remove(role, `Anti-Nuke: ${permCheck.reason}`);
+                logger.info(`[Anti-Nuke] Removed role ${role.name} from ${member.user.tag}`);
+              } catch (err) {
+                logger.error(`[Anti-Nuke] Failed to remove role:`, err);
+              }
+            }
+
+            // Notify admins
+            const logChannel = guild.channels.cache.find(
+              ch => ch.name.includes("log") || ch.name.includes("mod")
+            );
+            if (logChannel) {
+              await logChannel.send({
+                embeds: [{
+                  title: "🚨 Permission Testing Detected",
+                  description: `**User:** <@${userId}>\n**Reason:** ${permCheck.reason}\n**Confidence:** ${permCheck.confidence}%\n**Action:** Removed dangerous permissions`,
+                  color: 0xff0000,
+                  timestamp: new Date().toISOString(),
+                }],
+              });
+            }
+
+            return; // Stop further monitoring, threat neutralized
+          } catch (error) {
+            logger.error("[Anti-Nuke] Failed to handle permission testing:", error);
+          }
+        }
+      }
     }
 
     // Predictive threat detection (EXCEEDS WICK)

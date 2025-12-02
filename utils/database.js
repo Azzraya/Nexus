@@ -702,6 +702,72 @@ class Database {
             )
         `);
 
+    // Add default bot list links if table is empty
+    this.db.get("SELECT COUNT(*) as count FROM botlist_links", [], (err, row) => {
+      if (!err && row.count === 0) {
+        const defaultLinks = [
+          { name: "Top.gg", url: "https://top.gg/bot/1444739230679957646/vote" },
+          { name: "Discord Bot List", url: "https://discordbotlist.com/bots/nexus-8245/upvote" },
+          { name: "Void Bots", url: "https://voidbots.net/bot/1444739230679957646/vote" },
+        ];
+
+        defaultLinks.forEach(link => {
+          this.db.run(
+            "INSERT OR IGNORE INTO botlist_links (name, url, added_by, added_at) VALUES (?, ?, ?, ?)",
+            [link.name, link.url, "system", Date.now()]
+          );
+        });
+      }
+    });
+
+    // Voting rewards
+    this.db.run(`
+            CREATE TABLE IF NOT EXISTS vote_rewards (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id TEXT NOT NULL,
+                guild_id TEXT NOT NULL,
+                botlist TEXT NOT NULL,
+                voted_at INTEGER NOT NULL,
+                reward_claimed INTEGER DEFAULT 0,
+                reward_expires INTEGER
+            )
+        `);
+
+    // Vote streaks
+    this.db.run(`
+            CREATE TABLE IF NOT EXISTS vote_streaks (
+                user_id TEXT PRIMARY KEY,
+                current_streak INTEGER DEFAULT 0,
+                longest_streak INTEGER DEFAULT 0,
+                total_votes INTEGER DEFAULT 0,
+                last_vote_at INTEGER,
+                streak_started INTEGER
+            )
+        `);
+
+    // Add vote rewards config columns to server_config (use exec with error handling)
+    this.db.exec(`
+            ALTER TABLE server_config ADD COLUMN vote_rewards_enabled INTEGER DEFAULT 0;
+        `, (err) => {
+      if (err && !err.message.includes("duplicate column")) {
+        // Ignore duplicate column errors
+      }
+    });
+    this.db.exec(`
+            ALTER TABLE server_config ADD COLUMN vote_reward_role TEXT;
+        `, (err) => {
+      if (err && !err.message.includes("duplicate column")) {
+        // Ignore duplicate column errors
+      }
+    });
+    this.db.exec(`
+            ALTER TABLE server_config ADD COLUMN vote_webhook_url TEXT;
+        `, (err) => {
+      if (err && !err.message.includes("duplicate column")) {
+        // Ignore duplicate column errors
+      }
+    });
+
     // Auto-recovery snapshots
     this.db.run(`
             CREATE TABLE IF NOT EXISTS recovery_snapshots (

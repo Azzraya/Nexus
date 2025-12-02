@@ -116,6 +116,20 @@ module.exports = {
       console.log(`⚙️ Workflows loaded`);
     }
 
+    // Start automatic snapshot scheduler (EXCEEDS WICK - point-in-time recovery)
+    if (client.snapshotScheduler && (!shardInfo.isSharded || shardInfo.shardId === 0)) {
+      client.snapshotScheduler.start();
+      console.log(`📸 Snapshot scheduler started (hourly backups enabled)`);
+    }
+
+    // Start automatic vote checking for all guilds (EXCEEDS WICK - auto vote rewards)
+    if (client.voteRewards) {
+      for (const guild of client.guilds.cache.values()) {
+        client.voteRewards.startAutoChecking(guild);
+      }
+      console.log(`🎁 Vote rewards auto-checking started for ${client.guilds.cache.size} guilds`);
+    }
+
     // Generate initial recommendations for all guilds
     const SmartRecommendations = require("../utils/smartRecommendations");
     for (const guild of client.guilds.cache.values()) {

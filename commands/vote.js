@@ -10,6 +10,7 @@ const {
 const db = require("../utils/database");
 const Owner = require("../utils/owner");
 const logger = require("../utils/logger");
+const VoteRewards = require("../utils/voteRewards");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -26,6 +27,33 @@ module.exports = {
           option
             .setName("user")
             .setDescription("User to check (defaults to you)")
+            .setRequired(false)
+        )
+    )
+    .addSubcommand((subcommand) =>
+      subcommand
+        .setName("rewards")
+        .setDescription("View your voting rewards and streak")
+        .addUserOption((option) =>
+          option
+            .setName("user")
+            .setDescription("User to check (defaults to you)")
+            .setRequired(false)
+        )
+    )
+    .addSubcommand((subcommand) =>
+      subcommand
+        .setName("leaderboard")
+        .setDescription("View voting leaderboard")
+        .addStringOption((option) =>
+          option
+            .setName("type")
+            .setDescription("Leaderboard type")
+            .addChoices(
+              { name: "Current Streak", value: "streak" },
+              { name: "Total Votes", value: "total" },
+              { name: "Longest Streak", value: "longest" }
+            )
             .setRequired(false)
         )
     )
@@ -218,6 +246,8 @@ module.exports = {
           topgg: null,
           discordbotlist: null,
           voidbots: null,
+          discordbots: null,
+          botsondicord: null,
         };
 
         // Check Top.gg
@@ -269,7 +299,35 @@ module.exports = {
           }
         }
 
-        const hasVotedAny = voteStatus.topgg || voteStatus.discordbotlist || voteStatus.voidbots;
+        // Check Discord Bots (discord.bots.gg)
+        if (process.env.DISCORDBOTS_TOKEN) {
+          try {
+            const DiscordBots = require("../utils/discordbots");
+            const discordBots = interaction.client.discordBots || new DiscordBots(
+              interaction.client,
+              process.env.DISCORDBOTS_TOKEN
+            );
+            voteStatus.discordbots = await discordBots.hasVoted(targetUser.id);
+          } catch (error) {
+            logger.debug("Error checking Discord Bots vote:", error);
+          }
+        }
+
+        // Check Bots on Discord
+        if (process.env.BOTSONDICORD_TOKEN) {
+          try {
+            const BotsOnDiscord = require("../utils/botsondicord");
+            const botsOnDiscord = interaction.client.botsOnDiscord || new BotsOnDiscord(
+              interaction.client,
+              process.env.BOTSONDICORD_TOKEN
+            );
+            voteStatus.botsondicord = await botsOnDiscord.hasVoted(targetUser.id);
+          } catch (error) {
+            logger.debug("Error checking Bots on Discord vote:", error);
+          }
+        }
+
+        const hasVotedAny = voteStatus.topgg || voteStatus.discordbotlist || voteStatus.voidbots || voteStatus.discordbots || voteStatus.botsondicord;
 
         const embed = new EmbedBuilder()
           .setTitle("📊 Vote Status Check")
@@ -305,6 +363,20 @@ module.exports = {
             inline: true,
           });
         }
+        if (process.env.DISCORDBOTS_TOKEN) {
+          statusFields.push({
+            name: "Discord Bots",
+            value: voteStatus.discordbots ? "✅ Voted" : "❌ Not Voted",
+            inline: true,
+          });
+        }
+        if (process.env.BOTSONDICORD_TOKEN) {
+          statusFields.push({
+            name: "Bots on Discord",
+            value: voteStatus.botsondicord ? "✅ Voted" : "❌ Not Voted",
+            inline: true,
+          });
+        }
         embed.addFields(statusFields);
 
         // Get voting links
@@ -335,7 +407,9 @@ module.exports = {
           const votedOn = [];
           if (voteStatus.topgg) votedOn.push("Top.gg");
           if (voteStatus.discordbotlist) votedOn.push("Discord Bot List");
-          if (voteStatus.voidbots) votedOn.push("VoidBots");
+          if (voteStatus.voidbots) votedOn.push("Void Bots");
+          if (voteStatus.discordbots) votedOn.push("Discord Bots");
+          if (voteStatus.botsondicord) votedOn.push("Bots on Discord");
 
           embed.setDescription(
             isSelf
@@ -468,6 +542,171 @@ module.exports = {
         .setTimestamp();
 
       return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
+    }
+
+    if (subcommand === "rewards") {
+      const targetUser = interaction.options.getUser("user") || interaction.user;
+      const isSelf = targetUser.id === interaction.user.id;
+
+      const voteRewards = new VoteRewards(interaction.client);
+      const stats = await voteRewards.getVoteStats(targetUser.id);
+
+      const embed = new EmbedBuilder()
+        .setTitle("🎁 Voting Rewards")
+        .setDescription(
+          isSelf
+            ? "Your voting statistics and rewards"
+            : `Voting statistics for ${targetUser.tag}`
+        )
+        .setThumbnail(targetUser.displayAvatarURL({ dynamic: true }))
+        .setColor(0xffd700)
+        .setTimestamp();
+
+      // Streak information
+      const streakEmoji =
+        stats.current_streak >= 30
+          ? "💎"
+          : stats.current_streak >= 14
+          ? "⚡"
+          : stats.current_streak >= 7
+          ? "🔥"
+          : "📅";
+
+      embed.addFields({
+        name: `${streakEmoji} Current Streak`,
+        value: `**${stats.current_streak}** day${stats.current_streak !== 1 ? "s" : ""}`,
+        inline: true,
+      });
+
+      embed.addFields({
+        name: "👑 Longest Streak",
+        value: `**${stats.longest_streak}** day${stats.longest_streak !== 1 ? "s" : ""}`,
+        inline: true,
+      });
+
+      embed.addFields({
+        name: "📊 Total Votes",
+        value: `**${stats.total_votes}**`,
+        inline: true,
+      });
+
+      embed.addFields({
+        name: "⭐ Vote Points",
+        value: `**${stats.points}** points`,
+        inline: true,
+      });
+
+      embed.addFields({
+        name: "📅 Recent Votes",
+        value: `**${stats.recent_votes}** (Last 30 days)`,
+        inline: true,
+      });
+
+      // Show next milestone
+      const streakMilestones = [7, 14, 30, 60, 90];
+      const nextMilestone = streakMilestones.find(
+        (m) => m > stats.current_streak
+      );
+
+      if (nextMilestone) {
+        const daysToGo = nextMilestone - stats.current_streak;
+        embed.addFields({
+          name: "🎯 Next Milestone",
+          value: `**${nextMilestone}** days (${daysToGo} day${daysToGo !== 1 ? "s" : ""} to go)`,
+          inline: true,
+        });
+      }
+
+      // Show if reward is active
+      const hasActive = await voteRewards.hasActiveReward(targetUser.id);
+      if (hasActive) {
+        embed.addFields({
+          name: "✅ Active Reward",
+          value: "You have an active vote reward! (12 hours)",
+          inline: false,
+        });
+      }
+
+      // Last vote time
+      if (stats.last_vote_at) {
+        embed.setFooter({
+          text: `Last voted: ${new Date(stats.last_vote_at).toLocaleString()}`,
+        });
+      }
+
+      return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
+    }
+
+    if (subcommand === "leaderboard") {
+      const type = interaction.options.getString("type") || "streak";
+
+      await interaction.deferReply();
+
+      const voteRewards = new VoteRewards(interaction.client);
+      const leaderboard = await voteRewards.getLeaderboard(type, 10);
+
+      const typeNames = {
+        streak: "Current Streak",
+        total: "Total Votes",
+        longest: "Longest Streak",
+      };
+
+      const embed = new EmbedBuilder()
+        .setTitle(`🏆 Voting Leaderboard - ${typeNames[type]}`)
+        .setDescription("Top 10 voters")
+        .setColor(0xffd700)
+        .setTimestamp();
+
+      if (leaderboard.length === 0) {
+        embed.setDescription("No voting data yet. Be the first to vote!");
+        return interaction.editReply({ embeds: [embed] });
+      }
+
+      // Build leaderboard
+      const medals = ["🥇", "🥈", "🥉"];
+      let leaderboardText = "";
+
+      for (let i = 0; i < leaderboard.length; i++) {
+        const entry = leaderboard[i];
+        const medal = medals[i] || `**${i + 1}.**`;
+
+        let value;
+        if (type === "streak") {
+          value = `${entry.current_streak} day${entry.current_streak !== 1 ? "s" : ""}`;
+        } else if (type === "total") {
+          value = `${entry.total_votes} vote${entry.total_votes !== 1 ? "s" : ""}`;
+        } else {
+          value = `${entry.longest_streak} day${entry.longest_streak !== 1 ? "s" : ""}`;
+        }
+
+        leaderboardText += `${medal} <@${entry.user_id}> - **${value}**\n`;
+      }
+
+      embed.setDescription(leaderboardText);
+
+      // Show user's rank if not in top 10
+      const userRank = leaderboard.findIndex(
+        (e) => e.user_id === interaction.user.id
+      );
+      if (userRank === -1) {
+        const userStats = await voteRewards.getVoteStats(interaction.user.id);
+        let userValue;
+        if (type === "streak") {
+          userValue = userStats.current_streak;
+        } else if (type === "total") {
+          userValue = userStats.total_votes;
+        } else {
+          userValue = userStats.longest_streak;
+        }
+
+        if (userValue > 0) {
+          embed.setFooter({
+            text: `Your ${typeNames[type].toLowerCase()}: ${userValue}`,
+          });
+        }
+      }
+
+      return interaction.editReply({ embeds: [embed] });
     }
   },
 };

@@ -251,6 +251,127 @@ if (process.env.VOIDBOTS_TOKEN) {
   console.log("ℹ️  [VoidBots] No VOIDBOTS_TOKEN found, skipping stats posting");
 }
 
+// Initialize Discord Bots (discord.bots.gg) stats posting
+if (process.env.DISCORDBOTS_TOKEN) {
+  let dbInterval = null;
+  let botId = null;
+
+  manager.once("shardCreate", async (shard) => {
+    shard.once("ready", async () => {
+      if (!botId) {
+        try {
+          const clientValues = await manager.fetchClientValues("user.id");
+          botId = clientValues[0];
+        } catch (error) {
+          console.error("[Discord Bots] Failed to get bot ID:", error.message);
+          return;
+        }
+      }
+
+      if (!dbInterval) {
+        const postStats = async () => {
+          try {
+            const axios = require("axios");
+            const guilds = await manager.fetchClientValues("guilds.cache.size");
+            const totalGuilds = guilds.reduce((acc, count) => acc + count, 0);
+
+            await axios.post(
+              `https://discord.bots.gg/api/v1/bots/${botId}/stats`,
+              {
+                guildCount: totalGuilds,
+                shardCount: manager.totalShards,
+              },
+              {
+                headers: {
+                  Authorization: process.env.DISCORDBOTS_TOKEN,
+                  "Content-Type": "application/json",
+                },
+              }
+            );
+
+            console.log(
+              `📊 [Discord Bots] Posted stats: ${totalGuilds} guilds, ${manager.totalShards} shards`
+            );
+          } catch (error) {
+            console.error("[Discord Bots] Error posting stats:", error.message);
+          }
+        };
+
+        postStats();
+        dbInterval = setInterval(postStats, 1800000); // Every 30 minutes
+        console.log("✅ [Discord Bots] Stats posting initialized");
+      }
+    });
+  });
+} else {
+  console.log(
+    "ℹ️  [Discord Bots] No DISCORDBOTS_TOKEN found, skipping stats posting"
+  );
+}
+
+// Initialize Bots on Discord stats posting
+if (process.env.BOTSONDICORD_TOKEN) {
+  let bodInterval = null;
+  let botId = null;
+
+  manager.once("shardCreate", async (shard) => {
+    shard.once("ready", async () => {
+      if (!botId) {
+        try {
+          const clientValues = await manager.fetchClientValues("user.id");
+          botId = clientValues[0];
+        } catch (error) {
+          console.error(
+            "[Bots on Discord] Failed to get bot ID:",
+            error.message
+          );
+          return;
+        }
+      }
+
+      if (!bodInterval) {
+        const postStats = async () => {
+          try {
+            const axios = require("axios");
+            const guilds = await manager.fetchClientValues("guilds.cache.size");
+            const totalGuilds = guilds.reduce((acc, count) => acc + count, 0);
+
+            await axios.post(
+              `https://bots.ondiscord.xyz/bot-api/bots/${botId}/guilds`,
+              {
+                guildCount: totalGuilds,
+              },
+              {
+                headers: {
+                  Authorization: process.env.BOTSONDICORD_TOKEN,
+                  "Content-Type": "application/json",
+                },
+              }
+            );
+
+            console.log(
+              `📊 [Bots on Discord] Posted stats: ${totalGuilds} guilds`
+            );
+          } catch (error) {
+            console.error(
+              "[Bots on Discord] Error posting stats:",
+              error.message
+            );
+          }
+        };
+
+        postStats();
+        bodInterval = setInterval(postStats, 1800000); // Every 30 minutes
+        console.log("✅ [Bots on Discord] Stats posting initialized");
+      }
+    });
+  });
+} else {
+  console.log(
+    "ℹ️  [Bots on Discord] No BOTSONDICORD_TOKEN found, skipping stats posting"
+  );
+}
+
 // Initialize Top.gg webhook server (runs once, not per shard)
 // The webhook server will be started in index.js when shard 0 is ready
 

@@ -5,6 +5,43 @@ const ErrorHandler = require("../utils/errorHandler");
 module.exports = {
   name: "roleUpdate",
   async execute(oldRole, newRole, client) {
+    // Track permission changes in anti-nuke system
+    try {
+      const auditLogs = await newRole.guild.fetchAuditLogs({
+        type: 31, // ROLE_UPDATE
+        limit: 1,
+      });
+      const roleUpdate = auditLogs.entries.first();
+      
+      if (roleUpdate && roleUpdate.target.id === newRole.id) {
+        const executor = roleUpdate.executor;
+        
+        // Check if this is a permission change
+        const oldPerms = oldRole.permissions;
+        const newPerms = newRole.permissions;
+        const addedPerms = newPerms.toArray().filter((p) => !oldPerms.has(p));
+        const hasAdminChange = addedPerms.includes("Administrator") ||
+                              addedPerms.includes("ManageGuild") ||
+                              addedPerms.includes("ManageRoles") ||
+                              addedPerms.includes("ManageChannels");
+        
+        if (client.advancedAntiNuke && (addedPerms.length > 0 || hasAdminChange)) {
+          await client.advancedAntiNuke.monitorAction(
+            newRole.guild,
+            "role_update",
+            executor.id,
+            {
+              targetId: newRole.id,
+              targetType: hasAdminChange ? "admin" : "normal",
+              addedPerms,
+            }
+          );
+        }
+      }
+    } catch (error) {
+      // Silently fail - permission tracking is non-critical
+    }
+
     const changes = [];
 
     // Check for name change

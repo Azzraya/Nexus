@@ -74,6 +74,14 @@ client.autoBackup = new AutoBackup(client);
 const PerformanceMonitor = require("./utils/performanceMonitor");
 client.performanceMonitor = new PerformanceMonitor();
 
+// Snapshot Scheduler (EXCEEDS WICK - automatic point-in-time snapshots)
+const SnapshotScheduler = require("./utils/snapshotScheduler");
+client.snapshotScheduler = new SnapshotScheduler(client);
+
+// Vote Rewards System (EXCEEDS WICK - automatic vote detection & rewards)
+const VoteRewards = require("./utils/voteRewards");
+client.voteRewards = new VoteRewards(client);
+
 // Optimized cleanup - run all cleanups in parallel (EXCEEDS WICK - better performance)
 setInterval(async () => {
   const cleanupTasks = [];
@@ -300,6 +308,48 @@ if (!process.env.USING_SHARDING && process.env.DISCORDBOTLIST_TOKEN) {
       client.discordBotList = dbl;
     } catch (error) {
       logger.error("[Discord Bot List] Failed to initialize:", error);
+    }
+  });
+}
+
+// Initialize Void Bots stats posting (for non-sharded mode)
+if (!process.env.USING_SHARDING && process.env.VOIDBOTS_TOKEN) {
+  client.once("clientReady", () => {
+    try {
+      const VoidBots = require("./utils/voidbots");
+      const voidBots = new VoidBots(client, process.env.VOIDBOTS_TOKEN);
+      voidBots.initialize();
+      client.voidBots = voidBots;
+    } catch (error) {
+      logger.error("[Void Bots] Failed to initialize:", error);
+    }
+  });
+}
+
+// Initialize Discord Bots (discord.bots.gg) stats posting (for non-sharded mode)
+if (!process.env.USING_SHARDING && process.env.DISCORDBOTS_TOKEN) {
+  client.once("clientReady", () => {
+    try {
+      const DiscordBots = require("./utils/discordbots");
+      const discordBots = new DiscordBots(client, process.env.DISCORDBOTS_TOKEN);
+      discordBots.initialize();
+      client.discordBots = discordBots;
+    } catch (error) {
+      logger.error("[Discord Bots] Failed to initialize:", error);
+    }
+  });
+}
+
+// Initialize Bots on Discord stats posting (for non-sharded mode)
+if (!process.env.USING_SHARDING && process.env.BOTSONDICORD_TOKEN) {
+  client.once("clientReady", () => {
+    try {
+      const BotsOnDiscord = require("./utils/botsondicord");
+      const botsOnDiscord = new BotsOnDiscord(client, process.env.BOTSONDICORD_TOKEN);
+      botsOnDiscord.initialize();
+      client.botsOnDiscord = botsOnDiscord;
+    } catch (error) {
+      logger.error("[Bots on Discord] Failed to initialize:", error);
     }
   });
 }
