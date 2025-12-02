@@ -162,8 +162,19 @@ class VerificationSystem {
   // Send captcha verification
   async sendCaptchaVerification(member, verificationId, config) {
     try {
-      const captcha = this.generateMathCaptcha();
+      // Randomly choose between math and text captcha
+      const useTextCaptcha = Math.random() < 0.5;
+      const captcha = useTextCaptcha
+        ? this.generateTextCaptcha()
+        : this.generateMathCaptcha();
       this.captchaCodes.set(verificationId, captcha.answer);
+      
+      // Store the question in verification data for modal display
+      const verification = this.pendingVerifications.get(verificationId);
+      if (verification) {
+        verification.captchaQuestion = captcha.question;
+        this.pendingVerifications.set(verificationId, verification);
+      }
 
       const {
         EmbedBuilder,
@@ -289,7 +300,15 @@ class VerificationSystem {
     // Verify answer for captcha
     if (verification.mode === "captcha" && answer) {
       const correctAnswer = this.captchaCodes.get(verificationId);
-      if (answer.toLowerCase().trim() !== correctAnswer.toLowerCase().trim()) {
+      if (!correctAnswer) {
+        return { success: false, reason: "Captcha expired. Please start a new verification." };
+      }
+      
+      // Normalize both answers for comparison (trim, lowercase, handle numbers)
+      const normalizedUserAnswer = answer.trim().toLowerCase();
+      const normalizedCorrectAnswer = correctAnswer.toString().trim().toLowerCase();
+      
+      if (normalizedUserAnswer !== normalizedCorrectAnswer) {
         return { success: false, reason: "Incorrect answer" };
       }
     }

@@ -11,6 +11,47 @@ module.exports = {
     // Register slash commands
     await registerCommands(client);
 
+    // Post commands to Discord Bot List (only from shard 0 or non-sharded)
+    if (process.env.DISCORDBOTLIST_TOKEN) {
+      const shardInfo = ShardManager.getShardInfo(client);
+      const shouldPostCommands =
+        !shardInfo.isSharded || shardInfo.shardId === 0;
+
+      if (shouldPostCommands) {
+        try {
+          const DiscordBotList = require("../utils/discordbotlist");
+          let dbl = client.discordBotList;
+          
+          if (!dbl) {
+            dbl = new DiscordBotList(client, process.env.DISCORDBOTLIST_TOKEN);
+            // Initialize it (this sets up the dbl instance)
+            dbl.initialize();
+            client.discordBotList = dbl;
+          }
+
+          // Collect all commands
+          const commands = [];
+          for (const command of client.commands.values()) {
+            if (command.data) {
+              commands.push(command.data.toJSON());
+            }
+          }
+
+          if (commands.length > 0) {
+            await dbl.postCommands(commands);
+            console.log(
+              `✅ Posted ${commands.length} commands to Discord Bot List`
+            );
+          }
+        } catch (error) {
+          console.error(
+            "⚠️ Failed to post commands to Discord Bot List:",
+            error.message
+          );
+        }
+      }
+    }
+
     if (shardInfo.isSharded) {
       console.log(
         `✅ Shard ${shardInfo.shardId}/${shardInfo.shardCount - 1} is online!`

@@ -12,7 +12,7 @@ module.exports = {
     const initialChecks = await Promise.all([
       ThreatIntelligence.checkThreat(member.user.id).catch(() => ({ hasThreat: false, riskScore: 0 })),
       JoinGate.checkMember(member, member.guild).catch(() => ({ filtered: false })),
-      client.workflows 
+      client.workflows
         ? client.workflows.checkTriggers(member.guild.id, "guildMemberAdd", {
             user: member.user,
             member: member,
@@ -116,12 +116,14 @@ module.exports = {
 
     if (daysOld < 7) {
       // Very new account - add heat
-      await client.addHeat(
-        member.guild.id,
-        member.id,
-        10,
-        "New account (< 7 days old)"
-      );
+      if (client.heatSystem && typeof client.heatSystem.addHeat === "function") {
+        await client.heatSystem.addHeat(
+          member.guild.id,
+          member.id,
+          10,
+          "New account (< 7 days old)"
+        );
+      }
     }
 
     // Check if server is in lockdown

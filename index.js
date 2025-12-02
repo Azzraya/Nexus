@@ -268,6 +268,46 @@ client.checkAntiNuke = async (guild, user, action) => {
   return false;
 };
 
+// Initialize Top.gg stats posting (for non-sharded mode)
+// Note: For sharded mode, Top.gg is initialized in shard.js
+if (!process.env.USING_SHARDING && process.env.TOPGG_TOKEN) {
+  try {
+    const { AutoPoster } = require("topgg-autoposter");
+    const ap = AutoPoster(process.env.TOPGG_TOKEN, client);
+
+    ap.on("posted", (stats) => {
+      logger.info(
+        `[Top.gg] Posted stats: ${stats.serverCount} servers`
+      );
+    });
+
+    ap.on("error", (error) => {
+      logger.error("[Top.gg] Error posting stats:", error);
+    });
+
+    logger.info("[Top.gg] Stats posting initialized");
+  } catch (error) {
+    logger.error("[Top.gg] Failed to initialize:", error);
+  }
+}
+
+// Initialize Discord Bot List stats posting (for non-sharded mode)
+// Note: For sharded mode, Discord Bot List is initialized in shard.js
+if (!process.env.USING_SHARDING && process.env.DISCORDBOTLIST_TOKEN) {
+  client.once("clientReady", () => {
+    try {
+      const DiscordBotList = require("./utils/discordbotlist");
+      const dbl = new DiscordBotList(client, process.env.DISCORDBOTLIST_TOKEN);
+      dbl.initialize();
+      client.discordBotList = dbl;
+    } catch (error) {
+      logger.error("[Discord Bot List] Failed to initialize:", error);
+    }
+  });
+}
+
+// Top.gg webhook server removed - not using webhooks
+
 // Login with shard support
 // If we're being spawned by ShardingManager (shard.js), it handles login automatically via the token passed to it
 // Only login if we're running index.js directly (not via shard.js)

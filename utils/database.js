@@ -880,8 +880,7 @@ class Database {
     this.db.run(
       `CREATE INDEX IF NOT EXISTS idx_threat_intelligence_user ON threat_intelligence(user_id, reported_at DESC)`,
       (err) => {
-        if (err)
-          logger.error("Error creating threat intelligence index:", err);
+        if (err) logger.error("Error creating threat intelligence index:", err);
       }
     );
 
@@ -917,8 +916,7 @@ class Database {
     this.db.run(
       `CREATE INDEX IF NOT EXISTS idx_threat_intelligence_user ON threat_intelligence(user_id, reported_at DESC)`,
       (err) => {
-        if (err)
-          logger.error("Error creating threat intelligence index:", err);
+        if (err) logger.error("Error creating threat intelligence index:", err);
       }
     );
 
@@ -938,8 +936,7 @@ class Database {
     this.db.run(
       `CREATE INDEX IF NOT EXISTS idx_workflows_guild ON workflows(guild_id)`,
       (err) => {
-        if (err)
-          logger.error("Error creating index idx_workflows_guild:", err);
+        if (err) logger.error("Error creating index idx_workflows_guild:", err);
       }
     );
     this.db.run(

@@ -1,0 +1,33 @@
+# Allow .env files to be edited
+!.env
+!.env.local
+
+# Still ignore sensitive files
+*.key
+*.pem
+*.secret
+*.token
+id_rsa
+id_ed25519
+
+# Ignore node_modules and build artifacts (except topgg-autoposter for patching)
+node_modules/
+!node_modules/topgg-autoposter/
+dist/
+build/
+*.log
+.DS_Store
+
+# Ignore database files (but allow editing config)
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# Ignore large directories
+data/
+logs/
+backups/
+readmes/
+scripts/
+

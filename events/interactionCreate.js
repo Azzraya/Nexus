@@ -795,13 +795,17 @@ module.exports = {
               ModalBuilder,
             } = require("discord.js");
 
+            // Get the captcha question from verification data
+            const verification = client.verificationSystem.pendingVerifications.get(verificationId);
+            const captchaQuestion = verification?.captchaQuestion || "Answer the captcha question";
+
             const modal = new ModalBuilder()
               .setCustomId(`captcha_modal_${verificationId}`)
               .setTitle("Complete Captcha");
 
             const answerInput = new TextInputBuilder()
               .setCustomId("captcha_answer")
-              .setLabel("Answer the captcha question")
+              .setLabel(captchaQuestion)
               .setStyle(TextInputStyle.Short)
               .setRequired(true)
               .setPlaceholder("Enter your answer here");

@@ -5,9 +5,11 @@ const {
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
+  MessageFlags,
 } = require("discord.js");
 const db = require("../utils/database");
 const Owner = require("../utils/owner");
+const logger = require("../utils/logger");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -15,6 +17,17 @@ module.exports = {
     .setDescription("Vote for the bot on bot listing websites")
     .addSubcommand((subcommand) =>
       subcommand.setName("list").setDescription("View all voting links")
+    )
+    .addSubcommand((subcommand) =>
+      subcommand
+        .setName("check")
+        .setDescription("Check if you've voted on Top.gg")
+        .addUserOption((option) =>
+          option
+            .setName("user")
+            .setDescription("User to check (defaults to you)")
+            .setRequired(false)
+        )
     )
     .addSubcommand((subcommand) =>
       subcommand
@@ -115,10 +128,186 @@ module.exports = {
         rows.push(row);
       }
 
+      // Check if user has voted on any bot lists (if configured)
+      const voteChecks = [];
+      if (process.env.TOPGG_TOKEN && interaction.client.user.id) {
+        try {
+          const Topgg = require("@top-gg/sdk");
+          const api = new Topgg.Api(process.env.TOPGG_TOKEN);
+          const hasVoted = await api.hasVoted(interaction.user.id, interaction.client.user.id);
+          if (hasVoted) voteChecks.push("Top.gg");
+        } catch (error) {
+          // Silently fail - Top.gg check is optional
+        }
+      }
+      
+      if (process.env.DISCORDBOTLIST_TOKEN && interaction.client.user.id) {
+        try {
+          const DiscordBotList = require("../utils/discordbotlist");
+          const dbl = new DiscordBotList(interaction.client, process.env.DISCORDBOTLIST_TOKEN);
+          const vote = await dbl.hasVoted(interaction.user.id, interaction.client.user.id);
+          if (vote) voteChecks.push("Discord Bot List");
+        } catch (error) {
+          // Silently fail - Discord Bot List check is optional
+        }
+      }
+
+      if (voteChecks.length > 0) {
+        embed.setDescription(
+          embed.data.description + `\n\n✅ **You have voted on ${voteChecks.join(" and ")}!** Thank you!`
+        );
+      } else if (botlists.length > 0) {
+        const topggLink = botlists.find(b => 
+          b.name.toLowerCase().includes("top.gg") || 
+          b.url.includes("top.gg")
+        );
+        const dblLink = botlists.find(b => 
+          b.name.toLowerCase().includes("discord bot list") || 
+          b.url.includes("discordbotlist.com")
+        );
+        
+        const links = [];
+        if (topggLink) links.push(`[Top.gg](${topggLink.url})`);
+        if (dblLink) links.push(`[Discord Bot List](${dblLink.url})`);
+        
+        if (links.length > 0) {
+          embed.setDescription(
+            embed.data.description + 
+            `\n\n💡 **Tip:** Vote on ${links.join(" or ")} to support the bot!`
+          );
+        }
+      }
+
       return interaction.reply({
         embeds: [embed],
         components: rows,
       });
+    }
+
+    if (subcommand === "check") {
+      const targetUser = interaction.options.getUser("user") || interaction.user;
+      const isSelf = targetUser.id === interaction.user.id;
+
+      if (!process.env.TOPGG_TOKEN && !process.env.DISCORDBOTLIST_TOKEN) {
+        return interaction.reply({
+          content: "❌ No bot list integrations are configured.",
+          flags: MessageFlags.Ephemeral,
+        });
+      }
+
+      await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+
+      try {
+        const voteStatus = {
+          topgg: null,
+          discordbotlist: null,
+        };
+
+        // Check Top.gg
+        if (process.env.TOPGG_TOKEN) {
+          try {
+            const Topgg = require("@top-gg/sdk");
+            const api = new Topgg.Api(process.env.TOPGG_TOKEN);
+            voteStatus.topgg = await api.hasVoted(
+              targetUser.id,
+              interaction.client.user.id
+            );
+          } catch (error) {
+            logger.debug("Error checking Top.gg vote:", error);
+          }
+        }
+
+        // Check Discord Bot List
+        if (process.env.DISCORDBOTLIST_TOKEN) {
+          try {
+            const DiscordBotList = require("../utils/discordbotlist");
+            const dbl = new DiscordBotList(
+              interaction.client,
+              process.env.DISCORDBOTLIST_TOKEN
+            );
+            voteStatus.discordbotlist = await dbl.hasVoted(
+              targetUser.id,
+              interaction.client.user.id
+            );
+          } catch (error) {
+            logger.debug("Error checking Discord Bot List vote:", error);
+          }
+        }
+
+        const hasVotedAny = voteStatus.topgg || voteStatus.discordbotlist;
+
+        const embed = new EmbedBuilder()
+          .setTitle("📊 Vote Status Check")
+          .setColor(hasVotedAny ? 0x00ff00 : 0xffaa00)
+          .setThumbnail(targetUser.displayAvatarURL({ dynamic: true }))
+          .addFields({
+            name: "User",
+            value: `${targetUser} (${targetUser.tag})`,
+            inline: true,
+          })
+          .setTimestamp();
+
+        // Add vote status fields
+        const statusFields = [];
+        if (process.env.TOPGG_TOKEN) {
+          statusFields.push({
+            name: "Top.gg",
+            value: voteStatus.topgg ? "✅ Voted" : "❌ Not Voted",
+            inline: true,
+          });
+        }
+        if (process.env.DISCORDBOTLIST_TOKEN) {
+          statusFields.push({
+            name: "Discord Bot List",
+            value: voteStatus.discordbotlist ? "✅ Voted" : "❌ Not Voted",
+            inline: true,
+          });
+        }
+        embed.addFields(statusFields);
+
+        // Get voting links
+        const botlists = await new Promise((resolve, reject) => {
+          db.db.all("SELECT * FROM botlist_links ORDER BY name ASC", [], (err, rows) => {
+            if (err) reject(err);
+            else resolve(rows || []);
+          });
+        });
+
+        if (!hasVotedAny && botlists.length > 0) {
+          const links = botlists
+            .slice(0, 5)
+            .map((b) => `[${b.name}](${b.url})`)
+            .join("\n");
+          embed.addFields({
+            name: "💡 Vote Now",
+            value: links,
+            inline: false,
+          });
+
+          embed.setDescription(
+            isSelf
+              ? "You haven't voted yet. Vote now to support the bot!"
+              : "This user hasn't voted yet."
+          );
+        } else {
+          const votedOn = [];
+          if (voteStatus.topgg) votedOn.push("Top.gg");
+          if (voteStatus.discordbotlist) votedOn.push("Discord Bot List");
+
+          embed.setDescription(
+            isSelf
+              ? `Thank you for voting${votedOn.length > 0 ? ` on ${votedOn.join(" and ")}` : ""}! Your support helps us grow. 💙`
+              : `This user has voted${votedOn.length > 0 ? ` on ${votedOn.join(" and ")}` : ""}.`
+          );
+        }
+
+        return interaction.editReply({ embeds: [embed] });
+      } catch (error) {
+        logger.error("Error checking vote status:", error);
+        return interaction.editReply({
+          content: "❌ Failed to check vote status. Please try again later.",
+        });
+      }
     }
 
     if (subcommand === "add") {
@@ -126,7 +315,7 @@ module.exports = {
       if (!Owner.isOwner(interaction.user.id)) {
         return interaction.reply({
           content: "❌ Only the bot owner can add voting links.",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 
@@ -139,7 +328,7 @@ module.exports = {
       } catch (error) {
         return interaction.reply({
           content: "❌ Invalid URL format. Please provide a valid URL (e.g., https://top.gg/bot/.../vote)",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 
@@ -158,7 +347,7 @@ module.exports = {
       if (existing) {
         return interaction.reply({
           content: `❌ A botlist with the name "${name}" already exists. Use \`/vote remove\` first if you want to update it.`,
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 
@@ -184,7 +373,7 @@ module.exports = {
         .setColor(0x00ff00)
         .setTimestamp();
 
-      return interaction.reply({ embeds: [embed], ephemeral: true });
+      return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
     }
 
     if (subcommand === "remove") {
@@ -192,7 +381,7 @@ module.exports = {
       if (!Owner.isOwner(interaction.user.id)) {
         return interaction.reply({
           content: "❌ Only the bot owner can remove voting links.",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 
@@ -213,7 +402,7 @@ module.exports = {
       if (!existing) {
         return interaction.reply({
           content: `❌ No botlist found with the name "${name}".`,
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 
@@ -235,7 +424,7 @@ module.exports = {
         .setColor(0xff0000)
         .setTimestamp();
 
-      return interaction.reply({ embeds: [embed], ephemeral: true });
+      return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
     }
   },
 };

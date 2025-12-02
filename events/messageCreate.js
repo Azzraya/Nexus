@@ -182,6 +182,19 @@ module.exports = {
               .catch(() => null);
 
             if (member && punishment.action === "timeout") {
+              // Check if bot has permission to timeout
+              const botMember = message.guild.members.me;
+              const canTimeout = botMember && botMember.permissions.has("ModerateMembers");
+
+              if (!canTimeout) {
+                // Silently skip if bot doesn't have permissions (don't log as error)
+                const logger = require("../utils/logger");
+                logger.debug(
+                  `[messageCreate] Skipping timeout - bot lacks ModerateMembers permission in guild ${message.guild.id}`
+                );
+                return; // Skip timeout if no permission
+              }
+
               // Apply timeout with multiplier
               await ErrorHandler.safeExecute(
                 member.timeout(punishment.duration, punishment.reason),
@@ -189,13 +202,21 @@ module.exports = {
                 `Timeout for heat score ${heatScore} (duration: ${punishment.duration}ms)`
               );
 
-              // Delete message if needed
+              // Delete message if needed (check permission first)
               if (punishment.purgeMessages) {
-                await ErrorHandler.safeExecute(
-                  message.delete(),
-                  `messageCreate [${message.guild.id}]`,
-                  `Delete message after timeout (cap reached)`
-                );
+                const canDelete = message.channel.permissionsFor(botMember)?.has("ManageMessages");
+                if (canDelete) {
+                  await ErrorHandler.safeExecute(
+                    message.delete(),
+                    `messageCreate [${message.guild.id}]`,
+                    `Delete message after timeout (cap reached)`
+                  );
+                } else {
+                  const logger = require("../utils/logger");
+                  logger.debug(
+                    `[messageCreate] Skipping message delete - bot lacks ManageMessages permission in channel ${message.channel.id}`
+                  );
+                }
               }
 
               // Mark as raider if in panic mode

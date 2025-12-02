@@ -264,20 +264,37 @@ class HeatSystem {
     if (this.heatPanicMode.has(guildId)) {
       // In panic mode, any raider gets timeouted
       if (this.isRaider(guildId, userId)) {
+        const constants = require("./constants");
+        const MAX_TIMEOUT_DURATION = constants.MUTE.MAX_DURATION; // 28 days (Discord limit)
+        let panicDuration = config.panicTimeoutDuration || 600000; // 10 minutes default
+
+        // Cap at Discord's maximum
+        if (panicDuration > MAX_TIMEOUT_DURATION) {
+          panicDuration = MAX_TIMEOUT_DURATION;
+        }
+
         return {
           action: "timeout",
-          duration: config.panicTimeoutDuration || 600000, // 10 minutes default
+          duration: panicDuration,
           reason: "Heat Panic Mode: Raider detected",
         };
       }
     }
 
     // Normal heat system
+    const constants = require("./constants");
+    const MAX_TIMEOUT_DURATION = constants.MUTE.MAX_DURATION; // 28 days (Discord limit)
+
     if (heatScore >= cap) {
       // Cap reached - use cap timeout duration
       const capDuration = config.capTimeoutDuration || 1209600000; // 14 days default
       const multiplier = this.getTimeoutMultiplier(guildId, userId);
-      const finalDuration = capDuration * multiplier;
+      let finalDuration = capDuration * multiplier;
+
+      // Cap at Discord's maximum (28 days)
+      if (finalDuration > MAX_TIMEOUT_DURATION) {
+        finalDuration = MAX_TIMEOUT_DURATION;
+      }
 
       return {
         action: "timeout",
@@ -289,7 +306,12 @@ class HeatSystem {
       // Below cap - use first violation timeout
       const firstDuration = config.firstTimeoutDuration || 86400000; // 1 day default
       const multiplier = this.getTimeoutMultiplier(guildId, userId);
-      const finalDuration = firstDuration * multiplier;
+      let finalDuration = firstDuration * multiplier;
+
+      // Cap at Discord's maximum (28 days)
+      if (finalDuration > MAX_TIMEOUT_DURATION) {
+        finalDuration = MAX_TIMEOUT_DURATION;
+      }
 
       return {
         action: "timeout",
@@ -310,8 +332,12 @@ class HeatSystem {
   increaseTimeoutMultiplier(guildId, userId) {
     const key = `${guildId}-${userId}`;
     const current = this.timeoutMultipliers.get(key) || 1;
-    this.timeoutMultipliers.set(key, current * 2); // Double the multiplier
-    return current * 2;
+    // Cap multiplier at 28 to prevent durations exceeding Discord's 28-day limit
+    // (28 * 1 day = 28 days max)
+    const maxMultiplier = 28;
+    const newMultiplier = Math.min(current * 2, maxMultiplier);
+    this.timeoutMultipliers.set(key, newMultiplier);
+    return newMultiplier;
   }
 
   // Reset timeout multiplier (after user behaves)
