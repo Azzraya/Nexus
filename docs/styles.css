@@ -368,6 +368,7 @@ footer p {
   text-decoration: none;
   letter-spacing: 2px;
   margin-right: auto; /* Push everything else to the right */
+  padding-left: 5px; /* Extra breathing room from edge */
 }
 
 .nav-right {
