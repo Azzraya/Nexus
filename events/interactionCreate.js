@@ -2,6 +2,8 @@ const { InteractionType, MessageFlags } = require("discord.js");
 const db = require("../utils/database");
 const ErrorHandler = require("../utils/errorHandler");
 const logger = require("../utils/logger");
+const performanceMonitor = require("../utils/performanceMonitor");
+const InputValidator = require("../utils/inputValidator");
 
 module.exports = {
   name: "interactionCreate",
@@ -83,14 +85,18 @@ module.exports = {
           logger.debug(`[interactionCreate] Command logging failed (non-blocking):`, err.message);
         }); // Don't block command execution if logging fails
         
-        await command.execute(interaction);
-        const executionTime = Date.now() - startTime;
+        // Start performance tracking
+        const perfTimer = performanceMonitor.start(command.data.name);
 
-        if (client.performanceMonitor) {
-          client.performanceMonitor.trackCommand(
-            command.data.name,
-            executionTime
-          );
+        try {
+          await command.execute(interaction);
+          
+          // Record successful execution
+          performanceMonitor.end(perfTimer, true);
+        } catch (cmdError) {
+          // Record failed execution
+          performanceMonitor.end(perfTimer, false, cmdError);
+          throw cmdError; // Re-throw to be caught by outer catch
         }
 
         await db.updateUserStats(
