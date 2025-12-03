@@ -41,6 +41,73 @@ module.exports = {
       );
       
       console.log(`   📊 Tracked join from source: ${inviteSource}`);
+
+      // Send webhook notification to admin
+      if (process.env.ADMIN_WEBHOOK_URL && process.env.ADMIN_WEBHOOK_URL !== 'https://discord.com/api/webhooks/YOUR_WEBHOOK_ID/YOUR_WEBHOOK_TOKEN') {
+        try {
+          const owner = await guild.fetchOwner().catch(() => null);
+          
+          // Get conversion stats for this source
+          const sourceStats = await db.getInviteSourceStats().catch(() => []);
+          const thisSourceStats = sourceStats.find(s => s.source === inviteSource);
+          
+          const webhook = {
+            username: "Nexus Growth Tracker",
+            avatar_url: "https://cdn.discordapp.com/avatars/1444739230679957646/32f2d77d44c2f3989fecd858be53f396.webp",
+            embeds: [{
+              title: "🎉 New Server Joined!",
+              color: 0x10b981,
+              thumbnail: {
+                url: guild.iconURL() || "https://cdn.discordapp.com/avatars/1444739230679957646/32f2d77d44c2f3989fecd858be53f396.webp"
+              },
+              fields: [
+                {
+                  name: "📋 Server Info",
+                  value: `**${guild.name}**\nID: \`${guild.id}\`\nMembers: **${guild.memberCount || 0}**`,
+                  inline: true
+                },
+                {
+                  name: "👑 Owner",
+                  value: owner ? `${owner.user.tag}\n\`${owner.id}\`` : "Unknown",
+                  inline: true
+                },
+                {
+                  name: "📊 Invite Source",
+                  value: `**${inviteSource}**${thisSourceStats ? `\n${thisSourceStats.total_joins} total joins from this source` : ''}`,
+                  inline: true
+                }
+              ],
+              footer: {
+                text: `Total Servers: ${client.guilds.cache.size} | v2.3.0`
+              },
+              timestamp: new Date().toISOString()
+            }]
+          };
+
+          // Send to webhook
+          const https = require('https');
+          const url = new URL(process.env.ADMIN_WEBHOOK_URL);
+          const postData = JSON.stringify(webhook);
+
+          const options = {
+            hostname: url.hostname,
+            path: url.pathname + url.search,
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Content-Length': Buffer.byteLength(postData)
+            }
+          };
+
+          const req = https.request(options);
+          req.write(postData);
+          req.end();
+
+          console.log(`   📬 Admin notification sent for ${guild.name}`);
+        } catch (webhookError) {
+          console.error("Failed to send webhook notification:", webhookError.message);
+        }
+      }
     } catch (error) {
       console.error("Failed to track invite source:", error.message);
     }

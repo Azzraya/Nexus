@@ -824,6 +824,24 @@ class Database {
             ON pending_invite_sources(user_id, timestamp DESC)
         `);
 
+    // Guild leaves tracking table
+    this.db.run(`
+            CREATE TABLE IF NOT EXISTS guild_leaves (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                guild_id TEXT NOT NULL,
+                guild_name TEXT,
+                source TEXT,
+                left_at INTEGER NOT NULL,
+                days_active INTEGER DEFAULT 0,
+                member_count INTEGER
+            )
+        `);
+
+    this.db.run(`
+            CREATE INDEX IF NOT EXISTS idx_guild_leaves_source 
+            ON guild_leaves(source)
+        `);
+
     // Add default bot list links if table is empty
     this.db.get(
       "SELECT COUNT(*) as count FROM botlist_links",
