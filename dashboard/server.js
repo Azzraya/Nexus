@@ -1007,6 +1007,174 @@ class DashboardServer {
       }
     });
 
+    // GET /api/v1/recent-activity - Get recent bot activity
+    this.app.get("/api/v1/recent-activity", async (req, res) => {
+      try {
+        const limit = Math.min(parseInt(req.query.limit) || 10, 50);
+        const activities = [];
+
+        // Get recent security logs (last 24 hours)
+        const last24h = Date.now() - 24 * 60 * 60 * 1000;
+        const securityLogs = await new Promise((resolve) => {
+          db.db.all(
+            `SELECT * FROM security_logs 
+             WHERE timestamp > ? 
+             ORDER BY timestamp DESC 
+             LIMIT ?`,
+            [last24h, limit],
+            (err, rows) => {
+              if (err) resolve([]);
+              else resolve(rows || []);
+            }
+          );
+        });
+
+        // Convert security logs to activity items
+        securityLogs.forEach((log) => {
+          let icon, text;
+          if (log.threat_type === "raid") {
+            icon = "🛡️";
+            text = `Stopped raid attempt in ${log.guild_id}`;
+          } else if (log.threat_type === "nuke") {
+            icon = "💣";
+            text = `Prevented nuke in ${log.guild_id}`;
+          } else if (log.event_type === "mass_ban" || log.event_type === "mass_kick") {
+            icon = "⚡";
+            text = `Blocked mass ${log.event_type.replace("mass_", "")} attempt`;
+          } else {
+            icon = "🔒";
+            text = `Security action: ${log.event_type}`;
+          }
+
+          activities.push({
+            icon,
+            text,
+            timestamp: log.timestamp,
+            type: "security",
+          });
+        });
+
+        // Add guild join/leave events
+        this.client.guilds.cache.forEach((guild) => {
+          const joinedAt = guild.joinedTimestamp;
+          if (joinedAt > last24h) {
+            activities.push({
+              icon: "🚀",
+              text: `Joined ${guild.name}`,
+              timestamp: joinedAt,
+              type: "guild_join",
+            });
+          }
+        });
+
+        // Sort by timestamp
+        activities.sort((a, b) => b.timestamp - a.timestamp);
+
+        res.json(activities.slice(0, limit));
+      } catch (error) {
+        console.error("Recent activity error:", error);
+        res.json([]);
+      }
+    });
+
+    // GET /api/v1/achievements - Get unlocked achievements
+    this.app.get("/api/v1/achievements", async (req, res) => {
+      try {
+        const serverCount = this.client.guilds.cache.size;
+        const userCount = this.client.guilds.cache.reduce(
+          (acc, guild) => acc + guild.memberCount,
+          0
+        );
+
+        // Get total votes
+        const totalVotes = await new Promise((resolve) => {
+          db.db.get(
+            "SELECT SUM(total_votes) as total FROM vote_streaks",
+            [],
+            (err, row) => {
+              if (err) resolve(0);
+              else resolve(row?.total || 0);
+            }
+          );
+        });
+
+        // Get total invites (sum of all server joins)
+        const totalInvites = await new Promise((resolve) => {
+          db.db.get(
+            "SELECT COUNT(*) as count FROM guild_join_log",
+            [],
+            (err, row) => {
+              if (err) resolve(serverCount); // Fallback to current count
+              else resolve(row?.count || serverCount);
+            }
+          );
+        });
+
+        // Define achievements
+        const achievements = [
+          { id: "servers_5", name: "First 5 Servers", icon: "🌟", requirement: 5, current: serverCount, unlocked: serverCount >= 5 },
+          { id: "servers_10", name: "10 Server Milestone", icon: "⭐", requirement: 10, current: serverCount, unlocked: serverCount >= 10 },
+          { id: "servers_20", name: "20 Servers Strong", icon: "💫", requirement: 20, current: serverCount, unlocked: serverCount >= 20 },
+          { id: "servers_50", name: "50 Server Club", icon: "🌠", requirement: 50, current: serverCount, unlocked: serverCount >= 50 },
+          { id: "servers_100", name: "100 Servers!", icon: "🏆", requirement: 100, current: serverCount, unlocked: serverCount >= 100 },
+          { id: "users_100", name: "100 Users Protected", icon: "🛡️", requirement: 100, current: userCount, unlocked: userCount >= 100 },
+          { id: "users_500", name: "500 Users Protected", icon: "🔰", requirement: 500, current: userCount, unlocked: userCount >= 500 },
+          { id: "users_1000", name: "1K Users Protected", icon: "💎", requirement: 1000, current: userCount, unlocked: userCount >= 1000 },
+          { id: "votes_10", name: "First 10 Votes", icon: "🗳️", requirement: 10, current: totalVotes, unlocked: totalVotes >= 10 },
+          { id: "votes_50", name: "50 Votes", icon: "🎖️", requirement: 50, current: totalVotes, unlocked: totalVotes >= 50 },
+          { id: "votes_100", name: "100 Votes", icon: "🏅", requirement: 100, current: totalVotes, unlocked: totalVotes >= 100 },
+          { id: "invites_25", name: "25 Total Invites", icon: "📈", requirement: 25, current: totalInvites, unlocked: totalInvites >= 25 },
+          { id: "invites_50", name: "50 Total Invites", icon: "📊", requirement: 50, current: totalInvites, unlocked: totalInvites >= 50 },
+          { id: "invites_100", name: "100 Total Invites", icon: "💯", requirement: 100, current: totalInvites, unlocked: totalInvites >= 100 },
+        ];
+
+        res.json(achievements);
+      } catch (error) {
+        console.error("Achievements error:", error);
+        res.json([]);
+      }
+    });
+
+    // GET /api/v1/invite-stats - Get invite statistics
+    this.app.get("/api/v1/invite-stats", async (req, res) => {
+      try {
+        const currentServers = this.client.guilds.cache.size;
+
+        // Try to get total invites from database
+        const totalInvites = await new Promise((resolve) => {
+          db.db.get(
+            "SELECT COUNT(*) as count FROM guild_join_log",
+            [],
+            (err, row) => {
+              if (err) resolve(currentServers);
+              else resolve(row?.count || currentServers);
+            }
+          );
+        });
+
+        // Calculate retention rate
+        const retentionRate = currentServers > 0 
+          ? Math.round((currentServers / totalInvites) * 100) 
+          : 100;
+
+        res.json({
+          totalInvites,
+          currentServers,
+          serversLeft: totalInvites - currentServers,
+          retentionRate,
+        });
+      } catch (error) {
+        console.error("Invite stats error:", error);
+        const currentServers = this.client.guilds.cache.size;
+        res.json({
+          totalInvites: currentServers,
+          currentServers,
+          serversLeft: 0,
+          retentionRate: 100,
+        });
+      }
+    });
+
     console.log("[API] Public API v1 endpoints registered");
   }
 

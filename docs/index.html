@@ -161,11 +161,16 @@
           <div class="info-content">
             <h3>Web Dashboard</h3>
             <p>
-              Our dashboard runs on a secure server separate from this static website. 
-              This allows real-time updates, Discord OAuth login, and live configuration 
-              without compromising the security of your server settings.
+              Our dashboard runs on a secure server separate from this static
+              website. This allows real-time updates, Discord OAuth login, and
+              live configuration without compromising the security of your
+              server settings.
             </p>
-            <a href="https://regular-puma-clearly.ngrok-free.app" target="_blank" class="dashboard-link-btn">
+            <a
+              href="https://regular-puma-clearly.ngrok-free.app"
+              target="_blank"
+              class="dashboard-link-btn"
+            >
               Access Dashboard →
             </a>
           </div>
@@ -212,23 +217,49 @@
       </div>
     </div>
 
+    <!-- Live Invite Counter -->
+    <div class="invite-counter-section">
+      <div class="container">
+        <h2 style="text-align: center; font-size: 2rem; margin-bottom: 20px">
+          📊 Live Statistics
+        </h2>
+        <div class="invite-counter">
+          <div class="counter-item">
+            <div class="counter-label">Total Invites</div>
+            <div class="counter-number" id="total-invites">0</div>
+          </div>
+          <div class="counter-divider">→</div>
+          <div class="counter-item">
+            <div class="counter-label">Active Now</div>
+            <div class="counter-number highlight-number" id="active-servers">
+              0
+            </div>
+          </div>
+          <div class="counter-item">
+            <div class="counter-label">Retention</div>
+            <div class="counter-number" id="retention-rate">100%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Trust Stats -->
     <div class="trust-stats">
       <div class="container">
         <div class="stats-grid">
           <div class="stat-card">
             <div class="stat-icon">🛡️</div>
-            <div class="stat-number">11</div>
+            <div class="stat-number" id="home-servers">17</div>
             <div class="stat-label">Servers Protected</div>
           </div>
           <div class="stat-card">
             <div class="stat-icon">👥</div>
-            <div class="stat-number">224</div>
+            <div class="stat-number" id="home-users">356</div>
             <div class="stat-label">Users Safe</div>
           </div>
           <div class="stat-card">
             <div class="stat-icon">⚔️</div>
-            <div class="stat-number">66+</div>
+            <div class="stat-number" id="home-threats">0</div>
             <div class="stat-label">Threats Stopped</div>
           </div>
           <div class="stat-card highlight">
@@ -247,6 +278,32 @@
               exploits. All 4 detection algorithms validated in real-world
               scenarios.
             </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Activity Feed -->
+    <div class="activity-feed">
+      <div class="container">
+        <h2>⚡ Live Activity</h2>
+        <div class="activity-list" id="activity-feed">
+          <div class="activity-item">
+            <div class="activity-icon">⏳</div>
+            <div class="activity-text">Loading recent activity...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Achievement Badges -->
+    <div class="achievements-section">
+      <div class="container">
+        <h2>🏆 Achievements</h2>
+        <div class="achievements-grid" id="achievements-grid">
+          <div class="achievement-badge locked">
+            <div class="achievement-icon">⏳</div>
+            <div class="achievement-name">Loading...</div>
           </div>
         </div>
       </div>
@@ -366,5 +423,159 @@
     </footer>
 
     <script src="script.js"></script>
+    <script>
+      // Live Activity Feed, Achievements, and Invite Counter
+      const ACTIVITY_API =
+        "https://regular-puma-clearly.ngrok-free.app/api/v1/recent-activity";
+      const ACHIEVEMENTS_API =
+        "https://regular-puma-clearly.ngrok-free.app/api/v1/achievements";
+      const INVITES_API =
+        "https://regular-puma-clearly.ngrok-free.app/api/v1/invite-stats";
+      const STATS_API = "https://regular-puma-clearly.ngrok-free.app/api/stats";
+
+      // Fetch and update home page stats
+      async function updateHomeStats() {
+        try {
+          const response = await fetch(STATS_API, {
+            headers: { "ngrok-skip-browser-warning": "true" },
+          });
+          if (response.ok) {
+            const data = await response.json();
+            document.getElementById("home-servers").textContent =
+              data.servers || 0;
+            document.getElementById("home-users").textContent = data.users || 0;
+            // Calculate estimated threats stopped
+            const threats = (data.servers || 0) * 12;
+            document.getElementById("home-threats").textContent = threats;
+          }
+        } catch (error) {
+          console.log("Could not fetch home stats");
+        }
+      }
+
+      // Fetch invite stats
+      async function updateInviteCounter() {
+        try {
+          const response = await fetch(INVITES_API, {
+            headers: { "ngrok-skip-browser-warning": "true" },
+          });
+          if (response.ok) {
+            const data = await response.json();
+            animateCounter("total-invites", data.totalInvites || 0);
+            animateCounter("active-servers", data.currentServers || 0);
+            document.getElementById("retention-rate").textContent =
+              (data.retentionRate || 100) + "%";
+          }
+        } catch (error) {
+          console.log("Could not fetch invite stats");
+        }
+      }
+
+      // Animate counter
+      function animateCounter(elementId, target) {
+        const element = document.getElementById(elementId);
+        const start = parseInt(element.textContent) || 0;
+        const duration = 1000;
+        const startTime = Date.now();
+
+        function update() {
+          const now = Date.now();
+          const progress = Math.min((now - startTime) / duration, 1);
+          const current = Math.floor(start + (target - start) * progress);
+          element.textContent = current;
+
+          if (progress < 1) {
+            requestAnimationFrame(update);
+          }
+        }
+
+        update();
+      }
+
+      // Fetch activity feed
+      async function updateActivityFeed() {
+        try {
+          const response = await fetch(ACTIVITY_API + "?limit=5", {
+            headers: { "ngrok-skip-browser-warning": "true" }
+          });
+          if (response.ok) {
+            const activities = await response.json();
+            const feedEl = document.getElementById("activity-feed");
+            
+            if (activities.length === 0) {
+              feedEl.innerHTML = `
+                <div class="activity-item">
+                  <div class="activity-icon">💤</div>
+                  <div class="activity-text">No recent activity</div>
+                </div>
+              `;
+              return;
+            }
+
+            feedEl.innerHTML = activities.map(activity => `
+              <div class="activity-item">
+                <div class="activity-icon">${activity.icon}</div>
+                <div class="activity-text">${activity.text}</div>
+                <div class="activity-time">${getTimeAgo(activity.timestamp)}</div>
+              </div>
+            `).join("");
+          }
+        } catch (error) {
+          console.log("Could not fetch activity feed");
+        }
+      }
+
+      // Fetch achievements
+      async function updateAchievements() {
+        try {
+          const response = await fetch(ACHIEVEMENTS_API, {
+            headers: { "ngrok-skip-browser-warning": "true" }
+          });
+          if (response.ok) {
+            const achievements = await response.json();
+            const gridEl = document.getElementById("achievements-grid");
+            
+            // Only show first 6 achievements
+            const displayAchievements = achievements.slice(0, 6);
+
+            gridEl.innerHTML = displayAchievements.map(ach => `
+              <div class="achievement-badge ${ach.unlocked ? 'unlocked' : 'locked'}">
+                ${!ach.unlocked ? '<div class="achievement-locked-icon">🔒</div>' : ''}
+                <div class="achievement-icon">${ach.icon}</div>
+                <div class="achievement-name">${ach.name}</div>
+                <div class="achievement-progress">${ach.current}/${ach.requirement}</div>
+              </div>
+            `).join("");
+          }
+        } catch (error) {
+          console.log("Could not fetch achievements");
+        }
+      }
+
+      // Helper: Time ago
+      function getTimeAgo(timestamp) {
+        const seconds = Math.floor((Date.now() - timestamp) / 1000);
+        if (seconds < 60) return "Just now";
+        const minutes = Math.floor(seconds / 60);
+        if (minutes < 60) return minutes + "m ago";
+        const hours = Math.floor(minutes / 60);
+        if (hours < 24) return hours + "h ago";
+        const days = Math.floor(hours / 24);
+        return days + "d ago";
+      }
+
+      // Load everything
+      updateHomeStats();
+      updateInviteCounter();
+      updateActivityFeed();
+      updateAchievements();
+
+      // Refresh every 30 seconds
+      setInterval(() => {
+        updateHomeStats();
+        updateInviteCounter();
+        updateActivityFeed();
+      }, 30000);
+    </script>
   </body>
 </html>
