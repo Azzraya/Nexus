@@ -1,6 +1,6 @@
 {
   "name": "nexus-bot",
-  "version": "2.3.0",
+  "version": "2.4.0",
   "description": "Advanced Discord bot that exceeds Wick and all competitors",
   "main": "index.js",
   "scripts": {
