@@ -384,14 +384,17 @@
               }
             );
 
-            if (response.status === 401) {
-              localStorage.removeItem("nexus_admin_password");
-              alert("Invalid password");
-              window.location.reload();
-              return;
-            }
+           if (response.status === 401) {
+             localStorage.removeItem("nexus_admin_password");
+             alert("Invalid password");
+             window.location.reload();
+             return;
+           }
 
-            if (!response.ok) throw new Error("Failed to create link");
+           if (!response.ok) {
+             const errorData = await response.json().catch(() => ({}));
+             throw new Error(errorData.error || "Failed to create link");
+           }
 
             showSuccess(`Link created: ${sanitizedSource}`);
             document.getElementById("createLinkForm").reset();
