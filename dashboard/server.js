@@ -52,22 +52,25 @@ class DashboardServer {
     // IP Logging Middleware
     this.app.use(async (req, res, next) => {
       try {
-        const ip = req.ip || req.connection.remoteAddress || req.headers['x-forwarded-for'];
-        const cleanIP = ip?.replace('::ffff:', '') || 'unknown';
-        
+        const ip =
+          req.ip ||
+          req.connection.remoteAddress ||
+          req.headers["x-forwarded-for"];
+        const cleanIP = ip?.replace("::ffff:", "") || "unknown";
+
         // Log the visit
         await db.logIP(
           cleanIP,
           req.path,
-          req.headers['user-agent'] || 'unknown',
-          req.headers['referer'] || req.headers['referrer'] || 'direct',
-          req.sessionID || 'unknown',
+          req.headers["user-agent"] || "unknown",
+          req.headers["referer"] || req.headers["referrer"] || "direct",
+          req.sessionID || "unknown",
           req.user?.id || null,
           req.user?.username || null
         );
       } catch (error) {
         // Silent fail - IP logging shouldn't break the site
-        console.log('[IP Log] Logging failed:', error.message);
+        console.log("[IP Log] Logging failed:", error.message);
       }
       next();
     });
@@ -1061,9 +1064,15 @@ class DashboardServer {
           } else if (log.threat_type === "nuke") {
             icon = "💣";
             text = `Prevented nuke in ${log.guild_id}`;
-          } else if (log.event_type === "mass_ban" || log.event_type === "mass_kick") {
+          } else if (
+            log.event_type === "mass_ban" ||
+            log.event_type === "mass_kick"
+          ) {
             icon = "⚡";
-            text = `Blocked mass ${log.event_type.replace("mass_", "")} attempt`;
+            text = `Blocked mass ${log.event_type.replace(
+              "mass_",
+              ""
+            )} attempt`;
           } else {
             icon = "🔒";
             text = `Security action: ${log.event_type}`;
@@ -1135,20 +1144,118 @@ class DashboardServer {
 
         // Define achievements
         const achievements = [
-          { id: "servers_5", name: "First 5 Servers", icon: "🌟", requirement: 5, current: serverCount, unlocked: serverCount >= 5 },
-          { id: "servers_10", name: "10 Server Milestone", icon: "⭐", requirement: 10, current: serverCount, unlocked: serverCount >= 10 },
-          { id: "servers_20", name: "20 Servers Strong", icon: "💫", requirement: 20, current: serverCount, unlocked: serverCount >= 20 },
-          { id: "servers_50", name: "50 Server Club", icon: "🌠", requirement: 50, current: serverCount, unlocked: serverCount >= 50 },
-          { id: "servers_100", name: "100 Servers!", icon: "🏆", requirement: 100, current: serverCount, unlocked: serverCount >= 100 },
-          { id: "users_100", name: "100 Users Protected", icon: "🛡️", requirement: 100, current: userCount, unlocked: userCount >= 100 },
-          { id: "users_500", name: "500 Users Protected", icon: "🔰", requirement: 500, current: userCount, unlocked: userCount >= 500 },
-          { id: "users_1000", name: "1K Users Protected", icon: "💎", requirement: 1000, current: userCount, unlocked: userCount >= 1000 },
-          { id: "votes_10", name: "First 10 Votes", icon: "🗳️", requirement: 10, current: totalVotes, unlocked: totalVotes >= 10 },
-          { id: "votes_50", name: "50 Votes", icon: "🎖️", requirement: 50, current: totalVotes, unlocked: totalVotes >= 50 },
-          { id: "votes_100", name: "100 Votes", icon: "🏅", requirement: 100, current: totalVotes, unlocked: totalVotes >= 100 },
-          { id: "invites_25", name: "25 Total Invites", icon: "📈", requirement: 25, current: totalInvites, unlocked: totalInvites >= 25 },
-          { id: "invites_50", name: "50 Total Invites", icon: "📊", requirement: 50, current: totalInvites, unlocked: totalInvites >= 50 },
-          { id: "invites_100", name: "100 Total Invites", icon: "💯", requirement: 100, current: totalInvites, unlocked: totalInvites >= 100 },
+          {
+            id: "servers_5",
+            name: "First 5 Servers",
+            icon: "🌟",
+            requirement: 5,
+            current: serverCount,
+            unlocked: serverCount >= 5,
+          },
+          {
+            id: "servers_10",
+            name: "10 Server Milestone",
+            icon: "⭐",
+            requirement: 10,
+            current: serverCount,
+            unlocked: serverCount >= 10,
+          },
+          {
+            id: "servers_20",
+            name: "20 Servers Strong",
+            icon: "💫",
+            requirement: 20,
+            current: serverCount,
+            unlocked: serverCount >= 20,
+          },
+          {
+            id: "servers_50",
+            name: "50 Server Club",
+            icon: "🌠",
+            requirement: 50,
+            current: serverCount,
+            unlocked: serverCount >= 50,
+          },
+          {
+            id: "servers_100",
+            name: "100 Servers!",
+            icon: "🏆",
+            requirement: 100,
+            current: serverCount,
+            unlocked: serverCount >= 100,
+          },
+          {
+            id: "users_100",
+            name: "100 Users Protected",
+            icon: "🛡️",
+            requirement: 100,
+            current: userCount,
+            unlocked: userCount >= 100,
+          },
+          {
+            id: "users_500",
+            name: "500 Users Protected",
+            icon: "🔰",
+            requirement: 500,
+            current: userCount,
+            unlocked: userCount >= 500,
+          },
+          {
+            id: "users_1000",
+            name: "1K Users Protected",
+            icon: "💎",
+            requirement: 1000,
+            current: userCount,
+            unlocked: userCount >= 1000,
+          },
+          {
+            id: "votes_10",
+            name: "First 10 Votes",
+            icon: "🗳️",
+            requirement: 10,
+            current: totalVotes,
+            unlocked: totalVotes >= 10,
+          },
+          {
+            id: "votes_50",
+            name: "50 Votes",
+            icon: "🎖️",
+            requirement: 50,
+            current: totalVotes,
+            unlocked: totalVotes >= 50,
+          },
+          {
+            id: "votes_100",
+            name: "100 Votes",
+            icon: "🏅",
+            requirement: 100,
+            current: totalVotes,
+            unlocked: totalVotes >= 100,
+          },
+          {
+            id: "invites_25",
+            name: "25 Total Invites",
+            icon: "📈",
+            requirement: 25,
+            current: totalInvites,
+            unlocked: totalInvites >= 25,
+          },
+          {
+            id: "invites_50",
+            name: "50 Total Invites",
+            icon: "📊",
+            requirement: 50,
+            current: totalInvites,
+            unlocked: totalInvites >= 50,
+          },
+          {
+            id: "invites_100",
+            name: "100 Total Invites",
+            icon: "💯",
+            requirement: 100,
+            current: totalInvites,
+            unlocked: totalInvites >= 100,
+          },
         ];
 
         res.json(achievements);
@@ -1176,9 +1283,10 @@ class DashboardServer {
         });
 
         // Calculate retention rate
-        const retentionRate = currentServers > 0 
-          ? Math.round((currentServers / totalInvites) * 100) 
-          : 100;
+        const retentionRate =
+          currentServers > 0
+            ? Math.round((currentServers / totalInvites) * 100)
+            : 100;
 
         res.json({
           totalInvites,
@@ -1221,10 +1329,14 @@ class DashboardServer {
           uniqueVisitors7d: await db.getUniqueVisitors(last7d),
           uniqueVisitorsAllTime: await db.getUniqueVisitors(),
           totalRequests: await new Promise((resolve) => {
-            db.db.get("SELECT COUNT(*) as count FROM ip_logs", [], (err, row) => {
-              if (err) resolve(0);
-              else resolve(row?.count || 0);
-            });
+            db.db.get(
+              "SELECT COUNT(*) as count FROM ip_logs",
+              [],
+              (err, row) => {
+                if (err) resolve(0);
+                else resolve(row?.count || 0);
+              }
+            );
           }),
         };
 
@@ -1237,6 +1349,54 @@ class DashboardServer {
           uniqueVisitorsAllTime: 0,
           totalRequests: 0,
         });
+      }
+    });
+
+    // GET /api/v1/showcase-servers - Get top servers for showcase
+    this.app.get("/api/v1/showcase-servers", async (req, res) => {
+      try {
+        const limit = Math.min(parseInt(req.query.limit) || 6, 20);
+
+        // Get servers with highest security scores and member counts
+        const servers = [];
+
+        for (const [guildId, guild] of this.client.guilds.cache) {
+          const config = await db.getServerConfig(guildId);
+
+          // Calculate security score
+          let score = 0;
+          if (config?.anti_nuke_enabled) score += 30;
+          if (config?.anti_raid_enabled) score += 30;
+          if (config?.auto_mod_enabled) score += 20;
+          if (config?.auto_recovery_enabled) score += 20;
+
+          servers.push({
+            id: guild.id,
+            name: guild.name,
+            icon: guild.iconURL() || null,
+            memberCount: guild.memberCount,
+            securityScore: score,
+            features: {
+              antiNuke: config?.anti_nuke_enabled || false,
+              antiRaid: config?.anti_raid_enabled || false,
+              autoMod: config?.auto_mod_enabled || false,
+              autoRecovery: config?.auto_recovery_enabled || false,
+            },
+          });
+        }
+
+        // Sort by security score, then member count
+        servers.sort((a, b) => {
+          if (b.securityScore !== a.securityScore) {
+            return b.securityScore - a.securityScore;
+          }
+          return b.memberCount - a.memberCount;
+        });
+
+        res.json(servers.slice(0, limit));
+      } catch (error) {
+        console.error("Showcase servers error:", error);
+        res.json([]);
       }
     });
 

@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Server Showcase - Nexus Bot</title>
+    <link
+      rel="icon"
+      type="image/webp"
+      href="https://cdn.discordapp.com/avatars/1444739230679957646/32f2d77d44c2f3989fecd858be53f396.webp?size=256"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="pages.css" />
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="container">
+        <a href="index.html" class="nav-brand">NEXUS</a>
+        <div class="nav-links">
+          <a href="features.html">Features</a>
+          <a href="commands.html">Commands</a>
+          <a href="comparison.html">vs Wick</a>
+          <a href="setup.html">Setup</a>
+          <a href="docs.html">Docs</a>
+          <a href="faq.html">FAQ</a>
+          <a href="stats.html">Stats</a>
+          <a href="status.html">Status</a>
+          <a href="changelog.html">Changelog</a>
+
+          <a
+            href="https://regular-puma-clearly.ngrok-free.app"
+            target="_blank"
+            class="btn-dashboard"
+            >Dashboard</a
+          >
+          <a
+            href="https://discord.com/oauth2/authorize?client_id=1444739230679957646&permissions=268443574&scope=bot%20applications.commands"
+            class="btn-nav"
+            >Invite</a
+          >
+        </div>
+      </div>
+    </nav>
+
+    <div class="container" style="margin-top: 100px">
+      <header class="page-header">
+        <h1>🏆 Server Showcase</h1>
+        <p>Top servers protected by Nexus</p>
+      </header>
+
+      <div class="content-section">
+        <!-- Featured Server -->
+        <div style="margin-bottom: 60px">
+          <h2 style="text-align: center; font-size: 2rem; margin-bottom: 30px">
+            ⭐ Featured Server of the Week
+          </h2>
+          <div id="featured-server" style="max-width: 800px; margin: 0 auto">
+            <div class="loading">Loading featured server...</div>
+          </div>
+        </div>
+
+        <!-- All Servers -->
+        <h2 style="text-align: center; font-size: 2rem; margin-bottom: 30px">
+          🛡️ Servers Protected by Nexus
+        </h2>
+        <div
+          id="showcase-grid"
+          style="
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+          "
+        >
+          <div class="loading">Loading servers...</div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="footer">
+      <div class="container">
+        <div class="footer-content">
+          <div>
+            <h3>NEXUS</h3>
+            <p>Elite Discord Protection</p>
+          </div>
+          <div class="footer-links">
+            <a href="privacy.html">Privacy</a>
+            <a href="terms.html">Terms</a>
+            <a href="contact.html">Contact</a>
+            <a href="https://discord.gg/EvFMz4VQPx" target="_blank">Support</a>
+          </div>
+        </div>
+        <div style="text-align: center; margin-top: 30px; opacity: 0.7">
+          <p>&copy; 2025 Nexus. All rights reserved.</p>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      const SHOWCASE_API =
+        "https://regular-puma-clearly.ngrok-free.app/api/v1/showcase-servers";
+
+      async function loadShowcase() {
+        try {
+          const response = await fetch(SHOWCASE_API + "?limit=12", {
+            headers: { "ngrok-skip-browser-warning": "true" },
+          });
+
+          if (!response.ok) throw new Error("Failed to load");
+
+          const servers = await response.json();
+
+          if (servers.length === 0) {
+            document.getElementById("showcase-grid").innerHTML = `
+              <div style="text-align: center; padding: 60px; opacity: 0.7; grid-column: 1/-1;">
+                <h3>No servers yet</h3>
+                <p>Be the first to join!</p>
+              </div>
+            `;
+            return;
+          }
+
+          // Featured server (highest security score)
+          const featured = servers[0];
+          document.getElementById("featured-server").innerHTML =
+            createFeaturedCard(featured);
+
+          // Rest of servers
+          document.getElementById("showcase-grid").innerHTML = servers
+            .slice(1)
+            .map((server) => createServerCard(server))
+            .join("");
+        } catch (error) {
+          console.error("Failed to load showcase:", error);
+          document.getElementById("showcase-grid").innerHTML = `
+            <div style="text-align: center; padding: 40px; opacity: 0.7; grid-column: 1/-1;">
+              <p>Failed to load servers</p>
+            </div>
+          `;
+        }
+      }
+
+      function createFeaturedCard(server) {
+        return `
+          <div style="background: linear-gradient(135deg, rgba(255, 215, 0, 0.2) 0%, rgba(102, 126, 234, 0.2) 100%); padding: 40px; border-radius: 20px; border: 3px solid #ffd700; position: relative; overflow: hidden;">
+            <div style="position: absolute; top: 20px; right: 20px; background: #ffd700; color: #000; padding: 8px 16px; border-radius: 20px; font-weight: 900; font-size: 0.9rem;">
+              ⭐ FEATURED
+            </div>
+            <div style="display: flex; align-items: center; gap: 30px; flex-wrap: wrap;">
+              <img src="${
+                server.icon || "https://cdn.discordapp.com/embed/avatars/0.png"
+              }" 
+                   alt="${server.name}" 
+                   style="width: 120px; height: 120px; border-radius: 50%; border: 4px solid #ffd700; box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);">
+              <div style="flex: 1;">
+                <h2 style="font-size: 2.5rem; margin-bottom: 10px;">${
+                  server.name
+                }</h2>
+                <p style="font-size: 1.2rem; opacity: 0.9; margin-bottom: 20px;">👥 ${server.memberCount.toLocaleString()} members</p>
+                <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 20px;">
+                  <div style="text-align: center;">
+                    <div style="font-size: 3rem; font-weight: 900; color: #ffd700;">${
+                      server.securityScore
+                    }</div>
+                    <div style="opacity: 0.8;">Security Score</div>
+                  </div>
+                  <div style="flex: 1; display: flex; gap: 10px; flex-wrap: wrap;">
+                    ${
+                      server.features.antiNuke
+                        ? '<span style="background: #00d1b2; padding: 8px 15px; border-radius: 20px; font-weight: 700;">🛡️ Anti-Nuke</span>'
+                        : ""
+                    }
+                    ${
+                      server.features.antiRaid
+                        ? '<span style="background: #667eea; padding: 8px 15px; border-radius: 20px; font-weight: 700;">⚔️ Anti-Raid</span>'
+                        : ""
+                    }
+                    ${
+                      server.features.autoMod
+                        ? '<span style="background: #9b59b6; padding: 8px 15px; border-radius: 20px; font-weight: 700;">🤖 Auto-Mod</span>'
+                        : ""
+                    }
+                    ${
+                      server.features.autoRecovery
+                        ? '<span style="background: #f39c12; padding: 8px 15px; border-radius: 20px; font-weight: 700;">🔄 Recovery</span>'
+                        : ""
+                    }
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      function createServerCard(server) {
+        return `
+          <div style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); padding: 30px; border-radius: 15px; border: 2px solid rgba(255, 255, 255, 0.2); transition: all 0.3s;" onmouseover="this.style.transform='translateY(-5px)'; this.style.borderColor='#667eea';" onmouseout="this.style.transform=''; this.style.borderColor='rgba(255,255,255,0.2)';">
+            <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 20px;">
+              <img src="${
+                server.icon || "https://cdn.discordapp.com/embed/avatars/0.png"
+              }" 
+                   alt="${server.name}" 
+                   style="width: 80px; height: 80px; border-radius: 50%; border: 3px solid #667eea;">
+              <div style="flex: 1;">
+                <h3 style="font-size: 1.5rem; margin-bottom: 5px;">${
+                  server.name
+                }</h3>
+                <p style="opacity: 0.8;">👥 ${server.memberCount.toLocaleString()} members</p>
+              </div>
+            </div>
+            <div style="margin-bottom: 15px;">
+              <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                <span>Security Score</span>
+                <span style="font-weight: 700; color: #ffd700;">${
+                  server.securityScore
+                }/100</span>
+              </div>
+              <div style="background: rgba(0, 0, 0, 0.3); height: 10px; border-radius: 10px; overflow: hidden;">
+                <div style="background: linear-gradient(90deg, #667eea 0%, #ffd700 100%); height: 100%; width: ${
+                  server.securityScore
+                }%; transition: width 1s;"></div>
+              </div>
+            </div>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              ${
+                server.features.antiNuke
+                  ? '<span style="background: rgba(0, 209, 178, 0.3); padding: 6px 12px; border-radius: 15px; font-size: 0.85rem; border: 1px solid #00d1b2;">🛡️ Anti-Nuke</span>'
+                  : ""
+              }
+              ${
+                server.features.antiRaid
+                  ? '<span style="background: rgba(102, 126, 234, 0.3); padding: 6px 12px; border-radius: 15px; font-size: 0.85rem; border: 1px solid #667eea;">⚔️ Anti-Raid</span>'
+                  : ""
+              }
+              ${
+                server.features.autoMod
+                  ? '<span style="background: rgba(155, 89, 182, 0.3); padding: 6px 12px; border-radius: 15px; font-size: 0.85rem; border: 1px solid #9b59b6;">🤖 Auto-Mod</span>'
+                  : ""
+              }
+              ${
+                server.features.autoRecovery
+                  ? '<span style="background: rgba(243, 156, 18, 0.3); padding: 6px 12px; border-radius: 15px; font-size: 0.85rem; border: 1px solid #f39c12;">🔄 Recovery</span>'
+                  : ""
+              }
+            </div>
+          </div>
+        `;
+      }
+
+      loadShowcase();
+
+      // Refresh every 60 seconds
+      setInterval(loadShowcase, 60000);
+    </script>
+  </body>
+</html>

@@ -63,6 +63,7 @@
           <a href="faq.html">FAQ</a>
           <a href="stats.html">Stats</a>
           <a href="status.html">Status</a>
+          <a href="showcase.html">Showcase</a>
           <a href="changelog.html">Changelog</a>
 
           <a
@@ -496,12 +497,12 @@
       async function updateActivityFeed() {
         try {
           const response = await fetch(ACTIVITY_API + "?limit=5", {
-            headers: { "ngrok-skip-browser-warning": "true" }
+            headers: { "ngrok-skip-browser-warning": "true" },
           });
           if (response.ok) {
             const activities = await response.json();
             const feedEl = document.getElementById("activity-feed");
-            
+
             if (activities.length === 0) {
               feedEl.innerHTML = `
                 <div class="activity-item">
@@ -512,13 +513,19 @@
               return;
             }
 
-            feedEl.innerHTML = activities.map(activity => `
+            feedEl.innerHTML = activities
+              .map(
+                (activity) => `
               <div class="activity-item">
                 <div class="activity-icon">${activity.icon}</div>
                 <div class="activity-text">${activity.text}</div>
-                <div class="activity-time">${getTimeAgo(activity.timestamp)}</div>
+                <div class="activity-time">${getTimeAgo(
+                  activity.timestamp
+                )}</div>
               </div>
-            `).join("");
+            `
+              )
+              .join("");
           }
         } catch (error) {
           console.log("Could not fetch activity feed");
@@ -529,23 +536,35 @@
       async function updateAchievements() {
         try {
           const response = await fetch(ACHIEVEMENTS_API, {
-            headers: { "ngrok-skip-browser-warning": "true" }
+            headers: { "ngrok-skip-browser-warning": "true" },
           });
           if (response.ok) {
             const achievements = await response.json();
             const gridEl = document.getElementById("achievements-grid");
-            
+
             // Only show first 6 achievements
             const displayAchievements = achievements.slice(0, 6);
 
-            gridEl.innerHTML = displayAchievements.map(ach => `
-              <div class="achievement-badge ${ach.unlocked ? 'unlocked' : 'locked'}">
-                ${!ach.unlocked ? '<div class="achievement-locked-icon">🔒</div>' : ''}
+            gridEl.innerHTML = displayAchievements
+              .map(
+                (ach) => `
+              <div class="achievement-badge ${
+                ach.unlocked ? "unlocked" : "locked"
+              }">
+                ${
+                  !ach.unlocked
+                    ? '<div class="achievement-locked-icon">🔒</div>'
+                    : ""
+                }
                 <div class="achievement-icon">${ach.icon}</div>
                 <div class="achievement-name">${ach.name}</div>
-                <div class="achievement-progress">${ach.current}/${ach.requirement}</div>
+                <div class="achievement-progress">${ach.current}/${
+                  ach.requirement
+                }</div>
               </div>
-            `).join("");
+            `
+              )
+              .join("");
           }
         } catch (error) {
           console.log("Could not fetch achievements");

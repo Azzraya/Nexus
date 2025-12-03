@@ -494,9 +494,209 @@ function loadPage(page) {
     case "bulk":
       loadBulkOperations();
       break;
+    case "templates":
+      loadTemplates();
+      break;
     default:
       alert(`${page} page coming soon!`);
   }
+}
+
+// Template Library (EXCEEDS WICK!)
+async function loadTemplates() {
+  const contentArea = document.getElementById("contentArea");
+  
+  contentArea.innerHTML = `
+    <div class="content-header">
+      <h1>📋 Configuration Templates</h1>
+      <p>One-click server setup with pre-made configs</p>
+      <p style="color: #ffd700; font-size: 0.9rem;">⭐ Feature not available in Wick!</p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 25px; margin-top: 30px;">
+      <!-- Gaming Server Template -->
+      <div class="setting-card" style="height: auto;">
+        <div style="text-align: center; margin-bottom: 20px;">
+          <div style="font-size: 4rem; margin-bottom: 10px;">🎮</div>
+          <h2>Gaming Server</h2>
+          <p style="opacity: 0.8; margin-bottom: 20px;">Optimized for gaming communities with focus on anti-raid</p>
+        </div>
+        <div style="background: rgba(0, 0, 0, 0.3); padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+          <div style="margin-bottom: 8px;">✅ Anti-Raid: <strong>ON</strong></div>
+          <div style="margin-bottom: 8px;">✅ Anti-Nuke: <strong>ON</strong></div>
+          <div style="margin-bottom: 8px;">✅ Auto-Mod: <strong>ON</strong></div>
+          <div style="margin-bottom: 8px;">✅ Auto-Recovery: <strong>ON</strong></div>
+        </div>
+        <button class="btn" onclick="applyTemplate('gaming')" style="width: 100%;">
+          ⚡ Apply to Current Server
+        </button>
+      </div>
+
+      <!-- Community Server Template -->
+      <div class="setting-card" style="height: auto;">
+        <div style="text-align: center; margin-bottom: 20px;">
+          <div style="font-size: 4rem; margin-bottom: 10px;">💬</div>
+          <h2>Community Server</h2>
+          <p style="opacity: 0.8; margin-bottom: 20px;">Balanced protection for community servers</p>
+        </div>
+        <div style="background: rgba(0, 0, 0, 0.3); padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+          <div style="margin-bottom: 8px;">✅ Anti-Raid: <strong>ON</strong></div>
+          <div style="margin-bottom: 8px;">✅ Anti-Nuke: <strong>ON</strong></div>
+          <div style="margin-bottom: 8px;">✅ Auto-Mod: <strong>ON</strong></div>
+          <div style="margin-bottom: 8px;">❌ Auto-Recovery: <strong>OFF</strong></div>
+        </div>
+        <button class="btn" onclick="applyTemplate('community')" style="width: 100%;">
+          ⚡ Apply to Current Server
+        </button>
+      </div>
+
+      <!-- RP Server Template -->
+      <div class="setting-card" style="height: auto;">
+        <div style="text-align: center; margin-bottom: 20px;">
+          <div style="font-size: 4rem; margin-bottom: 10px;">🎭</div>
+          <h2>Roleplay Server</h2>
+          <p style="opacity: 0.8; margin-bottom: 20px;">Light protection with focus on logging</p>
+        </div>
+        <div style="background: rgba(0, 0, 0, 0.3); padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+          <div style="margin-bottom: 8px;">✅ Anti-Nuke: <strong>ON</strong></div>
+          <div style="margin-bottom: 8px;">❌ Anti-Raid: <strong>OFF</strong></div>
+          <div style="margin-bottom: 8px;">✅ Auto-Mod: <strong>ON</strong></div>
+          <div style="margin-bottom: 8px;">❌ Auto-Recovery: <strong>OFF</strong></div>
+        </div>
+        <button class="btn" onclick="applyTemplate('rp')" style="width: 100%;">
+          ⚡ Apply to Current Server
+        </button>
+      </div>
+
+      <!-- Maximum Security Template -->
+      <div class="setting-card" style="height: auto;">
+        <div style="text-align: center; margin-bottom: 20px;">
+          <div style="font-size: 4rem; margin-bottom: 10px;">🔒</div>
+          <h2>Maximum Security</h2>
+          <p style="opacity: 0.8; margin-bottom: 20px;">All protection features enabled</p>
+        </div>
+        <div style="background: rgba(0, 0, 0, 0.3); padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+          <div style="margin-bottom: 8px;">✅ Anti-Raid: <strong>ON</strong></div>
+          <div style="margin-bottom: 8px;">✅ Anti-Nuke: <strong>ON</strong></div>
+          <div style="margin-bottom: 8px;">✅ Auto-Mod: <strong>ON</strong></div>
+          <div style="margin-bottom: 8px;">✅ Auto-Recovery: <strong>ON</strong></div>
+        </div>
+        <button class="btn" onclick="applyTemplate('maxsec')" style="width: 100%;">
+          ⚡ Apply to Current Server
+        </button>
+      </div>
+
+      <!-- Minimal Template -->
+      <div class="setting-card" style="height: auto;">
+        <div style="text-align: center; margin-bottom: 20px;">
+          <div style="font-size: 4rem; margin-bottom: 10px;">⚪</div>
+          <h2>Minimal Protection</h2>
+          <p style="opacity: 0.8; margin-bottom: 20px;">Basic protection only</p>
+        </div>
+        <div style="background: rgba(0, 0, 0, 0.3); padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+          <div style="margin-bottom: 8px;">✅ Anti-Nuke: <strong>ON</strong></div>
+          <div style="margin-bottom: 8px;">❌ Anti-Raid: <strong>OFF</strong></div>
+          <div style="margin-bottom: 8px;">❌ Auto-Mod: <strong>OFF</strong></div>
+          <div style="margin-bottom: 8px;">❌ Auto-Recovery: <strong>OFF</strong></div>
+        </div>
+        <button class="btn" onclick="applyTemplate('minimal')" style="width: 100%;">
+          ⚡ Apply to Current Server
+        </button>
+      </div>
+
+      <!-- Custom Template (Save Current) -->
+      <div class="setting-card" style="height: auto;">
+        <div style="text-align: center; margin-bottom: 20px;">
+          <div style="font-size: 4rem; margin-bottom: 10px;">💾</div>
+          <h2>Save Current Config</h2>
+          <p style="opacity: 0.8; margin-bottom: 20px;">Save this server's settings as a custom template</p>
+        </div>
+        <input type="text" id="template-name" placeholder="Template name..." style="width: 100%; padding: 12px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; color: white; margin-bottom: 15px;">
+        <button class="btn-secondary" onclick="saveTemplate()" style="width: 100%;">
+          💾 Save as Template
+        </button>
+      </div>
+    </div>
+
+    <div id="template-result" style="margin-top: 30px; display: none; padding: 20px; background: rgba(0, 209, 178, 0.2); border-radius: 10px; border: 2px solid #00d1b2; text-align: center;">
+      <div id="template-message"></div>
+    </div>
+  `;
+}
+
+const templates = {
+  gaming: {
+    anti_nuke_enabled: 1,
+    anti_raid_enabled: 1,
+    auto_mod_enabled: 1,
+    auto_recovery_enabled: 1
+  },
+  community: {
+    anti_nuke_enabled: 1,
+    anti_raid_enabled: 1,
+    auto_mod_enabled: 1,
+    auto_recovery_enabled: 0
+  },
+  rp: {
+    anti_nuke_enabled: 1,
+    anti_raid_enabled: 0,
+    auto_mod_enabled: 1,
+    auto_recovery_enabled: 0
+  },
+  maxsec: {
+    anti_nuke_enabled: 1,
+    anti_raid_enabled: 1,
+    auto_mod_enabled: 1,
+    auto_recovery_enabled: 1
+  },
+  minimal: {
+    anti_nuke_enabled: 1,
+    anti_raid_enabled: 0,
+    auto_mod_enabled: 0,
+    auto_recovery_enabled: 0
+  }
+};
+
+async function applyTemplate(templateName) {
+  if (!currentServer) {
+    alert("Please select a server first!");
+    return;
+  }
+
+  const template = templates[templateName];
+  if (!template) return;
+
+  if (!confirm(`Apply "${templateName}" template to current server? This will override current settings.`)) {
+    return;
+  }
+
+  try {
+    const response = await fetch(`/api/server/${currentServer}/config`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(template)
+    });
+
+    if (response.ok) {
+      const resultEl = document.getElementById("template-result");
+      const messageEl = document.getElementById("template-message");
+      resultEl.style.display = "block";
+      messageEl.innerHTML = `
+        <h3 style="color: #00d1b2; margin-bottom: 10px;">✅ Template Applied!</h3>
+        <p>Configuration updated successfully. Refresh the page to see changes.</p>
+      `;
+      setTimeout(() => resultEl.style.display = "none", 5000);
+    } else {
+      alert("Failed to apply template");
+    }
+  } catch (error) {
+    console.error("Template apply error:", error);
+    alert("Failed to apply template");
+  }
+}
+
+async function saveTemplate() {
+  alert("Custom templates coming soon! For now, use the pre-made templates.");
 }
 
 // Bulk Operations Page (EXCEEDS WICK!)
