@@ -1,0 +1,150 @@
+/* Mobile-First Responsive Styles for Dashboard */
+
+@media (max-width: 768px) {
+  .dashboard-container {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    min-height: auto;
+    position: relative;
+  }
+
+  .sidebar .logo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .nav-links {
+    display: none;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .nav-links.mobile-open {
+    display: flex;
+  }
+
+  .nav-links li {
+    width: 100%;
+  }
+
+  .nav-links a {
+    padding: 15px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .mobile-menu-toggle {
+    display: block !important;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+  }
+
+  .main-content {
+    padding: 20px;
+  }
+
+  .content-header h1 {
+    font-size: 1.8rem;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .analytics-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .search-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .filters {
+    flex-direction: column;
+  }
+
+  .filters select,
+  .filters input {
+    width: 100%;
+  }
+
+  /* Make tables scrollable */
+  .log-table {
+    overflow-x: auto;
+  }
+
+  .log-table table {
+    min-width: 600px;
+  }
+
+  /* Stack cards vertically */
+  .server-card,
+  .analytics-card {
+    margin-bottom: 20px;
+  }
+
+  /* Adjust chart containers */
+  .chart-container {
+    height: 250px !important;
+  }
+
+  /* Better touch targets */
+  button,
+  .btn-tutorial,
+  .btn-search {
+    min-height: 44px;
+    padding: 12px 20px;
+  }
+
+  /* Compact summary stats */
+  .summary-stats {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  .summary-card h4 {
+    font-size: 1.5rem;
+  }
+
+  .summary-card p {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .content-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .content-header p {
+    font-size: 0.9rem;
+  }
+
+  .stat-box h3 {
+    font-size: 1.5rem !important;
+  }
+
+  .stat-box p {
+    font-size: 0.8rem;
+  }
+
+  .summary-stats {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Mobile Menu Toggle Button */
+.mobile-menu-toggle {
+  display: none;
+}
+
+@media (min-width: 769px) {
+  .mobile-menu-toggle {
+    display: none !important;
+  }
+}
