@@ -388,14 +388,16 @@ footer p {
 .btn-dashboard {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white !important;
-  padding: 8px 20px;
+  padding: 8px 18px; /* Slightly reduced for cleaner fit */
   border-radius: 5px;
   opacity: 1 !important;
   font-weight: 600;
+  font-size: 0.9rem; /* Smaller font so text fits on one line */
   text-decoration: none !important;
   margin-right: 10px;
   transition: all 0.3s ease;
   position: relative;
+  white-space: nowrap; /* Ensure single line */
 }
 
 .btn-dashboard::after {
