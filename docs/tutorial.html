@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Interactive Tutorial - Nexus Bot</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="pages.css" />
+    <style>
+      .tutorial-container {
+        max-width: 900px;
+        margin: 100px auto;
+        padding: 0 20px 100px;
+      }
+
+      .tutorial-step {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        padding: 40px;
+        border-radius: 20px;
+        margin-bottom: 30px;
+        border-left: 5px solid #667eea;
+        display: none;
+      }
+
+      .tutorial-step.active {
+        display: block;
+        animation: fadeInUp 0.5s;
+      }
+
+      .step-number {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 20px;
+      }
+
+      .step-title {
+        font-size: 2rem;
+        margin: 20px 0;
+      }
+
+      .step-content {
+        line-height: 1.8;
+        font-size: 1.1rem;
+        margin: 20px 0;
+      }
+
+      .code-block {
+        background: rgba(0, 0, 0, 0.3);
+        padding: 15px;
+        border-radius: 10px;
+        font-family: "Courier New", monospace;
+        margin: 20px 0;
+        font-size: 1rem;
+      }
+
+      .tutorial-nav {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 30px;
+      }
+
+      .btn-tutorial {
+        padding: 12px 30px;
+        border-radius: 8px;
+        border: none;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-size: 1rem;
+      }
+
+      .btn-prev {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+      }
+
+      .btn-next {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+      }
+
+      .btn-tutorial:hover {
+        transform: translateY(-2px);
+      }
+
+      .btn-tutorial:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .progress-bar {
+        width: 100%;
+        height: 8px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        overflow: hidden;
+        margin-bottom: 40px;
+      }
+
+      .progress-fill {
+        height: 100%;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        transition: width 0.5s ease;
+      }
+
+      .tip-box {
+        background: rgba(102, 126, 234, 0.2);
+        border-left: 4px solid #667eea;
+        padding: 20px;
+        border-radius: 10px;
+        margin: 20px 0;
+      }
+
+      .tip-box strong {
+        color: #667eea;
+      }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="container">
+        <a href="index.html" class="nav-brand">NEXUS</a>
+
+        <div class="nav-right">
+          <div class="dropdown">
+            <button class="dropdown-toggle">Menu ▼</button>
+            <div class="dropdown-menu">
+              <a href="features.html">Features</a>
+              <a href="commands.html">Commands</a>
+              <a href="comparison.html">vs Wick</a>
+              <a href="setup.html">Setup</a>
+              <a href="docs.html">Docs</a>
+              <a href="faq.html">FAQ</a>
+              <a href="stats.html">Stats</a>
+              <a href="status.html">Status</a>
+              <a href="showcase.html">Showcase</a>
+              <a href="growth.html">Growth</a>
+              <a href="changelog.html">Changelog</a>
+            </div>
+          </div>
+          <a
+            href="https://regular-puma-clearly.ngrok-free.app"
+            target="_blank"
+            class="btn-dashboard"
+            >Dashboard</a
+          >
+          <a href="setup-wizard.html" class="btn-nav">Get Started</a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="tutorial-container">
+      <!-- Progress Bar -->
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+      </div>
+
+      <!-- Step 1 -->
+      <div class="tutorial-step active" id="step1">
+        <div class="step-number">1</div>
+        <h2 class="step-title">🎉 Welcome to Nexus!</h2>
+        <div class="step-content">
+          <p>
+            Thank you for choosing Nexus! This interactive guide will walk you
+            through setting up the most advanced Discord security bot available.
+          </p>
+          <p><strong>What you'll learn:</strong></p>
+          <ul>
+            <li>✅ How to invite and set up Nexus</li>
+            <li>✅ Configure essential security features</li>
+            <li>✅ Set up automated protection</li>
+            <li>✅ Access the dashboard and analytics</li>
+            <li>✅ Optimize your server's health score</li>
+          </ul>
+          <div class="tip-box">
+            <strong>💡 Pro Tip:</strong> This tutorial takes about 5 minutes.
+            Each step builds on the previous one!
+          </div>
+        </div>
+        <div class="tutorial-nav">
+          <button class="btn-tutorial btn-prev" disabled>← Previous</button>
+          <button class="btn-tutorial btn-next" onclick="nextStep()">
+            Next →
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="tutorial-step" id="step2">
+        <div class="step-number">2</div>
+        <h2 class="step-title">🤖 Invite Nexus to Your Server</h2>
+        <div class="step-content">
+          <p>
+            First, you need to add Nexus to your Discord server. Make sure you
+            have <strong>Administrator</strong> permissions!
+          </p>
+          <div class="code-block">
+            Click the button below to invite Nexus with all required
+            permissions:
+          </div>
+          <a
+            href="https://discord.com/oauth2/authorize?client_id=1444739230679957646&permissions=268443574&scope=bot%20applications.commands"
+            target="_blank"
+            class="btn btn-primary"
+            style="margin: 20px 0; display: inline-block"
+          >
+            🔗 Invite Nexus Now
+          </a>
+          <div class="tip-box">
+            <strong>💡 Why these permissions?</strong> Nexus needs specific
+            permissions to protect your server: ban members, manage channels,
+            view audit logs, and send messages.
+          </div>
+        </div>
+        <div class="tutorial-nav">
+          <button class="btn-tutorial btn-prev" onclick="prevStep()">
+            ← Previous
+          </button>
+          <button class="btn-tutorial btn-next" onclick="nextStep()">
+            Next →
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="tutorial-step" id="step3">
+        <div class="step-number">3</div>
+        <h2 class="step-title">⚡ Quick Setup with Presets</h2>
+        <div class="step-content">
+          <p>
+            The fastest way to get started is using a preset configuration.
+            Choose the one that matches your server type:
+          </p>
+          <div class="code-block">
+            /setup preset gaming<br />
+            /setup preset community<br />
+            /setup preset business<br />
+            /setup preset streaming<br />
+            /setup preset educational
+          </div>
+          <p>This automatically configures:</p>
+          <ul>
+            <li>Anti-raid protection (4 algorithms)</li>
+            <li>Anti-nuke safeguards</li>
+            <li>Verification system</li>
+            <li>Auto-moderation</li>
+            <li>Logging channels</li>
+          </ul>
+          <div class="tip-box">
+            <strong>💡 Custom Setup:</strong> Want full control? Use
+            <code>/setup wizard</code> for step-by-step configuration.
+          </div>
+        </div>
+        <div class="tutorial-nav">
+          <button class="btn-tutorial btn-prev" onclick="prevStep()">
+            ← Previous
+          </button>
+          <button class="btn-tutorial btn-next" onclick="nextStep()">
+            Next →
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 4 -->
+      <div class="tutorial-step" id="step4">
+        <div class="step-number">4</div>
+        <h2 class="step-title">🛡️ Test Your Security</h2>
+        <div class="step-content">
+          <p>After setup, check your server's security health:</p>
+          <div class="code-block">/health view:overview</div>
+          <p>This shows you:</p>
+          <ul>
+            <li>📊 Overall health score (0-100)</li>
+            <li>🎯 Letter grade (A+ to F)</li>
+            <li>💡 Personalized recommendations</li>
+            <li>🔍 Category breakdowns</li>
+          </ul>
+          <p>
+            <strong>Goal:</strong> Get an A+ rating (90+) for maximum
+            protection!
+          </p>
+          <div class="tip-box">
+            <strong>💡 Not A+?</strong> Use
+            <code>/health view:recommendations</code> for specific steps to
+            improve.
+          </div>
+        </div>
+        <div class="tutorial-nav">
+          <button class="btn-tutorial btn-prev" onclick="prevStep()">
+            ← Previous
+          </button>
+          <button class="btn-tutorial btn-next" onclick="nextStep()">
+            Next →
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 5 -->
+      <div class="tutorial-step" id="step5">
+        <div class="step-number">5</div>
+        <h2 class="step-title">📊 Access Your Dashboard</h2>
+        <div class="step-content">
+          <p>Monitor everything from the web dashboard:</p>
+          <a
+            href="https://regular-puma-clearly.ngrok-free.app"
+            target="_blank"
+            class="btn btn-primary"
+            style="margin: 20px 0; display: inline-block"
+          >
+            🎛️ Open Dashboard
+          </a>
+          <p><strong>What you can do:</strong></p>
+          <ul>
+            <li>📈 View real-time server statistics</li>
+            <li>🔍 Search through all logs</li>
+            <li>📊 Analyze command usage</li>
+            <li>🔗 Track invite sources</li>
+            <li>💾 Create server backups</li>
+            <li>⚙️ Configure settings visually</li>
+          </ul>
+          <div class="tip-box">
+            <strong>💡 Bookmark it!</strong> The dashboard is password-protected
+            and only accessible to server admins.
+          </div>
+        </div>
+        <div class="tutorial-nav">
+          <button class="btn-tutorial btn-prev" onclick="prevStep()">
+            ← Previous
+          </button>
+          <button class="btn-tutorial btn-next" onclick="nextStep()">
+            Next →
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 6 -->
+      <div class="tutorial-step" id="step6">
+        <div class="step-number">6</div>
+        <h2 class="step-title">🎯 Essential Commands</h2>
+        <div class="step-content">
+          <p>Here are the most important commands to know:</p>
+          <div class="code-block">
+            /setup wizard - Interactive configuration<br />
+            /health - Check server security score<br />
+            /backup create - Save your server config<br />
+            /risk top - See risky members<br />
+            /bulk ban - Mass ban raiders<br />
+            /compare - Compare vs optimal settings
+          </div>
+          <p>
+            See all 88 commands at
+            <a
+              href="commands.html"
+              style="color: #667eea; text-decoration: underline"
+              >commands page</a
+            >
+          </p>
+          <div class="tip-box">
+            <strong>💡 Quick Access:</strong> Use <code>/help</code> anytime to
+            see command categories.
+          </div>
+        </div>
+        <div class="tutorial-nav">
+          <button class="btn-tutorial btn-prev" onclick="prevStep()">
+            ← Previous
+          </button>
+          <button class="btn-tutorial btn-next" onclick="nextStep()">
+            Finish Tutorial
+          </button>
+        </div>
+      </div>
+
+      <!-- Final Step -->
+      <div class="tutorial-step" id="step7">
+        <div class="step-number">✓</div>
+        <h2 class="step-title">🎉 You're All Set!</h2>
+        <div class="step-content">
+          <p style="font-size: 1.3rem">
+            Congratulations! Your server is now protected by the most advanced
+            Discord security bot available.
+          </p>
+
+          <h3 style="margin-top: 40px">🚀 Next Steps:</h3>
+          <ul style="font-size: 1.1rem">
+            <li>✅ Run <code>/health</code> to check your score</li>
+            <li>✅ Create a backup with <code>/backup create</code></li>
+            <li>✅ Join our support server for help</li>
+            <li>
+              ✅ Check the
+              <a
+                href="vote-features.html"
+                style="color: #667eea; text-decoration: underline"
+                >roadmap</a
+              >
+              and vote on features!
+            </li>
+          </ul>
+
+          <div style="text-align: center; margin: 50px 0">
+            <a
+              href="index.html"
+              class="btn btn-primary"
+              style="font-size: 1.2rem; padding: 15px 40px"
+            >
+              Back to Homepage
+            </a>
+            <a
+              href="https://regular-puma-clearly.ngrok-free.app"
+              target="_blank"
+              class="btn btn-secondary"
+              style="
+                font-size: 1.2rem;
+                padding: 15px 40px;
+                background: #667eea;
+                color: white;
+                margin-left: 20px;
+              "
+            >
+              Open Dashboard
+            </a>
+          </div>
+
+          <div class="tip-box">
+            <strong>💜 Thank you for using Nexus!</strong> We're constantly
+            improving. Check the changelog for new features!
+          </div>
+        </div>
+        <div class="tutorial-nav">
+          <button class="btn-tutorial btn-prev" onclick="prevStep()">
+            ← Previous
+          </button>
+          <button
+            class="btn-tutorial btn-next"
+            onclick="location.href='index.html'"
+          >
+            Done ✓
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let currentStep = 1;
+      const totalSteps = 7;
+
+      function updateProgress() {
+        const progress = ((currentStep - 1) / (totalSteps - 1)) * 100;
+        document.getElementById("progressFill").style.width = progress + "%";
+      }
+
+      function showStep(step) {
+        document.querySelectorAll(".tutorial-step").forEach((el) => {
+          el.classList.remove("active");
+        });
+        document.getElementById(`step${step}`).classList.add("active");
+        currentStep = step;
+        updateProgress();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      function nextStep() {
+        if (currentStep < totalSteps) {
+          showStep(currentStep + 1);
+        }
+      }
+
+      function prevStep() {
+        if (currentStep > 1) {
+          showStep(currentStep - 1);
+        }
+      }
+
+      // Keyboard navigation
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowRight") nextStep();
+        if (e.key === "ArrowLeft") prevStep();
+      });
+
+      updateProgress();
+    </script>
+  </body>
+</html>
