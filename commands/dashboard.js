@@ -136,9 +136,9 @@ module.exports = {
 
       // Check if this is a button interaction (update) or command (reply)
       if (interaction.deferred || interaction.replied) {
-        await interaction.editReply({ embeds: [embed], components: [buttons] });
+        await interaction.editReply({ embeds: [embed], components: [row1, row2] });
       } else {
-        await interaction.reply({ embeds: [embed], components: [buttons] });
+        await interaction.reply({ embeds: [embed], components: [row1, row2] });
       }
     } else if (view === "security") {
       // Security dashboard
