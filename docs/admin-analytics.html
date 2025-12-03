@@ -344,29 +344,6 @@
           </div>
         </div>
 
-        <!-- Traffic Sources -->
-        <div class="analytics-section">
-          <h2>🔗 Traffic Sources</h2>
-          <p style="opacity: 0.8; margin-bottom: 20px">
-            Where your visitors come from (<a href="link-tracker.html" style="color: #ffd700">Create tracked link</a>)
-          </p>
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Source</th>
-                <th>Medium</th>
-                <th>Campaign</th>
-                <th>Visits</th>
-              </tr>
-            </thead>
-            <tbody id="traffic-sources-body">
-              <tr>
-                <td colspan="4" class="loading">Loading...</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
         <!-- Top Pages -->
         <div class="analytics-section">
           <h2>📄 Top Pages</h2>
@@ -476,30 +453,10 @@
 
           analyticsData = await response.json();
           displayAnalytics();
-          loadTrafficSources();
         } catch (error) {
           console.error("Error loading analytics:", error);
           alert("Failed to load analytics: " + error.message);
         }
-      }
-
-      async function loadTrafficSources() {
-        // For now, we'll simulate this - would need a dedicated API endpoint
-        // This would query analytics_events and parse the 'data' JSON for tracking params
-        const sourcesBody = document.getElementById("traffic-sources-body");
-        sourcesBody.innerHTML = `
-          <tr>
-            <td colspan="4" class="empty-state">
-              <p>Traffic source tracking is active!</p>
-              <p style="font-size: 0.9rem; margin-top: 10px">
-                Use <a href="link-tracker.html" style="color: #ffd700">Link Tracker</a> to create tracked links
-              </p>
-              <p style="font-size: 0.85rem; margin-top: 5px; opacity: 0.7">
-                Data will appear here once tracked links are clicked
-              </p>
-            </td>
-          </tr>
-        `;
       }
 
       function displayAnalytics() {

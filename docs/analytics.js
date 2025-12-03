@@ -92,27 +92,10 @@ class NexusAnalytics {
   }
 
   trackPageView() {
-    // Parse URL parameters for tracking
-    const urlParams = new URLSearchParams(window.location.search);
-    const trackingParams = {
-      source: urlParams.get("source") || urlParams.get("utm_source"),
-      medium: urlParams.get("medium") || urlParams.get("utm_medium"),
-      campaign: urlParams.get("campaign") || urlParams.get("utm_campaign"),
-      ref: urlParams.get("ref"),
-      content: urlParams.get("content") || urlParams.get("utm_content"),
-      term: urlParams.get("term") || urlParams.get("utm_term"),
-    };
-
-    // Remove null values
-    Object.keys(trackingParams).forEach((key) => {
-      if (!trackingParams[key]) delete trackingParams[key];
-    });
-
     this.trackEvent("pageview", {
       page: window.location.pathname,
       referrer: document.referrer,
       title: document.title,
-      tracking: trackingParams,
       viewport: {
         width: window.innerWidth,
         height: window.innerHeight,
@@ -120,11 +103,6 @@ class NexusAnalytics {
       userAgent: navigator.userAgent,
       language: navigator.language,
     });
-
-    // Store tracking params in session for attribution
-    if (Object.keys(trackingParams).length > 0) {
-      sessionStorage.setItem("nexus_tracking", JSON.stringify(trackingParams));
-    }
   }
 
   trackClick(type, data) {
