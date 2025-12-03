@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Live Stats - Nexus Discord Bot</title>
+    <meta
+      name="description"
+      content="Real-time statistics for Nexus Discord bot - server count, user count, and more."
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="pages.css" />
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="container">
+        <a href="index.html" class="nav-brand">NEXUS</a>
+        <div class="nav-links">
+          <a href="features.html">Features</a>
+          <a href="commands.html">Commands</a>
+          <a href="comparison.html">vs Wick</a>
+          <a href="setup.html">Setup</a>
+          <a href="faq.html">FAQ</a>
+          <a href="stats.html" class="active">Stats</a>
+          <a
+            href="https://discord.com/oauth2/authorize?client_id=1444739230679957646&permissions=268443574&scope=bot%20applications.commands"
+            class="btn-nav"
+            >Invite</a
+          >
+        </div>
+      </div>
+    </nav>
+
+    <div class="page-header">
+      <div class="container">
+        <h1>📊 Live Statistics</h1>
+        <p>Real-time Nexus bot statistics</p>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <div class="container">
+        <!-- Main Stats -->
+        <div class="stats-display">
+          <div class="stat-box">
+            <div class="stat-icon">🖥️</div>
+            <div class="stat-number" id="stat-servers">Loading...</div>
+            <div class="stat-label">Servers Protected</div>
+          </div>
+
+          <div class="stat-box">
+            <div class="stat-icon">👥</div>
+            <div class="stat-number" id="stat-users">Loading...</div>
+            <div class="stat-label">Users Protected</div>
+          </div>
+
+          <div class="stat-box">
+            <div class="stat-icon">⚡</div>
+            <div class="stat-number" id="stat-uptime">Loading...</div>
+            <div class="stat-label">Uptime</div>
+          </div>
+
+          <div class="stat-box">
+            <div class="stat-icon">📝</div>
+            <div class="stat-number" id="stat-commands">85+</div>
+            <div class="stat-label">Commands</div>
+          </div>
+        </div>
+
+        <!-- Bot Lists Stats -->
+        <div class="feature-category">
+          <h2>🏆 Bot List Rankings</h2>
+          <div class="cards-grid">
+            <div class="card">
+              <h3>Top.gg</h3>
+              <div class="stat-item">
+                <span>Votes</span>
+                <span id="topgg-votes">-</span>
+              </div>
+              <a
+                href="https://top.gg/bot/1444739230679957646/vote"
+                target="_blank"
+                class="btn btn-primary"
+                style="margin-top: 15px; display: inline-block"
+              >
+                Vote Now
+              </a>
+            </div>
+
+            <div class="card">
+              <h3>Discord Bot List</h3>
+              <div class="stat-item">
+                <span>Votes</span>
+                <span id="dbl-votes">-</span>
+              </div>
+              <a
+                href="https://discordbotlist.com/bots/nexus-9296/upvote"
+                target="_blank"
+                class="btn btn-primary"
+                style="margin-top: 15px; display: inline-block"
+              >
+                Vote Now
+              </a>
+            </div>
+
+            <div class="card">
+              <h3>Void Bots</h3>
+              <div class="stat-item">
+                <span>Votes</span>
+                <span id="void-votes">-</span>
+              </div>
+              <a
+                href="https://voidbots.net/bot/1444739230679957646/vote"
+                target="_blank"
+                class="btn btn-primary"
+                style="margin-top: 15px; display: inline-block"
+              >
+                Vote Now
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Growth Stats -->
+        <div class="feature-category">
+          <h2>📈 Growth Metrics</h2>
+          <div class="card">
+            <div class="stats-grid-simple">
+              <div class="stat-item">
+                <span>Raids Stopped</span>
+                <span id="raids-stopped" class="stat-value-large">-</span>
+              </div>
+              <div class="stat-item">
+                <span>Nukes Prevented</span>
+                <span id="nukes-prevented" class="stat-value-large">-</span>
+              </div>
+              <div class="stat-item">
+                <span>Threats Detected</span>
+                <span id="threats-detected" class="stat-value-large">-</span>
+              </div>
+              <div class="stat-item">
+                <span>Servers Recovered</span>
+                <span id="servers-recovered" class="stat-value-large">-</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Real-Time Status -->
+        <div class="feature-category">
+          <h2>🟢 Real-Time Status</h2>
+          <div class="card">
+            <div class="status-indicator">
+              <div class="status-dot" id="status-dot"></div>
+              <div>
+                <div class="status-text" id="status-text">Checking...</div>
+                <div class="status-subtext">Last updated: <span id="last-update">Never</span></div>
+              </div>
+            </div>
+
+            <div class="stats-grid-simple" style="margin-top: 30px">
+              <div class="stat-item">
+                <span>Ping</span>
+                <span id="bot-ping">-</span>
+              </div>
+              <div class="stat-item">
+                <span>Memory Usage</span>
+                <span id="memory-usage">-</span>
+              </div>
+              <div class="stat-item">
+                <span>Shards</span>
+                <span id="shard-count">1</span>
+              </div>
+              <div class="stat-item">
+                <span>Version</span>
+                <span>1.6.0</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Last Updated -->
+        <div style="text-align: center; opacity: 0.7; margin-top: 40px">
+          <p>Statistics update every 30 seconds</p>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <div class="container">
+        <div class="footer-links">
+          <a href="index.html">Home</a>
+          <a href="features.html">Features</a>
+          <a href="commands.html">Commands</a>
+          <a href="comparison.html">vs Wick</a>
+          <a href="stats.html">Stats</a>
+          <a href="https://github.com/Azzraya/Nexus" target="_blank">GitHub</a>
+          <a href="https://discord.gg/UHNcUKheZP" target="_blank">Support</a>
+        </div>
+        <p>Nexus - Beyond Wick. Beyond Everything.</p>
+      </div>
+    </footer>
+
+    <script src="stats.js"></script>
+  </body>
+</html>
+

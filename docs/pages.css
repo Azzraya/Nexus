@@ -360,11 +360,91 @@
   margin: 20px 0;
 }
 
+/* FAQ Styles */
+.faq-item {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  padding: 25px;
+  border-radius: 15px;
+  margin-bottom: 20px;
+  border-left: 4px solid #667eea;
+}
+
+.faq-item h3 {
+  font-size: 1.5rem;
+  margin-bottom: 15px;
+  color: #ffd700;
+}
+
+.faq-item p {
+  line-height: 1.8;
+  opacity: 0.9;
+}
+
+.faq-item ul {
+  margin: 15px 0;
+  padding-left: 25px;
+}
+
+.faq-item li {
+  margin-bottom: 8px;
+  line-height: 1.6;
+}
+
+.faq-item code {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 3px 8px;
+  border-radius: 5px;
+  font-family: "Courier New", monospace;
+}
+
+/* Mobile Navigation */
+.mobile-menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 2rem;
+  cursor: pointer;
+  padding: 5px;
+}
+
 /* Responsive */
-@media (max-width: 768px) {
+@media (max-width: 968px) {
+  .navbar .container {
+    position: relative;
+  }
+
+  .mobile-menu-toggle {
+    display: block;
+  }
+
   .nav-links {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.95);
+    backdrop-filter: blur(20px);
     flex-direction: column;
-    gap: 10px;
+    padding: 20px;
+    gap: 5px;
+    display: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .nav-links.active {
+    display: flex;
+  }
+
+  .nav-links a {
+    padding: 12px;
+    border-radius: 8px;
+  }
+
+  .btn-nav {
+    width: 100%;
+    text-align: center;
   }
 
   .page-header h1 {
