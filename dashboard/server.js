@@ -2871,29 +2871,40 @@ class DashboardServer {
     });
 
     // GET /api/admin/newsletter/stats - Get newsletter stats (admin only)
-    this.app.get("/api/admin/newsletter/stats", this.adminAuth.bind(this), async (req, res) => {
-      try {
-        const newsletter = require("../utils/newsletter");
-        const stats = await newsletter.getStats();
-        res.json(stats);
-      } catch (error) {
-        res.status(500).json({ error: error.message });
+    this.app.get(
+      "/api/admin/newsletter/stats",
+      this.adminAuth.bind(this),
+      async (req, res) => {
+        try {
+          const newsletter = require("../utils/newsletter");
+          const stats = await newsletter.getStats();
+          res.json(stats);
+        } catch (error) {
+          res.status(500).json({ error: error.message });
+        }
       }
-    });
+    );
 
     // GET /api/admin/newsletter/export - Export subscriber list (admin only)
-    this.app.get("/api/admin/newsletter/export", this.adminAuth.bind(this), async (req, res) => {
-      try {
-        const newsletter = require("../utils/newsletter");
-        const csv = await newsletter.exportSubscribers();
+    this.app.get(
+      "/api/admin/newsletter/export",
+      this.adminAuth.bind(this),
+      async (req, res) => {
+        try {
+          const newsletter = require("../utils/newsletter");
+          const csv = await newsletter.exportSubscribers();
 
-        res.setHeader('Content-Type', 'text/csv');
-        res.setHeader('Content-Disposition', `attachment; filename=nexus-subscribers-${Date.now()}.csv`);
-        res.send(csv);
-      } catch (error) {
-        res.status(500).json({ error: error.message });
+          res.setHeader("Content-Type", "text/csv");
+          res.setHeader(
+            "Content-Disposition",
+            `attachment; filename=nexus-subscribers-${Date.now()}.csv`
+          );
+          res.send(csv);
+        } catch (error) {
+          res.status(500).json({ error: error.message });
+        }
       }
-    });
+    );
 
     console.log("[API] Public API v1 endpoints registered");
     console.log("[API] 🔥 POWERFUL API v2 - 35 endpoints active!");
