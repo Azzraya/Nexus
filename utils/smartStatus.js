@@ -27,7 +27,7 @@ class SmartStatus {
       },
       {
         type: "PLAYING",
-        name: `azzraya.github.io/Nexus | v2.3.0`,
+        name: `azzraya.github.io/Nexus | v3.1.0`,
       },
       {
         type: "WATCHING",

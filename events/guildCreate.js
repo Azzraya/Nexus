@@ -84,7 +84,7 @@ module.exports = {
                 }
               ],
               footer: {
-                text: `Total Servers: ${client.guilds.cache.size} | v2.3.0`
+                text: `Total Servers: ${client.guilds.cache.size} | v3.1.0`
               },
               timestamp: new Date().toISOString()
             }]

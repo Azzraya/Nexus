@@ -101,7 +101,7 @@ module.exports = {
               }
             ],
             footer: {
-              text: `Retention tracking | v2.3.0`
+              text: `Retention tracking | v3.1.0`
             },
             timestamp: new Date().toISOString()
           }]
