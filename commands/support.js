@@ -30,7 +30,7 @@ module.exports = {
         {
           name: "🔗 Quick Links",
           value: [
-            "• [Official Website](https://azzraya.github.io/nexus-bot/)",
+            "• [Official Website](https://azzraya.github.io/Nexus/)",
             "• [Support Server](https://discord.com/invite/UHNcUKheZP)",
             "• [GitHub Repository](https://github.com/Azzraya/Nexus)",
             "• [Privacy Policy](https://github.com/Azzraya/Nexus/blob/main/PRIVACY_POLICY.md)",
@@ -56,7 +56,7 @@ module.exports = {
 
     const websiteButton = new ButtonBuilder()
       .setLabel("Visit Website")
-      .setURL("https://azzraya.github.io/nexus-bot/")
+      .setURL("https://azzraya.github.io/Nexus/")
       .setStyle(ButtonStyle.Link);
 
     const supportButton = new ButtonBuilder()

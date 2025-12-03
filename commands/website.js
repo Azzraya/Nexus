@@ -17,48 +17,48 @@ module.exports = {
       .addFields(
         {
           name: "🏠 Home",
-          value: "[nexusbot.github.io](https://azzraya.github.io/nexus-bot/)",
+          value: "[nexusbot.github.io](https://azzraya.github.io/Nexus/)",
           inline: true,
         },
         {
           name: "✨ Features",
           value:
-            "[View Features](https://azzraya.github.io/nexus-bot/features.html)",
+            "[View Features](https://azzraya.github.io/Nexus/features.html)",
           inline: true,
         },
         {
           name: "📝 Commands",
           value:
-            "[Command List](https://azzraya.github.io/nexus-bot/commands.html)",
+            "[Command List](https://azzraya.github.io/Nexus/commands.html)",
           inline: true,
         },
         {
           name: "⚔️ vs Wick",
           value:
-            "[Comparison Guide](https://azzraya.github.io/nexus-bot/comparison.html)",
+            "[Comparison Guide](https://azzraya.github.io/Nexus/comparison.html)",
           inline: true,
         },
         {
           name: "🛠️ Setup",
           value:
-            "[Setup Guide](https://azzraya.github.io/nexus-bot/setup.html)",
+            "[Setup Guide](https://azzraya.github.io/Nexus/setup.html)",
           inline: true,
         },
         {
           name: "📚 Documentation",
-          value: "[Full Docs](https://azzraya.github.io/nexus-bot/docs.html)",
+          value: "[Full Docs](https://azzraya.github.io/Nexus/docs.html)",
           inline: true,
         },
         {
           name: "❓ FAQ",
           value:
-            "[Frequently Asked Questions](https://azzraya.github.io/nexus-bot/faq.html)",
+            "[Frequently Asked Questions](https://azzraya.github.io/Nexus/faq.html)",
           inline: true,
         },
         {
           name: "📊 Live Stats",
           value:
-            "[View Live Stats](https://azzraya.github.io/nexus-bot/stats.html)",
+            "[View Live Stats](https://azzraya.github.io/Nexus/stats.html)",
           inline: true,
         },
         {
