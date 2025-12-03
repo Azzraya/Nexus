@@ -255,62 +255,63 @@
               align-items: center;
               gap: 15px;
               margin-bottom: 20px;
-              padding: 15px;
-              background: rgba(102, 126, 234, 0.1);
-              border-radius: 10px;
-              border: 2px solid rgba(102, 126, 234, 0.3);
+              padding: 20px;
+              background: rgba(0, 0, 0, 0.6);
+              border-radius: 12px;
+              border: 2px solid rgba(0, 255, 136, 0.3);
+              backdrop-filter: blur(10px);
             "
           >
             <div style="display: flex; align-items: center; gap: 10px">
               <div
                 id="botStatus"
                 style="
-                  width: 12px;
-                  height: 12px;
+                  width: 14px;
+                  height: 14px;
                   border-radius: 50%;
                   background: #00ff00;
-                  box-shadow: 0 0 10px #00ff00;
+                  box-shadow: 0 0 15px #00ff00;
                   animation: pulse 2s infinite;
                 "
               ></div>
-              <span style="font-weight: 600; color: #cbd5e0">Bot Online</span>
+              <span style="font-weight: 700; color: #ffffff; font-size: 15px; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">Bot Online</span>
             </div>
             <div
               style="
-                border-left: 2px solid rgba(255, 255, 255, 0.2);
-                height: 30px;
+                border-left: 2px solid rgba(255, 255, 255, 0.4);
+                height: 35px;
               "
             ></div>
             <div style="display: flex; align-items: center; gap: 8px">
-              <span style="font-size: 20px">🛡️</span>
+              <span style="font-size: 22px">🛡️</span>
               <div>
                 <div
                   id="liveServerCount"
-                  style="font-size: 20px; font-weight: bold; color: #667eea"
+                  style="font-size: 26px; font-weight: bold; color: #00ff88; text-shadow: 0 2px 10px rgba(0,255,136,0.6);"
                 >
                   Loading...
                 </div>
-                <div style="font-size: 12px; color: #cbd5e0">
+                <div style="font-size: 13px; color: #ffffff; font-weight: 500; opacity: 0.95;">
                   Servers Protected
                 </div>
               </div>
             </div>
             <div
               style="
-                border-left: 2px solid rgba(255, 255, 255, 0.2);
-                height: 30px;
+                border-left: 2px solid rgba(255, 255, 255, 0.4);
+                height: 35px;
               "
             ></div>
             <div style="display: flex; align-items: center; gap: 8px">
-              <span style="font-size: 20px">👥</span>
+              <span style="font-size: 22px">👥</span>
               <div>
                 <div
                   id="liveUserCount"
-                  style="font-size: 20px; font-weight: bold; color: #667eea"
+                  style="font-size: 26px; font-weight: bold; color: #00ff88; text-shadow: 0 2px 10px rgba(0,255,136,0.6);"
                 >
                   Loading...
                 </div>
-                <div style="font-size: 12px; color: #cbd5e0">
+                <div style="font-size: 13px; color: #ffffff; font-weight: 500; opacity: 0.95;">
                   Users Protected
                 </div>
               </div>

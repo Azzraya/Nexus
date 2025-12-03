@@ -73,6 +73,8 @@ class SupportChat {
         .chat-message.bot {
           background: #e9ecef;
           margin-right: auto;
+          color: #1a202c;
+          font-weight: 500;
         }
 
         .chat-message.user {
