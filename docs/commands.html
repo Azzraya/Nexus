@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Commands - Nexus Discord Bot</title>
+    <meta
+      name="description"
+      content="Complete list of Nexus commands - over 85 slash commands for security, moderation, and automation."
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="pages.css" />
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="container">
+        <a href="index.html" class="nav-brand">NEXUS</a>
+        <div class="nav-links">
+          <a href="features.html">Features</a>
+          <a href="commands.html" class="active">Commands</a>
+          <a href="comparison.html">vs Wick</a>
+          <a href="setup.html">Setup</a>
+          <a href="docs.html">Docs</a>
+          <a
+            href="https://discord.com/oauth2/authorize?client_id=1444739230679957646&permissions=268443574&scope=bot%20applications.commands"
+            class="btn-nav"
+            >Invite</a
+          >
+        </div>
+      </div>
+    </nav>
+
+    <div class="page-header">
+      <div class="container">
+        <h1>📝 Commands</h1>
+        <p>85+ slash commands to secure and manage your server</p>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <div class="container">
+        <!-- Security Commands -->
+        <div class="command-category">
+          <h3>🛡️ Security Commands</h3>
+          <div class="command-list">
+            <div class="command-item">
+              <h4>/antiraid</h4>
+              <div class="command-name">config | enable | disable | status</div>
+              <p>
+                Configure and manage anti-raid protection with 4 detection
+                algorithms
+              </p>
+            </div>
+            <div class="command-item">
+              <h4>/antinuke</h4>
+              <div class="command-name">config | enable | disable | status</div>
+              <p>
+                Advanced anti-nuke protection with predictive threat detection
+              </p>
+            </div>
+            <div class="command-item">
+              <h4>/joingate</h4>
+              <div class="command-name">setup | config | toggle</div>
+              <p>
+                Verification system for new members (button, reaction, captcha,
+                2FA)
+              </p>
+            </div>
+            <div class="command-item">
+              <h4>/security</h4>
+              <div class="command-name">whitelist | status | audit</div>
+              <p>Security whitelist management and server security audit</p>
+            </div>
+            <div class="command-item">
+              <h4>/threatdashboard</h4>
+              <div class="command-name">live | history | stats</div>
+              <p>Real-time threat monitoring and security analytics</p>
+            </div>
+            <div class="command-item">
+              <h4>/threatnet</h4>
+              <div class="command-name">check | report | stats</div>
+              <p>Cross-server threat intelligence network</p>
+            </div>
+            <div class="command-item">
+              <h4>/quarantine</h4>
+              <div class="command-name">user | release | list</div>
+              <p>Isolate suspicious users in quarantine</p>
+            </div>
+            <div class="command-item">
+              <h4>/rescue</h4>
+              <div class="command-name">create | use | revoke</div>
+              <p>Emergency rescue key system for compromised servers</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Moderation Commands -->
+        <div class="command-category">
+          <h3>⚖️ Moderation Commands</h3>
+          <div class="command-list">
+            <div class="command-item">
+              <h4>/ban</h4>
+              <div class="command-name">user [reason] [delete_days]</div>
+              <p>Ban a user with optional message deletion</p>
+            </div>
+            <div class="command-item">
+              <h4>/kick</h4>
+              <div class="command-name">user [reason]</div>
+              <p>Remove a user from the server</p>
+            </div>
+            <div class="command-item">
+              <h4>/mute</h4>
+              <div class="command-name">user [duration] [reason]</div>
+              <p>Timeout a user for specified duration</p>
+            </div>
+            <div class="command-item">
+              <h4>/warn</h4>
+              <div class="command-name">user [reason]</div>
+              <p>Issue a warning to a user</p>
+            </div>
+            <div class="command-item">
+              <h4>/warnings</h4>
+              <div class="command-name">user | list | clear</div>
+              <p>View and manage user warnings</p>
+            </div>
+            <div class="command-item">
+              <h4>/cases</h4>
+              <div class="command-name">view | search | delete | export</div>
+              <p>Advanced case management system</p>
+            </div>
+            <div class="command-item">
+              <h4>/notes</h4>
+              <div class="command-name">add | edit | remove | view</div>
+              <p>Moderator notes for users</p>
+            </div>
+            <div class="command-item">
+              <h4>/bulk</h4>
+              <div class="command-name">ban | kick | mute | role</div>
+              <p>Moderate multiple users simultaneously</p>
+            </div>
+            <div class="command-item">
+              <h4>/purge</h4>
+              <div class="command-name">[amount] [user] [contains]</div>
+              <p>Bulk delete messages with advanced filters</p>
+            </div>
+            <div class="command-item">
+              <h4>/heat</h4>
+              <div class="command-name">check | set | reset | config</div>
+              <p>Heat-based moderation system</p>
+            </div>
+            <div class="command-item">
+              <h4>/queue</h4>
+              <div class="command-name">view | process | clear</div>
+              <p>Smart moderation queue with AI prioritization</p>
+            </div>
+            <div class="command-item">
+              <h4>/smartban</h4>
+              <div class="command-name">user [reason]</div>
+              <p>AI-assisted ban with threat analysis</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recovery Commands -->
+        <div class="command-category">
+          <h3>💾 Recovery & Backup Commands</h3>
+          <div class="command-list">
+            <div class="command-item">
+              <h4>/snapshot</h4>
+              <div class="command-name">list | create | restore | stats</div>
+              <p>Point-in-time recovery with hourly automatic snapshots</p>
+            </div>
+            <div class="command-item">
+              <h4>/backup</h4>
+              <div class="command-name">create | restore | list | delete</div>
+              <p>Manual server backup and restoration</p>
+            </div>
+            <div class="command-item">
+              <h4>/recover</h4>
+              <div class="command-name">auto | manual</div>
+              <p>Trigger automatic or manual recovery process</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- AI Commands -->
+        <div class="command-category">
+          <h3>🤖 AI & Analysis Commands</h3>
+          <div class="command-list">
+            <div class="command-item">
+              <h4>/recommend</h4>
+              <div class="command-name">analyze | apply | history</div>
+              <p>AI-powered security recommendations for your server</p>
+            </div>
+            <div class="command-item">
+              <h4>/behavior</h4>
+              <div class="command-name">check | history | report</div>
+              <p>User behavioral analysis and pattern detection</p>
+            </div>
+            <div class="command-item">
+              <h4>/predict</h4>
+              <div class="command-name">threat | raid | user</div>
+              <p>Predictive threat analysis</p>
+            </div>
+            <div class="command-item">
+              <h4>/scan</h4>
+              <div class="command-name">user | server | threats</div>
+              <p>Security scan for users and server</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Utility Commands -->
+        <div class="command-category">
+          <h3>🔧 Utility Commands</h3>
+          <div class="command-list">
+            <div class="command-item">
+              <h4>/setup</h4>
+              <div class="command-name">preset | wizard | export</div>
+              <p>Quick server setup with preset configurations</p>
+            </div>
+            <div class="command-item">
+              <h4>/config</h4>
+              <div class="command-name">view | set | reset</div>
+              <p>View and modify server configuration</p>
+            </div>
+            <div class="command-item">
+              <h4>/role</h4>
+              <div class="command-name">give | remove | create | template</div>
+              <p>Advanced role management</p>
+            </div>
+            <div class="command-item">
+              <h4>/lock</h4>
+              <div class="command-name">channel [duration]</div>
+              <p>Lock a channel temporarily</p>
+            </div>
+            <div class="command-item">
+              <h4>/lockdown</h4>
+              <div class="command-name">enable | disable</div>
+              <p>Server-wide lockdown mode</p>
+            </div>
+            <div class="command-item">
+              <h4>/slowmode</h4>
+              <div class="command-name">set [duration]</div>
+              <p>Set channel slowmode</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Community Commands -->
+        <div class="command-category">
+          <h3>🎉 Community Commands</h3>
+          <div class="command-list">
+            <div class="command-item">
+              <h4>/vote</h4>
+              <div class="command-name">
+                list | check | rewards | leaderboard
+              </div>
+              <p>Voting system with rewards and streaks</p>
+            </div>
+            <div class="command-item">
+              <h4>/poll</h4>
+              <div class="command-name">create | end | results</div>
+              <p>Create polls with multiple options</p>
+            </div>
+            <div class="command-item">
+              <h4>/suggest</h4>
+              <div class="command-name">create | approve | deny</div>
+              <p>Community suggestion system</p>
+            </div>
+            <div class="command-item">
+              <h4>/giveaway</h4>
+              <div class="command-name">start | end | reroll</div>
+              <p>Host server giveaways</p>
+            </div>
+            <div class="command-item">
+              <h4>/achievement</h4>
+              <div class="command-name">create | award | list</div>
+              <p>Achievement system for members</p>
+            </div>
+            <div class="command-item">
+              <h4>/leaderboard</h4>
+              <div class="command-name">xp | votes | achievements</div>
+              <p>View server leaderboards</p>
+            </div>
+            <div class="command-item">
+              <h4>/level</h4>
+              <div class="command-name">check | set | config</div>
+              <p>XP and leveling system</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Info Commands -->
+        <div class="command-category">
+          <h3>📊 Information Commands</h3>
+          <div class="command-list">
+            <div class="command-item">
+              <h4>/serverinfo</h4>
+              <div class="command-name">-</div>
+              <p>Detailed server information and statistics</p>
+            </div>
+            <div class="command-item">
+              <h4>/userinfo</h4>
+              <div class="command-name">[user]</div>
+              <p>View user information and moderation history</p>
+            </div>
+            <div class="command-item">
+              <h4>/stats</h4>
+              <div class="command-name">server | bot | user</div>
+              <p>Comprehensive statistics</p>
+            </div>
+            <div class="command-item">
+              <h4>/analytics</h4>
+              <div class="command-name">overview | growth | activity</div>
+              <p>Server analytics and insights</p>
+            </div>
+            <div class="command-item">
+              <h4>/performance</h4>
+              <div class="command-name">check | report</div>
+              <p>Bot performance metrics and health</p>
+            </div>
+            <div class="command-item">
+              <h4>/health</h4>
+              <div class="command-name">-</div>
+              <p>Bot health check with AI recommendations</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Automation Commands -->
+        <div class="command-category">
+          <h3>⚙️ Automation Commands</h3>
+          <div class="command-list">
+            <div class="command-item">
+              <h4>/workflow</h4>
+              <div class="command-name">create | edit | delete | list</div>
+              <p>Custom automation workflows</p>
+            </div>
+            <div class="command-item">
+              <h4>/autoresponder</h4>
+              <div class="command-name">add | remove | list</div>
+              <p>Automatic message responses</p>
+            </div>
+            <div class="command-item">
+              <h4>/autorole</h4>
+              <div class="command-name">setup | config | toggle</div>
+              <p>Automatic role assignment</p>
+            </div>
+            <div class="command-item">
+              <h4>/automod</h4>
+              <div class="command-name">config | rules | toggle</div>
+              <p>Automated moderation rules</p>
+            </div>
+            <div class="command-item">
+              <h4>/schedule</h4>
+              <div class="command-name">message | action | list</div>
+              <p>Schedule messages and moderation actions</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Logging Commands -->
+        <div class="command-category">
+          <h3>📋 Logging Commands</h3>
+          <div class="command-list">
+            <div class="command-item">
+              <h4>/logs</h4>
+              <div class="command-name">setup | config | view</div>
+              <p>Configure server logging channels</p>
+            </div>
+            <div class="command-item">
+              <h4>/modlogs</h4>
+              <div class="command-name">view | search | export</div>
+              <p>View and search moderation logs</p>
+            </div>
+            <div class="command-item">
+              <h4>/report</h4>
+              <div class="command-name">user | message</div>
+              <p>Report system for members</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- All Commands Table -->
+        <div class="feature-category">
+          <h2>📚 Complete Command List</h2>
+          <div class="info-box">
+            <p><strong>Total Commands:</strong> 85+</p>
+            <p>
+              All commands use Discord's slash command system for easy
+              discovery. Type <code>/</code> in Discord to see all available
+              commands!
+            </p>
+          </div>
+
+          <details style="margin-top: 30px">
+            <summary
+              style="
+                font-size: 1.5rem;
+                cursor: pointer;
+                padding: 15px;
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: 10px;
+              "
+            >
+              Click to view all 85 commands alphabetically
+            </summary>
+            <div
+              style="
+                margin-top: 20px;
+                background: rgba(255, 255, 255, 0.05);
+                padding: 20px;
+                border-radius: 10px;
+              "
+            >
+              <p style="font-family: monospace; line-height: 2">
+                /achievement • /activity • /alert • /analytics • /antiraid •
+                /automod • /autoresponder • /autorole • /autotune • /backup •
+                /ban • /behavior • /bulk • /cases • /clearwarnings • /config •
+                /configexport • /customcommand • /dashboard • /eval • /giveaway
+                • /health • /heat • /help • /info • /invite • /joingate •
+                /joinraid • /kick • /leaderboard • /level • /lock • /lockdown •
+                /logs • /modlogs • /mute • /notes • /notify • /performance •
+                /ping • /poll • /predict • /privacy • /purge • /quarantine •
+                /queue • /quick • /reactionrole • /recommend • /recover •
+                /report • /rescue • /role • /roletemplate • /sanitize • /scan •
+                /schedule • /search • /security • /serverinfo • /setup •
+                /shardinfo • /slowmode • /smartban • /snapshot • /stats •
+                /suggest • /support • /threatdashboard • /threatnet • /ticket •
+                /timeout • /troubleshoot • /unban • /unlock • /userinfo •
+                /verify • /voice • /vote • /voterewards • /warn • /warnings •
+                /webhook • /welcome • /workflow
+              </p>
+            </div>
+          </details>
+        </div>
+
+        <!-- CTA -->
+        <div class="cta-box">
+          <h2>Try All Features Free</h2>
+          <p>No premium tiers. No limitations. Every command included.</p>
+          <a
+            href="https://discord.com/oauth2/authorize?client_id=1444739230679957646&permissions=268443574&scope=bot%20applications.commands"
+            class="btn btn-primary btn-large"
+          >
+            Invite Nexus Now
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <div class="container">
+        <div class="footer-links">
+          <a href="index.html">Home</a>
+          <a href="features.html">Features</a>
+          <a href="commands.html">Commands</a>
+          <a href="comparison.html">vs Wick</a>
+          <a href="https://github.com/Azzraya/Nexus" target="_blank">GitHub</a>
+          <a href="https://discord.gg/UHNcUKheZP" target="_blank">Support</a>
+        </div>
+        <p>Nexus - Beyond Wick. Beyond Everything.</p>
+      </div>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>

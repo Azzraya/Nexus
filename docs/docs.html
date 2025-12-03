@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Documentation - Nexus Discord Bot</title>
+    <meta
+      name="description"
+      content="Complete technical documentation for Nexus Discord bot - API, features, and development guides."
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="pages.css" />
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="container">
+        <a href="index.html" class="nav-brand">NEXUS</a>
+        <div class="nav-links">
+          <a href="features.html">Features</a>
+          <a href="commands.html">Commands</a>
+          <a href="comparison.html">vs Wick</a>
+          <a href="setup.html">Setup</a>
+          <a href="docs.html" class="active">Docs</a>
+          <a
+            href="https://discord.com/oauth2/authorize?client_id=1444739230679957646&permissions=268443574&scope=bot%20applications.commands"
+            class="btn-nav"
+            >Invite</a
+          >
+        </div>
+      </div>
+    </nav>
+
+    <div class="page-header">
+      <div class="container">
+        <h1>📚 Documentation</h1>
+        <p>Technical documentation and developer resources</p>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <div class="container">
+        <!-- Getting Started -->
+        <div class="feature-category">
+          <h2>🚀 Getting Started</h2>
+
+          <div class="feature-detailed">
+            <h3>Installation</h3>
+            <p>Invite Nexus to your Discord server:</p>
+            <div class="code-block">
+              <pre>
+https://discord.com/oauth2/authorize?client_id=1444739230679957646&permissions=268443574&scope=bot%20applications.commands</pre
+              >
+            </div>
+            <p>
+              <strong>Required Permissions:</strong> Administrator (or Manage
+              Server, Manage Roles, Manage Channels, Ban Members, Kick Members)
+            </p>
+          </div>
+
+          <div class="feature-detailed">
+            <h3>First Steps</h3>
+            <ol>
+              <li>Run <code>/setup preset</code> for quick configuration</li>
+              <li>
+                Run <code>/recommend analyze</code> for AI recommendations
+              </li>
+              <li>Configure <code>/logs setup</code> for logging</li>
+              <li>
+                Enable <code>/antiraid config</code> and
+                <code>/security config</code>
+              </li>
+              <li>Set up <code>/joingate setup</code> for verification</li>
+            </ol>
+          </div>
+        </div>
+
+        <!-- Core Systems -->
+        <div class="feature-category">
+          <h2>🏗️ Core Systems</h2>
+
+          <div class="feature-detailed">
+            <h3>Anti-Raid System</h3>
+            <p><strong>How it works:</strong></p>
+            <ul>
+              <li>Monitors all member joins in real-time</li>
+              <li>4 detection algorithms analyze join patterns</li>
+              <li>Triggers when thresholds exceeded</li>
+              <li>Automatically bans/kicks/quarantines raiders</li>
+              <li>Locks down server during active raids</li>
+              <li>Reports threats to intelligence network</li>
+            </ul>
+            <p><strong>Algorithms:</strong></p>
+            <ol>
+              <li><strong>Rate-Based:</strong> Monitors joins per second</li>
+              <li>
+                <strong>Pattern-Based:</strong> Detects coordinated joins
+                (similar account ages, usernames)
+              </li>
+              <li>
+                <strong>Behavioral:</strong> Analyzes account characteristics
+                (avatars, age, discriminators)
+              </li>
+              <li>
+                <strong>Network-Based:</strong> Identifies account creation time
+                clusters
+              </li>
+            </ol>
+          </div>
+
+          <div class="feature-detailed">
+            <h3>Anti-Nuke System</h3>
+            <p><strong>Monitored Actions:</strong></p>
+            <ul>
+              <li>Channel deletions (triggers on 1 deletion)</li>
+              <li>Channel creations (triggers on 2+ in 5 seconds)</li>
+              <li>Role deletions (triggers on 1 deletion)</li>
+              <li>Role modifications (permission changes)</li>
+              <li>Mass bans (2+ in 5 seconds)</li>
+              <li>Mass kicks (2+ in 5 seconds)</li>
+              <li>Webhook creations (2+ in 5 seconds)</li>
+              <li>Permission testing (3+ changes in 10 seconds)</li>
+            </ul>
+            <p><strong>Response:</strong></p>
+            <ul>
+              <li>Instant ban of attacker</li>
+              <li>Remove all dangerous permissions</li>
+              <li>Trigger auto-recovery</li>
+              <li>Alert administrators</li>
+              <li>Report to threat network</li>
+            </ul>
+          </div>
+
+          <div class="feature-detailed">
+            <h3>Snapshot & Recovery System</h3>
+            <p><strong>Automatic Snapshots:</strong></p>
+            <ul>
+              <li>Taken every hour automatically</li>
+              <li>24-hour retention (24 snapshots)</li>
+              <li>
+                Captures: channels, roles, permissions, settings, webhooks,
+                emojis, stickers
+              </li>
+              <li>Zero configuration required</li>
+            </ul>
+            <p><strong>Recovery Process:</strong></p>
+            <ol>
+              <li>Parallel batch processing (10 channels at once)</li>
+              <li>Smart ordering (categories → channels → permissions)</li>
+              <li>Role hierarchy preservation</li>
+              <li>Verification after restoration</li>
+            </ol>
+            <p><strong>Commands:</strong></p>
+            <ul>
+              <li><code>/snapshot list</code> - View available snapshots</li>
+              <li><code>/snapshot create</code> - Manual snapshot</li>
+              <li>
+                <code>/snapshot restore</code> - Restore to specific snapshot
+              </li>
+            </ul>
+          </div>
+
+          <div class="feature-detailed">
+            <h3>Threat Intelligence Network</h3>
+            <p><strong>How it works:</strong></p>
+            <ul>
+              <li>
+                When Nexus detects a threat, it's reported to the global
+                database
+              </li>
+              <li>
+                Threat receives risk score based on severity and verification
+              </li>
+              <li>All Nexus servers check new members against the database</li>
+              <li>Known threats are flagged/quarantined automatically</li>
+            </ul>
+            <p><strong>Commands:</strong></p>
+            <ul>
+              <li>
+                <code>/threatnet check user</code> - Check if user is known
+                threat
+              </li>
+              <li><code>/threatnet stats</code> - View network statistics</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- API Reference -->
+        <div class="feature-category">
+          <h2>🔌 Self-Hosting (Advanced)</h2>
+
+          <div class="feature-detailed">
+            <h3>Requirements</h3>
+            <ul>
+              <li>Node.js v16 or higher</li>
+              <li>npm or yarn</li>
+              <li>Discord bot token</li>
+              <li>Bot list API tokens (optional)</li>
+            </ul>
+          </div>
+
+          <div class="feature-detailed">
+            <h3>Installation</h3>
+            <div class="code-block">
+              <pre>
+git clone https://github.com/Azzraya/Nexus.git
+cd Nexus
+npm install</pre
+              >
+            </div>
+          </div>
+
+          <div class="feature-detailed">
+            <h3>Configuration</h3>
+            <p>Create <code>.env</code> file:</p>
+            <div class="code-block">
+              <pre>
+DISCORD_TOKEN=your_bot_token
+TOPGG_TOKEN=your_topgg_token (optional)
+DISCORDBOTLIST_TOKEN=your_dbl_token (optional)
+VOIDBOTS_TOKEN=your_voidbots_token (optional)</pre
+              >
+            </div>
+          </div>
+
+          <div class="feature-detailed">
+            <h3>Running</h3>
+            <p><strong>Single Instance:</strong></p>
+            <div class="code-block">
+              <pre>node index.js</pre>
+            </div>
+            <p><strong>Sharded (2,500+ servers):</strong></p>
+            <div class="code-block">
+              <pre>node shard.js</pre>
+            </div>
+            <p><strong>Clustered (10,000+ servers):</strong></p>
+            <div class="code-block">
+              <pre>
+npm install discord-hybrid-sharding
+node cluster.js</pre
+              >
+            </div>
+          </div>
+        </div>
+
+        <!-- Support -->
+        <div class="feature-category">
+          <h2>🆘 Support Resources</h2>
+
+          <div class="features-grid">
+            <div class="feature-card">
+              <h4>📖 GitHub</h4>
+              <p>View source code, report issues, contribute</p>
+              <a
+                href="https://github.com/Azzraya/Nexus"
+                target="_blank"
+                class="btn btn-secondary"
+                style="margin-top: 15px"
+              >
+                View on GitHub
+              </a>
+            </div>
+            <div class="feature-card">
+              <h4>💬 Discord</h4>
+              <p>Get help, request features, discuss</p>
+              <a
+                href="https://discord.gg/UHNcUKheZP"
+                target="_blank"
+                class="btn btn-secondary"
+                style="margin-top: 15px"
+              >
+                Support Server
+              </a>
+            </div>
+            <div class="feature-card">
+              <h4>🐛 Report Bug</h4>
+              <p>Found an issue? Report it on GitHub</p>
+              <a
+                href="https://github.com/Azzraya/Nexus/issues"
+                target="_blank"
+                class="btn btn-secondary"
+                style="margin-top: 15px"
+              >
+                Report Issue
+              </a>
+            </div>
+            <div class="feature-card">
+              <h4>💡 Feature Request</h4>
+              <p>Suggest new features or improvements</p>
+              <a
+                href="https://github.com/Azzraya/Nexus/discussions"
+                target="_blank"
+                class="btn btn-secondary"
+                style="margin-top: 15px"
+              >
+                Request Feature
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- License -->
+        <div class="feature-category">
+          <h2>📜 License & Legal</h2>
+
+          <div class="info-box">
+            <h3>MIT License</h3>
+            <p>
+              Nexus is free and open-source software licensed under the MIT
+              License.
+            </p>
+            <p style="margin-top: 10px">You are free to:</p>
+            <ul>
+              <li>Use commercially</li>
+              <li>Modify the source code</li>
+              <li>Distribute</li>
+              <li>Use privately</li>
+              <li>Self-host</li>
+            </ul>
+            <p style="margin-top: 15px">
+              <a
+                href="https://github.com/Azzraya/Nexus/blob/main/LICENSE"
+                target="_blank"
+                style="color: #fff"
+                >View Full License →</a
+              >
+            </p>
+          </div>
+
+          <div class="feature-detailed">
+            <h3>Privacy & Data Handling</h3>
+            <p>Nexus is transparent about data collection:</p>
+            <ul>
+              <li>Minimal data collection (only what's needed for features)</li>
+              <li>No data selling</li>
+              <li>No telemetry or tracking (except configured logging)</li>
+              <li>Data deletion on bot removal</li>
+              <li>GDPR compliant</li>
+            </ul>
+            <p style="margin-top: 15px">
+              <a
+                href="https://github.com/Azzraya/Nexus/blob/main/PRIVACY_POLICY.md"
+                target="_blank"
+                style="color: #fff"
+                >Read Privacy Policy →</a
+              >
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <div class="container">
+        <div class="footer-links">
+          <a href="index.html">Home</a>
+          <a href="features.html">Features</a>
+          <a href="commands.html">Commands</a>
+          <a href="comparison.html">vs Wick</a>
+          <a href="https://github.com/Azzraya/Nexus" target="_blank">GitHub</a>
+          <a href="https://discord.gg/UHNcUKheZP" target="_blank">Support</a>
+        </div>
+        <p>Nexus - Beyond Wick. Beyond Everything.</p>
+      </div>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>
