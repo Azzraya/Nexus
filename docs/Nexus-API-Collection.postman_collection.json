@@ -1,0 +1,504 @@
+{
+  "info": {
+    "name": "Nexus API - Complete Collection",
+    "description": "Complete Nexus Discord Bot API with all 34 endpoints. Import this into Postman for easy testing!",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "nexus-bot"
+  },
+  "auth": {
+    "type": "apikey",
+    "apikey": [
+      {
+        "key": "value",
+        "value": "{{api_key}}",
+        "type": "string"
+      },
+      {
+        "key": "key",
+        "value": "x-api-key",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "https://regular-puma-clearly.ngrok-free.app",
+      "type": "string"
+    },
+    {
+      "key": "api_key",
+      "value": "your-api-key-here",
+      "type": "string"
+    },
+    {
+      "key": "server_id",
+      "value": "1234567890",
+      "type": "string"
+    },
+    {
+      "key": "user_id",
+      "value": "0987654321",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Public Endpoints",
+      "item": [
+        {
+          "name": "Get Bot Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "ngrok-skip-browser-warning",
+                "value": "true"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/stats",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "stats"]
+            }
+          }
+        },
+        {
+          "name": "Get API Version",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "ngrok-skip-browser-warning",
+                "value": "true"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/version",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "version"]
+            }
+          }
+        },
+        {
+          "name": "Get Recent Activity",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "ngrok-skip-browser-warning",
+                "value": "true"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/recent-activity",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "recent-activity"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Server Management",
+      "item": [
+        {
+          "name": "Configure Server",
+          "request": {
+            "auth": {
+              "type": "inherit"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "ngrok-skip-browser-warning",
+                "value": "true"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"settings\": {\n    \"anti_nuke_enabled\": true,\n    \"anti_raid_enabled\": true,\n    \"log_channel\": \"1234567890\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/server/{{server_id}}/configure",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "server", "{{server_id}}", "configure"]
+            }
+          }
+        },
+        {
+          "name": "Create Backup",
+          "request": {
+            "auth": {
+              "type": "inherit"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "ngrok-skip-browser-warning",
+                "value": "true"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/server/{{server_id}}/backup",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "server", "{{server_id}}", "backup"]
+            }
+          }
+        },
+        {
+          "name": "Get Server Health",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "ngrok-skip-browser-warning",
+                "value": "true"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/server/{{server_id}}/health",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "server", "{{server_id}}", "health"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Moderation",
+      "item": [
+        {
+          "name": "Ban User",
+          "request": {
+            "auth": {
+              "type": "inherit"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "ngrok-skip-browser-warning",
+                "value": "true"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"serverId\": \"{{server_id}}\",\n  \"userId\": \"{{user_id}}\",\n  \"reason\": \"Spam\",\n  \"deleteMessageDays\": 7\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/moderation/ban",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "moderation", "ban"]
+            }
+          }
+        },
+        {
+          "name": "Kick User",
+          "request": {
+            "auth": {
+              "type": "inherit"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "ngrok-skip-browser-warning",
+                "value": "true"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"serverId\": \"{{server_id}}\",\n  \"userId\": \"{{user_id}}\",\n  \"reason\": \"Breaking rules\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/moderation/kick",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "moderation", "kick"]
+            }
+          }
+        },
+        {
+          "name": "Issue Warning",
+          "request": {
+            "auth": {
+              "type": "inherit"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "ngrok-skip-browser-warning",
+                "value": "true"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"serverId\": \"{{server_id}}\",\n  \"userId\": \"{{user_id}}\",\n  \"reason\": \"First warning\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/moderation/warn",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "moderation", "warn"]
+            }
+          }
+        },
+        {
+          "name": "Bulk Ban",
+          "request": {
+            "auth": {
+              "type": "inherit"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "ngrok-skip-browser-warning",
+                "value": "true"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"serverId\": \"{{server_id}}\",\n  \"action\": \"ban\",\n  \"userIds\": [\"111111\", \"222222\", \"333333\"],\n  \"reason\": \"Raid participants\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/moderation/bulk",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "moderation", "bulk"]
+            }
+          }
+        },
+        {
+          "name": "Get Moderation Logs",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "ngrok-skip-browser-warning",
+                "value": "true"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/moderation/logs?serverId={{server_id}}&limit=50",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "moderation", "logs"],
+              "query": [
+                {
+                  "key": "serverId",
+                  "value": "{{server_id}}"
+                },
+                {
+                  "key": "limit",
+                  "value": "50"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "User Intelligence",
+      "item": [
+        {
+          "name": "Get User Risk Score",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "ngrok-skip-browser-warning",
+                "value": "true"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/user/{{user_id}}/risk?serverId={{server_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "user", "{{user_id}}", "risk"],
+              "query": [
+                {
+                  "key": "serverId",
+                  "value": "{{server_id}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get User History",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "ngrok-skip-browser-warning",
+                "value": "true"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/user/{{user_id}}/history?serverId={{server_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "user", "{{user_id}}", "history"],
+              "query": [
+                {
+                  "key": "serverId",
+                  "value": "{{server_id}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Analyze User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "ngrok-skip-browser-warning",
+                "value": "true"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"serverId\": \"{{server_id}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/user/{{user_id}}/analyze",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "user", "{{user_id}}", "analyze"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "AI Predictions",
+      "item": [
+        {
+          "name": "Predict Threat",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "ngrok-skip-browser-warning",
+                "value": "true"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"serverId\": \"{{server_id}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/predict/threat",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "predict", "threat"]
+            }
+          }
+        },
+        {
+          "name": "Predict Retention",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "ngrok-skip-browser-warning",
+                "value": "true"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"serverId\": \"{{server_id}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/predict/retention",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "predict", "retention"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Community",
+      "item": [
+        {
+          "name": "Submit Feedback",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "ngrok-skip-browser-warning",
+                "value": "true"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"feature_request\",\n  \"message\": \"Please add more AI features!\",\n  \"contact\": \"user@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/feedback",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "feedback"]
+            }
+          }
+        },
+        {
+          "name": "Submit Ban Appeal",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "ngrok-skip-browser-warning",
+                "value": "true"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"serverId\": \"{{server_id}}\",\n  \"userId\": \"{{user_id}}\",\n  \"reason\": \"I was wrongfully banned\",\n  \"contact\": \"myemail@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/appeals/create",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "appeals", "create"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
+
