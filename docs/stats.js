@@ -1,8 +1,8 @@
 // Dynamic stats that scale with bot growth
 // Base numbers that will scale up as servers/users increase
 let statsCache = {
-  servers: 9,
-  users: 195,
+  servers: 11,
+  users: 224,
   uptime: 0,
   raidsStopped: 0,
   nukesPrevented: 0,
