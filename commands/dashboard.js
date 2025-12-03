@@ -104,35 +104,36 @@ module.exports = {
           text: "Nexus - Beyond Wick. Free. Open Source. Powerful.",
         });
 
-      const row1 = new ActionRowBuilder().addComponents(
-        new ButtonBuilder()
-          .setCustomId("dashboard_security")
-          .setLabel("Security")
-          .setStyle(ButtonStyle.Primary),
-        new ButtonBuilder()
-          .setCustomId("dashboard_moderation")
-          .setLabel("Moderation")
-          .setStyle(ButtonStyle.Primary),
-        new ButtonBuilder()
-          .setCustomId("dashboard_activity")
-          .setLabel("Activity")
-          .setStyle(ButtonStyle.Primary),
-        new ButtonBuilder()
-          .setCustomId("dashboard_performance")
-          .setLabel("Performance")
-          .setStyle(ButtonStyle.Success)
-      );
-
-      const row2 = new ActionRowBuilder().addComponents(
-        new ButtonBuilder()
-          .setLabel("🎛️ Web Dashboard")
-          .setStyle(ButtonStyle.Link)
-          .setURL(process.env.DASHBOARD_URL || "https://regular-puma-clearly.ngrok-free.app"),
-        new ButtonBuilder()
-          .setLabel("🌐 Website")
-          .setStyle(ButtonStyle.Link)
-          .setURL("https://azzraya.github.io/Nexus/")
-      );
+      const buttons = [
+        new ActionRowBuilder().addComponents(
+          new ButtonBuilder()
+            .setCustomId("dashboard_security")
+            .setLabel("Security")
+            .setStyle(ButtonStyle.Primary),
+          new ButtonBuilder()
+            .setCustomId("dashboard_moderation")
+            .setLabel("Moderation")
+            .setStyle(ButtonStyle.Primary),
+          new ButtonBuilder()
+            .setCustomId("dashboard_activity")
+            .setLabel("Activity")
+            .setStyle(ButtonStyle.Primary),
+          new ButtonBuilder()
+            .setCustomId("dashboard_performance")
+            .setLabel("Performance")
+            .setStyle(ButtonStyle.Success)
+        ),
+        new ActionRowBuilder().addComponents(
+          new ButtonBuilder()
+            .setLabel("🎛️ Web Dashboard")
+            .setStyle(ButtonStyle.Link)
+            .setURL("https://regular-puma-clearly.ngrok-free.app"),
+          new ButtonBuilder()
+            .setLabel("🌐 Website")
+            .setStyle(ButtonStyle.Link)
+            .setURL("https://azzraya.github.io/Nexus/")
+        )
+      ];
 
       // Check if this is a button interaction (update) or command (reply)
       if (interaction.deferred || interaction.replied) {
