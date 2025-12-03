@@ -1405,6 +1405,134 @@ class DashboardServer {
       }
     });
 
+    // GET /api/admin/command-analytics - Command usage analytics
+    this.app.get("/api/admin/command-analytics", async (req, res) => {
+      try {
+        // Get time range (default 7 days)
+        const timeRange = req.query.range || "7d";
+        let since = Date.now();
+        
+        switch(timeRange) {
+          case "24h": since -= 24 * 60 * 60 * 1000; break;
+          case "7d": since -= 7 * 24 * 60 * 60 * 1000; break;
+          case "30d": since -= 30 * 24 * 60 * 60 * 1000; break;
+          case "all": since = 0; break;
+        }
+
+        // Get all command usage data
+        const commandStats = await new Promise((resolve, reject) => {
+          db.db.all(
+            `SELECT 
+              command_name,
+              COUNT(*) as executions
+            FROM command_usage_log
+            WHERE timestamp > ?
+            GROUP BY command_name
+            ORDER BY executions DESC`,
+            [since],
+            (err, rows) => {
+              if (err) reject(err);
+              else resolve(rows || []);
+            }
+          );
+        });
+
+        // Get performance data from performance monitor
+        const PerformanceMonitor = require("../utils/performanceMonitor");
+        const perfMonitor = PerformanceMonitor.getInstance();
+        
+        // Calculate aggregated stats
+        const totalCommands = commandStats.length;
+        const totalExecutions = commandStats.reduce((sum, cmd) => sum + cmd.executions, 0);
+        
+        // Get performance metrics for each command
+        const commandsWithPerf = commandStats.map(cmd => {
+          const metrics = perfMonitor.getMetrics(cmd.command_name);
+          return {
+            name: cmd.command_name,
+            executions: cmd.executions,
+            avgTime: metrics?.avgExecutionTime || 0,
+            successRate: metrics?.successRate || 100,
+            failureRate: 100 - (metrics?.successRate || 100)
+          };
+        });
+
+        // Calculate overall metrics
+        const avgResponseTime = commandsWithPerf.length > 0 
+          ? Math.round(commandsWithPerf.reduce((sum, cmd) => sum + cmd.avgTime, 0) / commandsWithPerf.length)
+          : 0;
+        
+        const successRate = commandsWithPerf.length > 0 && totalExecutions > 0
+          ? Math.round(commandsWithPerf.reduce((sum, cmd) => sum + (cmd.successRate * cmd.executions), 0) / totalExecutions)
+          : 100;
+
+        // Top 10 most used commands
+        const topCommands = commandsWithPerf.slice(0, 10);
+
+        // Top 10 slowest commands
+        const slowestCommands = [...commandsWithPerf]
+          .sort((a, b) => b.avgTime - a.avgTime)
+          .slice(0, 10);
+
+        // Commands with highest failure rate
+        const failedCommands = [...commandsWithPerf]
+          .filter(cmd => cmd.failureRate > 0)
+          .sort((a, b) => b.failureRate - a.failureRate)
+          .slice(0, 10);
+
+        // Usage trends (last 7 days)
+        const usageTrends = [];
+        for (let i = 6; i >= 0; i--) {
+          const dayStart = Date.now() - (i * 24 * 60 * 60 * 1000);
+          const dayEnd = dayStart + (24 * 60 * 60 * 1000);
+          
+          const dayCount = await new Promise((resolve, reject) => {
+            db.db.get(
+              `SELECT COUNT(*) as count 
+              FROM command_usage_log 
+              WHERE timestamp >= ? AND timestamp < ?`,
+              [dayStart, dayEnd],
+              (err, row) => {
+                if (err) reject(err);
+                else resolve(row);
+              }
+            );
+          });
+
+          const date = new Date(dayStart);
+          usageTrends.push({
+            date: `${date.getMonth() + 1}/${date.getDate()}`,
+            count: dayCount.count || 0
+          });
+        }
+
+        // Performance distribution
+        const performanceDistribution = {
+          under100: commandsWithPerf.filter(c => c.avgTime < 100).length,
+          under500: commandsWithPerf.filter(c => c.avgTime >= 100 && c.avgTime < 500).length,
+          under1000: commandsWithPerf.filter(c => c.avgTime >= 500 && c.avgTime < 1000).length,
+          under5000: commandsWithPerf.filter(c => c.avgTime >= 1000 && c.avgTime < 5000).length,
+          over5000: commandsWithPerf.filter(c => c.avgTime >= 5000).length
+        };
+
+        res.json({
+          totalCommands,
+          totalExecutions,
+          avgResponseTime,
+          successRate,
+          topCommands,
+          slowestCommands,
+          failedCommands,
+          usageTrends,
+          performanceDistribution
+        });
+
+      } catch (error) {
+        console.error("[Command Analytics] Error:", error);
+        res.status(500).json({ error: "Failed to fetch command analytics" });
+      }
+    });
+
     // ==================== INVITE SOURCE TRACKING ====================
 
     // GET /api/admin/invite-sources - List all invite sources
