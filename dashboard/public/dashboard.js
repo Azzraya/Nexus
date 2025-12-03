@@ -1079,60 +1079,181 @@ async function updateConfig(key, value) {
   }
 }
 
-// Load moderation logs page
+// Load moderation logs page with charts and filters
 async function loadModLogs() {
   const contentArea = document.getElementById("contentArea");
 
   contentArea.innerHTML = `
-    <h2>Moderation Logs</h2>
-    <div id="modLogsContainer" style="margin-top: 20px;">
-      <div class="loading">Loading moderation logs...</div>
+    <h2>⚖️ Moderation Logs</h2>
+    <p style="opacity:0.8; margin-bottom:20px;">Advanced log viewing with charts and filters</p>
+
+    <!-- Chart -->
+    <div style="background: rgba(255, 255, 255, 0.05); padding: 25px; border-radius: 12px; margin-bottom: 25px;">
+      <h3 style="margin-bottom: 15px;">📊 Activity Chart (Last 7 Days)</h3>
+      <div style="height: 250px;">
+        <canvas id="modLogsChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div style="background: rgba(255, 255, 255, 0.05); padding: 20px; border-radius: 12px; margin-bottom: 25px;">
+      <h3 style="margin-bottom: 15px;">🔍 Filters</h3>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 12px;">
+        <select id="filter-action" onchange="filterModLogs()" style="padding: 10px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; color: white;">
+          <option value="">All Actions</option>
+          <option value="ban">Bans</option>
+          <option value="kick">Kicks</option>
+          <option value="warn">Warns</option>
+          <option value="mute">Mutes</option>
+        </select>
+        <input type="text" id="filter-mod" placeholder="Filter by moderator..." onkeyup="filterModLogs()" style="padding: 10px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; color: white;">
+        <input type="text" id="filter-user" placeholder="Filter by user..." onkeyup="filterModLogs()" style="padding: 10px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; color: white;">
+        <input type="date" id="filter-date" onchange="filterModLogs()" style="padding: 10px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; color: white;">
+      </div>
+      <div>
+        <button class="btn-secondary" onclick="clearModFilters()">Clear Filters</button>
+        <button class="btn" onclick="exportModLogs()" style="margin-left: 10px;">📥 Export CSV</button>
+        <span id="filter-count" style="margin-left: 15px; opacity: 0.8;"></span>
+      </div>
+    </div>
+
+    <div id="modLogsContainer">
+      <div class="loading">Loading logs...</div>
     </div>
   `;
 
   try {
-    const response = await fetch(
-      `/api/server/${currentServer}/modlogs?limit=50`
-    );
-    const logs = await response.json();
+    const response = await fetch(`/api/server/${currentServer}/modlogs?limit=100`);
+    window.allModLogs = await response.json();
 
-    const container = document.getElementById("modLogsContainer");
-
-    if (logs.length === 0) {
-      container.innerHTML =
-        '<p style="opacity:0.7;">No moderation logs yet.</p>';
+    if (window.allModLogs.length === 0) {
+      document.getElementById("modLogsContainer").innerHTML = '<p style="opacity:0.7;">No logs yet.</p>';
       return;
     }
 
-    container.innerHTML = `
-      <div class="logs-table">
-        <div class="logs-header">
-          <div>Date</div>
-          <div>Action</div>
-          <div>User</div>
-          <div>Moderator</div>
-          <div>Reason</div>
-        </div>
-        ${logs
-          .map(
-            (log) => `
-          <div class="log-row">
-            <div>${new Date(log.timestamp).toLocaleString()}</div>
-            <div><span class="action-badge action-${log.action.toLowerCase()}">${log.action.toUpperCase()}</span></div>
-            <div><code>${log.user_id}</code></div>
-            <div><code>${log.moderator_id}</code></div>
-            <div>${log.reason || "No reason provided"}</div>
-          </div>
-        `
-          )
-          .join("")}
-      </div>
-    `;
+    createModChart(window.allModLogs);
+    displayFilteredModLogs(window.allModLogs);
   } catch (error) {
     console.error("Failed to load mod logs:", error);
-    document.getElementById("modLogsContainer").innerHTML =
-      '<p style="color:#ff4444;">Failed to load moderation logs</p>';
   }
+}
+
+function createModChart(logs) {
+  const ctx = document.getElementById('modLogsChart');
+  if (!ctx) return;
+
+  const last7Days = [];
+  for (let i = 6; i >= 0; i--) {
+    const date = new Date();
+    date.setDate(date.getDate() - i);
+    date.setHours(0, 0, 0, 0);
+    last7Days.push(date.getTime());
+  }
+
+  const counts = last7Days.map(day => {
+    const dayEnd = day + 86400000;
+    return logs.filter(l => l.timestamp >= day && l.timestamp < dayEnd).length;
+  });
+
+  const labels = last7Days.map(d => new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Actions',
+        data: counts,
+        borderColor: '#667eea',
+        backgroundColor: 'rgba(102, 126, 234, 0.2)',
+        tension: 0.4,
+        fill: true
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { labels: { color: '#fff' } } },
+      scales: {
+        y: { beginAtZero: true, ticks: { color: '#fff' }, grid: { color: 'rgba(255,255,255,0.1)' } },
+        x: { ticks: { color: '#fff' }, grid: { color: 'rgba(255,255,255,0.1)' } }
+      }
+    }
+  });
+}
+
+function displayFilteredModLogs(logs) {
+  const container = document.getElementById("modLogsContainer");
+  document.getElementById("filter-count").textContent = `Showing ${logs.length} log(s)`;
+
+  container.innerHTML = `
+    <div class="logs-table">
+      <div class="logs-header">
+        <div>Date</div>
+        <div>Action</div>
+        <div>User</div>
+        <div>Moderator</div>
+        <div>Reason</div>
+      </div>
+      ${logs.map(log => `
+        <div class="log-row">
+          <div>${new Date(log.timestamp).toLocaleString()}</div>
+          <div><span class="action-badge action-${log.action}">${log.action.toUpperCase()}</span></div>
+          <div><code>${log.user_id}</code></div>
+          <div><code>${log.moderator_id}</code></div>
+          <div>${log.reason || "None"}</div>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+
+function filterModLogs() {
+  if (!window.allModLogs) return;
+
+  const action = document.getElementById("filter-action").value;
+  const mod = document.getElementById("filter-mod").value.toLowerCase();
+  const user = document.getElementById("filter-user").value.toLowerCase();
+  const date = document.getElementById("filter-date").value;
+
+  const filtered = window.allModLogs.filter(log => {
+    if (action && log.action !== action) return false;
+    if (mod && !log.moderator_id.toLowerCase().includes(mod)) return false;
+    if (user && !log.user_id.toLowerCase().includes(user)) return false;
+    if (date) {
+      const logDate = new Date(log.timestamp).toISOString().split('T')[0];
+      if (logDate !== date) return false;
+    }
+    return true;
+  });
+
+  displayFilteredModLogs(filtered);
+}
+
+function clearModFilters() {
+  document.getElementById("filter-action").value = "";
+  document.getElementById("filter-mod").value = "";
+  document.getElementById("filter-user").value = "";
+  document.getElementById("filter-date").value = "";
+  if (window.allModLogs) displayFilteredModLogs(window.allModLogs);
+}
+
+function exportModLogs() {
+  if (!window.allModLogs) return;
+
+  const filtered = window.allModLogs; // Or get currently filtered logs
+  const csv = [
+    "Timestamp,Action,User ID,Moderator ID,Reason",
+    ...filtered.map(l => `"${new Date(l.timestamp).toISOString()}","${l.action}","${l.user_id}","${l.moderator_id}","${l.reason || 'None'}"`)
+  ].join("\n");
+
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `modlogs-${currentServer}-${Date.now()}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
 // Load security logs page
