@@ -366,9 +366,82 @@ footer p {
   letter-spacing: 2px;
 }
 
+.nav-right {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+/* Dropdown Menu */
+.dropdown {
+  position: relative;
+}
+
+.dropdown-toggle {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  white-space: nowrap;
+}
+
+.dropdown-toggle:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 120%;
+  left: 0;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  min-width: 200px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.3s ease;
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.dropdown:hover .dropdown-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.dropdown-menu a {
+  display: block;
+  padding: 12px 20px;
+  color: #333;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: all 0.2s;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.dropdown-menu a:last-child {
+  border-bottom: none;
+}
+
+.dropdown-menu a:hover {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding-left: 25px;
+}
+
+/* Keep old nav-links class for other pages */
 .nav-links {
   display: flex;
-  gap: 35px; /* Better spacing */
+  gap: 35px;
   align-items: center;
 }
 
@@ -378,8 +451,8 @@ footer p {
   opacity: 0.8;
   transition: opacity 0.3s;
   font-weight: 500;
-  font-size: 0.95rem; /* Slightly smaller */
-  white-space: nowrap; /* No wrapping */
+  font-size: 0.95rem;
+  white-space: nowrap;
 }
 
 .nav-links a:hover,
