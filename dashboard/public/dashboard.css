@@ -453,6 +453,27 @@ body {
   margin-bottom: 15px;
 }
 
+.status-badge {
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.status-active {
+  background: rgba(67, 181, 129, 0.2);
+  color: #43b581;
+  border: 1px solid rgba(67, 181, 129, 0.4);
+}
+
+.status-inactive {
+  background: rgba(114, 118, 125, 0.2);
+  color: #72767d;
+  border: 1px solid rgba(114, 118, 125, 0.4);
+}
+
 .system-title {
   display: flex;
   align-items: center;

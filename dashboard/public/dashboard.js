@@ -319,9 +319,9 @@ async function loadOverview(server) {
                     </div>
                     <label class="toggle-switch">
                         <input type="checkbox" ${
-                          config.automod_enabled !== 0 ? "checked" : ""
+                          config.auto_mod_enabled !== 0 ? "checked" : ""
                         } 
-                               onchange="toggleSetting('automod_enabled', this.checked)">
+                               onchange="toggleSetting('auto_mod_enabled', this.checked)">
                         <span class="slider"></span>
                     </label>
                 </div>
@@ -361,41 +361,15 @@ async function loadOverview(server) {
                         <span class="system-icon">📝</span>
                         <span>Logging</span>
                     </div>
-                    <label class="toggle-switch">
-                        <input type="checkbox" ${
-                          config.log_channel ? "checked" : ""
-                        } 
-                               onchange="toggleSetting('logging_enabled', this.checked)">
-                        <span class="slider"></span>
-                    </label>
+                    <span class="status-badge ${config.mod_log_channel ? 'status-active' : 'status-inactive'}">
+                        ${config.mod_log_channel ? 'ACTIVE' : 'INACTIVE'}
+                    </span>
                 </div>
                 <p class="system-description">
                     Comprehensive audit logs for all moderation actions and security events.
                 </p>
                 <div class="system-footer">
-                    <button class="settings-btn" onclick="loadPage('logging')">SETTINGS</button>
-                </div>
-            </div>
-
-            <div class="system-card">
-                <div class="system-header">
-                    <div class="system-title">
-                        <span class="system-icon">🎁</span>
-                        <span>Vote Rewards</span>
-                    </div>
-                    <label class="toggle-switch">
-                        <input type="checkbox" ${
-                          config.vote_rewards_enabled !== 0 ? "checked" : ""
-                        } 
-                               onchange="toggleSetting('vote_rewards_enabled', this.checked)">
-                        <span class="slider"></span>
-                    </label>
-                </div>
-                <p class="system-description">
-                    Automatic rewards for users who vote. Streaks, points, and temporary roles.
-                </p>
-                <div class="system-footer">
-                    <button class="settings-btn">SETTINGS</button>
+                    <button class="settings-btn" onclick="loadPage('logging')">CONFIGURE</button>
                 </div>
             </div>
         </div>
@@ -406,9 +380,9 @@ function calculateSecurityScore(config) {
   let score = 0;
   if (config.anti_nuke_enabled !== 0) score += 20;
   if (config.anti_raid_enabled !== 0) score += 20;
-  if (config.automod_enabled !== 0) score += 15;
+  if (config.auto_mod_enabled !== 0) score += 15;
   if (config.auto_recovery_enabled !== 0) score += 20;
-  if (config.log_channel) score += 15;
+  if (config.mod_log_channel) score += 15;
   if (config.vote_rewards_enabled !== 0) score += 10;
   return Math.min(score, 100);
 }
