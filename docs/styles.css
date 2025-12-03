@@ -993,14 +993,14 @@ footer a:hover {
   }
 
   .nav-links {
-    gap: 10px;
-    font-size: 0.9rem;
+    gap: 15px; /* Better spacing even on smaller screens */
+    font-size: 0.85rem;
   }
 
   .btn-nav,
   .btn-dashboard {
-    padding: 8px 16px;
-    font-size: 0.9rem;
+    padding: 7px 14px;
+    font-size: 0.85rem;
   }
 }
 
