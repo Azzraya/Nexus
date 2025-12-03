@@ -3,6 +3,7 @@ const session = require("express-session");
 const passport = require("passport");
 const DiscordStrategy = require("passport-discord").Strategy;
 const path = require("path");
+const db = require("../utils/database");
 
 class DashboardServer {
   constructor(client) {
@@ -123,6 +124,7 @@ class DashboardServer {
       }
     });
 
+    // Update server config
     this.app.post(
       "/api/server/:id/config",
       this.checkAuth,
@@ -132,12 +134,8 @@ class DashboardServer {
           if (!guild)
             return res.status(404).json({ error: "Server not found" });
 
-          const db = require("../utils/database");
-          const { setting, value } = req.body;
-
-          // Update config in database
-          const updateQuery = `UPDATE server_config SET ${setting} = ? WHERE server_id = ?`;
-          db.prepare(updateQuery).run(value, guild.id);
+          const updates = req.body;
+          await db.setServerConfig(guild.id, updates);
 
           res.json({ success: true });
         } catch (error) {
@@ -145,6 +143,128 @@ class DashboardServer {
         }
       }
     );
+
+    // Get moderation logs
+    this.app.get("/api/server/:id/modlogs", this.checkAuth, async (req, res) => {
+      try {
+        const limit = parseInt(req.query.limit) || 50;
+        const userId = req.query.userId || null;
+        const logs = await db.getModLogs(req.params.id, userId, limit);
+        res.json(logs);
+      } catch (error) {
+        res.status(500).json({ error: error.message });
+      }
+    });
+
+    // Get warnings for a user
+    this.app.get("/api/server/:id/warnings", this.checkAuth, async (req, res) => {
+      try {
+        const userId = req.query.userId;
+        if (!userId) return res.status(400).json({ error: "userId required" });
+        
+        const warnings = await db.getWarnings(req.params.id, userId);
+        res.json(warnings);
+      } catch (error) {
+        res.status(500).json({ error: error.message });
+      }
+    });
+
+    // Get security logs
+    this.app.get("/api/server/:id/security", this.checkAuth, async (req, res) => {
+      try {
+        const logs = await db.searchLogs(req.params.id, {
+          category: "security",
+          limit: parseInt(req.query.limit) || 50,
+        });
+        res.json(logs);
+      } catch (error) {
+        res.status(500).json({ error: error.message });
+      }
+    });
+
+    // Get anti-raid statistics
+    this.app.get("/api/server/:id/antiraid", this.checkAuth, async (req, res) => {
+      try {
+        const logs = await new Promise((resolve, reject) => {
+          db.db.all(
+            "SELECT COUNT(*) as total FROM anti_raid_logs WHERE guild_id = ?",
+            [req.params.id],
+            (err, rows) => {
+              if (err) reject(err);
+              else resolve(rows[0]);
+            }
+          );
+        });
+        res.json({ raidsBlocked: logs.total || 0 });
+      } catch (error) {
+        res.status(500).json({ error: error.message });
+      }
+    });
+
+    // Get server statistics
+    this.app.get("/api/server/:id/stats", this.checkAuth, async (req, res) => {
+      try {
+        const guild = this.client.guilds.cache.get(req.params.id);
+        if (!guild) return res.status(404).json({ error: "Server not found" });
+
+        // Get counts from database
+        const [
+          modLogsCount,
+          warningsCount,
+          securityLogsCount,
+          antiRaidCount,
+        ] = await Promise.all([
+          new Promise((resolve) => {
+            db.db.get(
+              "SELECT COUNT(*) as count FROM moderation_logs WHERE guild_id = ?",
+              [req.params.id],
+              (err, row) => resolve(row?.count || 0)
+            );
+          }),
+          new Promise((resolve) => {
+            db.db.get(
+              "SELECT COUNT(*) as count FROM warnings WHERE guild_id = ?",
+              [req.params.id],
+              (err, row) => resolve(row?.count || 0)
+            );
+          }),
+          new Promise((resolve) => {
+            db.db.get(
+              "SELECT COUNT(*) as count FROM security_logs WHERE guild_id = ?",
+              [req.params.id],
+              (err, row) => resolve(row?.count || 0)
+            );
+          }),
+          new Promise((resolve) => {
+            db.db.get(
+              "SELECT COUNT(*) as count FROM anti_raid_logs WHERE guild_id = ?",
+              [req.params.id],
+              (err, row) => resolve(row?.count || 0)
+            );
+          }),
+        ]);
+
+        res.json({
+          memberCount: guild.memberCount,
+          modActions: modLogsCount,
+          warnings: warningsCount,
+          threatsDetected: securityLogsCount,
+          raidsBlocked: antiRaidCount,
+        });
+      } catch (error) {
+        res.status(500).json({ error: error.message });
+      }
+    });
+
+    // Get recovery snapshots
+    this.app.get("/api/server/:id/snapshots", this.checkAuth, async (req, res) => {
+      try {
+        const snapshots = await db.getRecoverySnapshots(req.params.id, 10);
+        res.json(snapshots);
+      } catch (error) {
+        res.status(500).json({ error: error.message });
+      }
+    });
 
     this.app.get("/api/stats", (req, res) => {
       try {

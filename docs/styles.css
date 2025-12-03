@@ -139,6 +139,73 @@ body {
   letter-spacing: 1px;
 }
 
+/* Dashboard Info Section */
+.dashboard-info-section {
+  padding: 40px 20px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.dashboard-info-box {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%);
+  border: 2px solid rgba(102, 126, 234, 0.3);
+  border-radius: 20px;
+  padding: 40px;
+  max-width: 900px;
+  margin: 0 auto;
+  backdrop-filter: blur(10px);
+}
+
+.info-icon {
+  font-size: 4rem;
+  flex-shrink: 0;
+}
+
+.info-content h3 {
+  font-size: 1.8rem;
+  margin-bottom: 15px;
+  color: #fff;
+}
+
+.info-content p {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  opacity: 0.9;
+  margin-bottom: 20px;
+}
+
+.dashboard-link-btn {
+  display: inline-block;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 12px 30px;
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
+}
+
+.dashboard-link-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(102, 126, 234, 0.5);
+}
+
+@media (max-width: 768px) {
+  .dashboard-info-box {
+    flex-direction: column;
+    text-align: center;
+    padding: 30px 20px;
+  }
+  
+  .info-icon {
+    font-size: 3rem;
+  }
+}
+
 /* Comparison Section */
 .comparison-section {
   background: rgba(255, 255, 255, 0.1);
@@ -281,6 +348,45 @@ footer p {
 
 .nav-links a:hover,
 .nav-links a.active {
+  opacity: 1;
+}
+
+.btn-dashboard {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white !important;
+  padding: 8px 20px;
+  border-radius: 5px;
+  opacity: 1 !important;
+  font-weight: 600;
+  text-decoration: none !important;
+  margin-right: 10px;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.btn-dashboard::after {
+  content: "Opens secure server";
+  position: absolute;
+  bottom: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.btn-dashboard:hover {
+  transform: scale(1.05);
+  box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+}
+
+.btn-dashboard:hover::after {
   opacity: 1;
 }
 

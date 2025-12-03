@@ -62,6 +62,12 @@ module.exports = {
           inline: true,
         },
         {
+          name: "🎛️ Dashboard",
+          value:
+            "[Manage Your Servers](https://regular-puma-clearly.ngrok-free.app)",
+          inline: true,
+        },
+        {
           name: "🔗 Quick Links",
           value:
             "[Vote on Top.gg](https://top.gg/bot/1444739230679957646/vote)\n" +

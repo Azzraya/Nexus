@@ -76,8 +76,14 @@ module.exports = {
       )
       .setStyle(ButtonStyle.Link);
 
+    const dashboardButton = new ButtonBuilder()
+      .setLabel("🎛️ Dashboard")
+      .setURL("https://regular-puma-clearly.ngrok-free.app")
+      .setStyle(ButtonStyle.Link);
+
     const row = new ActionRowBuilder().addComponents(
       websiteButton,
+      dashboardButton,
       supportButton,
       githubButton,
       inviteButton
