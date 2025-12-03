@@ -44,8 +44,63 @@
 
       <div class="content-section">
         <div class="changelog-entry">
-          <h2>Version 2.2.0 - December 2025</h2>
+          <h2>Version 2.3.0 - December 3, 2025</h2>
           <span class="version-badge">Latest</span>
+          <h3>🔗 Complete Invite Source Tracking System</h3>
+          <ul>
+            <li><strong>Link Manager:</strong> Create and manage custom tracking links for different platforms</li>
+            <li><strong>Smart Redirect:</strong> Beautiful redirect page that captures source before Discord</li>
+            <li><strong>Click Tracking:</strong> See exactly how many people clicked each link</li>
+            <li><strong>Conversion Analytics:</strong> View clicks vs joins with color-coded rates (30%+ = excellent)</li>
+            <li><strong>End-to-End Attribution:</strong> Complete tracking from click → auth → bot join</li>
+            <li><strong>Admin Dashboard:</strong> Password-protected interface to view all tracking data</li>
+          </ul>
+
+          <h3>⚡ Performance Monitoring & Optimization</h3>
+          <ul>
+            <li><strong>NEW Command:</strong> /performancestats - View real-time bot performance metrics</li>
+            <li><strong>Performance Monitor:</strong> Tracks execution time, errors, and success rates for all 88 commands</li>
+            <li><strong>Cache System:</strong> In-memory caching with auto-cleanup and hit/miss statistics</li>
+            <li><strong>Input Validator:</strong> Security hardening against XSS and injection attacks</li>
+            <li><strong>Slow Command Alerts:</strong> Automatically logs commands taking >5 seconds</li>
+          </ul>
+
+          <h3>🛡️ Security Improvements</h3>
+          <ul>
+            <li>Input sanitization for all user-facing endpoints</li>
+            <li>XSS attack detection and prevention</li>
+            <li>SQL injection protection with pattern detection</li>
+            <li>Malicious pattern scanner for URLs, emails, and Discord IDs</li>
+            <li>IP rate limiting (100 requests/minute per IP)</li>
+            <li>Batch validation for multiple inputs</li>
+          </ul>
+
+          <h3>🎯 Better Error Handling</h3>
+          <ul>
+            <li>User-friendly error messages for common issues (no more cryptic errors!)</li>
+            <li>Specific solutions for permission errors (code 50013)</li>
+            <li>Expired interaction handling (code 10062)</li>
+            <li>Support server links in all error messages</li>
+            <li>Error codes displayed for debugging</li>
+          </ul>
+
+          <h3>🚀 Bug Fixes & Improvements</h3>
+          <ul>
+            <li>Fixed dashboard command button structure (now shows Website + Dashboard links)</li>
+            <li>Fixed client ID mismatch in invite redirect</li>
+            <li>Fixed URL parameter separator (? vs &)</li>
+            <li>Fixed CORS policy blocking admin password header</li>
+            <li>Fixed duplicate source error messages</li>
+            <li>Fixed vote streak calculation in dashboard</li>
+            <li>All admin pages use consistent password authentication</li>
+            <li>Database indexes for faster invite tracking queries</li>
+          </ul>
+
+          <p><strong>📦 Technical Details:</strong> 5 new database tables • 8 new API endpoints • 3 new utility modules • 1 new command • 2 new admin pages</p>
+        </div>
+
+        <div class="changelog-entry">
+          <h2>Version 2.2.0 - December 2, 2025</h2>
           <h3>🎉 Major Features</h3>
           <ul>
             <li>🏆 <strong>Server Showcase</strong> - Display top servers with real stats</li>
