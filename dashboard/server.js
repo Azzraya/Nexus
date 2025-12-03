@@ -2782,34 +2782,45 @@ class DashboardServer {
     this.app.post("/api/v1/newsletter/subscribe", async (req, res) => {
       try {
         const { email } = req.body;
-        
+
         // Get IP for tracking (privacy: only for spam prevention)
-        const ip = req.headers["x-forwarded-for"]?.split(",")[0].trim() || 
-                   req.headers["x-real-ip"] || 
-                   req.ip?.replace("::ffff:", "");
+        const ip =
+          req.headers["x-forwarded-for"]?.split(",")[0].trim() ||
+          req.headers["x-real-ip"] ||
+          req.ip?.replace("::ffff:", "");
 
         const newsletter = require("../utils/newsletter");
-        const result = await newsletter.subscribe(email, ip, req.headers['user-agent']);
+        const result = await newsletter.subscribe(
+          email,
+          ip,
+          req.headers["user-agent"]
+        );
 
         // Notify you via Discord when someone subscribes
-        const notificationChannel = this.client.channels.cache.get(process.env.NOTIFICATION_CHANNEL_ID);
+        const notificationChannel = this.client.channels.cache.get(
+          process.env.NOTIFICATION_CHANNEL_ID
+        );
         if (notificationChannel) {
           await notificationChannel.send({
-            embeds: [{
-              title: '📰 New Newsletter Subscriber!',
-              description: `**Email:** ${email}\n**Time:** <t:${Math.floor(Date.now()/1000)}:R>`,
-              color: 0x667eea,
-              footer: { text: 'Newsletter System' }
-            }]
+            embeds: [
+              {
+                title: "📰 New Newsletter Subscriber!",
+                description: `**Email:** ${email}\n**Time:** <t:${Math.floor(
+                  Date.now() / 1000
+                )}:R>`,
+                color: 0x667eea,
+                footer: { text: "Newsletter System" },
+              },
+            ],
           });
         }
 
         res.json(result);
       } catch (error) {
-        if (error.message.includes('already subscribed')) {
-          return res.status(400).json({ 
-            success: false, 
-            error: 'This email is already subscribed!' 
+        if (error.message.includes("already subscribed")) {
+          return res.status(400).json({
+            success: false,
+            error: "This email is already subscribed!",
           });
         }
         res.status(500).json({ success: false, error: error.message });
@@ -2820,7 +2831,7 @@ class DashboardServer {
     this.app.get("/api/v1/newsletter/unsubscribe", async (req, res) => {
       try {
         const { token } = req.query;
-        
+
         const newsletter = require("../utils/newsletter");
         const result = await newsletter.unsubscribe(token);
 
