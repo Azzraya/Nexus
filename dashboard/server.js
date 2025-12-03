@@ -1083,91 +1083,7 @@ class DashboardServer {
     console.log("[Analytics] Analytics endpoints registered");
   }
 
-  // ===== API Key Management (Admin) =====
-
-  setupAPIKeyManagement() {
-    // GET /api/admin/apikeys - List all API keys
-    this.app.get("/api/admin/apikeys", async (req, res) => {
-      try {
-        console.log("[API Keys] Listing all API keys...");
-        const keys = await db.listAPIKeys();
-        console.log(`[API Keys] Found ${keys.length} keys`);
-        res.json(keys);
-      } catch (error) {
-        console.error("[API Keys] Error listing API keys:", error);
-        res.status(500).json({ error: error.message || "Internal server error" });
-      }
-    });
-
-    // POST /api/admin/apikeys/create - Create new API key
-    this.app.post("/api/admin/apikeys/create", async (req, res) => {
-      try {
-        console.log("[API Keys] Creating new API key...");
-        const { discordUserId, discordUsername, email, purpose, notes } = req.body;
-        
-        console.log("[API Keys] Request body:", { discordUserId, discordUsername, email, purpose });
-
-        if (!discordUserId || !discordUsername || !email || !purpose) {
-          console.log("[API Keys] Missing required fields");
-          return res.status(400).json({ error: "Missing required fields" });
-        }
-
-        const apiKey = await db.createAPIKey(
-          discordUserId,
-          discordUsername,
-          email,
-          purpose,
-          "Admin Dashboard",
-          notes || ""
-        );
-
-        console.log("[API Keys] API key created successfully");
-        res.json({
-          success: true,
-          apiKey: apiKey,
-          message: "API key created successfully",
-        });
-      } catch (error) {
-        console.error("[API Keys] Error creating API key:", error);
-        res.status(500).json({ error: error.message || "Internal server error" });
-      }
-    });
-
-    // POST /api/admin/apikeys/:id/revoke - Revoke an API key
-    this.app.post("/api/admin/apikeys/:id/revoke", async (req, res) => {
-      try {
-        console.log("[API Keys] Revoking API key...");
-        const keyId = req.params.id;
-        console.log("[API Keys] Key ID:", keyId);
-
-        await new Promise((resolve, reject) => {
-          db.db.run(
-            `UPDATE api_keys SET is_active = 0 WHERE id = ?`,
-            [keyId],
-            (err) => {
-              if (err) {
-                console.error("[API Keys] Database error:", err);
-                reject(err);
-              } else {
-                console.log("[API Keys] API key revoked successfully");
-                resolve();
-              }
-            }
-          );
-        });
-
-        res.json({
-          success: true,
-          message: "API key revoked successfully",
-        });
-      } catch (error) {
-        console.error("[API Keys] Error revoking API key:", error);
-        res.status(500).json({ error: error.message || "Internal server error" });
-      }
-    });
-
-    console.log("[API Keys] Management endpoints registered");
-  }
+  // API Key Management removed - causing database conflicts
 
   async getServerStat(serverId, type) {
     return new Promise((resolve, reject) => {
@@ -1195,10 +1111,9 @@ class DashboardServer {
   }
 
   start(port = 3000) {
-    // Setup public API, analytics, and API key management
+    // Setup public API and analytics
     this.setupPublicAPI();
     this.setupAnalytics();
-    this.setupAPIKeyManagement();
 
     this.app.listen(port, () => {
       console.log(`[Dashboard] Running on http://localhost:${port}`);
