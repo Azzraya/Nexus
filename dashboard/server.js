@@ -87,7 +87,9 @@ class DashboardServer {
 
       // Check if over limit
       if (record.count >= maxRequests) {
-        console.log(`[Rate Limit] Blocked ${cleanIP} - ${record.count} requests in last minute`);
+        console.log(
+          `[Rate Limit] Blocked ${cleanIP} - ${record.count} requests in last minute`
+        );
         return res.status(429).json({
           error: "Too many requests",
           message: "Rate limit exceeded. Try again in 1 minute.",
@@ -1469,7 +1471,9 @@ class DashboardServer {
 
         if (source) {
           await db.trackInviteClick(source, ipAddress, userAgent);
-          console.log(`[Invite Tracking] Click tracked: ${source} from ${ipAddress}`);
+          console.log(
+            `[Invite Tracking] Click tracked: ${source} from ${ipAddress}`
+          );
         }
 
         res.json({ success: true });
@@ -1486,7 +1490,9 @@ class DashboardServer {
 
         if (userId && source) {
           await db.trackPendingInviteSource(userId, source);
-          console.log(`[Invite Tracking] Associated user ${userId} with source: ${source}`);
+          console.log(
+            `[Invite Tracking] Associated user ${userId} with source: ${source}`
+          );
         }
 
         res.json({ success: true });
@@ -1585,7 +1591,8 @@ class DashboardServer {
     setInterval(() => {
       const now = Date.now();
       for (const [ip, record] of this.rateLimitStore.entries()) {
-        if (now > record.resetTime + 300000) { // 5 minutes after reset
+        if (now > record.resetTime + 300000) {
+          // 5 minutes after reset
           this.rateLimitStore.delete(ip);
         }
       }
