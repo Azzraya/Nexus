@@ -528,7 +528,19 @@
                 ? Math.round((link.total_joins / link.total_clicks) * 100)
                 : 0
             }%</div>
-                                     <div class="stat-label">Rate</div>
+                                     <div class="stat-label">Conv Rate</div>
+                                 </div>
+                                 <div class="stat">
+                                     <div class="stat-value" style="color: ${
+                                       link.avg_retention_days >= 30
+                                         ? "#10b981"
+                                         : link.avg_retention_days >= 7
+                                         ? "#f59e0b"
+                                         : link.avg_retention_days > 0
+                                         ? "#ef4444"
+                                         : "#999"
+                                     }">${Math.round(link.avg_retention_days || 0)}d</div>
+                                     <div class="stat-label">Retention</div>
                                  </div>
                              </div>
                         </div>
