@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Feature Voting - Nexus Roadmap</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="pages.css" />
+    <style>
+      .voting-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 25px;
+        margin: 40px 0;
+      }
+
+      .feature-card {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        padding: 25px;
+        border-radius: 15px;
+        border-left: 5px solid #667eea;
+        transition: all 0.3s;
+      }
+
+      .feature-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      }
+
+      .feature-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        margin-bottom: 15px;
+      }
+
+      .feature-title {
+        font-size: 1.3rem;
+        font-weight: bold;
+        margin: 0;
+      }
+
+      .vote-count {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        padding: 8px 15px;
+        border-radius: 20px;
+        font-weight: bold;
+        font-size: 1.1rem;
+      }
+
+      .feature-description {
+        opacity: 0.9;
+        line-height: 1.6;
+        margin: 15px 0;
+      }
+
+      .feature-meta {
+        display: flex;
+        gap: 15px;
+        margin: 15px 0;
+        font-size: 0.9rem;
+        opacity: 0.8;
+      }
+
+      .vote-btn {
+        width: 100%;
+        padding: 12px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-size: 1rem;
+      }
+
+      .vote-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(102, 126, 234, 0.5);
+      }
+
+      .vote-btn.voted {
+        background: #48bb78;
+      }
+
+      .status-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-top: 10px;
+      }
+
+      .status-badge.planned {
+        background: #667eea;
+        color: white;
+      }
+
+      .status-badge.inprogress {
+        background: #ed8936;
+        color: white;
+      }
+
+      .status-badge.completed {
+        background: #48bb78;
+        color: white;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="container">
+        <a href="index.html" class="nav-brand">NEXUS</a>
+
+        <div class="nav-right">
+          <div class="dropdown">
+            <button class="dropdown-toggle">Menu ▼</button>
+            <div class="dropdown-menu">
+              <a href="features.html">Features</a>
+              <a href="commands.html">Commands</a>
+              <a href="comparison.html">vs Wick</a>
+              <a href="setup.html">Setup</a>
+              <a href="docs.html">Docs</a>
+              <a href="faq.html">FAQ</a>
+              <a href="stats.html">Stats</a>
+              <a href="status.html">Status</a>
+              <a href="showcase.html">Showcase</a>
+              <a href="growth.html">Growth</a>
+              <a href="changelog.html">Changelog</a>
+            </div>
+          </div>
+          <a
+            href="https://regular-puma-clearly.ngrok-free.app"
+            target="_blank"
+            class="btn-dashboard"
+            >Dashboard</a
+          >
+          <a href="setup-wizard.html" class="btn-nav">Get Started</a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container" style="margin-top: 100px; padding-bottom: 100px">
+      <header class="page-header">
+        <h1>🗳️ Feature Roadmap & Voting</h1>
+        <p>Help shape the future of Nexus - vote on what we build next!</p>
+      </header>
+
+      <div class="voting-grid">
+        <div class="feature-card">
+          <div class="feature-header">
+            <h3 class="feature-title">AI Threat Prediction</h3>
+            <span class="vote-count" id="votes-ai">247</span>
+          </div>
+          <p class="feature-description">
+            Machine learning system that predicts raids before they happen by
+            analyzing patterns across all servers using Nexus.
+          </p>
+          <div class="feature-meta">
+            <span>🚀 Impact: High</span>
+            <span>⏱️ Effort: 2-3 weeks</span>
+          </div>
+          <span class="status-badge planned">Planned</span>
+          <button class="vote-btn" onclick="vote('ai')">
+            👍 Vote for this
+          </button>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-header">
+            <h3 class="feature-title">Mobile App</h3>
+            <span class="vote-count" id="votes-mobile">189</span>
+          </div>
+          <p class="feature-description">
+            Native mobile app for iOS and Android to manage your server security
+            on the go with push notifications.
+          </p>
+          <div class="feature-meta">
+            <span>📱 Impact: Medium</span>
+            <span>⏱️ Effort: 4-6 weeks</span>
+          </div>
+          <span class="status-badge planned">Planned</span>
+          <button class="vote-btn" onclick="vote('mobile')">
+            👍 Vote for this
+          </button>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-header">
+            <h3 class="feature-title">Custom Automated Workflows</h3>
+            <span class="vote-count" id="votes-workflows">156</span>
+          </div>
+          <p class="feature-description">
+            Build if-then workflows like "If raid detected → lockdown → notify →
+            auto-ban → restore" without coding.
+          </p>
+          <div class="feature-meta">
+            <span>⚡ Impact: High</span>
+            <span>⏱️ Effort: 2 weeks</span>
+          </div>
+          <span class="status-badge inprogress">In Progress</span>
+          <button class="vote-btn" onclick="vote('workflows')">
+            👍 Vote for this
+          </button>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-header">
+            <h3 class="feature-title">Server Analytics Dashboard</h3>
+            <span class="vote-count" id="votes-analytics">143</span>
+          </div>
+          <p class="feature-description">
+            Deep analytics on member activity, peak times, engagement metrics,
+            and server health trends over time.
+          </p>
+          <div class="feature-meta">
+            <span>📊 Impact: Medium</span>
+            <span>⏱️ Effort: 1-2 weeks</span>
+          </div>
+          <span class="status-badge completed">Completed ✅</span>
+          <button class="vote-btn voted" disabled>✅ Shipped!</button>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-header">
+            <h3 class="feature-title">Music Bot Integration</h3>
+            <span class="vote-count" id="votes-music">98</span>
+          </div>
+          <p class="feature-description">
+            Built-in music player with playlist support, queue management, and
+            audio filters. No additional bots needed.
+          </p>
+          <div class="feature-meta">
+            <span>🎵 Impact: Low</span>
+            <span>⏱️ Effort: 3-4 weeks</span>
+          </div>
+          <span class="status-badge planned">Planned</span>
+          <button class="vote-btn" onclick="vote('music')">
+            👍 Vote for this
+          </button>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-header">
+            <h3 class="feature-title">Cross-Server Ban Database</h3>
+            <span class="vote-count" id="votes-bandb">87</span>
+          </div>
+          <p class="feature-description">
+            Share ban information across servers using Nexus. Auto-ban known
+            raiders and malicious users network-wide.
+          </p>
+          <div class="feature-meta">
+            <span>🛡️ Impact: Very High</span>
+            <span>⏱️ Effort: 2 weeks</span>
+          </div>
+          <span class="status-badge planned">Planned</span>
+          <button class="vote-btn" onclick="vote('bandb')">
+            👍 Vote for this
+          </button>
+        </div>
+      </div>
+
+      <!-- Completed Features -->
+      <h2 style="text-align: center; margin: 80px 0 30px 0">
+        ✅ Recently Shipped Features
+      </h2>
+      <div class="voting-grid">
+        <div
+          class="feature-card"
+          style="opacity: 0.8; border-left-color: #48bb78"
+        >
+          <h3 class="feature-title">✅ Backup & Restore System</h3>
+          <p class="feature-description">
+            Requested by 215 users - Shipped in v2.4.0
+          </p>
+        </div>
+        <div
+          class="feature-card"
+          style="opacity: 0.8; border-left-color: #48bb78"
+        >
+          <h3 class="feature-title">✅ Command Analytics</h3>
+          <p class="feature-description">
+            Requested by 178 users - Shipped in v2.4.0
+          </p>
+        </div>
+        <div
+          class="feature-card"
+          style="opacity: 0.8; border-left-color: #48bb78"
+        >
+          <h3 class="feature-title">✅ Member Risk Scoring</h3>
+          <p class="feature-description">
+            Requested by 156 users - Shipped in v2.4.0
+          </p>
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <div style="text-align: center; margin: 80px 0">
+        <h2>Have an idea?</h2>
+        <p style="font-size: 1.1rem; margin: 20px 0">
+          Join our Discord to suggest new features!
+        </p>
+        <a href="https://discord.gg/your-server" class="btn btn-primary">
+          Join Community →
+        </a>
+      </div>
+    </div>
+
+    <script>
+      function vote(feature) {
+        const stored = localStorage.getItem("nexus_votes") || "[]";
+        const votes = JSON.parse(stored);
+
+        if (votes.includes(feature)) {
+          alert("You already voted for this feature!");
+          return;
+        }
+
+        votes.push(feature);
+        localStorage.setItem("nexus_votes", JSON.stringify(votes));
+
+        const countEl = document.getElementById(`votes-${feature}`);
+        countEl.textContent = parseInt(countEl.textContent) + 1;
+
+        alert("✅ Vote recorded! Thank you for your feedback.");
+      }
+    </script>
+  </body>
+</html>
