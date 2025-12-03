@@ -10,17 +10,26 @@ module.exports = {
     // Track invite source if present
     let inviteSource = "direct"; // default
     try {
-      // Try to get the invite used
-      const invites = await guild.invites.fetch().catch(() => null);
-      if (invites) {
-        // Check for invites with tracking parameters
-        // This would need to be tracked via a separate system
-        // For now, we'll check guild vanity URL or use "direct"
-      }
-      
-      // Check if guild has a vanity URL - might be from website or bot list
-      if (guild.vanityURLCode) {
-        inviteSource = "vanity";
+      // Check if we have a tracked source for this user (guild owner)
+      const owner = await guild.fetchOwner().catch(() => null);
+      if (owner) {
+        // Query database for any pending invite tracking for this user
+        const trackedSource = await new Promise((resolve) => {
+          db.db.get(
+            'SELECT source FROM pending_invite_sources WHERE user_id = ? ORDER BY timestamp DESC LIMIT 1',
+            [owner.id],
+            (err, row) => {
+              if (err || !row) resolve(null);
+              else resolve(row.source);
+            }
+          );
+        });
+
+        if (trackedSource) {
+          inviteSource = trackedSource;
+          // Clean up the pending tracking
+          db.db.run('DELETE FROM pending_invite_sources WHERE user_id = ?', [owner.id]);
+        }
       }
 
       // Track the guild join with source

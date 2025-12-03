@@ -806,6 +806,23 @@ class Database {
             ON guild_invite_tracking(source)
         `);
 
+    // Pending invite sources - tracks clicks before bot joins
+    this.db.run(`
+            CREATE TABLE IF NOT EXISTS pending_invite_sources (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id TEXT NOT NULL,
+                source TEXT NOT NULL,
+                timestamp INTEGER NOT NULL,
+                ip_address TEXT,
+                user_agent TEXT
+            )
+        `);
+
+    this.db.run(`
+            CREATE INDEX IF NOT EXISTS idx_pending_sources_user 
+            ON pending_invite_sources(user_id, timestamp DESC)
+        `);
+
     // Add default bot list links if table is empty
     this.db.get(
       "SELECT COUNT(*) as count FROM botlist_links",
@@ -3081,9 +3098,9 @@ class Database {
     return new Promise((resolve, reject) => {
       const now = Date.now();
       this.db.run(
-        'INSERT INTO invite_sources (source, description, created_at, updated_at) VALUES (?, ?, ?, ?)',
+        "INSERT INTO invite_sources (source, description, created_at, updated_at) VALUES (?, ?, ?, ?)",
         [source, description, now, now],
-        function(err) {
+        function (err) {
           if (err) reject(err);
           else resolve({ id: this.lastID, source, description });
         }
@@ -3095,7 +3112,7 @@ class Database {
   getAllInviteSources() {
     return new Promise((resolve, reject) => {
       this.db.all(
-        'SELECT * FROM invite_sources ORDER BY total_joins DESC, created_at DESC',
+        "SELECT * FROM invite_sources ORDER BY total_joins DESC, created_at DESC",
         [],
         (err, rows) => {
           if (err) reject(err);
@@ -3109,7 +3126,7 @@ class Database {
   deleteInviteSource(source) {
     return new Promise((resolve, reject) => {
       this.db.run(
-        'DELETE FROM invite_sources WHERE source = ?',
+        "DELETE FROM invite_sources WHERE source = ?",
         [source],
         (err) => {
           if (err) reject(err);
@@ -3123,10 +3140,10 @@ class Database {
   trackGuildJoin(guildId, source, guildName, memberCount) {
     return new Promise((resolve, reject) => {
       const now = Date.now();
-      
+
       // Insert guild tracking
       this.db.run(
-        'INSERT OR REPLACE INTO guild_invite_tracking (guild_id, source, invited_at, guild_name, member_count) VALUES (?, ?, ?, ?, ?)',
+        "INSERT OR REPLACE INTO guild_invite_tracking (guild_id, source, invited_at, guild_name, member_count) VALUES (?, ?, ?, ?, ?)",
         [guildId, source, now, guildName, memberCount],
         (err) => {
           if (err) {
@@ -3136,7 +3153,7 @@ class Database {
 
           // Increment total_joins for this source
           this.db.run(
-            'UPDATE invite_sources SET total_joins = total_joins + 1, updated_at = ? WHERE source = ?',
+            "UPDATE invite_sources SET total_joins = total_joins + 1, updated_at = ? WHERE source = ?",
             [now, source],
             (err2) => {
               if (err2) reject(err2);
@@ -3164,6 +3181,40 @@ class Database {
         (err, rows) => {
           if (err) reject(err);
           else resolve(rows || []);
+        }
+      );
+    });
+  }
+
+  // Track pending invite source (before bot joins)
+  trackPendingInviteSource(userId, source, ipAddress = null, userAgent = null) {
+    return new Promise((resolve, reject) => {
+      this.db.run(
+        "INSERT INTO pending_invite_sources (user_id, source, timestamp, ip_address, user_agent) VALUES (?, ?, ?, ?, ?)",
+        [userId, source, Date.now(), ipAddress, userAgent],
+        (err) => {
+          if (err) reject(err);
+          else resolve();
+        }
+      );
+    });
+  }
+
+  // Track invite link click (no user ID yet)
+  trackInviteClick(
+    source,
+    ipAddress = null,
+    userAgent = null,
+    referrer = null
+  ) {
+    return new Promise((resolve, reject) => {
+      // Store anonymously first, will be associated with user later
+      this.db.run(
+        "INSERT INTO pending_invite_sources (user_id, source, timestamp, ip_address, user_agent) VALUES (?, ?, ?, ?, ?)",
+        ["anonymous", source, Date.now(), ipAddress, userAgent],
+        (err) => {
+          if (err) reject(err);
+          else resolve();
         }
       );
     });

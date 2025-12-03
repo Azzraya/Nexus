@@ -1460,6 +1460,42 @@ class DashboardServer {
       }
     });
 
+    // POST /api/track-invite-click - Track when someone clicks an invite link
+    this.app.post("/api/track-invite-click", async (req, res) => {
+      try {
+        const { source } = req.body;
+        const ipAddress = req.ip || req.connection.remoteAddress;
+        const userAgent = req.headers["user-agent"];
+
+        if (source) {
+          await db.trackInviteClick(source, ipAddress, userAgent);
+          console.log(`[Invite Tracking] Click tracked: ${source} from ${ipAddress}`);
+        }
+
+        res.json({ success: true });
+      } catch (error) {
+        console.error("Error tracking invite click:", error);
+        res.status(500).json({ error: "Failed to track click" });
+      }
+    });
+
+    // POST /api/associate-invite-source - Associate a user with their invite source
+    this.app.post("/api/associate-invite-source", async (req, res) => {
+      try {
+        const { userId, source } = req.body;
+
+        if (userId && source) {
+          await db.trackPendingInviteSource(userId, source);
+          console.log(`[Invite Tracking] Associated user ${userId} with source: ${source}`);
+        }
+
+        res.json({ success: true });
+      } catch (error) {
+        console.error("Error associating invite source:", error);
+        res.status(500).json({ error: "Failed to associate source" });
+      }
+    });
+
     // GET /api/v1/showcase-servers - Get top servers for showcase
     this.app.get("/api/v1/showcase-servers", async (req, res) => {
       try {
