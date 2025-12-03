@@ -862,15 +862,24 @@ class DashboardServer {
       try {
         const stats = {
           serverCount: this.client.guilds.cache.size,
-          userCount: this.client.guilds.cache.reduce((acc, guild) => acc + guild.memberCount, 0),
+          userCount: this.client.guilds.cache.reduce(
+            (acc, guild) => acc + guild.memberCount,
+            0
+          ),
           avgResponseTime: 50, // Could pull from performance monitor
           uptime: Math.floor(this.client.uptime / 1000),
-          commandCount: this.client.commands?.size || 88
+          commandCount: this.client.commands?.size || 88,
         };
         res.json(stats);
       } catch (error) {
-        console.error('[API] Stats error:', error);
-        res.json({ serverCount: 17, userCount: 0, avgResponseTime: 50, uptime: 0, commandCount: 88 });
+        console.error("[API] Stats error:", error);
+        res.json({
+          serverCount: 17,
+          userCount: 0,
+          avgResponseTime: 50,
+          uptime: 0,
+          commandCount: 88,
+        });
       }
     });
 
@@ -1861,62 +1870,78 @@ class DashboardServer {
     });
 
     // ==================== POWERFUL PUBLIC API v2 ====================
-    
+
     // 1. POST /api/v1/server/:id/configure - Configure server remotely
-    this.app.post("/api/v1/server/:id/configure", this.apiAuth.bind(this), async (req, res) => {
-      try {
-        const { settings } = req.body;
-        const serverId = req.params.id;
-        
-        // Update server config
-        for (const [key, value] of Object.entries(settings)) {
-          await db.updateServerConfig(serverId, key, value);
+    this.app.post(
+      "/api/v1/server/:id/configure",
+      this.apiAuth.bind(this),
+      async (req, res) => {
+        try {
+          const { settings } = req.body;
+          const serverId = req.params.id;
+
+          // Update server config
+          for (const [key, value] of Object.entries(settings)) {
+            await db.updateServerConfig(serverId, key, value);
+          }
+
+          res.json({ success: true, message: "Configuration updated" });
+        } catch (error) {
+          res.status(500).json({ error: error.message });
         }
-        
-        res.json({ success: true, message: "Configuration updated" });
-      } catch (error) {
-        res.status(500).json({ error: error.message });
       }
-    });
+    );
 
     // 2. POST /api/v1/server/:id/backup - Trigger backup creation
-    this.app.post("/api/v1/server/:id/backup", this.apiAuth.bind(this), async (req, res) => {
-      try {
-        const serverId = req.params.id;
-        const guild = this.client.guilds.cache.get(serverId);
-        
-        if (!guild) {
-          return res.status(404).json({ error: "Server not found" });
+    this.app.post(
+      "/api/v1/server/:id/backup",
+      this.apiAuth.bind(this),
+      async (req, res) => {
+        try {
+          const serverId = req.params.id;
+          const guild = this.client.guilds.cache.get(serverId);
+
+          if (!guild) {
+            return res.status(404).json({ error: "Server not found" });
+          }
+
+          const backupManager = require("../utils/backupManager");
+          const result = await backupManager.createBackup(guild);
+
+          res.json(result);
+        } catch (error) {
+          res.status(500).json({ error: error.message });
         }
-        
-        const backupManager = require("../utils/backupManager");
-        const result = await backupManager.createBackup(guild);
-        
-        res.json(result);
-      } catch (error) {
-        res.status(500).json({ error: error.message });
       }
-    });
+    );
 
     // 3. POST /api/v1/server/:id/restore - Restore from backup
-    this.app.post("/api/v1/server/:id/restore", this.apiAuth.bind(this), async (req, res) => {
-      try {
-        const { backupId, options } = req.body;
-        const serverId = req.params.id;
-        const guild = this.client.guilds.cache.get(serverId);
-        
-        if (!guild) {
-          return res.status(404).json({ error: "Server not found" });
+    this.app.post(
+      "/api/v1/server/:id/restore",
+      this.apiAuth.bind(this),
+      async (req, res) => {
+        try {
+          const { backupId, options } = req.body;
+          const serverId = req.params.id;
+          const guild = this.client.guilds.cache.get(serverId);
+
+          if (!guild) {
+            return res.status(404).json({ error: "Server not found" });
+          }
+
+          const backupManager = require("../utils/backupManager");
+          const result = await backupManager.restoreBackup(
+            guild,
+            backupId,
+            options
+          );
+
+          res.json(result);
+        } catch (error) {
+          res.status(500).json({ error: error.message });
         }
-        
-        const backupManager = require("../utils/backupManager");
-        const result = await backupManager.restoreBackup(guild, backupId, options);
-        
-        res.json(result);
-      } catch (error) {
-        res.status(500).json({ error: error.message });
       }
-    });
+    );
 
     // 4. GET /api/v1/server/:id/health - Get server health
     this.app.get("/api/v1/server/:id/health", async (req, res) => {
@@ -1924,7 +1949,7 @@ class DashboardServer {
         const serverId = req.params.id;
         const serverHealth = require("../utils/serverHealth");
         const health = await serverHealth.calculateHealth(serverId);
-        
+
         res.json(health);
       } catch (error) {
         res.status(500).json({ error: error.message });
@@ -1937,11 +1962,11 @@ class DashboardServer {
         const serverId = req.params.id;
         const serverHealth = require("../utils/serverHealth");
         const health = await serverHealth.calculateHealth(serverId);
-        
+
         res.json({
           ...health,
           timestamp: Date.now(),
-          analyzed: true
+          analyzed: true,
         });
       } catch (error) {
         res.status(500).json({ error: error.message });
@@ -1951,119 +1976,135 @@ class DashboardServer {
     // ==================== MODERATION API (6-10) ====================
 
     // 6. POST /api/v1/moderation/ban - Ban user via API
-    this.app.post("/api/v1/moderation/ban", this.apiAuth.bind(this), async (req, res) => {
-      try {
-        const { serverId, userId, reason, deleteMessageDays } = req.body;
-        const guild = this.client.guilds.cache.get(serverId);
-        
-        if (!guild) {
-          return res.status(404).json({ error: "Server not found" });
+    this.app.post(
+      "/api/v1/moderation/ban",
+      this.apiAuth.bind(this),
+      async (req, res) => {
+        try {
+          const { serverId, userId, reason, deleteMessageDays } = req.body;
+          const guild = this.client.guilds.cache.get(serverId);
+
+          if (!guild) {
+            return res.status(404).json({ error: "Server not found" });
+          }
+
+          await guild.members.ban(userId, {
+            reason: reason || "API ban",
+            deleteMessageSeconds: (deleteMessageDays || 0) * 24 * 60 * 60,
+          });
+
+          res.json({ success: true, message: "User banned" });
+        } catch (error) {
+          res.status(500).json({ error: error.message });
         }
-        
-        await guild.members.ban(userId, {
-          reason: reason || "API ban",
-          deleteMessageSeconds: (deleteMessageDays || 0) * 24 * 60 * 60
-        });
-        
-        res.json({ success: true, message: "User banned" });
-      } catch (error) {
-        res.status(500).json({ error: error.message });
       }
-    });
+    );
 
     // 7. POST /api/v1/moderation/kick - Kick user via API
-    this.app.post("/api/v1/moderation/kick", this.apiAuth.bind(this), async (req, res) => {
-      try {
-        const { serverId, userId, reason } = req.body;
-        const guild = this.client.guilds.cache.get(serverId);
-        
-        if (!guild) {
-          return res.status(404).json({ error: "Server not found" });
+    this.app.post(
+      "/api/v1/moderation/kick",
+      this.apiAuth.bind(this),
+      async (req, res) => {
+        try {
+          const { serverId, userId, reason } = req.body;
+          const guild = this.client.guilds.cache.get(serverId);
+
+          if (!guild) {
+            return res.status(404).json({ error: "Server not found" });
+          }
+
+          const member = await guild.members.fetch(userId);
+          await member.kick(reason || "API kick");
+
+          res.json({ success: true, message: "User kicked" });
+        } catch (error) {
+          res.status(500).json({ error: error.message });
         }
-        
-        const member = await guild.members.fetch(userId);
-        await member.kick(reason || "API kick");
-        
-        res.json({ success: true, message: "User kicked" });
-      } catch (error) {
-        res.status(500).json({ error: error.message });
       }
-    });
+    );
 
     // 8. POST /api/v1/moderation/warn - Warn user via API
-    this.app.post("/api/v1/moderation/warn", this.apiAuth.bind(this), async (req, res) => {
-      try {
-        const { serverId, userId, reason } = req.body;
-        
-        await db.addWarning(serverId, userId, reason || "API warning");
-        
-        res.json({ success: true, message: "Warning issued" });
-      } catch (error) {
-        res.status(500).json({ error: error.message });
+    this.app.post(
+      "/api/v1/moderation/warn",
+      this.apiAuth.bind(this),
+      async (req, res) => {
+        try {
+          const { serverId, userId, reason } = req.body;
+
+          await db.addWarning(serverId, userId, reason || "API warning");
+
+          res.json({ success: true, message: "Warning issued" });
+        } catch (error) {
+          res.status(500).json({ error: error.message });
+        }
       }
-    });
+    );
 
     // 9. POST /api/v1/moderation/bulk - Bulk moderation operations
-    this.app.post("/api/v1/moderation/bulk", this.apiAuth.bind(this), async (req, res) => {
-      try {
-        const { serverId, action, userIds, reason } = req.body;
-        const guild = this.client.guilds.cache.get(serverId);
-        
-        if (!guild) {
-          return res.status(404).json({ error: "Server not found" });
-        }
-        
-        const results = { success: 0, failed: 0, errors: [] };
-        
-        for (const userId of userIds) {
-          try {
-            if (action === 'ban') {
-              await guild.members.ban(userId, { reason });
-            } else if (action === 'kick') {
-              const member = await guild.members.fetch(userId);
-              await member.kick(reason);
-            }
-            results.success++;
-          } catch (error) {
-            results.failed++;
-            results.errors.push({ userId, error: error.message });
+    this.app.post(
+      "/api/v1/moderation/bulk",
+      this.apiAuth.bind(this),
+      async (req, res) => {
+        try {
+          const { serverId, action, userIds, reason } = req.body;
+          const guild = this.client.guilds.cache.get(serverId);
+
+          if (!guild) {
+            return res.status(404).json({ error: "Server not found" });
           }
+
+          const results = { success: 0, failed: 0, errors: [] };
+
+          for (const userId of userIds) {
+            try {
+              if (action === "ban") {
+                await guild.members.ban(userId, { reason });
+              } else if (action === "kick") {
+                const member = await guild.members.fetch(userId);
+                await member.kick(reason);
+              }
+              results.success++;
+            } catch (error) {
+              results.failed++;
+              results.errors.push({ userId, error: error.message });
+            }
+          }
+
+          res.json(results);
+        } catch (error) {
+          res.status(500).json({ error: error.message });
         }
-        
-        res.json(results);
-      } catch (error) {
-        res.status(500).json({ error: error.message });
       }
-    });
+    );
 
     // 10. GET /api/v1/moderation/logs - Get moderation logs
     this.app.get("/api/v1/moderation/logs", async (req, res) => {
       try {
         const { serverId, limit = 50, action, userId } = req.query;
-        
+
         let query = "SELECT * FROM moderation_logs WHERE guild_id = ?";
         const params = [serverId];
-        
+
         if (action) {
           query += " AND action = ?";
           params.push(action);
         }
-        
+
         if (userId) {
           query += " AND user_id = ?";
           params.push(userId);
         }
-        
+
         query += " ORDER BY timestamp DESC LIMIT ?";
         params.push(parseInt(limit));
-        
+
         const logs = await new Promise((resolve, reject) => {
           db.db.all(query, params, (err, rows) => {
             if (err) reject(err);
             else resolve(rows || []);
           });
         });
-        
+
         res.json({ logs });
       } catch (error) {
         res.status(500).json({ error: error.message });
@@ -2077,24 +2118,26 @@ class DashboardServer {
       try {
         const { serverId } = req.query;
         const userId = req.params.id;
-        
+
         if (!serverId) {
-          return res.status(400).json({ error: "serverId query parameter required" });
+          return res
+            .status(400)
+            .json({ error: "serverId query parameter required" });
         }
-        
+
         const guild = this.client.guilds.cache.get(serverId);
         if (!guild) {
           return res.status(404).json({ error: "Server not found" });
         }
-        
+
         const member = await guild.members.fetch(userId).catch(() => null);
         if (!member) {
           return res.status(404).json({ error: "User not found in server" });
         }
-        
+
         const memberIntelligence = require("../utils/memberIntelligence");
         const risk = await memberIntelligence.calculateRiskScore(member);
-        
+
         res.json(risk);
       } catch (error) {
         res.status(500).json({ error: error.message });
@@ -2106,7 +2149,7 @@ class DashboardServer {
       try {
         const { serverId } = req.query;
         const userId = req.params.id;
-        
+
         const history = await new Promise((resolve, reject) => {
           db.db.all(
             "SELECT * FROM moderation_logs WHERE guild_id = ? AND user_id = ? ORDER BY timestamp DESC",
@@ -2117,7 +2160,7 @@ class DashboardServer {
             }
           );
         });
-        
+
         const warnings = await new Promise((resolve, reject) => {
           db.db.all(
             "SELECT * FROM warnings WHERE guild_id = ? AND user_id = ? ORDER BY timestamp DESC",
@@ -2128,7 +2171,7 @@ class DashboardServer {
             }
           );
         });
-        
+
         res.json({ modActions: history, warnings });
       } catch (error) {
         res.status(500).json({ error: error.message });
@@ -2140,28 +2183,35 @@ class DashboardServer {
       try {
         const { serverId } = req.body;
         const userId = req.params.id;
-        
+
         const guild = this.client.guilds.cache.get(serverId);
         if (!guild) {
           return res.status(404).json({ error: "Server not found" });
         }
-        
+
         const member = await guild.members.fetch(userId).catch(() => null);
         if (!member) {
           return res.status(404).json({ error: "User not found" });
         }
-        
+
         const memberIntelligence = require("../utils/memberIntelligence");
         const risk = await memberIntelligence.calculateRiskScore(member);
-        
+
         const retentionPredictor = require("../utils/retentionPredictor");
-        const churnRisk = await retentionPredictor.predictChurn(serverId, userId);
-        
+        const churnRisk = await retentionPredictor.predictChurn(
+          serverId,
+          userId
+        );
+
         res.json({
           risk,
           churnPrediction: churnRisk,
-          accountAge: Math.floor((Date.now() - member.user.createdTimestamp) / (24 * 60 * 60 * 1000)),
-          serverAge: Math.floor((Date.now() - member.joinedTimestamp) / (24 * 60 * 60 * 1000))
+          accountAge: Math.floor(
+            (Date.now() - member.user.createdTimestamp) / (24 * 60 * 60 * 1000)
+          ),
+          serverAge: Math.floor(
+            (Date.now() - member.joinedTimestamp) / (24 * 60 * 60 * 1000)
+          ),
         });
       } catch (error) {
         res.status(500).json({ error: error.message });
@@ -2169,23 +2219,30 @@ class DashboardServer {
     });
 
     // 14. GET /api/v1/users/risky - Get risky users across servers
-    this.app.get("/api/v1/users/risky", this.apiAuth.bind(this), async (req, res) => {
-      try {
-        const { serverId, limit = 10 } = req.query;
-        const guild = this.client.guilds.cache.get(serverId);
-        
-        if (!guild) {
-          return res.status(404).json({ error: "Server not found" });
+    this.app.get(
+      "/api/v1/users/risky",
+      this.apiAuth.bind(this),
+      async (req, res) => {
+        try {
+          const { serverId, limit = 10 } = req.query;
+          const guild = this.client.guilds.cache.get(serverId);
+
+          if (!guild) {
+            return res.status(404).json({ error: "Server not found" });
+          }
+
+          const memberIntelligence = require("../utils/memberIntelligence");
+          const riskyMembers = await memberIntelligence.getTopRiskyMembers(
+            guild,
+            parseInt(limit)
+          );
+
+          res.json({ riskyMembers });
+        } catch (error) {
+          res.status(500).json({ error: error.message });
         }
-        
-        const memberIntelligence = require("../utils/memberIntelligence");
-        const riskyMembers = await memberIntelligence.getTopRiskyMembers(guild, parseInt(limit));
-        
-        res.json({ riskyMembers });
-      } catch (error) {
-        res.status(500).json({ error: error.message });
       }
-    });
+    );
 
     // ==================== AI PREDICTION API (15-18) ====================
 
@@ -2194,14 +2251,14 @@ class DashboardServer {
       try {
         const { serverId } = req.body;
         const guild = this.client.guilds.cache.get(serverId);
-        
+
         if (!guild) {
           return res.status(404).json({ error: "Server not found" });
         }
-        
+
         const threatPredictor = require("../utils/threatPredictor");
         const prediction = await threatPredictor.predictThreat(guild);
-        
+
         res.json(prediction);
       } catch (error) {
         res.status(500).json({ error: error.message });
@@ -2212,10 +2269,10 @@ class DashboardServer {
     this.app.post("/api/v1/predict/retention", async (req, res) => {
       try {
         const { serverId } = req.body;
-        
+
         const retentionPredictor = require("../utils/retentionPredictor");
         const analysis = await retentionPredictor.analyzeRetention(serverId);
-        
+
         res.json(analysis);
       } catch (error) {
         res.status(500).json({ error: error.message });
@@ -2234,14 +2291,14 @@ class DashboardServer {
              GROUP BY patterns_detected 
              ORDER BY count DESC 
              LIMIT 20`,
-            [Date.now() - (7 * 24 * 60 * 60 * 1000)],
+            [Date.now() - 7 * 24 * 60 * 60 * 1000],
             (err, rows) => {
               if (err) reject(err);
               else resolve(rows || []);
             }
           );
         });
-        
+
         res.json({ patterns });
       } catch (error) {
         res.status(500).json({ error: error.message });
@@ -2252,19 +2309,19 @@ class DashboardServer {
     this.app.post("/api/v1/threat/report", async (req, res) => {
       try {
         const { serverId, pattern, description, severity } = req.body;
-        
+
         // Log threat report
         await new Promise((resolve, reject) => {
           db.db.run(
             "INSERT INTO threat_reports (guild_id, pattern, description, severity, timestamp) VALUES (?, ?, ?, ?, ?)",
-            [serverId, pattern, description, severity || 'medium', Date.now()],
+            [serverId, pattern, description, severity || "medium", Date.now()],
             (err) => {
               if (err) reject(err);
               else resolve();
             }
           );
         });
-        
+
         res.json({ success: true, message: "Threat pattern reported" });
       } catch (error) {
         res.status(500).json({ error: error.message });
@@ -2277,7 +2334,7 @@ class DashboardServer {
     this.app.get("/api/v1/analytics/commands", async (req, res) => {
       try {
         const { serverId } = req.query;
-        
+
         const stats = await new Promise((resolve, reject) => {
           db.db.all(
             "SELECT command_name, COUNT(*) as uses FROM command_usage_log WHERE guild_id = ? GROUP BY command_name ORDER BY uses DESC LIMIT 20",
@@ -2288,7 +2345,7 @@ class DashboardServer {
             }
           );
         });
-        
+
         res.json({ commands: stats });
       } catch (error) {
         res.status(500).json({ error: error.message });
@@ -2299,29 +2356,29 @@ class DashboardServer {
     this.app.get("/api/v1/analytics/security", async (req, res) => {
       try {
         const { serverId } = req.query;
-        
+
         const threats = await new Promise((resolve, reject) => {
           db.db.get(
             "SELECT COUNT(*) as count FROM security_logs WHERE guild_id = ? AND timestamp > ?",
-            [serverId, Date.now() - (7 * 24 * 60 * 60 * 1000)],
+            [serverId, Date.now() - 7 * 24 * 60 * 60 * 1000],
             (err, row) => {
               if (err) reject(err);
               else resolve(row?.count || 0);
             }
           );
         });
-        
+
         const raids = await new Promise((resolve, reject) => {
           db.db.get(
             "SELECT COUNT(*) as count FROM anti_raid_logs WHERE guild_id = ? AND timestamp > ?",
-            [serverId, Date.now() - (7 * 24 * 60 * 60 * 1000)],
+            [serverId, Date.now() - 7 * 24 * 60 * 60 * 1000],
             (err, row) => {
               if (err) reject(err);
               else resolve(row?.count || 0);
             }
           );
         });
-        
+
         res.json({ threatsLast7d: threats, raidsLast7d: raids });
       } catch (error) {
         res.status(500).json({ error: error.message });
@@ -2331,147 +2388,193 @@ class DashboardServer {
     // ==================== EXPORT API (21-22) ====================
 
     // 21. POST /api/v1/export/logs - Export logs
-    this.app.post("/api/v1/export/logs", this.apiAuth.bind(this), async (req, res) => {
-      try {
-        const { serverId, format = 'json', range = '7d' } = req.body;
-        
-        let since = Date.now();
-        switch(range) {
-          case '24h': since -= 24 * 60 * 60 * 1000; break;
-          case '7d': since -= 7 * 24 * 60 * 60 * 1000; break;
-          case '30d': since -= 30 * 24 * 60 * 60 * 1000; break;
-          case 'all': since = 0; break;
+    this.app.post(
+      "/api/v1/export/logs",
+      this.apiAuth.bind(this),
+      async (req, res) => {
+        try {
+          const { serverId, format = "json", range = "7d" } = req.body;
+
+          let since = Date.now();
+          switch (range) {
+            case "24h":
+              since -= 24 * 60 * 60 * 1000;
+              break;
+            case "7d":
+              since -= 7 * 24 * 60 * 60 * 1000;
+              break;
+            case "30d":
+              since -= 30 * 24 * 60 * 60 * 1000;
+              break;
+            case "all":
+              since = 0;
+              break;
+          }
+
+          const logs = await new Promise((resolve, reject) => {
+            db.db.all(
+              "SELECT * FROM moderation_logs WHERE guild_id = ? AND timestamp > ? ORDER BY timestamp DESC",
+              [serverId, since],
+              (err, rows) => {
+                if (err) reject(err);
+                else resolve(rows || []);
+              }
+            );
+          });
+
+          if (format === "csv") {
+            const csv = [
+              ["Timestamp", "Action", "User", "Moderator", "Reason"].join(","),
+              ...logs.map((log) =>
+                [
+                  new Date(log.timestamp).toISOString(),
+                  log.action,
+                  log.user_tag || log.user_id,
+                  log.moderator_tag || log.moderator_id,
+                  (log.reason || "").replace(/,/g, ";"),
+                ].join(",")
+              ),
+            ].join("\n");
+
+            res.setHeader("Content-Type", "text/csv");
+            res.setHeader(
+              "Content-Disposition",
+              `attachment; filename=nexus-logs-${Date.now()}.csv`
+            );
+            res.send(csv);
+          } else {
+            res.json({ logs });
+          }
+        } catch (error) {
+          res.status(500).json({ error: error.message });
         }
-        
-        const logs = await new Promise((resolve, reject) => {
-          db.db.all(
-            "SELECT * FROM moderation_logs WHERE guild_id = ? AND timestamp > ? ORDER BY timestamp DESC",
-            [serverId, since],
-            (err, rows) => {
-              if (err) reject(err);
-              else resolve(rows || []);
-            }
-          );
-        });
-        
-        if (format === 'csv') {
-          const csv = [
-            ['Timestamp', 'Action', 'User', 'Moderator', 'Reason'].join(','),
-            ...logs.map(log => [
-              new Date(log.timestamp).toISOString(),
-              log.action,
-              log.user_tag || log.user_id,
-              log.moderator_tag || log.moderator_id,
-              (log.reason || '').replace(/,/g, ';')
-            ].join(','))
-          ].join('\n');
-          
-          res.setHeader('Content-Type', 'text/csv');
-          res.setHeader('Content-Disposition', `attachment; filename=nexus-logs-${Date.now()}.csv`);
-          res.send(csv);
-        } else {
-          res.json({ logs });
-        }
-      } catch (error) {
-        res.status(500).json({ error: error.message });
       }
-    });
+    );
 
     // 22. POST /api/v1/export/data - Export all server data
-    this.app.post("/api/v1/export/data", this.apiAuth.bind(this), async (req, res) => {
-      try {
-        const { serverId } = req.body;
-        const guild = this.client.guilds.cache.get(serverId);
-        
-        if (!guild) {
-          return res.status(404).json({ error: "Server not found" });
+    this.app.post(
+      "/api/v1/export/data",
+      this.apiAuth.bind(this),
+      async (req, res) => {
+        try {
+          const { serverId } = req.body;
+          const guild = this.client.guilds.cache.get(serverId);
+
+          if (!guild) {
+            return res.status(404).json({ error: "Server not found" });
+          }
+
+          const config = await db.getServerConfig(serverId);
+          const serverHealth = require("../utils/serverHealth");
+          const health = await serverHealth.calculateHealth(serverId);
+
+          const exportData = {
+            server: {
+              id: guild.id,
+              name: guild.name,
+              memberCount: guild.memberCount,
+            },
+            config,
+            health,
+            exportedAt: Date.now(),
+          };
+
+          res.json(exportData);
+        } catch (error) {
+          res.status(500).json({ error: error.message });
         }
-        
-        const config = await db.getServerConfig(serverId);
-        const serverHealth = require("../utils/serverHealth");
-        const health = await serverHealth.calculateHealth(serverId);
-        
-        const exportData = {
-          server: {
-            id: guild.id,
-            name: guild.name,
-            memberCount: guild.memberCount
-          },
-          config,
-          health,
-          exportedAt: Date.now()
-        };
-        
-        res.json(exportData);
-      } catch (error) {
-        res.status(500).json({ error: error.message });
       }
-    });
+    );
 
     // ==================== WEBHOOKS API (24-25) ====================
 
     // 24. POST /api/v1/webhooks/create - Create webhook integration
-    this.app.post("/api/v1/webhooks/create", this.apiAuth.bind(this), async (req, res) => {
-      try {
-        const { serverId, url, events, name } = req.body;
-        
-        const webhookHub = require("../utils/webhookHub");
-        const result = await webhookHub.registerWebhook(serverId, url, events, name);
-        
-        res.json({ success: true, webhookId: result.id });
-      } catch (error) {
-        res.status(500).json({ error: error.message });
+    this.app.post(
+      "/api/v1/webhooks/create",
+      this.apiAuth.bind(this),
+      async (req, res) => {
+        try {
+          const { serverId, url, events, name } = req.body;
+
+          const webhookHub = require("../utils/webhookHub");
+          const result = await webhookHub.registerWebhook(
+            serverId,
+            url,
+            events,
+            name
+          );
+
+          res.json({ success: true, webhookId: result.id });
+        } catch (error) {
+          res.status(500).json({ error: error.message });
+        }
       }
-    });
+    );
 
     // 25. POST /api/v1/webhooks/test - Test webhook
     this.app.post("/api/v1/webhooks/test", async (req, res) => {
       try {
         const { url } = req.body;
-        
-        const axios = require('axios');
-        await axios.post(url, {
-          event: 'test',
-          message: 'This is a test webhook from Nexus API',
-          timestamp: Date.now()
-        }, { timeout: 5000 });
-        
+
+        const axios = require("axios");
+        await axios.post(
+          url,
+          {
+            event: "test",
+            message: "This is a test webhook from Nexus API",
+            timestamp: Date.now(),
+          },
+          { timeout: 5000 }
+        );
+
         res.json({ success: true, message: "Webhook test sent successfully" });
       } catch (error) {
-        res.status(500).json({ error: "Webhook test failed: " + error.message });
+        res
+          .status(500)
+          .json({ error: "Webhook test failed: " + error.message });
       }
     });
 
     // ==================== CUSTOM COMMANDS API (26-28) ====================
 
     // 26. POST /api/v1/commands/create - Create custom command via API
-    this.app.post("/api/v1/commands/create", this.apiAuth.bind(this), async (req, res) => {
-      try {
-        const { serverId, name, description, response, type = 'text' } = req.body;
-        
-        const customCommands = require("../utils/customCommands");
-        const result = await customCommands.createCommand(serverId, {
-          name,
-          description,
-          type,
-          content: response,
-          createdBy: 'api'
-        });
-        
-        res.json({ success: true, command: result });
-      } catch (error) {
-        res.status(500).json({ error: error.message });
+    this.app.post(
+      "/api/v1/commands/create",
+      this.apiAuth.bind(this),
+      async (req, res) => {
+        try {
+          const {
+            serverId,
+            name,
+            description,
+            response,
+            type = "text",
+          } = req.body;
+
+          const customCommands = require("../utils/customCommands");
+          const result = await customCommands.createCommand(serverId, {
+            name,
+            description,
+            type,
+            content: response,
+            createdBy: "api",
+          });
+
+          res.json({ success: true, command: result });
+        } catch (error) {
+          res.status(500).json({ error: error.message });
+        }
       }
-    });
+    );
 
     // 27. GET /api/v1/commands/list - List custom commands
     this.app.get("/api/v1/commands/list", async (req, res) => {
       try {
         const { serverId } = req.query;
-        
+
         const customCommands = require("../utils/customCommands");
         const commands = await customCommands.getCommands(serverId);
-        
+
         res.json({ commands });
       } catch (error) {
         res.status(500).json({ error: error.message });
@@ -2479,55 +2582,74 @@ class DashboardServer {
     });
 
     // 28. DELETE /api/v1/commands/:name - Delete custom command
-    this.app.delete("/api/v1/commands/:name", this.apiAuth.bind(this), async (req, res) => {
-      try {
-        const { serverId } = req.query;
-        const commandName = req.params.name;
-        
-        const customCommands = require("../utils/customCommands");
-        const result = await customCommands.deleteCommand(serverId, commandName);
-        
-        res.json(result);
-      } catch (error) {
-        res.status(500).json({ error: error.message });
+    this.app.delete(
+      "/api/v1/commands/:name",
+      this.apiAuth.bind(this),
+      async (req, res) => {
+        try {
+          const { serverId } = req.query;
+          const commandName = req.params.name;
+
+          const customCommands = require("../utils/customCommands");
+          const result = await customCommands.deleteCommand(
+            serverId,
+            commandName
+          );
+
+          res.json(result);
+        } catch (error) {
+          res.status(500).json({ error: error.message });
+        }
       }
-    });
+    );
 
     // ==================== WORKFLOWS API (29-30) ====================
 
     // 29. POST /api/v1/workflows/create - Create workflow via API
-    this.app.post("/api/v1/workflows/create", this.apiAuth.bind(this), async (req, res) => {
-      try {
-        const { serverId, name, trigger, actions } = req.body;
-        
-        await new Promise((resolve, reject) => {
-          db.db.run(
-            "INSERT INTO workflows (guild_id, name, trigger_type, actions, enabled) VALUES (?, ?, ?, ?, 1)",
-            [serverId, name, trigger, JSON.stringify(actions)],
-            function(err) {
-              if (err) reject(err);
-              else resolve({ id: this.lastID });
-            }
-          );
-        });
-        
-        res.json({ success: true, message: "Workflow created" });
-      } catch (error) {
-        res.status(500).json({ error: error.message });
+    this.app.post(
+      "/api/v1/workflows/create",
+      this.apiAuth.bind(this),
+      async (req, res) => {
+        try {
+          const { serverId, name, trigger, actions } = req.body;
+
+          await new Promise((resolve, reject) => {
+            db.db.run(
+              "INSERT INTO workflows (guild_id, name, trigger_type, actions, enabled) VALUES (?, ?, ?, ?, 1)",
+              [serverId, name, trigger, JSON.stringify(actions)],
+              function (err) {
+                if (err) reject(err);
+                else resolve({ id: this.lastID });
+              }
+            );
+          });
+
+          res.json({ success: true, message: "Workflow created" });
+        } catch (error) {
+          res.status(500).json({ error: error.message });
+        }
       }
-    });
+    );
 
     // 30. POST /api/v1/workflows/trigger - Trigger workflow manually
-    this.app.post("/api/v1/workflows/trigger", this.apiAuth.bind(this), async (req, res) => {
-      try {
-        const { workflowId, data } = req.body;
-        
-        // Trigger workflow execution
-        res.json({ success: true, message: "Workflow triggered", workflowId });
-      } catch (error) {
-        res.status(500).json({ error: error.message });
+    this.app.post(
+      "/api/v1/workflows/trigger",
+      this.apiAuth.bind(this),
+      async (req, res) => {
+        try {
+          const { workflowId, data } = req.body;
+
+          // Trigger workflow execution
+          res.json({
+            success: true,
+            message: "Workflow triggered",
+            workflowId,
+          });
+        } catch (error) {
+          res.status(500).json({ error: error.message });
+        }
       }
-    });
+    );
 
     // ==================== COMMUNITY API (31-35) ====================
 
@@ -2535,18 +2657,18 @@ class DashboardServer {
     this.app.post("/api/v1/appeals/create", async (req, res) => {
       try {
         const { serverId, userId, reason, contact } = req.body;
-        
+
         await new Promise((resolve, reject) => {
           db.db.run(
             "INSERT INTO ban_appeals (guild_id, user_id, reason, contact, status, created_at) VALUES (?, ?, ?, ?, 'pending', ?)",
             [serverId, userId, reason, contact, Date.now()],
-            function(err) {
+            function (err) {
               if (err) reject(err);
               else resolve({ id: this.lastID });
             }
           );
         });
-        
+
         res.json({ success: true, message: "Appeal submitted" });
       } catch (error) {
         res.status(500).json({ error: error.message });
@@ -2554,43 +2676,47 @@ class DashboardServer {
     });
 
     // 32. GET /api/v1/appeals/list - List appeals
-    this.app.get("/api/v1/appeals/list", this.apiAuth.bind(this), async (req, res) => {
-      try {
-        const { serverId, status = 'pending' } = req.query;
-        
-        const appeals = await new Promise((resolve, reject) => {
-          db.db.all(
-            "SELECT * FROM ban_appeals WHERE guild_id = ? AND status = ? ORDER BY created_at DESC",
-            [serverId, status],
-            (err, rows) => {
-              if (err) reject(err);
-              else resolve(rows || []);
-            }
-          );
-        });
-        
-        res.json({ appeals });
-      } catch (error) {
-        res.status(500).json({ error: error.message });
+    this.app.get(
+      "/api/v1/appeals/list",
+      this.apiAuth.bind(this),
+      async (req, res) => {
+        try {
+          const { serverId, status = "pending" } = req.query;
+
+          const appeals = await new Promise((resolve, reject) => {
+            db.db.all(
+              "SELECT * FROM ban_appeals WHERE guild_id = ? AND status = ? ORDER BY created_at DESC",
+              [serverId, status],
+              (err, rows) => {
+                if (err) reject(err);
+                else resolve(rows || []);
+              }
+            );
+          });
+
+          res.json({ appeals });
+        } catch (error) {
+          res.status(500).json({ error: error.message });
+        }
       }
-    });
+    );
 
     // 33. POST /api/v1/showcase/nominate - Nominate server for showcase
     this.app.post("/api/v1/showcase/nominate", async (req, res) => {
       try {
         const { serverId, reason, contactEmail } = req.body;
-        
+
         await new Promise((resolve, reject) => {
           db.db.run(
             "INSERT INTO showcase_nominations (guild_id, reason, contact_email, status, created_at) VALUES (?, ?, ?, 'pending', ?)",
             [serverId, reason, contactEmail, Date.now()],
-            function(err) {
+            function (err) {
               if (err) reject(err);
               else resolve({ id: this.lastID });
             }
           );
         });
-        
+
         res.json({ success: true, message: "Nomination submitted for review" });
       } catch (error) {
         res.status(500).json({ error: error.message });
@@ -2601,19 +2727,28 @@ class DashboardServer {
     this.app.post("/api/v1/testimonial/submit", async (req, res) => {
       try {
         const { serverName, memberCount, quote, metrics } = req.body;
-        
+
         await new Promise((resolve, reject) => {
           db.db.run(
             "INSERT INTO testimonials (server_name, member_count, quote, metrics, status, created_at) VALUES (?, ?, ?, ?, 'pending', ?)",
-            [serverName, memberCount, quote, JSON.stringify(metrics), Date.now()],
-            function(err) {
+            [
+              serverName,
+              memberCount,
+              quote,
+              JSON.stringify(metrics),
+              Date.now(),
+            ],
+            function (err) {
               if (err) reject(err);
               else resolve({ id: this.lastID });
             }
           );
         });
-        
-        res.json({ success: true, message: "Testimonial submitted for review" });
+
+        res.json({
+          success: true,
+          message: "Testimonial submitted for review",
+        });
       } catch (error) {
         res.status(500).json({ error: error.message });
       }
@@ -2623,18 +2758,18 @@ class DashboardServer {
     this.app.post("/api/v1/feedback", async (req, res) => {
       try {
         const { type, message, contact } = req.body;
-        
+
         await new Promise((resolve, reject) => {
           db.db.run(
             "INSERT INTO feedback (type, message, contact, created_at) VALUES (?, ?, ?, ?)",
-            [type || 'general', message, contact || 'anonymous', Date.now()],
-            function(err) {
+            [type || "general", message, contact || "anonymous", Date.now()],
+            function (err) {
               if (err) reject(err);
               else resolve({ id: this.lastID });
             }
           );
         });
-        
+
         res.json({ success: true, message: "Feedback received. Thank you!" });
       } catch (error) {
         res.status(500).json({ error: error.message });
