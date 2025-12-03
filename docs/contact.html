@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#b794f6" />
+    <title>Contact - Nexus Bot</title>
+    <link
+      rel="icon"
+      type="image/webp"
+      href="https://cdn.discordapp.com/avatars/1444739230679957646/32f2d77d44c2f3989fecd858be53f396.webp?size=256"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="pages.css" />
+    <style>
+      .contact-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 30px;
+        margin-bottom: 50px;
+      }
+
+      .contact-card {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        padding: 40px;
+        border-radius: 20px;
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        text-align: center;
+        transition: all 0.3s;
+      }
+
+      .contact-card:hover {
+        transform: translateY(-5px);
+        border-color: rgba(183, 148, 246, 0.5);
+        box-shadow: 0 10px 30px rgba(183, 148, 246, 0.2);
+      }
+
+      .contact-icon {
+        font-size: 4rem;
+        margin-bottom: 20px;
+      }
+
+      .contact-card h3 {
+        font-size: 1.5rem;
+        margin-bottom: 15px;
+        color: #b794f6;
+      }
+
+      .contact-card p {
+        opacity: 0.8;
+        margin-bottom: 20px;
+        line-height: 1.6;
+      }
+
+      .contact-link {
+        display: inline-block;
+        padding: 12px 25px;
+        background: linear-gradient(135deg, #b794f6 0%, #9333ea 100%);
+        color: white;
+        text-decoration: none;
+        border-radius: 10px;
+        font-weight: 600;
+        transition: all 0.3s;
+      }
+
+      .contact-link:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(183, 148, 246, 0.4);
+      }
+
+      .response-times {
+        background: rgba(183, 148, 246, 0.1);
+        padding: 30px;
+        border-radius: 15px;
+        border-left: 4px solid #b794f6;
+        margin-bottom: 40px;
+      }
+
+      .response-times h3 {
+        margin-bottom: 20px;
+        color: #b794f6;
+      }
+
+      .response-times ul {
+        list-style: none;
+        padding-left: 0;
+      }
+
+      .response-times li {
+        padding: 10px 0;
+        opacity: 0.9;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="container">
+        <a href="index.html" class="nav-brand">NEXUS</a>
+        <div class="nav-links">
+          <a href="features.html">Features</a>
+          <a href="commands.html">Commands</a>
+          <a href="comparison.html">vs Wick</a>
+          <a href="setup.html">Setup</a>
+          <a href="docs.html">Docs</a>
+          <a href="faq.html">FAQ</a>
+          <a href="stats.html">Stats</a>
+          <a href="status.html">Status</a>
+          <a href="changelog.html">Changelog</a>
+          <a
+            href="https://discord.com/oauth2/authorize?client_id=1444739230679957646&permissions=268443574&scope=bot%20applications.commands"
+            class="btn-nav"
+            >Invite</a
+          >
+        </div>
+      </div>
+    </nav>
+
+    <div class="container" style="margin-top: 100px">
+      <header class="page-header">
+        <h1>📬 Contact Us</h1>
+        <p>Get in touch with the Nexus team</p>
+      </header>
+
+      <div class="content-section">
+        <div class="response-times">
+          <h3>⏱️ Expected Response Times</h3>
+          <ul>
+            <li><strong>Discord:</strong> Usually within 24 hours</li>
+            <li><strong>Email:</strong> 1-3 business days</li>
+            <li>
+              <strong>GitHub Issues:</strong> 1-7 days (for bugs/features)
+            </li>
+            <li>
+              <strong>Emergency Security Issues:</strong> Contact Discord
+              immediately
+            </li>
+          </ul>
+        </div>
+
+        <div class="contact-grid">
+          <div class="contact-card">
+            <div class="contact-icon">💬</div>
+            <h3>Discord Support</h3>
+            <p>
+              Join our support server for the fastest help. Get assistance from
+              the community and developers.
+            </p>
+            <a
+              href="https://discord.gg/UHNcUKheZP"
+              target="_blank"
+              class="contact-link"
+            >
+              Join Support Server
+            </a>
+          </div>
+
+          <div class="contact-card">
+            <div class="contact-icon">📧</div>
+            <h3>Email</h3>
+            <p>
+              For business inquiries, partnership opportunities, or detailed
+              questions, reach us via email.
+            </p>
+            <a href="mailto:nexusbot0@proton.me" class="contact-link">
+              nexusbot0@proton.me
+            </a>
+          </div>
+
+          <div class="contact-card">
+            <div class="contact-icon">🐙</div>
+            <h3>GitHub</h3>
+            <p>
+              Report bugs, request features, or contribute to the project. We're
+              open source!
+            </p>
+            <a
+              href="https://github.com/Azzraya/Nexus"
+              target="_blank"
+              class="contact-link"
+            >
+              Open an Issue
+            </a>
+          </div>
+        </div>
+
+        <h2>💼 Business & Partnerships</h2>
+        <p>
+          Interested in partnering with Nexus or featuring us in your community?
+          Email us at
+          <a href="mailto:nexusbot0@proton.me">nexusbot0@proton.me</a> with:
+        </p>
+        <ul>
+          <li>Your server/organization name and size</li>
+          <li>Partnership proposal or collaboration idea</li>
+          <li>Expected timeline</li>
+        </ul>
+
+        <h2>🐛 Bug Reports</h2>
+        <p>Found a bug? Please report it via:</p>
+        <ul>
+          <li>
+            <strong>GitHub Issues:</strong>
+            <a href="https://github.com/Azzraya/Nexus/issues" target="_blank"
+              >Create an issue</a
+            >
+            (preferred for tracking)
+          </li>
+          <li><strong>Discord:</strong> Post in #bug-reports channel</li>
+          <li><strong>Email:</strong> Include detailed steps to reproduce</li>
+        </ul>
+
+        <h2>💡 Feature Requests</h2>
+        <p>Have an idea for Nexus? We'd love to hear it:</p>
+        <ul>
+          <li>
+            <strong>GitHub Discussions:</strong>
+            <a
+              href="https://github.com/Azzraya/Nexus/discussions"
+              target="_blank"
+              >Propose a feature</a
+            >
+          </li>
+          <li><strong>Discord:</strong> Share in #suggestions channel</li>
+          <li><strong>Email:</strong> Send detailed proposal</li>
+        </ul>
+
+        <h2>🚨 Security Vulnerabilities</h2>
+        <p>
+          <strong>Do NOT publicly disclose security vulnerabilities.</strong>
+          Please report them privately via:
+        </p>
+        <ul>
+          <li>
+            <strong>Email:</strong>
+            <a href="mailto:nexusbot0@proton.me">nexusbot0@proton.me</a> with
+            subject "SECURITY"
+          </li>
+          <li>
+            <strong>GitHub Security Advisory:</strong>
+            <a
+              href="https://github.com/Azzraya/Nexus/security/advisories/new"
+              target="_blank"
+              >Report privately</a
+            >
+          </li>
+        </ul>
+        <p>We take security seriously and will respond within 48 hours.</p>
+
+        <h2>📱 Social Media</h2>
+        <p>Stay updated with Nexus:</p>
+        <ul>
+          <li>
+            <strong>GitHub:</strong>
+            <a href="https://github.com/Azzraya/Nexus" target="_blank"
+              >@Azzraya/Nexus</a
+            >
+          </li>
+          <li>
+            <strong>Discord:</strong>
+            <a href="https://discord.gg/UHNcUKheZP" target="_blank"
+              >Support Server</a
+            >
+          </li>
+          <li>
+            <strong>Top.gg:</strong>
+            <a href="https://top.gg/bot/1444739230679957646" target="_blank"
+              >Vote & Review</a
+            >
+          </li>
+        </ul>
+
+        <div
+          style="
+            margin-top: 50px;
+            padding: 25px;
+            background: rgba(183, 148, 246, 0.1);
+            border-left: 4px solid #b794f6;
+            border-radius: 10px;
+          "
+        >
+          <strong>💬 General Questions?</strong> Check our
+          <a href="faq.html">FAQ</a> first - most common questions are already
+          answered there!
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <div class="container">
+        <div class="footer-links">
+          <a href="index.html">Home</a>
+          <a href="features.html">Features</a>
+          <a href="docs.html">Docs</a>
+          <a href="faq.html">FAQ</a>
+          <a href="privacy.html">Privacy</a>
+          <a href="terms.html">Terms</a>
+          <a href="contact.html">Contact</a>
+          <a href="https://discord.gg/UHNcUKheZP">Support</a>
+          <a href="https://github.com/Azzraya/Nexus">GitHub</a>
+        </div>
+        <p>Nexus - Beyond Wick. Beyond Everything.</p>
+        <p>&copy; 2025 Nexus Bot. All rights reserved.</p>
+      </div>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>
