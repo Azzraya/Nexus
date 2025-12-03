@@ -418,35 +418,44 @@ footer a:hover {
 
 /* Trust Stats Section */
 .trust-stats {
-  padding: 60px 20px;
-  background: rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(10px);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 80px 20px;
 }
 
-.trust-header {
-  text-align: center;
-  font-size: 1rem;
-  opacity: 0.7;
-  margin-bottom: 30px;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-}
-
-.trust-numbers {
+.stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 40px;
-  max-width: 800px;
-  margin: 0 auto;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 25px;
+  max-width: 1000px;
+  margin: 0 auto 50px;
 }
 
-.trust-item {
+.stat-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  padding: 35px 25px;
+  border-radius: 15px;
   text-align: center;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
 }
 
-.trust-number {
+.stat-card:hover {
+  transform: translateY(-5px);
+  border-color: rgba(183, 148, 246, 0.5);
+  box-shadow: 0 10px 30px rgba(183, 148, 246, 0.2);
+}
+
+.stat-card.highlight {
+  background: linear-gradient(135deg, rgba(183, 148, 246, 0.2) 0%, rgba(147, 51, 234, 0.2) 100%);
+  border-color: rgba(183, 148, 246, 0.4);
+}
+
+.stat-icon {
+  font-size: 2.5rem;
+  margin-bottom: 15px;
+}
+
+.stat-number {
   font-size: 3rem;
   font-weight: 900;
   background: linear-gradient(135deg, #b794f6 0%, #9333ea 100%);
@@ -454,13 +463,44 @@ footer a:hover {
   -webkit-text-fill-color: transparent;
   background-clip: text;
   margin-bottom: 10px;
+  line-height: 1;
 }
 
-.trust-label {
-  font-size: 0.9rem;
-  opacity: 0.7;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+.stat-label {
+  font-size: 0.95rem;
+  opacity: 0.8;
+  font-weight: 600;
+}
+
+.battle-tested {
+  max-width: 800px;
+  margin: 0 auto;
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  padding: 30px;
+  background: rgba(183, 148, 246, 0.1);
+  border-left: 4px solid #b794f6;
+  border-radius: 12px;
+}
+
+.badge-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.badge-content strong {
+  display: block;
+  font-size: 1.1rem;
+  color: #b794f6;
+  margin-bottom: 8px;
+}
+
+.badge-content p {
+  margin: 0;
+  opacity: 0.9;
+  line-height: 1.6;
+  font-size: 0.95rem;
 }
 
 /* Scroll to top button */
