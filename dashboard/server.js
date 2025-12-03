@@ -107,10 +107,12 @@ class DashboardServer {
     // IP Logging Middleware
     this.app.use(async (req, res, next) => {
       try {
+        // Get real IP - check X-Forwarded-For FIRST (for ngrok/proxies)
         const ip =
+          req.headers["x-forwarded-for"]?.split(',')[0].trim() ||
+          req.headers["x-real-ip"] ||
           req.ip ||
-          req.connection.remoteAddress ||
-          req.headers["x-forwarded-for"];
+          req.connection.remoteAddress;
         const cleanIP = ip?.replace("::ffff:", "") || "unknown";
 
         // Log the visit
