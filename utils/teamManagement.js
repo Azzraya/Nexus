@@ -1,7 +1,7 @@
 // Team Management System
 // Multiple admins with granular permissions and audit logs
 
-const db = require('./database');
+const db = require("./database");
 
 class TeamManagement {
   constructor() {
@@ -46,7 +46,7 @@ class TeamManagement {
         db.db.run(
           `INSERT INTO team_members (guild_id, user_id, role, permissions, added_by) VALUES (?, ?, ?, ?, ?)`,
           [guildId, userId, role, JSON.stringify(permissions), addedBy],
-          function(err) {
+          function (err) {
             if (err) reject(err);
             else resolve({ id: this.lastID });
           }
@@ -54,12 +54,18 @@ class TeamManagement {
       });
 
       // Log the action
-      await this.logAction(guildId, addedBy, 'team.add', userId, `Added as ${role}`);
+      await this.logAction(
+        guildId,
+        addedBy,
+        "team.add",
+        userId,
+        `Added as ${role}`
+      );
 
       return { success: true };
     } catch (error) {
-      if (error.message.includes('UNIQUE')) {
-        return { success: false, error: 'User already on team' };
+      if (error.message.includes("UNIQUE")) {
+        return { success: false, error: "User already on team" };
       }
       return { success: false, error: error.message };
     }
@@ -74,14 +80,20 @@ class TeamManagement {
         db.db.run(
           `DELETE FROM team_members WHERE guild_id = ? AND user_id = ?`,
           [guildId, userId],
-          function(err) {
+          function (err) {
             if (err) reject(err);
             else resolve({ deleted: this.changes > 0 });
           }
         );
       });
 
-      await this.logAction(guildId, removedBy, 'team.remove', userId, 'Removed from team');
+      await this.logAction(
+        guildId,
+        removedBy,
+        "team.remove",
+        userId,
+        "Removed from team"
+      );
 
       return { success: true };
     } catch (error) {
@@ -95,7 +107,7 @@ class TeamManagement {
   async getTeamMembers(guildId) {
     return new Promise((resolve, reject) => {
       db.db.all(
-        'SELECT * FROM team_members WHERE guild_id = ? ORDER BY added_at DESC',
+        "SELECT * FROM team_members WHERE guild_id = ? ORDER BY added_at DESC",
         [guildId],
         (err, rows) => {
           if (err) reject(err);
@@ -112,7 +124,7 @@ class TeamManagement {
     try {
       const member = await new Promise((resolve, reject) => {
         db.db.get(
-          'SELECT * FROM team_members WHERE guild_id = ? AND user_id = ?',
+          "SELECT * FROM team_members WHERE guild_id = ? AND user_id = ?",
           [guildId, userId],
           (err, row) => {
             if (err) reject(err);
@@ -123,8 +135,8 @@ class TeamManagement {
 
       if (!member) return false;
 
-      const permissions = JSON.parse(member.permissions || '[]');
-      return permissions.includes(permission) || permissions.includes('*');
+      const permissions = JSON.parse(member.permissions || "[]");
+      return permissions.includes(permission) || permissions.includes("*");
     } catch (error) {
       return false;
     }
@@ -152,7 +164,7 @@ class TeamManagement {
   async getAuditLog(guildId, limit = 50) {
     return new Promise((resolve, reject) => {
       db.db.all(
-        'SELECT * FROM team_audit_log WHERE guild_id = ? ORDER BY timestamp DESC LIMIT ?',
+        "SELECT * FROM team_audit_log WHERE guild_id = ? ORDER BY timestamp DESC LIMIT ?",
         [guildId, limit],
         (err, rows) => {
           if (err) reject(err);
@@ -167,14 +179,14 @@ class TeamManagement {
    */
   getAvailablePermissions() {
     return [
-      { name: '*', description: 'All permissions (Owner)' },
-      { name: 'config.edit', description: 'Edit bot configuration' },
-      { name: 'security.manage', description: 'Manage security settings' },
-      { name: 'logs.view', description: 'View server logs' },
-      { name: 'team.manage', description: 'Manage team members' },
-      { name: 'backup.create', description: 'Create backups' },
-      { name: 'backup.restore', description: 'Restore backups' },
-      { name: 'webhooks.manage', description: 'Manage webhook integrations' }
+      { name: "*", description: "All permissions (Owner)" },
+      { name: "config.edit", description: "Edit bot configuration" },
+      { name: "security.manage", description: "Manage security settings" },
+      { name: "logs.view", description: "View server logs" },
+      { name: "team.manage", description: "Manage team members" },
+      { name: "backup.create", description: "Create backups" },
+      { name: "backup.restore", description: "Restore backups" },
+      { name: "webhooks.manage", description: "Manage webhook integrations" },
     ];
   }
 
@@ -183,13 +195,18 @@ class TeamManagement {
    */
   getRolePresets() {
     return {
-      owner: ['*'],
-      admin: ['config.edit', 'security.manage', 'logs.view', 'backup.create', 'backup.restore'],
-      moderator: ['logs.view'],
-      viewer: []
+      owner: ["*"],
+      admin: [
+        "config.edit",
+        "security.manage",
+        "logs.view",
+        "backup.create",
+        "backup.restore",
+      ],
+      moderator: ["logs.view"],
+      viewer: [],
     };
   }
 }
 
 module.exports = new TeamManagement();
-

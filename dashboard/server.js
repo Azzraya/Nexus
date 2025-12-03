@@ -59,7 +59,7 @@ class DashboardServer {
 
       // Get real IP - check X-Forwarded-For FIRST (for ngrok/proxies)
       const ip =
-        req.headers["x-forwarded-for"]?.split(',')[0].trim() || // Real IP from proxy
+        req.headers["x-forwarded-for"]?.split(",")[0].trim() || // Real IP from proxy
         req.headers["x-real-ip"] || // Alternative header
         req.ip ||
         req.connection.remoteAddress;
@@ -109,7 +109,7 @@ class DashboardServer {
       try {
         // Get real IP - check X-Forwarded-For FIRST (for ngrok/proxies)
         const ip =
-          req.headers["x-forwarded-for"]?.split(',')[0].trim() ||
+          req.headers["x-forwarded-for"]?.split(",")[0].trim() ||
           req.headers["x-real-ip"] ||
           req.ip ||
           req.connection.remoteAddress;
@@ -1415,12 +1415,20 @@ class DashboardServer {
         // Get time range (default 7 days)
         const timeRange = req.query.range || "7d";
         let since = Date.now();
-        
-        switch(timeRange) {
-          case "24h": since -= 24 * 60 * 60 * 1000; break;
-          case "7d": since -= 7 * 24 * 60 * 60 * 1000; break;
-          case "30d": since -= 30 * 24 * 60 * 60 * 1000; break;
-          case "all": since = 0; break;
+
+        switch (timeRange) {
+          case "24h":
+            since -= 24 * 60 * 60 * 1000;
+            break;
+          case "7d":
+            since -= 7 * 24 * 60 * 60 * 1000;
+            break;
+          case "30d":
+            since -= 30 * 24 * 60 * 60 * 1000;
+            break;
+          case "all":
+            since = 0;
+            break;
         }
 
         // Get all command usage data
@@ -1444,31 +1452,44 @@ class DashboardServer {
         // Get performance data from performance monitor
         const PerformanceMonitor = require("../utils/performanceMonitor");
         const perfMonitor = PerformanceMonitor.getInstance();
-        
+
         // Calculate aggregated stats
         const totalCommands = commandStats.length;
-        const totalExecutions = commandStats.reduce((sum, cmd) => sum + cmd.executions, 0);
-        
+        const totalExecutions = commandStats.reduce(
+          (sum, cmd) => sum + cmd.executions,
+          0
+        );
+
         // Get performance metrics for each command
-        const commandsWithPerf = commandStats.map(cmd => {
+        const commandsWithPerf = commandStats.map((cmd) => {
           const metrics = perfMonitor.getMetrics(cmd.command_name);
           return {
             name: cmd.command_name,
             executions: cmd.executions,
             avgTime: metrics?.avgExecutionTime || 0,
             successRate: metrics?.successRate || 100,
-            failureRate: 100 - (metrics?.successRate || 100)
+            failureRate: 100 - (metrics?.successRate || 100),
           };
         });
 
         // Calculate overall metrics
-        const avgResponseTime = commandsWithPerf.length > 0 
-          ? Math.round(commandsWithPerf.reduce((sum, cmd) => sum + cmd.avgTime, 0) / commandsWithPerf.length)
-          : 0;
-        
-        const successRate = commandsWithPerf.length > 0 && totalExecutions > 0
-          ? Math.round(commandsWithPerf.reduce((sum, cmd) => sum + (cmd.successRate * cmd.executions), 0) / totalExecutions)
-          : 100;
+        const avgResponseTime =
+          commandsWithPerf.length > 0
+            ? Math.round(
+                commandsWithPerf.reduce((sum, cmd) => sum + cmd.avgTime, 0) /
+                  commandsWithPerf.length
+              )
+            : 0;
+
+        const successRate =
+          commandsWithPerf.length > 0 && totalExecutions > 0
+            ? Math.round(
+                commandsWithPerf.reduce(
+                  (sum, cmd) => sum + cmd.successRate * cmd.executions,
+                  0
+                ) / totalExecutions
+              )
+            : 100;
 
         // Top 10 most used commands
         const topCommands = commandsWithPerf.slice(0, 10);
@@ -1480,16 +1501,16 @@ class DashboardServer {
 
         // Commands with highest failure rate
         const failedCommands = [...commandsWithPerf]
-          .filter(cmd => cmd.failureRate > 0)
+          .filter((cmd) => cmd.failureRate > 0)
           .sort((a, b) => b.failureRate - a.failureRate)
           .slice(0, 10);
 
         // Usage trends (last 7 days)
         const usageTrends = [];
         for (let i = 6; i >= 0; i--) {
-          const dayStart = Date.now() - (i * 24 * 60 * 60 * 1000);
-          const dayEnd = dayStart + (24 * 60 * 60 * 1000);
-          
+          const dayStart = Date.now() - i * 24 * 60 * 60 * 1000;
+          const dayEnd = dayStart + 24 * 60 * 60 * 1000;
+
           const dayCount = await new Promise((resolve, reject) => {
             db.db.get(
               `SELECT COUNT(*) as count 
@@ -1506,17 +1527,23 @@ class DashboardServer {
           const date = new Date(dayStart);
           usageTrends.push({
             date: `${date.getMonth() + 1}/${date.getDate()}`,
-            count: dayCount.count || 0
+            count: dayCount.count || 0,
           });
         }
 
         // Performance distribution
         const performanceDistribution = {
-          under100: commandsWithPerf.filter(c => c.avgTime < 100).length,
-          under500: commandsWithPerf.filter(c => c.avgTime >= 100 && c.avgTime < 500).length,
-          under1000: commandsWithPerf.filter(c => c.avgTime >= 500 && c.avgTime < 1000).length,
-          under5000: commandsWithPerf.filter(c => c.avgTime >= 1000 && c.avgTime < 5000).length,
-          over5000: commandsWithPerf.filter(c => c.avgTime >= 5000).length
+          under100: commandsWithPerf.filter((c) => c.avgTime < 100).length,
+          under500: commandsWithPerf.filter(
+            (c) => c.avgTime >= 100 && c.avgTime < 500
+          ).length,
+          under1000: commandsWithPerf.filter(
+            (c) => c.avgTime >= 500 && c.avgTime < 1000
+          ).length,
+          under5000: commandsWithPerf.filter(
+            (c) => c.avgTime >= 1000 && c.avgTime < 5000
+          ).length,
+          over5000: commandsWithPerf.filter((c) => c.avgTime >= 5000).length,
         };
 
         res.json({
@@ -1528,9 +1555,8 @@ class DashboardServer {
           slowestCommands,
           failedCommands,
           usageTrends,
-          performanceDistribution
+          performanceDistribution,
         });
-
       } catch (error) {
         console.error("[Command Analytics] Error:", error);
         res.status(500).json({ error: "Failed to fetch command analytics" });
@@ -1569,51 +1595,59 @@ class DashboardServer {
         const offset = (page - 1) * limit;
 
         // Build query based on filters
-        let query = '';
+        let query = "";
         let params = [];
         let conditions = [];
 
         // Time range
-        if (range && range !== 'all') {
+        if (range && range !== "all") {
           let since = Date.now();
-          switch(range) {
-            case '24h': since -= 24 * 60 * 60 * 1000; break;
-            case '7d': since -= 7 * 24 * 60 * 60 * 1000; break;
-            case '30d': since -= 30 * 24 * 60 * 60 * 1000; break;
+          switch (range) {
+            case "24h":
+              since -= 24 * 60 * 60 * 1000;
+              break;
+            case "7d":
+              since -= 7 * 24 * 60 * 60 * 1000;
+              break;
+            case "30d":
+              since -= 30 * 24 * 60 * 60 * 1000;
+              break;
           }
-          conditions.push('timestamp > ?');
+          conditions.push("timestamp > ?");
           params.push(since);
         }
 
         // Action filter
         if (action) {
-          conditions.push('action = ?');
+          conditions.push("action = ?");
           params.push(action);
         }
 
         // User filter (search in user_id or user_tag)
         if (user) {
-          conditions.push('(user_id LIKE ? OR user_tag LIKE ?)');
+          conditions.push("(user_id LIKE ? OR user_tag LIKE ?)");
           params.push(`%${user}%`, `%${user}%`);
         }
 
         // Log type filter
         const tables = {
-          'moderation': 'moderation_logs',
-          'security': 'security_logs',
-          'raid': 'anti_raid_logs',
-          'all': null
+          moderation: "moderation_logs",
+          security: "security_logs",
+          raid: "anti_raid_logs",
+          all: null,
         };
 
-        const searchType = type || 'all';
-        const tablesToSearch = searchType === 'all' 
-          ? ['moderation_logs', 'security_logs', 'anti_raid_logs']
-          : [tables[searchType]];
+        const searchType = type || "all";
+        const tablesToSearch =
+          searchType === "all"
+            ? ["moderation_logs", "security_logs", "anti_raid_logs"]
+            : [tables[searchType]];
 
         let allLogs = [];
 
         for (const table of tablesToSearch) {
-          const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+          const whereClause =
+            conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
           query = `SELECT *, '${table}' as log_type FROM ${table} ${whereClause} ORDER BY timestamp DESC LIMIT ${limit} OFFSET ${offset}`;
 
           const logs = await new Promise((resolve, reject) => {
@@ -1633,7 +1667,8 @@ class DashboardServer {
         // Get total count
         let totalCount = 0;
         for (const table of tablesToSearch) {
-          const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+          const whereClause =
+            conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
           const countQuery = `SELECT COUNT(*) as count FROM ${table} ${whereClause}`;
 
           const count = await new Promise((resolve, reject) => {
@@ -1650,11 +1685,11 @@ class DashboardServer {
           logs: allLogs,
           total: totalCount,
           page: parseInt(page),
-          totalPages: Math.ceil(totalCount / limit)
+          totalPages: Math.ceil(totalCount / limit),
         });
       } catch (error) {
-        console.error('[Log Search] Error:', error);
-        res.status(500).json({ error: 'Failed to search logs' });
+        console.error("[Log Search] Error:", error);
+        res.status(500).json({ error: "Failed to search logs" });
       }
     });
 
@@ -1720,10 +1755,10 @@ class DashboardServer {
       try {
         const { source } = req.body;
         // Get real IP from proxy headers
-        const ipAddress = 
-          req.headers["x-forwarded-for"]?.split(',')[0].trim() ||
+        const ipAddress =
+          req.headers["x-forwarded-for"]?.split(",")[0].trim() ||
           req.headers["x-real-ip"] ||
-          req.ip || 
+          req.ip ||
           req.connection.remoteAddress;
         const userAgent = req.headers["user-agent"];
 
