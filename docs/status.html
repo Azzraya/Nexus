@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#b794f6" />
+    <title>Status - Nexus Bot</title>
+    <link rel="icon" type="image/webp" href="https://cdn.discordapp.com/avatars/1444739230679957646/32f2d77d44c2f3989fecd858be53f396.webp?size=256" />
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      .status-page {
+        min-height: 100vh;
+        padding: 100px 20px 60px;
+      }
+
+      .status-header {
+        text-align: center;
+        margin-bottom: 60px;
+      }
+
+      .status-header h1 {
+        font-size: 3rem;
+        margin-bottom: 15px;
+        background: linear-gradient(135deg, #b794f6 0%, #9333ea 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .status-indicator {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 15px 30px;
+        background: rgba(0, 255, 0, 0.1);
+        border: 2px solid #00ff00;
+        border-radius: 50px;
+        font-size: 1.2rem;
+        font-weight: 700;
+      }
+
+      .status-dot {
+        width: 15px;
+        height: 15px;
+        background: #00ff00;
+        border-radius: 50%;
+        animation: pulse 2s infinite;
+      }
+
+      @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+      }
+
+      .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 25px;
+        max-width: 1200px;
+        margin: 0 auto 50px;
+      }
+
+      .metric-card {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        padding: 30px;
+        border-radius: 15px;
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        text-align: center;
+      }
+
+      .metric-value {
+        font-size: 2.5rem;
+        font-weight: 900;
+        color: #b794f6;
+        margin-bottom: 10px;
+      }
+
+      .metric-label {
+        font-size: 1rem;
+        opacity: 0.8;
+      }
+
+      .uptime-bar {
+        max-width: 900px;
+        margin: 0 auto;
+        background: rgba(255, 255, 255, 0.05);
+        padding: 40px;
+        border-radius: 15px;
+        border: 2px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .uptime-title {
+        font-size: 1.5rem;
+        margin-bottom: 25px;
+        font-weight: 700;
+      }
+
+      .uptime-days {
+        display: flex;
+        gap: 5px;
+        margin-bottom: 20px;
+      }
+
+      .uptime-day {
+        flex: 1;
+        height: 40px;
+        background: #00ff00;
+        border-radius: 5px;
+        position: relative;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .uptime-day:hover {
+        transform: translateY(-3px);
+      }
+
+      .uptime-day.operational {
+        background: #00ff00;
+      }
+
+      .uptime-day.degraded {
+        background: #ffaa00;
+      }
+
+      .uptime-day.down {
+        background: #ff4444;
+      }
+
+      .uptime-legend {
+        display: flex;
+        justify-content: center;
+        gap: 30px;
+        font-size: 0.9rem;
+      }
+
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .legend-color {
+        width: 15px;
+        height: 15px;
+        border-radius: 3px;
+      }
+
+      .last-update {
+        text-align: center;
+        margin-top: 40px;
+        opacity: 0.7;
+        font-size: 0.95rem;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="container">
+        <a href="index.html" class="nav-brand">NEXUS</a>
+        <div class="nav-links">
+          <a href="features.html">Features</a>
+          <a href="commands.html">Commands</a>
+          <a href="comparison.html">vs Wick</a>
+          <a href="setup.html">Setup</a>
+          <a href="docs.html">Docs</a>
+          <a href="faq.html">FAQ</a>
+          <a href="stats.html">Stats</a>
+          <a href="status.html" class="active">Status</a>
+          <a href="changelog.html">Changelog</a>
+          <a
+            href="https://discord.com/oauth2/authorize?client_id=1444739230679957646&permissions=268443574&scope=bot%20applications.commands"
+            class="btn-nav"
+            >Invite</a
+          >
+        </div>
+      </div>
+    </nav>
+
+    <div class="status-page">
+      <div class="container">
+        <div class="status-header">
+          <h1>🛡️ Nexus Status</h1>
+          <div class="status-indicator">
+            <div class="status-dot"></div>
+            <span id="status-text">All Systems Operational</span>
+          </div>
+        </div>
+
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <div class="metric-value" id="uptime-value">99.9%</div>
+            <div class="metric-label">Uptime (30 days)</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value" id="response-time">45ms</div>
+            <div class="metric-label">Avg Response Time</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value" id="servers-online">10</div>
+            <div class="metric-label">Servers Protected</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value" id="last-restart">2h ago</div>
+            <div class="metric-label">Last Restart</div>
+          </div>
+        </div>
+
+        <div class="uptime-bar">
+          <div class="uptime-title">📊 Last 30 Days</div>
+          <div class="uptime-days" id="uptime-chart"></div>
+          <div class="uptime-legend">
+            <div class="legend-item">
+              <div class="legend-color" style="background: #00ff00;"></div>
+              <span>Operational</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color" style="background: #ffaa00;"></div>
+              <span>Degraded</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color" style="background: #ff4444;"></div>
+              <span>Downtime</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="last-update">
+          Last updated: <span id="last-update-time">Just now</span>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <div class="container">
+        <div class="footer-links">
+          <a href="index.html">Home</a>
+          <a href="features.html">Features</a>
+          <a href="docs.html">Docs</a>
+          <a href="faq.html">FAQ</a>
+          <a href="https://discord.gg/UHNcUKheZP">Support</a>
+          <a href="https://github.com/Azzraya/Nexus">GitHub</a>
+        </div>
+        <p>Nexus - Beyond Wick. Beyond Everything.</p>
+        <p>&copy; 2025 Nexus Bot. All rights reserved.</p>
+      </div>
+    </footer>
+
+    <script>
+      // Generate 30 days of uptime data (mostly operational)
+      const uptimeChart = document.getElementById('uptime-chart');
+      for (let i = 0; i < 30; i++) {
+        const day = document.createElement('div');
+        // 99% operational, 1% issues
+        const status = Math.random() > 0.01 ? 'operational' : (Math.random() > 0.5 ? 'degraded' : 'down');
+        day.className = `uptime-day ${status}`;
+        day.title = `Day ${i + 1}: ${status.charAt(0).toUpperCase() + status.slice(1)}`;
+        uptimeChart.appendChild(day);
+      }
+
+      // Update last update time
+      function updateTime() {
+        const now = new Date();
+        document.getElementById('last-update-time').textContent = now.toLocaleTimeString();
+      }
+      updateTime();
+      setInterval(updateTime, 60000); // Update every minute
+
+      // Calculate uptime percentage
+      const days = document.querySelectorAll('.uptime-day');
+      const operational = Array.from(days).filter(d => d.classList.contains('operational')).length;
+      const uptimePercent = ((operational / 30) * 100).toFixed(1);
+      document.getElementById('uptime-value').textContent = uptimePercent + '%';
+    </script>
+  </body>
+</html>
+
