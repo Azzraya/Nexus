@@ -130,6 +130,13 @@ module.exports = {
       console.log(`🎁 Vote rewards auto-checking started for ${client.guilds.cache.size} guilds`);
     }
 
+    // Start Dashboard Server (EXCEEDS WICK - free dashboard vs Wick's premium)
+    if (client.dashboardServer && (!shardInfo.isSharded || shardInfo.shardId === 0)) {
+      client.dashboardServer.start(3000);
+      console.log(`🌐 Dashboard server started on port 3000`);
+      console.log(`🔗 Access at: ${process.env.DASHBOARD_URL || 'http://localhost:3000'}`);
+    }
+
     // Generate initial recommendations for all guilds
     const SmartRecommendations = require("../utils/smartRecommendations");
     for (const guild of client.guilds.cache.values()) {

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nexus Dashboard</title>
+    <link rel="stylesheet" href="dashboard.css" />
+  </head>
+  <body>
+    <div class="dashboard-container">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <div class="logo">🛡️</div>
+          <h2>NEXUS</h2>
+        </div>
+
+        <div class="server-selector" id="serverSelector">
+          <div class="loading">Loading servers...</div>
+        </div>
+
+        <nav class="sidebar-nav">
+          <a href="#overview" class="nav-item active" data-page="overview">
+            <span class="nav-icon">📊</span>
+            <span>Overview</span>
+          </a>
+          <a href="#anti-nuke" class="nav-item" data-page="anti-nuke">
+            <span class="nav-icon">🛡️</span>
+            <span>Anti-Nuke</span>
+          </a>
+          <a href="#anti-raid" class="nav-item" data-page="anti-raid">
+            <span class="nav-icon">⚔️</span>
+            <span>Anti-Raid</span>
+          </a>
+          <a href="#auto-mod" class="nav-item" data-page="auto-mod">
+            <span class="nav-icon">🤖</span>
+            <span>Auto-Mod</span>
+          </a>
+          <a href="#logging" class="nav-item" data-page="logging">
+            <span class="nav-icon">📝</span>
+            <span>Logging</span>
+          </a>
+          <a href="#recovery" class="nav-item" data-page="recovery">
+            <span class="nav-icon">📸</span>
+            <span>Recovery</span>
+          </a>
+        </nav>
+
+        <div class="sidebar-footer">
+          <a href="/logout" class="logout-btn">Logout</a>
+        </div>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <header class="top-bar">
+          <h1 id="currentPage">Overview</h1>
+          <div class="user-info">
+            <img id="userAvatar" src="" alt="User" class="user-avatar" />
+            <span id="userName">Loading...</span>
+          </div>
+        </header>
+
+        <div class="content-area" id="contentArea">
+          <!-- Content loads here dynamically -->
+        </div>
+      </main>
+    </div>
+
+    <script src="dashboard.js"></script>
+  </body>
+</html>

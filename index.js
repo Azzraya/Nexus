@@ -82,6 +82,10 @@ client.snapshotScheduler = new SnapshotScheduler(client);
 const VoteRewards = require("./utils/voteRewards");
 client.voteRewards = new VoteRewards(client);
 
+// Dashboard Server (EXCEEDS WICK - free dashboard vs Wick's paid)
+const DashboardServer = require("./dashboard/server");
+client.dashboardServer = new DashboardServer(client);
+
 // Optimized cleanup - run all cleanups in parallel (EXCEEDS WICK - better performance)
 setInterval(async () => {
   const cleanupTasks = [];
