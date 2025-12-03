@@ -13,18 +13,30 @@
     <link rel="stylesheet" href="pages.css" />
   </head>
   <body>
-    <nav class="navbar">
+        <nav class="navbar">
       <div class="container">
         <a href="index.html" class="nav-brand">NEXUS</a>
-        <div class="nav-links">
-          <a href="features.html">Features</a>
-          <a href="commands.html">Commands</a>
-          <a href="comparison.html">vs Wick</a>
-          <a href="setup.html">Setup</a>
-          <a href="docs.html">Docs</a>
-          <a href="faq.html" class="active">FAQ</a>
-          <a href="stats.html">Stats</a>
-          <a href="changelog.html">Changelog</a>
+        
+        <div class="nav-right">
+          <!-- Dropdown Menu -->
+          <div class="dropdown">
+            <button class="dropdown-toggle">
+              Menu ▼
+            </button>
+            <div class="dropdown-menu">
+              <a href="features.html">Features</a>
+              <a href="commands.html">Commands</a>
+              <a href="comparison.html">vs Wick</a>
+              <a href="setup.html">Setup</a>
+              <a href="docs.html">Docs</a>
+              <a href="faq.html">FAQ</a>
+              <a href="stats.html">Stats</a>
+              <a href="status.html">Status</a>
+              <a href="showcase.html">Showcase</a>
+              <a href="growth.html">Growth</a>
+              <a href="changelog.html">Changelog</a>
+            </div>
+          </div>
 
           <a
             href="https://regular-puma-clearly.ngrok-free.app"
@@ -32,11 +44,7 @@
             class="btn-dashboard"
             >Dashboard</a
           >
-          <a
-            href="https://discord.com/oauth2/authorize?client_id=1444739230679957646&permissions=268443574&scope=bot%20applications.commands"
-            class="btn-nav"
-            >Invite</a
-          >
+          <a href="setup-wizard.html" class="btn-nav">Get Started</a>
         </div>
       </div>
     </nav>

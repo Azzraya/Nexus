@@ -318,18 +318,39 @@
         </form>
       </div>
 
-        <div class="links-section">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h2 style="margin: 0;">📊 Your Tracking Links</h2>
-            <div style="display: flex; gap: 10px; align-items: center;">
-              <span id="lastRefresh" style="font-size: 0.9rem; opacity: 0.7;"></span>
-              <button onclick="loadLinks()" style="padding: 8px 16px; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer; transition: all 0.3s;">
-                🔄 Refresh Now
-              </button>
-            </div>
+      <div class="links-section">
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+          "
+        >
+          <h2 style="margin: 0">📊 Your Tracking Links</h2>
+          <div style="display: flex; gap: 10px; align-items: center">
+            <span
+              id="lastRefresh"
+              style="font-size: 0.9rem; opacity: 0.7"
+            ></span>
+            <button
+              onclick="loadLinks()"
+              style="
+                padding: 8px 16px;
+                background: #667eea;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+                transition: all 0.3s;
+              "
+            >
+              🔄 Refresh Now
+            </button>
           </div>
-          <div id="linksContainer" class="loading">Loading links...</div>
         </div>
+        <div id="linksContainer" class="loading">Loading links...</div>
+      </div>
     </div>
 
     <script>
@@ -360,7 +381,7 @@
       function updateLastRefreshTime() {
         const now = new Date();
         const timeString = now.toLocaleTimeString();
-        const existingTime = document.getElementById('lastRefresh');
+        const existingTime = document.getElementById("lastRefresh");
         if (existingTime) {
           existingTime.textContent = `Last updated: ${timeString}`;
         }
@@ -452,20 +473,20 @@
 
           if (!response.ok) throw new Error("Failed to load links");
 
-           const data = await response.json();
-           displayLinks(data.sources || []);
-           
-           // Update last refresh time
-           const now = new Date();
-           const timeString = now.toLocaleTimeString();
-           const refreshEl = document.getElementById('lastRefresh');
-           if (refreshEl) {
-             refreshEl.textContent = `Last updated: ${timeString}`;
-           }
-         } catch (error) {
-           container.innerHTML = `<div class="error-message" style="display: block;">Failed to load links: ${error.message}</div>`;
-         }
-       }
+          const data = await response.json();
+          displayLinks(data.sources || []);
+
+          // Update last refresh time
+          const now = new Date();
+          const timeString = now.toLocaleTimeString();
+          const refreshEl = document.getElementById("lastRefresh");
+          if (refreshEl) {
+            refreshEl.textContent = `Last updated: ${timeString}`;
+          }
+        } catch (error) {
+          container.innerHTML = `<div class="error-message" style="display: block;">Failed to load links: ${error.message}</div>`;
+        }
+      }
 
       function displayLinks(links) {
         const container = document.getElementById("linksContainer");
@@ -539,7 +560,9 @@
                                          : link.avg_retention_days > 0
                                          ? "#ef4444"
                                          : "#999"
-                                     }">${Math.round(link.avg_retention_days || 0)}d</div>
+                                     }">${Math.round(
+              link.avg_retention_days || 0
+            )}d</div>
                                      <div class="stat-label">Retention</div>
                                  </div>
                              </div>
