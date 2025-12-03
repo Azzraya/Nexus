@@ -72,7 +72,7 @@ module.exports = {
           value:
             "[Vote on Top.gg](https://top.gg/bot/1444739230679957646/vote)\n" +
             "[Support Server](https://discord.gg/your-server)\n" +
-            "[Invite Nexus](https://discord.com/oauth2/authorize?client_id=1444739230679957646&permissions=268443574&scope=bot%20applications.commands)",
+            "[Invite Nexus](https://azzraya.github.io/Nexus/invite.html?source=discord-bot)",
           inline: false,
         }
       )

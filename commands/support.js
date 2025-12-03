@@ -72,7 +72,7 @@ module.exports = {
     const inviteButton = new ButtonBuilder()
       .setLabel("Invite Bot")
       .setURL(
-        `https://discord.com/oauth2/authorize?client_id=${interaction.client.user.id}&permissions=268443574&scope=bot%20applications.commands`
+        `https://azzraya.github.io/Nexus/invite.html?source=discord-bot`
       )
       .setStyle(ButtonStyle.Link);
 

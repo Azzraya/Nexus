@@ -18,7 +18,7 @@ module.exports = {
     // Plus basic: View Channels (1024) + Send Messages (2048) + Embed Links (16384) + Attach Files (32768) + Read Message History (65536) + Use External Emojis (262144)
     // Total: 268435456 + 16 + 4 + 2 + 8192 + 1024 + 2048 + 16384 + 32768 + 65536 + 262144 = 268443574
     const permissions = "268443574";
-    const inviteUrl = `https://discord.com/oauth2/authorize?client_id=${botId}&permissions=${permissions}&scope=bot%20applications.commands`;
+    const inviteUrl = `https://azzraya.github.io/Nexus/invite.html?source=discord-bot`;
 
     const embed = new EmbedBuilder()
       .setTitle("🔗 Invite Nexus Bot")
