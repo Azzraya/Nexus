@@ -37,12 +37,12 @@ async function registerCommands(client) {
   const rest = new REST({ version: "10" }).setToken(process.env.DISCORD_TOKEN);
 
   try {
-    logger.info(`🔄 Registering ${commands.length} slash commands...`);
+    logger.info("Commands", `Registering ${commands.length} slash commands...`);
 
     // FIRST: Clear all global commands to prevent duplicates
     try {
       await rest.put(Routes.applicationCommands(client.user.id), { body: [] });
-      logger.info("✅ Cleared global commands");
+      logger.success("Commands", "Cleared global commands");
     } catch (error) {
       logger.error("⚠️ Failed to clear global commands:", error.message);
     }
@@ -67,8 +67,9 @@ async function registerCommands(client) {
       }
     }
 
-    logger.info(
-      `✅ Registered commands for ${successCount} servers${
+    logger.success(
+      "Commands",
+      `Registered commands for ${successCount} servers${
         failCount > 0 ? `, ${failCount} failed` : ""
       }`
     );

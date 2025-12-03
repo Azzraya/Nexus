@@ -16,7 +16,7 @@ class Database {
       if (err) {
         logger.error("Database connection error:", err);
       } else {
-        logger.info("✅ Database connected");
+        logger.success("Database", "Connected");
 
         // Optimize database performance (EXCEEDS WICK - better performance)
         this.db.serialize(() => {
