@@ -1,168 +1,131 @@
-const {
-  SlashCommandBuilder,
-  PermissionFlagsBits,
-  EmbedBuilder,
-} = require("discord.js");
-const IntelligentDetection = require("../utils/intelligentDetection");
-const db = require("../utils/database");
+const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require('discord.js');
+const threatPredictor = require('../utils/threatPredictor');
 
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName("predict")
-    .setDescription("Predict potential security threats")
-    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
+    .setName('predict')
+    .setDescription('AI-powered threat prediction and pattern analysis')
+    .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers)
+    .addSubcommand(subcommand =>
+      subcommand
+        .setName('now')
+        .setDescription('Analyze current server state for raid patterns')
+    )
+    .addSubcommand(subcommand =>
+      subcommand
+        .setName('history')
+        .setDescription('View prediction history and accuracy')
+    ),
 
   async execute(interaction) {
-    await interaction.deferReply();
+    const subcommand = interaction.options.getSubcommand();
 
-    // Get recent joins
-    const recentJoins = await new Promise((resolve, reject) => {
-      db.db.all(
-        "SELECT * FROM anti_raid_state WHERE guild_id = ?",
-        [interaction.guild.id],
-        (err, rows) => {
-          if (err) reject(err);
-          else resolve(rows || []);
-        }
-      );
-    });
+    if (subcommand === 'now') {
+      await interaction.deferReply({ ephemeral: true });
 
-    const members = [];
-    for (const join of recentJoins.slice(0, 10)) {
-      try {
-        const member = await interaction.guild.members
-          .fetch(join.user_id)
-          .catch(() => null);
-        if (member) members.push(member);
-      } catch (error) {
-        const ErrorHandler = require("../utils/errorHandler");
-        ErrorHandler.logError(
-          error,
-          `predict [${interaction.guild.id}]`,
-          `Fetch member ${userId}`
-        );
-      }
-    }
+      const prediction = await threatPredictor.predictThreat(interaction.guild);
 
-    const predictions = await IntelligentDetection.predictAttack(
-      interaction.guild,
-      members
-    );
-
-    const embed = new EmbedBuilder()
-      .setTitle("🔮 Threat Prediction")
-      .addFields(
-        {
-          name: "Raid Likelihood",
-          value: `${predictions.raidLikelihood}%`,
-          inline: true,
-        },
-        {
-          name: "Nuke Likelihood",
-          value: `${predictions.nukeLikelihood}%`,
-          inline: true,
-        },
-        {
-          name: "Spam Likelihood",
-          value: `${predictions.spamLikelihood}%`,
-          inline: true,
-        },
-        {
-          name: "Confidence",
-          value: `${predictions.confidence}%`,
-          inline: true,
-        }
-      )
-      .setColor(
-        predictions.raidLikelihood > 50
-          ? 0xff0000
-          : predictions.raidLikelihood > 30
-          ? 0xff8800
-          : 0x00ff00
-      )
-      .setTimestamp();
-
-    // Add predictive insights
-    const insights = [];
-    if (predictions.raidLikelihood > 50) {
-      insights.push("🔴 High raid risk detected - Consider lockdown mode");
-      embed.addFields({
-        name: "⚠️ Immediate Action Recommended",
-        value:
-          "• Enable lockdown: `/lockdown enable`\n• Increase anti-raid sensitivity\n• Monitor join rate closely",
-        inline: false,
-      });
-    } else if (predictions.raidLikelihood > 30) {
-      insights.push("🟡 Moderate raid risk - Monitor closely");
-      embed.addFields({
-        name: "💡 Preventive Measures",
-        value:
-          "• Review recent joins: `/scan recent`\n• Check threat network: `/threatnet check`\n• Consider increasing join gate strictness",
-        inline: false,
-      });
-    }
-
-    if (predictions.nukeLikelihood > 40) {
-      insights.push("🔴 High nuke risk - Review admin permissions");
-      embed.addFields({
-        name: "🛡️ Nuke Protection",
-        value:
-          "• Review admin roles: `/security audit`\n• Enable rescue key: `/rescue generate`\n• Check role hierarchy",
-        inline: false,
-      });
-    }
-
-    // Add trend analysis if available
-    const trends = await this.analyzeTrends(interaction.guild.id);
-    if (trends) {
-      embed.addFields({
-        name: "📈 Trend Analysis",
-        value: trends,
-        inline: false,
-      });
-    }
-
-    await interaction.editReply({ embeds: [embed] });
-  },
-
-  async analyzeTrends(guildId) {
-    try {
-      const db = require("../utils/database");
-
-      // Get join rate trend (last 7 days vs previous 7 days)
-      const recentJoins = await new Promise((resolve, reject) => {
-        db.db.get(
-          "SELECT COUNT(*) as count FROM anti_raid_logs WHERE guild_id = ? AND timestamp > ? AND timestamp < ?",
-          [guildId, Date.now() - 604800000, Date.now() - 172800000],
-          (err, row) => {
-            if (err) reject(err);
-            else resolve(row?.count || 0);
+      const embed = new EmbedBuilder()
+        .setTitle('🤖 AI Threat Prediction Analysis')
+        .setDescription(`Current threat assessment for ${interaction.guild.name}`)
+        .setColor(
+          prediction.level === 'Critical' ? '#c53030' :
+          prediction.level === 'High' ? '#f56565' :
+          prediction.level === 'Medium' ? '#ed8936' :
+          prediction.level === 'Low' ? '#ecc94b' :
+          '#48bb78'
+        )
+        .addFields(
+          {
+            name: '⚠️ Threat Score',
+            value: `**${prediction.score}/100** (${prediction.level})`,
+            inline: true
+          },
+          {
+            name: '📊 Recent Joins',
+            value: `${prediction.recentJoins} in last 60s`,
+            inline: true
+          },
+          {
+            name: '🔍 Patterns Detected',
+            value: prediction.patterns.length > 0 
+              ? prediction.patterns.join(', ') 
+              : 'None',
+            inline: false
           }
-        );
-      });
+        )
+        .setTimestamp();
 
-      const previousJoins = await new Promise((resolve, reject) => {
-        db.db.get(
-          "SELECT COUNT(*) as count FROM anti_raid_logs WHERE guild_id = ? AND timestamp > ? AND timestamp < ?",
-          [guildId, Date.now() - 1209600000, Date.now() - 604800000],
-          (err, row) => {
-            if (err) reject(err);
-            else resolve(row?.count || 0);
-          }
-        );
-      });
-
-      if (recentJoins > previousJoins * 1.5) {
-        return `⚠️ Join rate increased ${Math.round(
-          ((recentJoins - previousJoins) / previousJoins) * 100
-        )}% - Potential raid preparation`;
-      } else if (recentJoins < previousJoins * 0.5) {
-        return `✅ Join rate decreased - Server activity normalizing`;
+      // Add pattern details
+      if (prediction.patternDetails && Object.keys(prediction.patternDetails).length > 0) {
+        const patternText = Object.entries(prediction.patternDetails)
+          .map(([key, data]) => `**${key}:** ${data.value} (+${Math.round(data.contribution)} points)`)
+          .join('\n');
+        
+        embed.addFields({
+          name: '📋 Pattern Breakdown',
+          value: patternText,
+          inline: false
+        });
       }
 
-      return null;
-    } catch (error) {
-      return null;
+      // Add recommendations
+      if (prediction.recommendations.length > 0) {
+        embed.addFields({
+          name: '💡 Recommended Actions',
+          value: prediction.recommendations.join('\n'),
+          inline: false
+        });
+      } else {
+        embed.addFields({
+          name: '✅ Status',
+          value: 'No immediate action needed. Server looks safe.',
+          inline: false
+        });
+      }
+
+      embed.setFooter({ 
+        text: prediction.score >= 70 
+          ? '🚨 High threat - Take action immediately!' 
+          : prediction.score >= 30
+          ? 'Monitor closely for changes'
+          : 'Server appears secure'
+      });
+
+      await interaction.editReply({ embeds: [embed] });
+    } else if (subcommand === 'history') {
+      await interaction.deferReply({ ephemeral: true });
+
+      const history = await threatPredictor.getPredictionHistory(interaction.guild.id);
+
+      if (history.length === 0) {
+        return await interaction.editReply({
+          content: '📊 No prediction history yet. Use `/predict now` to start!'
+        });
+      }
+
+      const embed = new EmbedBuilder()
+        .setTitle('📊 Threat Prediction History')
+        .setDescription(`Last ${history.length} AI predictions for ${interaction.guild.name}`)
+        .setColor('#667eea')
+        .setTimestamp();
+
+      history.slice(0, 10).forEach((pred, index) => {
+        const patterns = JSON.parse(pred.patterns_detected || '[]');
+        embed.addFields({
+          name: `${index + 1}. <t:${Math.floor(pred.timestamp / 1000)}:R>`,
+          value: [
+            `**Score:** ${pred.prediction_score}/100`,
+            `**Patterns:** ${patterns.length > 0 ? patterns.join(', ') : 'None'}`,
+            pred.was_accurate !== null 
+              ? `**Accurate:** ${pred.was_accurate ? '✅ Yes' : '❌ No'}` 
+              : ''
+          ].filter(Boolean).join('\n'),
+          inline: true
+        });
+      });
+
+      await interaction.editReply({ embeds: [embed] });
     }
   },
 };

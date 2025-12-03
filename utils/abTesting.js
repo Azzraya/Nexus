@@ -1,7 +1,7 @@
 // A/B Testing System
 // Test different moderation strategies and measure effectiveness
 
-const db = require('./database');
+const db = require("./database");
 
 class ABTesting {
   constructor() {
@@ -38,7 +38,7 @@ class ABTesting {
         `INSERT INTO ab_tests (guild_id, test_name, variant_a, variant_b, metric, start_date, status) 
          VALUES (?, ?, ?, ?, ?, ?, 'running')`,
         [guildId, testName, variantA, variantB, metric, Date.now()],
-        function(err) {
+        function (err) {
           if (err) reject(err);
           else resolve({ id: this.lastID });
         }
@@ -51,8 +51,8 @@ class ABTesting {
    */
   async recordResult(testId, variant, value) {
     return new Promise((resolve, reject) => {
-      const field = variant === 'a' ? 'results_a' : 'results_b';
-      
+      const field = variant === "a" ? "results_a" : "results_b";
+
       db.db.get(
         `SELECT ${field} FROM ab_tests WHERE id = ?`,
         [testId],
@@ -82,7 +82,7 @@ class ABTesting {
     try {
       const test = await new Promise((resolve, reject) => {
         db.db.get(
-          'SELECT * FROM ab_tests WHERE id = ?',
+          "SELECT * FROM ab_tests WHERE id = ?",
           [testId],
           (err, row) => {
             if (err) reject(err);
@@ -97,11 +97,13 @@ class ABTesting {
       const resultsB = test.results_b ? JSON.parse(test.results_b) : [];
 
       // Calculate statistics
-      const avgA = resultsA.reduce((sum, v) => sum + v, 0) / resultsA.length || 0;
-      const avgB = resultsB.reduce((sum, v) => sum + v, 0) / resultsB.length || 0;
+      const avgA =
+        resultsA.reduce((sum, v) => sum + v, 0) / resultsA.length || 0;
+      const avgB =
+        resultsB.reduce((sum, v) => sum + v, 0) / resultsB.length || 0;
 
       const improvement = ((avgB - avgA) / avgA) * 100;
-      const winner = avgB > avgA ? 'B' : avgA > avgB ? 'A' : 'Tie';
+      const winner = avgB > avgA ? "B" : avgA > avgB ? "A" : "Tie";
 
       return {
         testName: test.test_name,
@@ -110,18 +112,18 @@ class ABTesting {
         metric: test.metric,
         resultsA: {
           count: resultsA.length,
-          average: Math.round(avgA * 100) / 100
+          average: Math.round(avgA * 100) / 100,
         },
         resultsB: {
           count: resultsB.length,
-          average: Math.round(avgB * 100) / 100
+          average: Math.round(avgB * 100) / 100,
         },
         improvement: Math.round(improvement * 100) / 100,
         winner,
-        confidence: this.calculateConfidence(resultsA, resultsB)
+        confidence: this.calculateConfidence(resultsA, resultsB),
       };
     } catch (error) {
-      console.error('[A/B Testing] Calculate results error:', error);
+      console.error("[A/B Testing] Calculate results error:", error);
       return null;
     }
   }
@@ -134,11 +136,11 @@ class ABTesting {
     const sampleSize = Math.min(resultsA.length, resultsB.length);
 
     if (sampleSize < minSampleSize) {
-      return 'Low (need more data)';
+      return "Low (need more data)";
     } else if (sampleSize < 100) {
-      return 'Medium';
+      return "Medium";
     } else {
-      return 'High';
+      return "High";
     }
   }
 
@@ -147,7 +149,7 @@ class ABTesting {
    */
   async endTest(testId) {
     const results = await this.calculateResults(testId);
-    
+
     return new Promise((resolve, reject) => {
       db.db.run(
         `UPDATE ab_tests SET status = 'completed', end_date = ?, winner = ? WHERE id = ?`,
@@ -162,4 +164,3 @@ class ABTesting {
 }
 
 module.exports = new ABTesting();
-
