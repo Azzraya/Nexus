@@ -495,21 +495,7 @@ class Database {
             )
         `);
 
-    // API keys for REST API
-    this.db.run(`
-            CREATE TABLE IF NOT EXISTS api_keys (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                guild_id TEXT,
-                key_hash TEXT UNIQUE,
-                name TEXT,
-                permissions TEXT,
-                created_by TEXT,
-                created_at INTEGER,
-                last_used INTEGER,
-                expires_at INTEGER,
-                enabled INTEGER DEFAULT 1
-            )
-        `);
+    // API keys table removed - now using Discord user-bound api_keys at line 706
 
     // Scheduled actions
     this.db.run(`
