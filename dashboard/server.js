@@ -9,6 +9,7 @@ class DashboardServer {
   constructor(client) {
     this.client = client;
     this.app = express();
+    this.rateLimitStore = new Map(); // IP -> { count, resetTime }
 
     // Middleware
     this.app.use(express.json());
@@ -46,6 +47,56 @@ class DashboardServer {
       if (req.method === "OPTIONS") {
         return res.sendStatus(200);
       }
+      next();
+    });
+
+    // Rate Limiting Middleware (BEFORE IP logging)
+    this.app.use((req, res, next) => {
+      // Skip rate limiting for authenticated users
+      if (req.user) {
+        return next();
+      }
+
+      const ip =
+        req.ip ||
+        req.connection.remoteAddress ||
+        req.headers["x-forwarded-for"];
+      const cleanIP = ip?.replace("::ffff:", "") || "unknown";
+
+      // Rate limit: 100 requests per minute per IP
+      const now = Date.now();
+      const windowMs = 60 * 1000; // 1 minute
+      const maxRequests = 100;
+
+      if (!this.rateLimitStore.has(cleanIP)) {
+        this.rateLimitStore.set(cleanIP, {
+          count: 1,
+          resetTime: now + windowMs,
+        });
+        return next();
+      }
+
+      const record = this.rateLimitStore.get(cleanIP);
+
+      // Reset if window expired
+      if (now > record.resetTime) {
+        record.count = 1;
+        record.resetTime = now + windowMs;
+        return next();
+      }
+
+      // Check if over limit
+      if (record.count >= maxRequests) {
+        console.log(`[Rate Limit] Blocked ${cleanIP} - ${record.count} requests in last minute`);
+        return res.status(429).json({
+          error: "Too many requests",
+          message: "Rate limit exceeded. Try again in 1 minute.",
+          retryAfter: Math.ceil((record.resetTime - now) / 1000),
+        });
+      }
+
+      // Increment counter
+      record.count++;
       next();
     });
 
@@ -1437,6 +1488,16 @@ class DashboardServer {
     // Setup public API
     this.setupPublicAPI();
 
+    // Clean up old rate limit entries every 5 minutes
+    setInterval(() => {
+      const now = Date.now();
+      for (const [ip, record] of this.rateLimitStore.entries()) {
+        if (now > record.resetTime + 300000) { // 5 minutes after reset
+          this.rateLimitStore.delete(ip);
+        }
+      }
+    }, 300000);
+
     this.app.listen(port, () => {
       console.log(`[Dashboard] Running on http://localhost:${port}`);
       console.log(
@@ -1444,6 +1505,7 @@ class DashboardServer {
           process.env.DASHBOARD_URL || "Set DASHBOARD_URL in .env"
         }`
       );
+      console.log("[Rate Limit] IP rate limiting active (100 req/min)");
     });
   }
 }
