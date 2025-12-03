@@ -345,6 +345,107 @@ footer a:hover {
   color: #fff;
 }
 
+/* Origin Story Section */
+.origin-story {
+  padding: 80px 20px;
+  background: linear-gradient(
+    135deg,
+    rgba(147, 51, 234, 0.1) 0%,
+    rgba(183, 148, 246, 0.1) 100%
+  );
+}
+
+.origin-story h2 {
+  text-align: center;
+  font-size: 2.5rem;
+  margin-bottom: 50px;
+  background: linear-gradient(135deg, #b794f6 0%, #9333ea 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.story-content {
+  max-width: 800px;
+  margin: 0 auto;
+  font-size: 1.1rem;
+  line-height: 1.8;
+}
+
+.story-lead {
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin-bottom: 30px;
+  text-align: center;
+  color: #b794f6;
+}
+
+.story-content p {
+  margin-bottom: 25px;
+  opacity: 0.9;
+}
+
+.story-content strong {
+  color: #b794f6;
+  font-weight: 700;
+}
+
+.story-cta {
+  font-size: 1.2rem;
+  font-weight: 600;
+  text-align: center;
+  margin-top: 40px;
+  padding-top: 30px;
+  border-top: 2px solid rgba(183, 148, 246, 0.3);
+}
+
+/* Trust Stats Section */
+.trust-stats {
+  padding: 60px 20px;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.trust-header {
+  text-align: center;
+  font-size: 1rem;
+  opacity: 0.7;
+  margin-bottom: 30px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.trust-numbers {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 40px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.trust-item {
+  text-align: center;
+}
+
+.trust-number {
+  font-size: 3rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, #b794f6 0%, #9333ea 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 10px;
+}
+
+.trust-label {
+  font-size: 0.9rem;
+  opacity: 0.7;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
 /* Scroll to top button */
 .scroll-top {
   position: fixed;
