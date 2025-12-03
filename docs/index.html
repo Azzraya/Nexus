@@ -52,7 +52,9 @@
   </head>
   <body>
     <!-- Back to Top Button -->
-    <button class="back-to-top" id="backToTop" onclick="scrollToTop()">↑</button>
+    <button class="back-to-top" id="backToTop" onclick="scrollToTop()">
+      ↑
+    </button>
 
     <nav class="navbar">
       <div class="container">
@@ -75,11 +77,7 @@
             class="btn-dashboard"
             >Dashboard</a
           >
-          <a
-            href="setup-wizard.html"
-            class="btn-nav"
-            >Get Started</a
-          >
+          <a href="setup-wizard.html" class="btn-nav">Get Started</a>
         </div>
       </div>
     </nav>
@@ -105,7 +103,7 @@
             <a
               href="setup-wizard.html"
               class="btn btn-primary"
-              style="font-size: 1.3rem; padding: 18px 45px;"
+              style="font-size: 1.3rem; padding: 18px 45px"
             >
               🚀 Start Setup Wizard
             </a>
@@ -309,79 +307,247 @@
     </div>
 
     <!-- Screenshots Gallery -->
-    <div style="padding: 80px 0; background: rgba(0, 0, 0, 0.2);">
+    <div style="padding: 80px 0; background: rgba(0, 0, 0, 0.2)">
       <div class="container">
-        <h2 style="text-align: center; font-size: 2.5rem; margin-bottom: 20px;">📸 See Nexus in Action</h2>
-        <p style="text-align: center; opacity: 0.9; margin-bottom: 50px; font-size: 1.2rem;">
+        <h2 style="text-align: center; font-size: 2.5rem; margin-bottom: 20px">
+          📸 See Nexus in Action
+        </h2>
+        <p
+          style="
+            text-align: center;
+            opacity: 0.9;
+            margin-bottom: 50px;
+            font-size: 1.2rem;
+          "
+        >
           Real screenshots from the dashboard and bot features
         </p>
-        
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px;">
-          <div style="background: rgba(255, 255, 255, 0.1); border-radius: 15px; overflow: hidden; border: 2px solid rgba(255, 255, 255, 0.2); transition: all 0.3s; cursor: pointer;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform=''">
-            <div style="aspect-ratio: 16/9; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; font-size: 4rem;">
+
+        <div
+          style="
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+          "
+        >
+          <div
+            style="
+              background: rgba(255, 255, 255, 0.1);
+              border-radius: 15px;
+              overflow: hidden;
+              border: 2px solid rgba(255, 255, 255, 0.2);
+              transition: all 0.3s;
+              cursor: pointer;
+            "
+            onmouseover="this.style.transform='scale(1.05)'"
+            onmouseout="this.style.transform=''"
+          >
+            <div
+              style="
+                aspect-ratio: 16/9;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 4rem;
+              "
+            >
               🎛️
             </div>
-            <div style="padding: 20px;">
-              <h3 style="margin-bottom: 10px;">Dashboard Overview</h3>
-              <p style="opacity: 0.8; font-size: 0.95rem;">Clean, modern interface for managing all settings</p>
+            <div style="padding: 20px">
+              <h3 style="margin-bottom: 10px">Dashboard Overview</h3>
+              <p style="opacity: 0.8; font-size: 0.95rem">
+                Clean, modern interface for managing all settings
+              </p>
             </div>
           </div>
 
-          <div style="background: rgba(255, 255, 255, 0.1); border-radius: 15px; overflow: hidden; border: 2px solid rgba(255, 255, 255, 0.2); transition: all 0.3s; cursor: pointer;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform=''">
-            <div style="aspect-ratio: 16/9; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; font-size: 4rem;">
+          <div
+            style="
+              background: rgba(255, 255, 255, 0.1);
+              border-radius: 15px;
+              overflow: hidden;
+              border: 2px solid rgba(255, 255, 255, 0.2);
+              transition: all 0.3s;
+              cursor: pointer;
+            "
+            onmouseover="this.style.transform='scale(1.05)'"
+            onmouseout="this.style.transform=''"
+          >
+            <div
+              style="
+                aspect-ratio: 16/9;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 4rem;
+              "
+            >
               🛡️
             </div>
-            <div style="padding: 20px;">
-              <h3 style="margin-bottom: 10px;">Anti-Nuke Protection</h3>
-              <p style="opacity: 0.8; font-size: 0.95rem;">Real-time threat detection and prevention</p>
+            <div style="padding: 20px">
+              <h3 style="margin-bottom: 10px">Anti-Nuke Protection</h3>
+              <p style="opacity: 0.8; font-size: 0.95rem">
+                Real-time threat detection and prevention
+              </p>
             </div>
           </div>
 
-          <div style="background: rgba(255, 255, 255, 0.1); border-radius: 15px; overflow: hidden; border: 2px solid rgba(255, 255, 255, 0.2); transition: all 0.3s; cursor: pointer;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform=''">
-            <div style="aspect-ratio: 16/9; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; font-size: 4rem;">
+          <div
+            style="
+              background: rgba(255, 255, 255, 0.1);
+              border-radius: 15px;
+              overflow: hidden;
+              border: 2px solid rgba(255, 255, 255, 0.2);
+              transition: all 0.3s;
+              cursor: pointer;
+            "
+            onmouseover="this.style.transform='scale(1.05)'"
+            onmouseout="this.style.transform=''"
+          >
+            <div
+              style="
+                aspect-ratio: 16/9;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 4rem;
+              "
+            >
               📊
             </div>
-            <div style="padding: 20px;">
-              <h3 style="margin-bottom: 10px;">Analytics & Charts</h3>
-              <p style="opacity: 0.8; font-size: 0.95rem;">Visual insights into your server's security</p>
+            <div style="padding: 20px">
+              <h3 style="margin-bottom: 10px">Analytics & Charts</h3>
+              <p style="opacity: 0.8; font-size: 0.95rem">
+                Visual insights into your server's security
+              </p>
             </div>
           </div>
         </div>
 
-        <p style="text-align: center; margin-top: 30px; opacity: 0.7; font-size: 0.95rem;">
+        <p
+          style="
+            text-align: center;
+            margin-top: 30px;
+            opacity: 0.7;
+            font-size: 0.95rem;
+          "
+        >
           💡 Want to add your own screenshots? Contact us!
         </p>
       </div>
     </div>
 
     <!-- Testimonials -->
-    <div style="padding: 80px 0;">
+    <div style="padding: 80px 0">
       <div class="container">
-        <h2 style="text-align: center; font-size: 2.5rem; margin-bottom: 20px;">💬 What Server Owners Say</h2>
-        <p style="text-align: center; opacity: 0.9; margin-bottom: 50px; font-size: 1.2rem;">
+        <h2 style="text-align: center; font-size: 2.5rem; margin-bottom: 20px">
+          💬 What Server Owners Say
+        </h2>
+        <p
+          style="
+            text-align: center;
+            opacity: 0.9;
+            margin-bottom: 50px;
+            font-size: 1.2rem;
+          "
+        >
           Real feedback from communities protected by Nexus
         </p>
 
-        <div id="testimonials-carousel" style="max-width: 800px; margin: 0 auto;">
-          <div class="testimonial-slide" style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); padding: 40px; border-radius: 20px; border: 2px solid rgba(255, 255, 255, 0.2); text-align: center;">
-            <div style="font-size: 3rem; margin-bottom: 20px;">⭐⭐⭐⭐⭐</div>
-            <p style="font-size: 1.3rem; font-style: italic; margin-bottom: 25px; line-height: 1.8;">
-              "Stopped 3 raid attempts in our first week. The auto-recovery saved us when someone went rogue. Best security bot we've used."
+        <div
+          id="testimonials-carousel"
+          style="max-width: 800px; margin: 0 auto"
+        >
+          <div
+            class="testimonial-slide"
+            style="
+              background: rgba(255, 255, 255, 0.1);
+              backdrop-filter: blur(10px);
+              padding: 40px;
+              border-radius: 20px;
+              border: 2px solid rgba(255, 255, 255, 0.2);
+              text-align: center;
+            "
+          >
+            <div style="font-size: 3rem; margin-bottom: 20px">⭐⭐⭐⭐⭐</div>
+            <p
+              style="
+                font-size: 1.3rem;
+                font-style: italic;
+                margin-bottom: 25px;
+                line-height: 1.8;
+              "
+            >
+              "Stopped 3 raid attempts in our first week. The auto-recovery
+              saved us when someone went rogue. Best security bot we've used."
             </p>
-            <div style="display: flex; align-items: center; justify-content: center; gap: 15px;">
-              <div style="width: 50px; height: 50px; border-radius: 50%; background: #667eea; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">👤</div>
-              <div style="text-align: left;">
-                <div style="font-weight: 700;">Server Owner</div>
-                <div style="opacity: 0.7; font-size: 0.9rem;">Gaming Community • 166 members</div>
+            <div
+              style="
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 15px;
+              "
+            >
+              <div
+                style="
+                  width: 50px;
+                  height: 50px;
+                  border-radius: 50%;
+                  background: #667eea;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  font-size: 1.5rem;
+                "
+              >
+                👤
+              </div>
+              <div style="text-align: left">
+                <div style="font-weight: 700">Server Owner</div>
+                <div style="opacity: 0.7; font-size: 0.9rem">
+                  Gaming Community • 166 members
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        <div style="text-align: center; margin-top: 30px;">
-          <button onclick="rotateTestimonial(-1)" style="background: rgba(255, 255, 255, 0.2); border: none; color: white; font-size: 2rem; padding: 10px 20px; border-radius: 10px; cursor: pointer; margin: 0 10px;">←</button>
-          <span id="testimonial-indicator" style="opacity: 0.7;">1 / 3</span>
-          <button onclick="rotateTestimonial(1)" style="background: rgba(255, 255, 255, 0.2); border: none; color: white; font-size: 2rem; padding: 10px 20px; border-radius: 10px; cursor: pointer; margin: 0 10px;">→</button>
+        <div style="text-align: center; margin-top: 30px">
+          <button
+            onclick="rotateTestimonial(-1)"
+            style="
+              background: rgba(255, 255, 255, 0.2);
+              border: none;
+              color: white;
+              font-size: 2rem;
+              padding: 10px 20px;
+              border-radius: 10px;
+              cursor: pointer;
+              margin: 0 10px;
+            "
+          >
+            ←
+          </button>
+          <span id="testimonial-indicator" style="opacity: 0.7">1 / 3</span>
+          <button
+            onclick="rotateTestimonial(1)"
+            style="
+              background: rgba(255, 255, 255, 0.2);
+              border: none;
+              color: white;
+              font-size: 2rem;
+              padding: 10px 20px;
+              border-radius: 10px;
+              cursor: pointer;
+              margin: 0 10px;
+            "
+          >
+            →
+          </button>
         </div>
       </div>
     </div>
@@ -679,38 +845,42 @@
           author: "Server Owner",
           server: "Gaming Community",
           members: "166 members",
-          stars: 5
+          stars: 5,
         },
         {
           text: "The bulk operations feature is a game-changer. I manage 5 servers and can update all of them in seconds. Wick doesn't have this!",
           author: "Network Admin",
           server: "Multi-Server Network",
           members: "500+ total members",
-          stars: 5
+          stars: 5,
         },
         {
           text: "Free, open-source, and better than paid alternatives. The template library made setup take literally 2 minutes. Incredible.",
           author: "Community Manager",
           server: "RP Community",
           members: "53 members",
-          stars: 5
-        }
+          stars: 5,
+        },
       ];
 
       let currentTestimonial = 0;
 
       function rotateTestimonial(direction) {
-        currentTestimonial = (currentTestimonial + direction + testimonials.length) % testimonials.length;
+        currentTestimonial =
+          (currentTestimonial + direction + testimonials.length) %
+          testimonials.length;
         showTestimonial(currentTestimonial);
       }
 
       function showTestimonial(index) {
         const testimonial = testimonials[index];
         const carousel = document.getElementById("testimonials-carousel");
-        
+
         carousel.innerHTML = `
           <div class="testimonial-slide" style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); padding: 40px; border-radius: 20px; border: 2px solid rgba(255, 255, 255, 0.2); text-align: center; animation: fadeIn 0.5s;">
-            <div style="font-size: 3rem; margin-bottom: 20px;">${'⭐'.repeat(testimonial.stars)}</div>
+            <div style="font-size: 3rem; margin-bottom: 20px;">${"⭐".repeat(
+              testimonial.stars
+            )}</div>
             <p style="font-size: 1.3rem; font-style: italic; margin-bottom: 25px; line-height: 1.8;">
               "${testimonial.text}"
             </p>
@@ -718,13 +888,17 @@
               <div style="width: 50px; height: 50px; border-radius: 50%; background: #667eea; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">👤</div>
               <div style="text-align: left;">
                 <div style="font-weight: 700;">${testimonial.author}</div>
-                <div style="opacity: 0.7; font-size: 0.9rem;">${testimonial.server} • ${testimonial.members}</div>
+                <div style="opacity: 0.7; font-size: 0.9rem;">${
+                  testimonial.server
+                } • ${testimonial.members}</div>
               </div>
             </div>
           </div>
         `;
 
-        document.getElementById("testimonial-indicator").textContent = `${index + 1} / ${testimonials.length}`;
+        document.getElementById("testimonial-indicator").textContent = `${
+          index + 1
+        } / ${testimonials.length}`;
       }
 
       // Auto-rotate testimonials every 5 seconds
@@ -732,7 +906,7 @@
 
       // Back to Top Button
       const backToTop = document.getElementById("backToTop");
-      
+
       window.addEventListener("scroll", () => {
         if (window.scrollY > 500) {
           backToTop.classList.add("visible");
@@ -746,10 +920,15 @@
       }
 
       // Keyboard shortcut: Press 's' for search
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 's' && !e.ctrlKey && !e.metaKey && document.activeElement.tagName !== 'INPUT') {
+      document.addEventListener("keydown", (e) => {
+        if (
+          e.key === "s" &&
+          !e.ctrlKey &&
+          !e.metaKey &&
+          document.activeElement.tagName !== "INPUT"
+        ) {
           e.preventDefault();
-          window.location.href = 'search.html';
+          window.location.href = "search.html";
         }
       });
     </script>
