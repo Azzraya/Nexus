@@ -715,21 +715,32 @@ module.exports = {
             });
           }
 
-          const ticketChannel = await interaction.guild.channels.create({
-            name: `ticket-${interaction.user.username}`,
-            type: 0, // Text channel
-            parent: category.id,
-            permissionOverwrites: [
-              {
-                id: interaction.guild.id,
-                deny: ["ViewChannel"],
-              },
-              {
-                id: interaction.user.id,
-                allow: ["ViewChannel", "SendMessages", "ReadMessageHistory"],
-              },
-            ],
-          });
+          let ticketChannel;
+          try {
+            ticketChannel = await interaction.guild.channels.create({
+              name: `ticket-${interaction.user.username}`,
+              type: 0, // Text channel
+              parent: category.id,
+              permissionOverwrites: [
+                {
+                  id: interaction.guild.id,
+                  deny: ["ViewChannel"],
+                },
+                {
+                  id: interaction.user.id,
+                  allow: ["ViewChannel", "SendMessages", "ReadMessageHistory"],
+                },
+              ],
+            });
+          } catch (error) {
+            if (error.code === 50013) {
+              return interaction.reply({
+                content: "❌ I don't have permission to create channels! Please give me **Manage Channels** permission.",
+                flags: MessageFlags.Ephemeral,
+              });
+            }
+            throw error; // Re-throw if not a permissions error
+          }
 
           await db.createTicket(
             interaction.guild.id,
