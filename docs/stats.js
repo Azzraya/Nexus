@@ -20,7 +20,8 @@ async function fetchLiveStats() {
     const response = await fetch(API_URL, {
       mode: 'cors',
       headers: {
-        'Accept': 'application/json'
+        'Accept': 'application/json',
+        'ngrok-skip-browser-warning': 'true'
       }
     });
     
