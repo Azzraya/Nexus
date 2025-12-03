@@ -1011,34 +1011,6 @@ class DashboardServer {
       }
     );
 
-    // GET /api/v1/stats - Get basic bot stats (public - no auth)
-    this.app.get("/api/v1/stats", async (req, res) => {
-      try {
-        const serverCount = this.client?.guilds.cache.size || 0;
-        const userCount = this.client?.guilds.cache.reduce(
-          (acc, guild) => acc + guild.memberCount,
-          0
-        ) || 0;
-
-        res.json({
-          serverCount,
-          userCount,
-          avgResponseTime: 50, // Placeholder
-          commandCount: this.client?.commands?.size || 88,
-          uptime: this.client?.uptime || 0
-        });
-      } catch (error) {
-        console.error("[Stats API] Error:", error);
-        res.json({
-          serverCount: 17,
-          userCount: 0,
-          avgResponseTime: 50,
-          commandCount: 88,
-          uptime: 0
-        });
-      }
-    });
-
     // GET /api/v1/security-analytics - Get real security analytics
     this.app.get("/api/v1/security-analytics", async (req, res) => {
       try {
