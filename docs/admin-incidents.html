@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Incident Manager - Nexus</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 40px 20px;
+      color: #fff;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .subtitle {
+      text-align: center;
+      opacity: 0.9;
+      margin-bottom: 40px;
+      font-size: 1.1rem;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 30px;
+      margin-bottom: 30px;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+    }
+
+    h2 {
+      font-size: 1.8rem;
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 12px 16px;
+      border-radius: 10px;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      font-size: 1rem;
+      font-family: inherit;
+    }
+
+    input::placeholder, textarea::placeholder {
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .btn {
+      padding: 12px 30px;
+      border-radius: 10px;
+      border: none;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .btn-primary {
+      background: #fff;
+      color: #667eea;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(255, 255, 255, 0.3);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.2);
+      color: #fff;
+    }
+
+    .btn-danger {
+      background: #ff4444;
+      color: #fff;
+    }
+
+    .timeline-builder {
+      background: rgba(0, 0, 0, 0.2);
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+
+    .timeline-item {
+      display: grid;
+      grid-template-columns: 1fr 2fr auto;
+      gap: 10px;
+      margin-bottom: 10px;
+      align-items: center;
+    }
+
+    .output-section {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 20px;
+      border-radius: 10px;
+      margin-top: 20px;
+    }
+
+    .json-output {
+      background: #1a1a1a;
+      padding: 20px;
+      border-radius: 10px;
+      color: #00ff00;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9rem;
+      overflow-x: auto;
+      white-space: pre;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .copy-btn {
+      float: right;
+      padding: 8px 16px;
+      font-size: 0.85rem;
+    }
+
+    .alert {
+      padding: 15px 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      font-weight: 600;
+    }
+
+    .alert-success {
+      background: rgba(0, 255, 0, 0.2);
+      border: 2px solid #00ff00;
+    }
+
+    .alert-info {
+      background: rgba(0, 170, 255, 0.2);
+      border: 2px solid #00aaff;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🛠️ Incident Manager</h1>
+    <p class="subtitle">Create and manage status page incidents</p>
+
+    <div class="alert alert-info">
+      ℹ️ <strong>How to use:</strong> Fill in the form below, then copy the generated JSON and paste it into <code>docs/incidents.json</code>
+    </div>
+
+    <div class="card">
+      <h2>Create New Incident</h2>
+      
+      <div class="form-group">
+        <label>Status</label>
+        <select id="status">
+          <option value="investigating">🔍 Investigating</option>
+          <option value="outage">🔴 Outage</option>
+          <option value="resolved">✅ Resolved</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Title</label>
+        <input type="text" id="title" placeholder="e.g., Brief Connection Issue">
+      </div>
+
+      <div class="form-group">
+        <label>Description</label>
+        <textarea id="description" placeholder="Describe what happened..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Start Time</label>
+        <input type="datetime-local" id="startTime">
+      </div>
+
+      <div class="form-group">
+        <label>End Time (leave empty if ongoing)</label>
+        <input type="datetime-local" id="endTime">
+      </div>
+
+      <div class="form-group">
+        <label>Timeline Events</label>
+        <div class="timeline-builder" id="timelineBuilder">
+          <div class="timeline-item">
+            <input type="time" placeholder="Time" class="timeline-time">
+            <input type="text" placeholder="Event description" class="timeline-text">
+            <button class="btn btn-danger" onclick="removeTimelineItem(this)">Remove</button>
+          </div>
+        </div>
+        <button class="btn btn-secondary" onclick="addTimelineItem()">+ Add Timeline Event</button>
+      </div>
+
+      <button class="btn btn-primary" onclick="generateIncident()">Generate JSON</button>
+    </div>
+
+    <div class="card">
+      <h2>Create Scheduled Maintenance</h2>
+      
+      <div class="form-group">
+        <label>Title</label>
+        <input type="text" id="maintenanceTitle" placeholder="e.g., Database Upgrade">
+      </div>
+
+      <div class="form-group">
+        <label>Description</label>
+        <textarea id="maintenanceDescription" placeholder="Describe the maintenance..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Start Time</label>
+        <input type="datetime-local" id="maintenanceStartTime">
+      </div>
+
+      <div class="form-group">
+        <label>End Time</label>
+        <input type="datetime-local" id="maintenanceEndTime">
+      </div>
+
+      <button class="btn btn-primary" onclick="generateMaintenance()">Generate Maintenance JSON</button>
+    </div>
+
+    <div class="card output-section" id="outputSection" style="display: none;">
+      <button class="btn btn-primary copy-btn" onclick="copyJSON()">📋 Copy JSON</button>
+      <h2>Generated JSON</h2>
+      <p style="opacity: 0.8; margin-bottom: 15px;">Copy this and paste it into <code>docs/incidents.json</code></p>
+      <div class="json-output" id="jsonOutput"></div>
+      <div id="copyAlert" style="display: none;" class="alert alert-success" style="margin-top: 15px;">
+        ✅ JSON copied to clipboard!
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Set current time as default
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+    document.getElementById('startTime').value = now.toISOString().slice(0, 16);
+
+    function addTimelineItem() {
+      const builder = document.getElementById('timelineBuilder');
+      const item = document.createElement('div');
+      item.className = 'timeline-item';
+      item.innerHTML = `
+        <input type="time" placeholder="Time" class="timeline-time">
+        <input type="text" placeholder="Event description" class="timeline-text">
+        <button class="btn btn-danger" onclick="removeTimelineItem(this)">Remove</button>
+      `;
+      builder.appendChild(item);
+    }
+
+    function removeTimelineItem(btn) {
+      btn.parentElement.remove();
+    }
+
+    function generateIncident() {
+      const status = document.getElementById('status').value;
+      const title = document.getElementById('title').value;
+      const description = document.getElementById('description').value;
+      const startTime = document.getElementById('startTime').value;
+      const endTime = document.getElementById('endTime').value;
+
+      if (!title || !description || !startTime) {
+        alert('Please fill in required fields: Title, Description, and Start Time');
+        return;
+      }
+
+      // Get timeline events
+      const timelineItems = document.querySelectorAll('.timeline-item');
+      const timeline = [];
+      timelineItems.forEach(item => {
+        const time = item.querySelector('.timeline-time').value;
+        const text = item.querySelector('.timeline-text').value;
+        if (time && text) {
+          const date = new Date(startTime);
+          const [hours, minutes] = time.split(':');
+          date.setHours(parseInt(hours), parseInt(minutes));
+          timeline.push({
+            time: date.toISOString(),
+            text: text
+          });
+        }
+      });
+
+      const incident = {
+        id: Date.now(),
+        status: status,
+        title: title,
+        description: description,
+        startTime: new Date(startTime).toISOString(),
+        endTime: endTime ? new Date(endTime).toISOString() : null,
+        timeline: timeline
+      };
+
+      displayJSON(incident, 'incident');
+    }
+
+    function generateMaintenance() {
+      const title = document.getElementById('maintenanceTitle').value;
+      const description = document.getElementById('maintenanceDescription').value;
+      const startTime = document.getElementById('maintenanceStartTime').value;
+      const endTime = document.getElementById('maintenanceEndTime').value;
+
+      if (!title || !description || !startTime || !endTime) {
+        alert('Please fill in all maintenance fields');
+        return;
+      }
+
+      const maintenance = {
+        id: Date.now(),
+        title: title,
+        description: description,
+        startTime: new Date(startTime).toISOString(),
+        endTime: new Date(endTime).toISOString()
+      };
+
+      displayJSON(maintenance, 'maintenance');
+    }
+
+    function displayJSON(data, type) {
+      const output = document.getElementById('jsonOutput');
+      const section = document.getElementById('outputSection');
+      
+      let jsonStructure;
+      if (type === 'incident') {
+        jsonStructure = {
+          incidents: [data],
+          maintenance: []
+        };
+      } else {
+        jsonStructure = {
+          incidents: [],
+          maintenance: [data]
+        };
+      }
+
+      output.textContent = JSON.stringify(jsonStructure, null, 2);
+      section.style.display = 'block';
+      section.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function copyJSON() {
+      const output = document.getElementById('jsonOutput');
+      navigator.clipboard.writeText(output.textContent);
+      
+      const alert = document.getElementById('copyAlert');
+      alert.style.display = 'block';
+      setTimeout(() => {
+        alert.style.display = 'none';
+      }, 3000);
+    }
+  </script>
+</body>
+</html>
+

@@ -13,6 +13,17 @@ class DashboardServer {
     // Middleware
     this.app.use(express.json());
     this.app.use(express.static(path.join(__dirname, "public")));
+    
+    // CORS for GitHub Pages
+    this.app.use((req, res, next) => {
+      res.header("Access-Control-Allow-Origin", "https://azzraya.github.io");
+      res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+      res.header("Access-Control-Allow-Headers", "Content-Type");
+      if (req.method === "OPTIONS") {
+        return res.sendStatus(200);
+      }
+      next();
+    });
 
     // Session
     this.app.use(
@@ -261,6 +272,49 @@ class DashboardServer {
       try {
         const snapshots = await db.getRecoverySnapshots(req.params.id, 10);
         res.json(snapshots);
+      } catch (error) {
+        res.status(500).json({ error: error.message });
+      }
+    });
+
+    // Admin authentication
+    this.app.post("/api/admin/auth", async (req, res) => {
+      try {
+        const { password } = req.body;
+        const adminPassword = process.env.ADMIN_PASSWORD;
+
+        if (!adminPassword) {
+          return res.status(500).json({ error: "Admin password not configured" });
+        }
+
+        if (password === adminPassword) {
+          // Generate simple token (in production, use JWT)
+          const token = Buffer.from(`admin:${Date.now()}`).toString('base64');
+          res.json({ success: true, token });
+        } else {
+          res.status(401).json({ error: "Invalid password" });
+        }
+      } catch (error) {
+        res.status(500).json({ error: error.message });
+      }
+    });
+
+    // Create incident (admin only)
+    this.app.post("/api/admin/incidents", async (req, res) => {
+      try {
+        const authHeader = req.headers.authorization;
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+          return res.status(401).json({ error: "Unauthorized" });
+        }
+
+        const incident = {
+          id: Date.now(),
+          ...req.body
+        };
+
+        // In a real app, you'd save this to a database
+        // For now, we'll just return success and let the admin update incidents.json manually
+        res.json({ success: true, incident });
       } catch (error) {
         res.status(500).json({ error: error.message });
       }

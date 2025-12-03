@@ -24,42 +24,12 @@ async function loadServers() {
     const response = await fetch("/api/servers");
     const servers = await response.json();
 
-    const selector = document.getElementById("serverSelector");
-
     if (servers.length === 0) {
-      selector.innerHTML = `
-        <div style="padding:20px;">
-          <p style="opacity:0.7; margin-bottom:15px;">No servers found. Invite Nexus to your servers first!</p>
-          <a href="https://discord.com/oauth2/authorize?client_id=1444739230679957646&permissions=8&scope=bot%20applications.commands" 
-             target="_blank" 
-             class="invite-btn" 
-             style="display:inline-block; padding:10px 20px; background:#5865f2; color:white; text-decoration:none; border-radius:8px; font-weight:bold;">
-            Invite Nexus
-          </a>
-        </div>
-      `;
+      showServerSelection([]);
       return;
     }
 
-    selector.innerHTML = `
-      <select class="server-dropdown" onchange="selectServer(this.value)">
-        <option value="">Select a server...</option>
-        ${servers
-          .map(
-            (s) => `
-          <option value="${s.id}">${s.name} (${s.memberCount} members)</option>
-        `
-          )
-          .join("")}
-      </select>
-    `;
-
-    // Auto-select first server
-    if (servers.length > 0) {
-      currentServer = servers[0].id;
-      document.querySelector(".server-dropdown").value = currentServer;
-      loadServerData(currentServer);
-    }
+    showServerSelection(servers);
   } catch (error) {
     console.error("Failed to load servers:", error);
     document.getElementById("serverSelector").innerHTML =
@@ -67,16 +37,108 @@ async function loadServers() {
   }
 }
 
+function showServerSelection(servers) {
+  const contentArea = document.getElementById("contentArea");
+
+  if (servers.length === 0) {
+    contentArea.innerHTML = `
+      <div class="server-selection-page">
+        <h1>SERVERS</h1>
+        <p class="selection-subtitle">No servers found where you have admin permissions</p>
+        <div class="empty-state">
+          <div class="empty-icon">🛡️</div>
+          <h2>Invite Nexus to Your Server</h2>
+          <p>You need to be an administrator in a server with Nexus to access the dashboard.</p>
+          <a href="https://discord.com/oauth2/authorize?client_id=1444739230679957646&permissions=8&scope=bot%20applications.commands" 
+             target="_blank" 
+             class="invite-server-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515a.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0a12.64 12.64 0 0 0-.617-1.25a.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057a19.9 19.9 0 0 0 5.993 3.03a.078.078 0 0 0 .084-.028a14.09 14.09 0 0 0 1.226-1.994a.076.076 0 0 0-.041-.106a13.107 13.107 0 0 1-1.872-.892a.077.077 0 0 1-.008-.128a10.2 10.2 0 0 0 .372-.292a.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127a12.299 12.299 0 0 1-1.873.892a.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028a19.839 19.839 0 0 0 6.002-3.03a.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/>
+            </svg>
+            Invite Nexus Bot
+          </a>
+        </div>
+      </div>
+    `;
+    // Hide sidebar when no servers
+    document.querySelector(".sidebar").style.display = "none";
+    return;
+  }
+
+  contentArea.innerHTML = `
+    <div class="server-selection-page">
+      <h1>SERVERS</h1>
+      <p class="selection-subtitle">Select the server you want to manage</p>
+      
+      <div class="server-filter">
+        <input type="text" id="serverSearch" placeholder="Search servers..." class="server-search-input">
+      </div>
+
+      <div class="servers-grid" id="serversGrid">
+        ${servers
+          .map(
+            (s) => `
+          <div class="server-card" onclick="selectServer('${s.id}')">
+            <div class="server-icon">
+              ${
+                s.icon
+                  ? `<img src="${s.icon}" alt="${s.name}">`
+                  : `<div class="server-icon-placeholder">${s.name.charAt(
+                      0
+                    )}</div>`
+              }
+            </div>
+            <div class="server-info">
+              <h3 class="server-name">${s.name}</h3>
+              <p class="server-members">${s.memberCount.toLocaleString()} members</p>
+            </div>
+            <div class="server-arrow">→</div>
+          </div>
+        `
+          )
+          .join("")}
+      </div>
+    </div>
+  `;
+
+  // Add search functionality
+  document.getElementById("serverSearch").addEventListener("input", (e) => {
+    const searchTerm = e.target.value.toLowerCase();
+    const serverCards = document.querySelectorAll(".server-card");
+
+    serverCards.forEach((card) => {
+      const serverName = card
+        .querySelector(".server-name")
+        .textContent.toLowerCase();
+      if (serverName.includes(searchTerm)) {
+        card.style.display = "";
+      } else {
+        card.style.display = "none";
+      }
+    });
+  });
+
+  // Hide sidebar when selecting server
+  document.querySelector(".sidebar").style.display = "none";
+}
+
 function selectServer(serverId) {
   if (!serverId) return;
   currentServer = serverId;
-  
-  // Reload current page with new server
-  if (currentPage === "overview") {
-    loadServerData(serverId);
-  } else {
-    loadPage(currentPage);
-  }
+
+  // Show sidebar and load server data
+  document.querySelector(".sidebar").style.display = "";
+  document.getElementById("currentPage").textContent = "Overview";
+
+  // Reset to overview page
+  currentPage = "overview";
+  document
+    .querySelectorAll(".nav-item")
+    .forEach((i) => i.classList.remove("active"));
+  document.querySelector('[data-page="overview"]').classList.add("active");
+
+  // Load server data
+  loadServerData(serverId);
 
   // Restart auto-refresh for new server
   startAutoRefresh();
@@ -88,10 +150,31 @@ async function loadServerData(serverId) {
     const response = await fetch(`/api/server/${serverId}`);
     const server = await response.json();
 
+    // Update current server display in sidebar
+    updateCurrentServerDisplay(server);
+
     loadOverview(server);
   } catch (error) {
     console.error("Failed to load server data:", error);
   }
+}
+
+function updateCurrentServerDisplay(server) {
+  const display = document.getElementById('currentServerDisplay');
+  display.innerHTML = `
+    <div class="current-server-info">
+      <div class="current-server-icon">
+        ${server.icon 
+          ? `<img src="${server.icon}" alt="${server.name}">` 
+          : server.name.charAt(0)
+        }
+      </div>
+      <div class="current-server-details">
+        <h3>${server.name}</h3>
+        <p>${server.memberCount.toLocaleString()} members</p>
+      </div>
+    </div>
+  `;
 }
 
 // Load overview page
@@ -312,9 +395,10 @@ async function toggleSetting(setting, enabled) {
     });
 
     // Show success feedback
-    const toast = document.createElement('div');
-    toast.textContent = '✅ Setting updated!';
-    toast.style.cssText = 'position:fixed; bottom:20px; right:20px; background:#43b581; color:white; padding:15px 25px; border-radius:8px; font-weight:bold; z-index:9999;';
+    const toast = document.createElement("div");
+    toast.textContent = "✅ Setting updated!";
+    toast.style.cssText =
+      "position:fixed; bottom:20px; right:20px; background:#43b581; color:white; padding:15px 25px; border-radius:8px; font-weight:bold; z-index:9999;";
     document.body.appendChild(toast);
     setTimeout(() => toast.remove(), 2000);
 

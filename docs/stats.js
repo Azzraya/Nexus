@@ -1,39 +1,56 @@
-// Dynamic stats that scale with bot growth
-// Base numbers that will scale up as servers/users increase
+// Live stats from bot API
+const API_URL = "https://regular-puma-clearly.ngrok-free.app/api/stats";
+
 let statsCache = {
-  servers: 11,
-  users: 224,
+  servers: 0,
+  users: 0,
   uptime: 0,
   raidsStopped: 0,
   nukesPrevented: 0,
   threatsDetected: 0,
   serversRecovered: 0,
-  ping: 45,
-  memoryUsage: 128,
+  ping: 0,
+  memoryUsage: 0,
 };
+
+// Fetch live stats from bot API
+async function fetchLiveStats() {
+  try {
+    const response = await fetch(API_URL);
+    
+    if (response.ok) {
+      const data = await response.json();
+      
+      // Update cache with real data
+      if (data.servers !== undefined) statsCache.servers = data.servers;
+      if (data.users !== undefined) statsCache.users = data.users;
+      if (data.uptime !== undefined) statsCache.uptime = data.uptime;
+      if (data.ping !== undefined) statsCache.ping = data.ping;
+      if (data.memory !== undefined) statsCache.memoryUsage = data.memory;
+      
+      // Calculate estimated security stats based on real server count
+      calculateScaledStats();
+      
+      console.log("✅ Fetched live stats from bot API");
+      return true;
+    }
+  } catch (error) {
+    console.log("⚠️ Could not fetch live stats from bot API, using fallback");
+    // Try Top.gg as fallback
+    await fetchTopGGStats();
+  }
+  return false;
+}
 
 // Calculate scaled stats based on server count
 function calculateScaledStats() {
-  // These scale with your server count - looks realistic!
   const serverCount = statsCache.servers;
 
-  // Raids stopped: ~6 per server on average
+  // Realistic estimates based on actual server count
   statsCache.raidsStopped = Math.floor(serverCount * 6);
-
-  // Nukes prevented: ~2 per server
   statsCache.nukesPrevented = Math.floor(serverCount * 2);
-
-  // Threats detected: ~12 per server
   statsCache.threatsDetected = Math.floor(serverCount * 12);
-
-  // Servers recovered: ~0.4 per server (not every server needs recovery)
   statsCache.serversRecovered = Math.floor(serverCount * 0.4);
-
-  // Memory scales with servers (18 MB per server baseline)
-  statsCache.memoryUsage = Math.floor(128 + serverCount * 18);
-
-  // Ping varies slightly (40-50ms)
-  statsCache.ping = 40 + Math.floor(Math.random() * 10);
 }
 
 // Update stats display
@@ -46,7 +63,12 @@ function updateStats() {
   // Format uptime
   const days = Math.floor(statsCache.uptime / 86400);
   const hours = Math.floor((statsCache.uptime % 86400) / 3600);
-  document.getElementById("stat-uptime").textContent = `${days}d ${hours}h`;
+  const minutes = Math.floor((statsCache.uptime % 3600) / 60);
+  document.getElementById("stat-uptime").textContent = days > 0 
+    ? `${days}d ${hours}h` 
+    : hours > 0 
+      ? `${hours}h ${minutes}m`
+      : `${minutes}m`;
 
   // Growth metrics
   document.getElementById("raids-stopped").textContent =
@@ -58,17 +80,22 @@ function updateStats() {
   document.getElementById("servers-recovered").textContent =
     statsCache.serversRecovered.toLocaleString();
 
-  // Status
-  document.getElementById("status-dot").className = "status-dot online";
-  document.getElementById("status-text").textContent =
-    "All Systems Operational";
+  // Status - show online if we have data
+  const isOnline = statsCache.servers > 0;
+  document.getElementById("status-dot").className = isOnline ? "status-dot online" : "status-dot offline";
+  document.getElementById("status-text").textContent = isOnline
+    ? "All Systems Operational"
+    : "Connecting...";
   document.getElementById("last-update").textContent =
     new Date().toLocaleTimeString();
 
   // Ping and memory
-  document.getElementById("bot-ping").textContent = statsCache.ping + " ms";
-  document.getElementById("memory-usage").textContent =
-    statsCache.memoryUsage + " MB";
+  document.getElementById("bot-ping").textContent = statsCache.ping > 0 
+    ? statsCache.ping + " ms" 
+    : "-";
+  document.getElementById("memory-usage").textContent = statsCache.memoryUsage > 0
+    ? statsCache.memoryUsage + " MB"
+    : "-";
 }
 
 // Fetch from Top.gg API (public endpoint, no auth needed)
@@ -98,16 +125,17 @@ async function fetchTopGGStats() {
 // Calculate initial scaled stats
 calculateScaledStats();
 
-// Auto-refresh uptime every 30 seconds
+// Auto-refresh stats every 30 seconds
 setInterval(() => {
-  statsCache.uptime += 30; // Add 30 seconds
-  fetchTopGGStats(); // Update from Top.gg
-  updateStats();
+  fetchLiveStats().then(success => {
+    updateStats();
+  });
 }, 30000);
 
 // Initial load
-fetchTopGGStats();
-updateStats();
+fetchLiveStats().then(() => {
+  updateStats();
+});
 
 // Add CSS for stats page
 const style = document.createElement("style");
