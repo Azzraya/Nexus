@@ -399,48 +399,48 @@ class DashboardServer {
         // Get vote statistics from database
         try {
           // Total votes across all users
-          const totalVotes = await new Promise((resolve, reject) => {
+          const totalVotes = await new Promise((resolve) => {
             db.db.get(
               "SELECT SUM(total_votes) as total FROM vote_rewards",
               [],
               (err, row) => {
-                if (err) reject(err);
+                if (err) resolve(0);
                 else resolve(row?.total || 0);
               }
             );
           });
 
           // Unique voters
-          const uniqueVoters = await new Promise((resolve, reject) => {
+          const uniqueVoters = await new Promise((resolve) => {
             db.db.get(
               "SELECT COUNT(*) as count FROM vote_rewards WHERE total_votes > 0",
               [],
               (err, row) => {
-                if (err) reject(err);
+                if (err) resolve(0);
                 else resolve(row?.count || 0);
               }
             );
           });
 
           // Recent votes (last 30 days)
-          const recentVotes = await new Promise((resolve, reject) => {
+          const recentVotes = await new Promise((resolve) => {
             db.db.get(
               "SELECT SUM(recent_votes) as total FROM vote_rewards",
               [],
               (err, row) => {
-                if (err) reject(err);
+                if (err) resolve(0);
                 else resolve(row?.total || 0);
               }
             );
           });
 
           // Longest streak ever
-          const longestStreak = await new Promise((resolve, reject) => {
+          const longestStreak = await new Promise((resolve) => {
             db.db.get(
               "SELECT MAX(longest_streak) as max FROM vote_rewards",
               [],
               (err, row) => {
-                if (err) reject(err);
+                if (err) resolve(0);
                 else resolve(row?.max || 0);
               }
             );
