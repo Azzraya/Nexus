@@ -3127,11 +3127,18 @@ class Database {
     });
   }
 
-  // Get all invite sources
+  // Get all invite sources with retention stats
   getAllInviteSources() {
     return new Promise((resolve, reject) => {
       this.db.all(
-        "SELECT * FROM invite_sources ORDER BY total_joins DESC, created_at DESC",
+        `SELECT 
+          s.*,
+          COALESCE(AVG(l.days_active), 0) as avg_retention_days,
+          COUNT(l.guild_id) as total_leaves
+        FROM invite_sources s
+        LEFT JOIN guild_leaves l ON s.source = l.source
+        GROUP BY s.id
+        ORDER BY s.total_joins DESC, s.created_at DESC`,
         [],
         (err, rows) => {
           if (err) reject(err);

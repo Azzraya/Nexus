@@ -51,12 +51,18 @@ module.exports = {
           const sourceStats = await db.getInviteSourceStats().catch(() => []);
           const thisSourceStats = sourceStats.find(s => s.source === inviteSource);
           
+          // Check for milestones
+          const totalServers = client.guilds.cache.size;
+          const milestones = [20, 50, 100, 250, 500, 1000];
+          const hitMilestone = milestones.includes(totalServers);
+
           const webhook = {
             username: "Nexus Growth Tracker",
             avatar_url: "https://cdn.discordapp.com/avatars/1444739230679957646/32f2d77d44c2f3989fecd858be53f396.webp",
             embeds: [{
-              title: "🎉 New Server Joined!",
-              color: 0x10b981,
+              title: hitMilestone ? `🎊 MILESTONE: ${totalServers} SERVERS! 🎊` : "🎉 New Server Joined!",
+              color: hitMilestone ? 0xffd700 : 0x10b981,
+              description: hitMilestone ? `**Congratulations! You just hit ${totalServers} servers!** 🚀` : null,
               thumbnail: {
                 url: guild.iconURL() || "https://cdn.discordapp.com/avatars/1444739230679957646/32f2d77d44c2f3989fecd858be53f396.webp"
               },
