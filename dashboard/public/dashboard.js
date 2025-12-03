@@ -458,6 +458,12 @@ async function toggleSetting(setting, enabled) {
 }
 
 function loadPage(page) {
+  // Bulk operations doesn't require a server selection
+  if (page === "bulk") {
+    loadBulkOperations();
+    return;
+  }
+
   if (!currentServer) {
     alert("Please select a server first!");
     return;
@@ -485,10 +491,251 @@ function loadPage(page) {
     case "recovery":
       loadRecoveryPage();
       break;
+    case "bulk":
+      loadBulkOperations();
+      break;
     default:
       alert(`${page} page coming soon!`);
   }
 }
+
+// Bulk Operations Page (EXCEEDS WICK!)
+async function loadBulkOperations() {
+  const contentArea = document.getElementById("contentArea");
+  
+  contentArea.innerHTML = `
+    <div class="content-header">
+      <h1>⚡ Bulk Operations</h1>
+      <p>Manage settings across multiple servers at once</p>
+      <p style="color: #ffd700; font-size: 0.9rem;">⭐ Feature not available in Wick!</p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 30px;">
+      <div>
+        <h3 style="margin-bottom: 20px;">📋 Select Servers</h3>
+        <div style="margin-bottom: 15px;">
+          <button class="btn-secondary" style="margin-right: 10px;" onclick="selectAllServers()">✓ Select All</button>
+          <button class="btn-secondary" onclick="deselectAllServers()">✗ Deselect All</button>
+        </div>
+        <div id="bulk-server-list" style="max-height: 600px; overflow-y: auto;">
+          <div class="loading">Loading servers...</div>
+        </div>
+      </div>
+
+      <div>
+        <h3 style="margin-bottom: 20px;">⚡ Bulk Actions</h3>
+        
+        <div class="setting-card" style="margin-bottom: 20px;">
+          <div class="setting-header">
+            <span>🛡️ Anti-Nuke Protection</span>
+          </div>
+          <div style="display: flex; gap: 10px; margin-top: 10px;">
+            <button class="btn" style="flex: 1; background: #00d1b2;" onclick="bulkToggle('anti_nuke_enabled', true)">
+              ✓ Enable on Selected
+            </button>
+            <button class="btn" style="flex: 1; background: #ff4444;" onclick="bulkToggle('anti_nuke_enabled', false)">
+              ✗ Disable on Selected
+            </button>
+          </div>
+        </div>
+
+        <div class="setting-card" style="margin-bottom: 20px;">
+          <div class="setting-header">
+            <span>⚔️ Anti-Raid Protection</span>
+          </div>
+          <div style="display: flex; gap: 10px; margin-top: 10px;">
+            <button class="btn" style="flex: 1; background: #00d1b2;" onclick="bulkToggle('anti_raid_enabled', true)">
+              ✓ Enable on Selected
+            </button>
+            <button class="btn" style="flex: 1; background: #ff4444;" onclick="bulkToggle('anti_raid_enabled', false)">
+              ✗ Disable on Selected
+            </button>
+          </div>
+        </div>
+
+        <div class="setting-card" style="margin-bottom: 20px;">
+          <div class="setting-header">
+            <span>🤖 Auto-Moderation</span>
+          </div>
+          <div style="display: flex; gap: 10px; margin-top: 10px;">
+            <button class="btn" style="flex: 1; background: #00d1b2;" onclick="bulkToggle('auto_mod_enabled', true)">
+              ✓ Enable on Selected
+            </button>
+            <button class="btn" style="flex: 1; background: #ff4444;" onclick="bulkToggle('auto_mod_enabled', false)">
+              ✗ Disable on Selected
+            </button>
+          </div>
+        </div>
+
+        <div class="setting-card" style="margin-bottom: 20px;">
+          <div class="setting-header">
+            <span>🔄 Auto-Recovery</span>
+          </div>
+          <div style="display: flex; gap: 10px; margin-top: 10px;">
+            <button class="btn" style="flex: 1; background: #00d1b2;" onclick="bulkToggle('auto_recovery_enabled', true)">
+              ✓ Enable on Selected
+            </button>
+            <button class="btn" style="flex: 1; background: #ff4444;" onclick="bulkToggle('auto_recovery_enabled', false)">
+              ✗ Disable on Selected
+            </button>
+          </div>
+        </div>
+
+        <div id="bulk-result" style="margin-top: 20px; display: none; padding: 20px; background: rgba(0, 209, 178, 0.2); border-radius: 10px; border: 2px solid #00d1b2;">
+          <div id="bulk-status"></div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Load servers for bulk selection
+  try {
+    const response = await fetch("/api/servers");
+    const servers = await response.json();
+    const serversWithBot = servers.filter(s => s.hasBot);
+    
+    const listEl = document.getElementById("bulk-server-list");
+    if (serversWithBot.length === 0) {
+      listEl.innerHTML = '<p style="opacity: 0.7;">No servers available</p>';
+      return;
+    }
+
+    listEl.innerHTML = serversWithBot.map(server => `
+      <label style="display: flex; align-items: center; padding: 15px; background: rgba(255, 255, 255, 0.05); border-radius: 10px; margin-bottom: 10px; cursor: pointer; transition: all 0.3s;" 
+             onmouseover="this.style.background='rgba(255, 255, 255, 0.1)'" 
+             onmouseout="this.style.background='rgba(255, 255, 255, 0.05)'">
+        <input type="checkbox" class="server-checkbox" value="${server.id}" data-name="${server.name}" 
+               style="margin-right: 15px; width: 20px; height: 20px; cursor: pointer;">
+        <img src="${server.icon || 'https://cdn.discordapp.com/embed/avatars/0.png'}" 
+             alt="${server.name}" 
+             style="width: 40px; height: 40px; border-radius: 50%; margin-right: 15px;">
+        <div style="flex: 1;">
+          <div style="font-weight: 700;">${server.name}</div>
+          <div style="font-size: 0.85rem; opacity: 0.7;">${server.memberCount} members</div>
+        </div>
+      </label>
+    `).join("");
+  } catch (error) {
+    console.error("Failed to load servers for bulk:", error);
+  }
+}
+
+function selectAllServers() {
+  document.querySelectorAll('.server-checkbox').forEach(cb => cb.checked = true);
+}
+
+function deselectAllServers() {
+  document.querySelectorAll('.server-checkbox').forEach(cb => cb.checked = false);
+}
+
+async function bulkToggle(setting, value) {
+  const selectedServers = Array.from(document.querySelectorAll('.server-checkbox:checked'))
+    .map(cb => ({ id: cb.value, name: cb.dataset.name }));
+
+  if (selectedServers.length === 0) {
+    alert("Please select at least one server!");
+    return;
+  }
+
+  const settingName = setting.replace(/_enabled/g, '').replace(/_/g, ' ');
+  if (!confirm(`${value ? 'Enable' : 'Disable'} ${settingName} on ${selectedServers.length} server(s)?`)) {
+    return;
+  }
+
+  const resultEl = document.getElementById("bulk-result");
+  const statusEl = document.getElementById("bulk-status");
+  resultEl.style.display = "block";
+  statusEl.innerHTML = `<div class="loading">⚡ Processing ${selectedServers.length} servers...</div>`;
+
+  let succeeded = 0;
+  let failed = 0;
+  const failedServers = [];
+
+  for (const server of selectedServers) {
+    try {
+      const response = await fetch(`/api/server/${server.id}/config`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ [setting]: value ? 1 : 0 })
+      });
+
+      if (response.ok) {
+        succeeded++;
+        statusEl.innerHTML = `<div class="loading">⚡ Processing... (${succeeded}/${selectedServers.length})</div>`;
+      } else {
+        failed++;
+        failedServers.push(server.name);
+      }
+    } catch (error) {
+      failed++;
+      failedServers.push(server.name);
+    }
+  }
+
+  statusEl.innerHTML = `
+    <h3 style="color: #00d1b2; margin-bottom: 10px;">✅ Bulk Operation Complete!</h3>
+    <p style="font-size: 1.1rem; margin: 5px 0;">✅ Successfully updated: <strong>${succeeded}</strong> servers</p>
+    ${failed > 0 ? `
+      <p style="color: #ff4444; margin: 5px 0;">❌ Failed: <strong>${failed}</strong> servers</p>
+      <details style="margin-top: 10px;">
+        <summary style="cursor: pointer; opacity: 0.8;">Show failed servers</summary>
+        <ul style="margin-top: 10px; opacity: 0.8;">
+          ${failedServers.map(name => `<li>${name}</li>`).join('')}
+        </ul>
+      </details>
+    ` : ''}
+  `;
+
+  setTimeout(() => {
+    resultEl.style.display = "none";
+  }, 10000);
+}
+
+// Initialize
+document.addEventListener("DOMContentLoaded", () => {
+  loadUser();
+  loadServers();
+
+  // Handle navigation
+  document.querySelectorAll(".nav-item").forEach((item) => {
+    item.addEventListener("click", (e) => {
+      e.preventDefault();
+
+      // Update active state
+      document
+        .querySelectorAll(".nav-item")
+        .forEach((i) => i.classList.remove("active"));
+      item.classList.add("active");
+
+      const page = item.dataset.page;
+      currentPage = page;
+
+      // Update page title
+      const pageTitle = item.querySelector("span:last-child").textContent;
+      document.getElementById("currentPage").textContent = pageTitle;
+
+      // Load page content
+      if (page === "overview") {
+        if (currentServer) loadServerData(currentServer);
+      } else {
+        loadPage(page);
+      }
+    });
+  });
+
+  // Mobile menu toggle
+  const mobileMenuToggle = document.getElementById("mobileMenuToggle");
+  const sidebar = document.getElementById("sidebar");
+  const overlay = document.getElementById("sidebarOverlay");
+
+  function toggleMobileMenu() {
+    sidebar.classList.toggle("active");
+    overlay.classList.toggle("active");
+  }
+
+  mobileMenuToggle.addEventListener("click", toggleMobileMenu);
+  overlay.addEventListener("click", toggleMobileMenu);
+});
 
 // Anti-Nuke Settings Page
 async function loadAntiNukePage() {
