@@ -396,7 +396,7 @@ footer p {
 
 .dropdown-menu {
   position: absolute;
-  top: 120%;
+  top: calc(100% + 5px);
   left: 0;
   background: rgba(255, 255, 255, 0.98);
   backdrop-filter: blur(10px);
@@ -409,14 +409,13 @@ footer p {
   transition: all 0.3s ease;
   z-index: 1000;
   overflow: hidden;
-  display: none; /* Hide by default */
+  display: none;
 }
 
-.dropdown:hover .dropdown-menu {
-  display: block; /* Show on hover */
-}
-
-.dropdown:hover .dropdown-menu {
+/* Keep menu open when hovering button OR menu itself */
+.dropdown:hover .dropdown-menu,
+.dropdown-menu:hover {
+  display: block;
   opacity: 1;
   visibility: visible;
   transform: translateY(0);
