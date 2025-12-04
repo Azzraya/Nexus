@@ -48,43 +48,30 @@ module.exports = {
         const startTime = Date.now();
 
         // Log command usage in parallel (non-blocking)
-        Promise.all([
-          Promise.resolve(
-            logger.info(`Command used: /${interaction.commandName} in ${interaction.guild.name} (${interaction.guild.id}) by ${interaction.user.tag}`);
-              userId: interaction.user.id,
-              userTag: interaction.user.tag,
-              commandName: interaction.commandName,
-            })
-          ),
-          new Promise((resolve, reject) => {
-            db.db.run(
-              "INSERT INTO command_usage_log (guild_id, guild_name, user_id, user_tag, command_name, timestamp) VALUES (?, ?, ?, ?, ?, ?)",
-              [
-                interaction.guild.id,
-                interaction.guild.name,
-                interaction.user.id,
-                interaction.user.tag,
-                interaction.commandName,
-                Date.now(),
-              ],
-              (err) => {
-                if (err) {
-                  ErrorHandler.logError(
-                    err,
-                    "interactionCreate",
-                    "Log command usage to database"
-                  );
-                  resolve(); // Don't reject, just log error
-                } else resolve();
-              }
-            );
-          }),
-        ]).catch((err) => {
-          logger.debug(
-            `[interactionCreate] Command logging failed (non-blocking):`,
-            err.message
-          );
-        }); // Don't block command execution if logging fails
+        logger.info(
+          `Command used: /${interaction.commandName} in ${interaction.guild.name} (${interaction.guild.id}) by ${interaction.user.tag}`
+        );
+
+        // Log to database (non-blocking)
+        db.db.run(
+          "INSERT INTO command_usage_log (guild_id, guild_name, user_id, user_tag, command_name, timestamp) VALUES (?, ?, ?, ?, ?, ?)",
+          [
+            interaction.guild.id,
+            interaction.guild.name,
+            interaction.user.id,
+            interaction.user.tag,
+            interaction.commandName,
+            Date.now(),
+          ],
+          (err) => {
+            if (err) {
+              logger.debug(
+                `[interactionCreate] Failed to log command to database:`,
+                err.message
+              );
+            }
+          }
+        );
 
         // Start performance tracking
         const perfTimer = performanceMonitor.start(command.data.name);
