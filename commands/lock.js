@@ -205,7 +205,8 @@ module.exports = {
       } else if (type === "roles") {
         const role = interaction.options.getRole("role");
         if (!role) {
-          return interaction.reply(ErrorMessages.missingArgument a role!",
+          return interaction.reply({
+            content: "❌ Please specify a role!",
             flags: MessageFlags.Ephemeral,
           });
         }
@@ -343,7 +344,8 @@ const ErrorMessages = require("../utils/errorMessages");
       } else if (type === "roles") {
         const role = interaction.options.getRole("role");
         if (!role) {
-          return interaction.reply(ErrorMessages.missingArgument a role!",
+          return interaction.reply({
+            content: "❌ Please specify a role!",
             flags: MessageFlags.Ephemeral,
           });
         }
