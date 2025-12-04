@@ -6,6 +6,7 @@ const {
 } = require("discord.js");
 const Moderation = require("../utils/moderation");
 const db = require("../utils/database");
+const ErrorMessages = require("../utils/errorMessages");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -29,28 +30,19 @@ module.exports = {
 
     // Prevent self-moderation
     if (user.id === interaction.user.id) {
-      return interaction.reply({
-        content: "❌ You cannot kick yourself!",
-        flags: MessageFlags.Ephemeral,
-      });
+      return interaction.reply(ErrorMessages.cannotTargetSelf());
     }
 
     // Prevent moderating the server owner
     if (user.id === interaction.guild.ownerId) {
-      return interaction.reply({
-        content: "❌ You cannot moderate the server owner!",
-        flags: MessageFlags.Ephemeral,
-      });
+      return interaction.reply(ErrorMessages.cannotTargetOwner());
     }
 
     const member = await interaction.guild.members
       .fetch(user.id)
       .catch(() => null);
     if (!member) {
-      return interaction.reply({
-        content: "❌ User not found in this server!",
-        flags: MessageFlags.Ephemeral,
-      });
+      return interaction.reply(ErrorMessages.userNotFound());
     }
 
     // Check if moderator is server owner (owners can kick anyone)
@@ -58,11 +50,7 @@ module.exports = {
 
     // Check if member is manageable
     if (!member.kickable) {
-      return interaction.reply({
-        content:
-          "❌ I cannot kick this user (they have a higher role than me or are the server owner)!",
-        flags: MessageFlags.Ephemeral,
-      });
+      return interaction.reply(ErrorMessages.botTargetHigherRole("kick"));
     }
 
     // Check role hierarchy (unless moderator is owner)
@@ -70,10 +58,7 @@ module.exports = {
       !isOwner &&
       member.roles.highest.position >= interaction.member.roles.highest.position
     ) {
-      return interaction.reply({
-        content: "❌ You cannot kick someone with equal or higher roles!",
-        flags: MessageFlags.Ephemeral,
-      });
+      return interaction.reply(ErrorMessages.targetHigherRole("kick"));
     }
 
     const result = await Moderation.kick(
@@ -102,10 +87,7 @@ module.exports = {
         }
       }
     } else {
-      await interaction.reply({
-        content: `❌ ${result.message}`,
-        flags: MessageFlags.Ephemeral,
-      });
+      await interaction.reply(ErrorMessages.commandFailed(result.message));
     }
   },
 };

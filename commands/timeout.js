@@ -6,6 +6,7 @@ const {
 } = require("discord.js");
 const ms = require("ms");
 const Moderation = require("../utils/moderation");
+const ErrorMessages = require("../utils/errorMessages");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -55,18 +56,12 @@ module.exports = {
 
       // Prevent self-moderation
       if (user.id === interaction.user.id) {
-        return interaction.reply({
-          content: "❌ You cannot timeout yourself!",
-          flags: MessageFlags.Ephemeral,
-        });
+        return interaction.reply(ErrorMessages.cannotTargetSelf());
       }
 
       // Prevent moderating the server owner
       if (user.id === interaction.guild.ownerId) {
-        return interaction.reply({
-          content: "❌ You cannot moderate the server owner!",
-          flags: MessageFlags.Ephemeral,
-        });
+        return interaction.reply(ErrorMessages.cannotTargetOwner());
       }
 
       const constants = require("../utils/constants");
@@ -76,11 +71,7 @@ module.exports = {
         duration < constants.MUTE.MIN_DURATION ||
         duration > constants.MUTE.MAX_DURATION
       ) {
-        return interaction.reply({
-          content:
-            "❌ Invalid duration! Use format like: 1h, 30m, 1d (max 28 days)",
-          flags: MessageFlags.Ephemeral,
-        });
+        return interaction.reply(ErrorMessages.invalidInput("duration", "1h, 30m, 1d (max 28 days)"));
       }
 
       const result = await Moderation.mute(
@@ -101,10 +92,7 @@ module.exports = {
         );
         await interaction.reply({ embeds: [embed] });
       } else {
-        await interaction.reply({
-          content: `❌ ${result.message}`,
-          flags: MessageFlags.Ephemeral,
-        });
+        await interaction.reply(ErrorMessages.commandFailed(result.message));
       }
     } else if (subcommand === "remove") {
       const user = interaction.options.getUser("user");
@@ -123,10 +111,7 @@ module.exports = {
           ],
         });
       } catch (error) {
-        await interaction.reply({
-          content: `❌ Failed to remove timeout: ${error.message}`,
-          flags: MessageFlags.Ephemeral,
-        });
+        await interaction.reply(ErrorMessages.commandFailed(error.message));
       }
     }
   },

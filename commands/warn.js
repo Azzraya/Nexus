@@ -6,6 +6,7 @@ const {
 } = require("discord.js");
 const Moderation = require("../utils/moderation");
 const db = require("../utils/database");
+const ErrorMessages = require("../utils/errorMessages");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -29,18 +30,12 @@ module.exports = {
 
     // Prevent self-moderation
     if (user.id === interaction.user.id) {
-      return interaction.reply({
-        content: "❌ You cannot warn yourself!",
-        flags: MessageFlags.Ephemeral,
-      });
+      return interaction.reply(ErrorMessages.cannotTargetSelf());
     }
 
     // Prevent moderating the server owner
     if (user.id === interaction.guild.ownerId) {
-      return interaction.reply({
-        content: "❌ You cannot moderate the server owner!",
-        flags: MessageFlags.Ephemeral,
-      });
+      return interaction.reply(ErrorMessages.cannotTargetOwner());
     }
 
     const result = await Moderation.warn(
@@ -85,10 +80,7 @@ module.exports = {
         }
       }
     } else {
-      await interaction.reply({
-        content: `❌ ${result.message}`,
-        flags: MessageFlags.Ephemeral,
-      });
+      await interaction.reply(ErrorMessages.commandFailed(result.message));
     }
   },
 };

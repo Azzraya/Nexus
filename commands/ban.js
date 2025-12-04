@@ -6,6 +6,7 @@ const {
 } = require("discord.js");
 const Moderation = require("../utils/moderation");
 const db = require("../utils/database");
+const ErrorMessages = require("../utils/errorMessages");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -62,25 +63,16 @@ module.exports = {
       const deleteDays = interaction.options.getInteger("delete_days") || 0;
 
       if (user.id === interaction.user.id) {
-        return interaction.reply({
-          content: "❌ You cannot ban yourself!",
-          flags: MessageFlags.Ephemeral,
-        });
+        return interaction.reply(ErrorMessages.cannotTargetSelf());
       }
 
       if (user.id === interaction.client.user.id) {
-        return interaction.reply({
-          content: "❌ I cannot ban myself!",
-          flags: MessageFlags.Ephemeral,
-        });
+        return interaction.reply(ErrorMessages.cannotTargetBot());
       }
 
       // Prevent moderating the server owner
       if (user.id === interaction.guild.ownerId) {
-        return interaction.reply({
-          content: "❌ You cannot moderate the server owner!",
-          flags: MessageFlags.Ephemeral,
-        });
+        return interaction.reply(ErrorMessages.cannotTargetOwner());
       }
 
       const member = await interaction.guild.members
@@ -96,11 +88,7 @@ module.exports = {
           interaction.client.user.id
         );
         if (!member.manageable) {
-          return interaction.reply({
-            content:
-              "❌ I cannot ban this user (they have a higher role than me or are the server owner)!",
-            flags: MessageFlags.Ephemeral,
-          });
+          return interaction.reply(ErrorMessages.botTargetHigherRole("ban"));
         }
 
         // Check role hierarchy (unless moderator is owner)
@@ -109,10 +97,7 @@ module.exports = {
           member.roles.highest.position >=
             interaction.member.roles.highest.position
         ) {
-          return interaction.reply({
-            content: "❌ You cannot ban someone with equal or higher roles!",
-            flags: MessageFlags.Ephemeral,
-          });
+          return interaction.reply(ErrorMessages.targetHigherRole("ban"));
         }
       }
 
@@ -144,10 +129,7 @@ module.exports = {
           }
         }
       } else {
-        await interaction.reply({
-          content: `❌ ${result.message}`,
-          flags: MessageFlags.Ephemeral,
-        });
+        await interaction.reply(ErrorMessages.commandFailed(result.message));
       }
     } else if (subcommand === "remove") {
       const user = interaction.options.getUser("user");
@@ -174,10 +156,8 @@ module.exports = {
           }
         }
       } catch (error) {
-        await interaction.reply({
-          content: `❌ Failed to unban user: ${error.message}`,
-          flags: MessageFlags.Ephemeral,
-        });
+        logger.error("Unban error:", error);
+        await interaction.reply(ErrorMessages.commandFailed(error.message));
       }
     }
   },
