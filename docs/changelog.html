@@ -84,8 +84,23 @@
 
       <div class="content-section">
         <div class="changelog-entry">
-          <h2>Version 3.7.7 - December 4, 2025</h2>
+          <h2>Version 3.7.8 - December 4, 2025</h2>
           <span class="version-badge">Latest</span>
+          <h3>🔧 Database Schema Fix</h3>
+          <ul>
+            <li>
+              <strong>Fixed missing column error:</strong> Added migration for <code>join_gate_enabled</code> column
+              <ul>
+                <li>✅ Fixed "SQLITE_ERROR: table server_config has no column named join_gate_enabled"</li>
+                <li>✅ Migration automatically runs on bot startup</li>
+                <li>✅ Defaults to 0 (disabled) for existing servers</li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+
+        <div class="changelog-entry">
+          <h2>Version 3.7.7 - December 4, 2025</h2>
           <h3>🐛 Bug Fix - Live Stats Widget</h3>
           <ul>
             <li>
