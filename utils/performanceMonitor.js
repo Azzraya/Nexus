@@ -1,164 +1,154 @@
-// Command performance monitoring
 const logger = require("./logger");
 
 class PerformanceMonitor {
   constructor() {
-    this.commandStats = new Map();
-    this.errorCounts = new Map();
+    this.metrics = new Map();
+    this.raidResponseTimes = [];
+    this.banResponseTimes = [];
   }
 
-  /**
-   * Start timing a command
-   */
-  start(commandName) {
-    return {
-      commandName,
-      startTime: Date.now(),
-      startMemory: process.memoryUsage().heapUsed,
+  // Start tracking an operation
+  start(operationId, operation, metadata = {}) {
+    this.metrics.set(operationId, {
+      operation,
+      startTime: process.hrtime.bigint(),
+      metadata,
+    });
+  }
+
+  // End tracking and log performance
+  end(operationId) {
+    const metric = this.metrics.get(operationId);
+    if (!metric) return null;
+
+    const endTime = process.hrtime.bigint();
+    const durationNs = endTime - metric.startTime;
+    const durationMs = Number(durationNs) / 1_000_000;
+
+    this.metrics.delete(operationId);
+
+    const result = {
+      operation: metric.operation,
+      duration: durationMs,
+      metadata: metric.metadata,
+      timestamp: Date.now(),
     };
-  }
 
-  /**
-   * End timing and record stats
-   */
-  end(timer, success = true, error = null) {
-    const duration = Date.now() - timer.startTime;
-    const memoryUsed = process.memoryUsage().heapUsed - timer.startMemory;
-
-    // Get or create command stats
-    if (!this.commandStats.has(timer.commandName)) {
-      this.commandStats.set(timer.commandName, {
-        executions: 0,
-        totalDuration: 0,
-        avgDuration: 0,
-        minDuration: Infinity,
-        maxDuration: 0,
-        errors: 0,
-        successRate: 100,
-      });
-    }
-
-    const stats = this.commandStats.get(timer.commandName);
-    stats.executions++;
-    stats.totalDuration += duration;
-    stats.avgDuration = Math.round(stats.totalDuration / stats.executions);
-    stats.minDuration = Math.min(stats.minDuration, duration);
-    stats.maxDuration = Math.max(stats.maxDuration, duration);
-
-    if (!success) {
-      stats.errors++;
-      stats.successRate = (
-        ((stats.executions - stats.errors) / stats.executions) *
-        100
-      ).toFixed(2);
-
-      // Track error types
-      if (error) {
-        const errorKey = `${timer.commandName}:${error.code || error.message}`;
-        this.errorCounts.set(
-          errorKey,
-          (this.errorCounts.get(errorKey) || 0) + 1
-        );
+    // Track raid-specific metrics
+    if (metric.operation.includes("raid")) {
+      this.raidResponseTimes.push(durationMs);
+      if (this.raidResponseTimes.length > 100) {
+        this.raidResponseTimes.shift(); // Keep last 100
       }
-    } else {
-      stats.successRate = (
-        ((stats.executions - stats.errors) / stats.executions) *
-        100
-      ).toFixed(2);
     }
 
-    // Log slow commands (>5 seconds)
-    if (duration > 5000) {
+    // Track ban response times
+    if (metric.operation.includes("ban") || metric.operation.includes("kick")) {
+      this.banResponseTimes.push(durationMs);
+      if (this.banResponseTimes.length > 100) {
+        this.banResponseTimes.shift();
+      }
+    }
+
+    // Log slow operations (>100ms for security, >500ms for others)
+    const threshold =
+      metric.operation.includes("security") || metric.operation.includes("raid")
+        ? 100
+        : 500;
+    if (durationMs > threshold) {
       logger.warn(
-        `[Performance] Slow command detected: ${timer.commandName} took ${duration}ms`
+        `⚠️ Slow Operation: ${metric.operation} took ${durationMs.toFixed(2)}ms`
       );
     }
 
-    return { duration, memoryUsed };
+    return result;
   }
 
-  /**
-   * Get stats for a specific command
-   */
-  getCommandStats(commandName) {
-    return this.commandStats.get(commandName) || null;
-  }
-
-  /**
-   * Get all command stats sorted by executions
-   */
-  getAllStats() {
-    return Array.from(this.commandStats.entries())
-      .map(([name, stats]) => ({ command: name, ...stats }))
-      .sort((a, b) => b.executions - a.executions);
-  }
-
-  /**
-   * Get slowest commands
-   */
-  getSlowestCommands(limit = 10) {
-    return Array.from(this.commandStats.entries())
-      .map(([name, stats]) => ({ command: name, ...stats }))
-      .sort((a, b) => b.avgDuration - a.avgDuration)
-      .slice(0, limit);
-  }
-
-  /**
-   * Get most error-prone commands
-   */
-  getMostErrors(limit = 10) {
-    return Array.from(this.commandStats.entries())
-      .map(([name, stats]) => ({ command: name, ...stats }))
-      .filter((s) => s.errors > 0)
-      .sort((a, b) => b.errors - a.errors)
-      .slice(0, limit);
-  }
-
-  /**
-   * Get common errors
-   */
-  getCommonErrors(limit = 10) {
-    return Array.from(this.errorCounts.entries())
-      .map(([key, count]) => ({ error: key, count }))
-      .sort((a, b) => b.count - a.count)
-      .slice(0, limit);
-  }
-
-  /**
-   * Get overall performance summary
-   */
-  getSummary() {
-    const allStats = this.getAllStats();
-    const totalExecutions = allStats.reduce((sum, s) => sum + s.executions, 0);
-    const totalErrors = allStats.reduce((sum, s) => sum + s.errors, 0);
-    const avgDuration =
-      allStats.reduce((sum, s) => sum + s.avgDuration, 0) /
-      (allStats.length || 1);
+  // Get average response times
+  getAverages() {
+    const avg = (arr) =>
+      arr.length > 0 ? arr.reduce((a, b) => a + b, 0) / arr.length : 0;
 
     return {
-      totalCommands: allStats.length,
-      totalExecutions,
-      totalErrors,
-      overallSuccessRate:
-        (
-          ((totalExecutions - totalErrors) / (totalExecutions || 1)) *
-          100
-        ).toFixed(2) + "%",
-      avgCommandDuration: Math.round(avgDuration) + "ms",
-      slowestCommand:
-        allStats.sort((a, b) => b.avgDuration - a.avgDuration)[0]?.command ||
-        "N/A",
-      mostUsedCommand: allStats[0]?.command || "N/A",
+      avgRaidResponse: avg(this.raidResponseTimes),
+      avgBanResponse: avg(this.banResponseTimes),
+      p95RaidResponse: this.percentile(this.raidResponseTimes, 95),
+      p95BanResponse: this.percentile(this.banResponseTimes, 95),
+      totalRaidDetections: this.raidResponseTimes.length,
+      totalBans: this.banResponseTimes.length,
     };
   }
 
-  /**
-   * Reset all stats
-   */
-  reset() {
-    this.commandStats.clear();
-    this.errorCounts.clear();
-    logger.info("[Performance Monitor] Stats reset");
+  percentile(arr, p) {
+    if (arr.length === 0) return 0;
+    const sorted = [...arr].sort((a, b) => a - b);
+    const index = Math.ceil((p / 100) * sorted.length) - 1;
+    return sorted[index] || 0;
+  }
+
+  // Benchmark a specific function
+  async benchmark(name, fn, iterations = 1) {
+    const times = [];
+
+    for (let i = 0; i < iterations; i++) {
+      const start = process.hrtime.bigint();
+      await fn();
+      const end = process.hrtime.bigint();
+      const duration = Number(end - start) / 1_000_000;
+      times.push(duration);
+    }
+
+    const avg = times.reduce((a, b) => a + b, 0) / times.length;
+    const min = Math.min(...times);
+    const max = Math.max(...times);
+    const p95 = this.percentile(times, 95);
+
+    logger.info(`📊 Benchmark: ${name}`);
+    logger.info(`   Avg: ${avg.toFixed(2)}ms`);
+    logger.info(`   Min: ${min.toFixed(2)}ms`);
+    logger.info(`   Max: ${max.toFixed(2)}ms`);
+    logger.info(`   P95: ${p95.toFixed(2)}ms`);
+
+    return { avg, min, max, p95, times };
+  }
+
+  // Compare with Wick's performance (estimated)
+  compareWithWick() {
+    const wickEstimate = {
+      avgRaidResponse: 50, // Wick is estimated ~50ms
+      avgBanResponse: 80, // Wick ban ~80ms
+    };
+
+    const nexus = this.getAverages();
+
+    return {
+      nexus,
+      wick: wickEstimate,
+      comparison: {
+        raidFaster:
+          nexus.avgRaidResponse < wickEstimate.avgRaidResponse
+            ? "✅ FASTER"
+            : "❌ SLOWER",
+        raidDiff: Math.abs(
+          nexus.avgRaidResponse - wickEstimate.avgRaidResponse
+        ).toFixed(2),
+        banFaster:
+          nexus.avgBanResponse < wickEstimate.avgBanResponse
+            ? "✅ FASTER"
+            : "❌ SLOWER",
+        banDiff: Math.abs(
+          nexus.avgBanResponse - wickEstimate.avgBanResponse
+        ).toFixed(2),
+      },
+    };
+  }
+
+  // Get real-time stats for API
+  getStats() {
+    return {
+      activeOperations: this.metrics.size,
+      ...this.getAverages(),
+    };
   }
 }
 

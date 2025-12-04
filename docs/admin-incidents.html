@@ -1,634 +1,754 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Incident Manager - Nexus</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
-      padding: 40px 20px;
-      color: #fff;
-    }
-
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    h1 {
-      font-size: 2.5rem;
-      margin-bottom: 10px;
-      text-align: center;
-    }
-
-    .subtitle {
-      text-align: center;
-      opacity: 0.9;
-      margin-bottom: 40px;
-      font-size: 1.1rem;
-    }
-
-    .card {
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(10px);
-      border-radius: 20px;
-      padding: 30px;
-      margin-bottom: 30px;
-      border: 2px solid rgba(255, 255, 255, 0.2);
-    }
-
-    h2 {
-      font-size: 1.8rem;
-      margin-bottom: 20px;
-    }
-
-    .form-group {
-      margin-bottom: 20px;
-    }
-
-    label {
-      display: block;
-      margin-bottom: 8px;
-      font-weight: 600;
-      font-size: 0.95rem;
-    }
-
-    input, textarea, select {
-      width: 100%;
-      padding: 12px 16px;
-      border-radius: 10px;
-      border: 2px solid rgba(255, 255, 255, 0.2);
-      background: rgba(255, 255, 255, 0.1);
-      color: #fff;
-      font-size: 1rem;
-      font-family: inherit;
-    }
-
-    input::placeholder, textarea::placeholder {
-      color: rgba(255, 255, 255, 0.5);
-    }
-
-    textarea {
-      resize: vertical;
-      min-height: 100px;
-    }
-
-    .btn {
-      padding: 12px 30px;
-      border-radius: 10px;
-      border: none;
-      font-weight: 600;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      margin-right: 10px;
-    }
-
-    .btn-primary {
-      background: #fff;
-      color: #667eea;
-    }
-
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 5px 20px rgba(255, 255, 255, 0.3);
-    }
-
-    .btn-secondary {
-      background: rgba(255, 255, 255, 0.2);
-      color: #fff;
-    }
-
-    .btn-danger {
-      background: #ff4444;
-      color: #fff;
-      padding: 8px 16px;
-      font-size: 0.85rem;
-    }
-
-    .btn-warning {
-      background: #ffa500;
-      color: #fff;
-      padding: 8px 16px;
-      font-size: 0.85rem;
-    }
-
-    .timeline-builder {
-      background: rgba(0, 0, 0, 0.2);
-      padding: 20px;
-      border-radius: 10px;
-      margin-bottom: 20px;
-    }
-
-    .timeline-item {
-      display: grid;
-      grid-template-columns: 1fr 2fr auto;
-      gap: 10px;
-      margin-bottom: 10px;
-      align-items: center;
-    }
-
-    .alert {
-      padding: 15px 20px;
-      border-radius: 10px;
-      margin-bottom: 20px;
-      font-weight: 600;
-      animation: slideIn 0.3s ease;
-    }
-
-    @keyframes slideIn {
-      from {
-        opacity: 0;
-        transform: translateY(-10px);
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Incident Manager - Nexus</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
       }
-      to {
-        opacity: 1;
-        transform: translateY(0);
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 40px 20px;
+        color: #fff;
       }
-    }
 
-    .alert-success {
-      background: rgba(0, 255, 0, 0.2);
-      border: 2px solid #00ff00;
-    }
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
 
-    .alert-error {
-      background: rgba(255, 0, 0, 0.2);
-      border: 2px solid #ff4444;
-    }
+      h1 {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+        text-align: center;
+      }
 
-    .alert-info {
-      background: rgba(0, 170, 255, 0.2);
-      border: 2px solid #00aaff;
-    }
+      .subtitle {
+        text-align: center;
+        opacity: 0.9;
+        margin-bottom: 40px;
+        font-size: 1.1rem;
+      }
 
-    .incident-list {
-      display: grid;
-      gap: 15px;
-    }
+      .card {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 30px;
+        margin-bottom: 30px;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+      }
 
-    .incident-card {
-      background: rgba(0, 0, 0, 0.3);
-      padding: 20px;
-      border-radius: 10px;
-      border-left: 4px solid #667eea;
-    }
+      h2 {
+        font-size: 1.8rem;
+        margin-bottom: 20px;
+      }
 
-    .incident-card.resolved {
-      border-left-color: #00ff00;
-    }
+      .form-group {
+        margin-bottom: 20px;
+      }
 
-    .incident-card.outage {
-      border-left-color: #ff4444;
-    }
+      label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        font-size: 0.95rem;
+      }
 
-    .incident-card.investigating {
-      border-left-color: #ffa500;
-    }
+      input,
+      textarea,
+      select {
+        width: 100%;
+        padding: 12px 16px;
+        border-radius: 10px;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        background: rgba(255, 255, 255, 0.1);
+        color: #fff;
+        font-size: 1rem;
+        font-family: inherit;
+      }
 
-    .incident-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: start;
-      margin-bottom: 10px;
-    }
+      input::placeholder,
+      textarea::placeholder {
+        color: rgba(255, 255, 255, 0.5);
+      }
 
-    .incident-actions {
-      display: flex;
-      gap: 10px;
-    }
+      textarea {
+        resize: vertical;
+        min-height: 100px;
+      }
 
-    .status-badge {
-      display: inline-block;
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      margin-left: 10px;
-    }
+      .btn {
+        padding: 12px 30px;
+        border-radius: 10px;
+        border: none;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-right: 10px;
+      }
 
-    .status-resolved {
-      background: rgba(0, 255, 0, 0.2);
-      color: #00ff00;
-    }
+      .btn-primary {
+        background: #fff;
+        color: #667eea;
+      }
 
-    .status-outage {
-      background: rgba(255, 0, 0, 0.2);
-      color: #ff4444;
-    }
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(255, 255, 255, 0.3);
+      }
 
-    .status-investigating {
-      background: rgba(255, 165, 0, 0.2);
-      color: #ffa500;
-    }
+      .btn-secondary {
+        background: rgba(255, 255, 255, 0.2);
+        color: #fff;
+      }
 
-    #authOverlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.8);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 10000;
-    }
+      .btn-danger {
+        background: #ff4444;
+        color: #fff;
+        padding: 8px 16px;
+        font-size: 0.85rem;
+      }
 
-    .auth-card {
-      background: #667eea;
-      padding: 40px;
-      border-radius: 20px;
-      max-width: 400px;
-      text-align: center;
-    }
+      .btn-warning {
+        background: #ffa500;
+        color: #fff;
+        padding: 8px 16px;
+        font-size: 0.85rem;
+      }
 
-    .loading {
-      opacity: 0.5;
-      pointer-events: none;
-    }
-  </style>
-</head>
-<body>
-  <!-- Auth Overlay -->
-  <div id="authOverlay">
-    <div class="auth-card">
-      <h2>🔐 Admin Authentication</h2>
-      <p style="margin: 20px 0;">Enter admin password to manage incidents</p>
-      <input type="password" id="adminPassword" placeholder="Password" style="margin-bottom: 20px;" onkeypress="if(event.key === 'Enter') authenticate()">
-      <button class="btn btn-primary" onclick="authenticate()">Login</button>
-      <div id="authError" style="display: none; margin-top: 15px; color: #ff4444; font-weight: 600;"></div>
-    </div>
-  </div>
+      .timeline-builder {
+        background: rgba(0, 0, 0, 0.2);
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+      }
 
-  <div style="position: fixed; top: 20px; left: 20px; z-index: 1000;">
-    <a href="admin.html" style="display: inline-block; padding: 12px 20px; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border-radius: 10px; color: white; text-decoration: none; font-weight: 600; transition: all 0.3s;">← Admin Hub</a>
-  </div>
+      .timeline-item {
+        display: grid;
+        grid-template-columns: 1fr 2fr auto;
+        gap: 10px;
+        margin-bottom: 10px;
+        align-items: center;
+      }
 
-  <div class="container">
-    <h1>🛠️ Incident Manager</h1>
-    <p class="subtitle">Create and manage status page incidents in real-time</p>
+      .alert {
+        padding: 15px 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        font-weight: 600;
+        animation: slideIn 0.3s ease;
+      }
 
-    <div id="alertContainer"></div>
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
 
-    <!-- Existing Incidents -->
-    <div class="card">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <h2>📊 Current Incidents</h2>
-        <button class="btn btn-secondary" onclick="loadIncidents()">🔄 Refresh</button>
-      </div>
-      <div id="incidentsList" class="incident-list">
-        <div style="text-align: center; opacity: 0.5; padding: 40px;">Loading incidents...</div>
+      .alert-success {
+        background: rgba(0, 255, 0, 0.2);
+        border: 2px solid #00ff00;
+      }
+
+      .alert-error {
+        background: rgba(255, 0, 0, 0.2);
+        border: 2px solid #ff4444;
+      }
+
+      .alert-info {
+        background: rgba(0, 170, 255, 0.2);
+        border: 2px solid #00aaff;
+      }
+
+      .incident-list {
+        display: grid;
+        gap: 15px;
+      }
+
+      .incident-card {
+        background: rgba(0, 0, 0, 0.3);
+        padding: 20px;
+        border-radius: 10px;
+        border-left: 4px solid #667eea;
+      }
+
+      .incident-card.resolved {
+        border-left-color: #00ff00;
+      }
+
+      .incident-card.outage {
+        border-left-color: #ff4444;
+      }
+
+      .incident-card.investigating {
+        border-left-color: #ffa500;
+      }
+
+      .incident-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        margin-bottom: 10px;
+      }
+
+      .incident-actions {
+        display: flex;
+        gap: 10px;
+      }
+
+      .status-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-left: 10px;
+      }
+
+      .status-resolved {
+        background: rgba(0, 255, 0, 0.2);
+        color: #00ff00;
+      }
+
+      .status-outage {
+        background: rgba(255, 0, 0, 0.2);
+        color: #ff4444;
+      }
+
+      .status-investigating {
+        background: rgba(255, 165, 0, 0.2);
+        color: #ffa500;
+      }
+
+      #authOverlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+      }
+
+      .auth-card {
+        background: #667eea;
+        padding: 40px;
+        border-radius: 20px;
+        max-width: 400px;
+        text-align: center;
+      }
+
+      .loading {
+        opacity: 0.5;
+        pointer-events: none;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Auth Overlay -->
+    <div id="authOverlay">
+      <div class="auth-card">
+        <h2>🔐 Admin Authentication</h2>
+        <p style="margin: 20px 0">Enter admin password to manage incidents</p>
+        <input
+          type="password"
+          id="adminPassword"
+          placeholder="Password"
+          style="margin-bottom: 20px"
+          onkeypress="if(event.key === 'Enter') authenticate()"
+        />
+        <button class="btn btn-primary" onclick="authenticate()">Login</button>
+        <div
+          id="authError"
+          style="
+            display: none;
+            margin-top: 15px;
+            color: #ff4444;
+            font-weight: 600;
+          "
+        ></div>
       </div>
     </div>
 
-    <!-- Create New Incident -->
-    <div class="card">
-      <h2>➕ Create New Incident</h2>
-      
-      <div class="form-group">
-        <label>Status</label>
-        <select id="status">
-          <option value="investigating">🔍 Investigating</option>
-          <option value="outage">🔴 Outage</option>
-          <option value="resolved">✅ Resolved</option>
-        </select>
-      </div>
+    <div style="position: fixed; top: 20px; left: 20px; z-index: 1000">
+      <a
+        href="admin.html"
+        style="
+          display: inline-block;
+          padding: 12px 20px;
+          background: rgba(255, 255, 255, 0.1);
+          backdrop-filter: blur(10px);
+          border-radius: 10px;
+          color: white;
+          text-decoration: none;
+          font-weight: 600;
+          transition: all 0.3s;
+        "
+        >← Admin Hub</a
+      >
+    </div>
 
-      <div class="form-group">
-        <label>Title</label>
-        <input type="text" id="title" placeholder="e.g., Brief Connection Issue">
-      </div>
+    <div class="container">
+      <h1>🛠️ Incident Manager</h1>
+      <p class="subtitle">
+        Create and manage status page incidents in real-time
+      </p>
 
-      <div class="form-group">
-        <label>Description</label>
-        <textarea id="description" placeholder="Describe what happened..."></textarea>
-      </div>
+      <div id="alertContainer"></div>
 
-      <div class="form-group">
-        <label>Start Time</label>
-        <input type="datetime-local" id="startTime">
-      </div>
-
-      <div class="form-group">
-        <label>End Time (leave empty if ongoing)</label>
-        <input type="datetime-local" id="endTime">
-      </div>
-
-      <div class="form-group">
-        <label>Timeline Events</label>
-        <div class="timeline-builder" id="timelineBuilder">
-          <div class="timeline-item">
-            <input type="time" placeholder="Time" class="timeline-time">
-            <input type="text" placeholder="Event description" class="timeline-text">
-            <button class="btn btn-danger" onclick="removeTimelineItem(this)">Remove</button>
+      <!-- Existing Incidents -->
+      <div class="card">
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+          "
+        >
+          <h2>📊 Current Incidents</h2>
+          <button class="btn btn-secondary" onclick="loadIncidents()">
+            🔄 Refresh
+          </button>
+        </div>
+        <div id="incidentsList" class="incident-list">
+          <div style="text-align: center; opacity: 0.5; padding: 40px">
+            Loading incidents...
           </div>
         </div>
-        <button class="btn btn-secondary" onclick="addTimelineItem()">+ Add Timeline Event</button>
       </div>
 
-      <button class="btn btn-primary" onclick="createIncident()">💾 Save Incident</button>
+      <!-- Create New Incident -->
+      <div class="card">
+        <h2>➕ Create New Incident</h2>
+
+        <div class="form-group">
+          <label>Status</label>
+          <select id="status">
+            <option value="investigating">🔍 Investigating</option>
+            <option value="outage">🔴 Outage</option>
+            <option value="resolved">✅ Resolved</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Title</label>
+          <input
+            type="text"
+            id="title"
+            placeholder="e.g., Brief Connection Issue"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Description</label>
+          <textarea
+            id="description"
+            placeholder="Describe what happened..."
+          ></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Start Time</label>
+          <input type="datetime-local" id="startTime" />
+        </div>
+
+        <div class="form-group">
+          <label>End Time (leave empty if ongoing)</label>
+          <input type="datetime-local" id="endTime" />
+        </div>
+
+        <div class="form-group">
+          <label>Timeline Events</label>
+          <div class="timeline-builder" id="timelineBuilder">
+            <div class="timeline-item">
+              <input type="time" placeholder="Time" class="timeline-time" />
+              <input
+                type="text"
+                placeholder="Event description"
+                class="timeline-text"
+              />
+              <button class="btn btn-danger" onclick="removeTimelineItem(this)">
+                Remove
+              </button>
+            </div>
+          </div>
+          <button class="btn btn-secondary" onclick="addTimelineItem()">
+            + Add Timeline Event
+          </button>
+        </div>
+
+        <button class="btn btn-primary" onclick="createIncident()">
+          💾 Save Incident
+        </button>
+      </div>
+
+      <!-- Create Maintenance -->
+      <div class="card">
+        <h2>🔧 Schedule Maintenance</h2>
+
+        <div class="form-group">
+          <label>Title</label>
+          <input
+            type="text"
+            id="maintenanceTitle"
+            placeholder="e.g., Database Upgrade"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Description</label>
+          <textarea
+            id="maintenanceDescription"
+            placeholder="Describe the maintenance..."
+          ></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Start Time</label>
+          <input type="datetime-local" id="maintenanceStartTime" />
+        </div>
+
+        <div class="form-group">
+          <label>End Time</label>
+          <input type="datetime-local" id="maintenanceEndTime" />
+        </div>
+
+        <button class="btn btn-primary" onclick="createMaintenance()">
+          💾 Save Maintenance
+        </button>
+      </div>
     </div>
 
-    <!-- Create Maintenance -->
-    <div class="card">
-      <h2>🔧 Schedule Maintenance</h2>
-      
-      <div class="form-group">
-        <label>Title</label>
-        <input type="text" id="maintenanceTitle" placeholder="e.g., Database Upgrade">
-      </div>
+    <script>
+      let authToken = null;
+      const API_URL =
+        window.location.hostname === "localhost"
+          ? "http://localhost:3000"
+          : "https://regular-puma-clearly.ngrok-free.app";
 
-      <div class="form-group">
-        <label>Description</label>
-        <textarea id="maintenanceDescription" placeholder="Describe the maintenance..."></textarea>
-      </div>
+      // Set current time as default
+      const now = new Date();
+      now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+      document.getElementById("startTime").value = now
+        .toISOString()
+        .slice(0, 16);
 
-      <div class="form-group">
-        <label>Start Time</label>
-        <input type="datetime-local" id="maintenanceStartTime">
-      </div>
-
-      <div class="form-group">
-        <label>End Time</label>
-        <input type="datetime-local" id="maintenanceEndTime">
-      </div>
-
-      <button class="btn btn-primary" onclick="createMaintenance()">💾 Save Maintenance</button>
-    </div>
-  </div>
-
-  <script>
-    let authToken = null;
-    const API_URL = window.location.hostname === 'localhost' 
-      ? 'http://localhost:3000'
-      : 'https://regular-puma-clearly.ngrok-free.app';
-
-    // Set current time as default
-    const now = new Date();
-    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-    document.getElementById('startTime').value = now.toISOString().slice(0, 16);
-
-    function showAlert(message, type = 'success') {
-      const container = document.getElementById('alertContainer');
-      const alert = document.createElement('div');
-      alert.className = `alert alert-${type}`;
-      alert.textContent = message;
-      container.appendChild(alert);
-      setTimeout(() => alert.remove(), 5000);
-    }
-
-    async function authenticate() {
-      const password = document.getElementById('adminPassword').value;
-      const errorDiv = document.getElementById('authError');
-
-      try {
-        const response = await fetch(`${API_URL}/api/admin/auth`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ password })
-        });
-
-        const data = await response.json();
-
-        if (data.token) {
-          authToken = data.token;
-          document.getElementById('authOverlay').style.display = 'none';
-          loadIncidents();
-        } else {
-          errorDiv.textContent = '❌ Invalid password';
-          errorDiv.style.display = 'block';
-        }
-      } catch (error) {
-        errorDiv.textContent = '❌ Authentication failed';
-        errorDiv.style.display = 'block';
+      function showAlert(message, type = "success") {
+        const container = document.getElementById("alertContainer");
+        const alert = document.createElement("div");
+        alert.className = `alert alert-${type}`;
+        alert.textContent = message;
+        container.appendChild(alert);
+        setTimeout(() => alert.remove(), 5000);
       }
-    }
 
-    async function loadIncidents() {
-      const list = document.getElementById('incidentsList');
-      list.innerHTML = '<div style="text-align: center; opacity: 0.5; padding: 20px;">Loading...</div>';
+      async function authenticate() {
+        const password = document.getElementById("adminPassword").value;
+        const errorDiv = document.getElementById("authError");
 
-      try {
-        const response = await fetch(`${API_URL}/api/admin/incidents`);
-        const data = await response.json();
+        try {
+          const response = await fetch(`${API_URL}/api/admin/auth`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ password }),
+          });
 
-        if (data.incidents.length === 0 && data.maintenance.length === 0) {
-          list.innerHTML = '<div style="text-align: center; opacity: 0.5; padding: 40px;">✅ No active incidents or maintenance</div>';
-          return;
+          const data = await response.json();
+
+          if (data.token) {
+            authToken = data.token;
+            document.getElementById("authOverlay").style.display = "none";
+            loadIncidents();
+          } else {
+            errorDiv.textContent = "❌ Invalid password";
+            errorDiv.style.display = "block";
+          }
+        } catch (error) {
+          errorDiv.textContent = "❌ Authentication failed";
+          errorDiv.style.display = "block";
         }
-
-        list.innerHTML = '';
-
-        // Display incidents
-        data.incidents.forEach(incident => {
-          const card = createIncidentCard(incident, 'incident');
-          list.appendChild(card);
-        });
-
-        // Display maintenance
-        data.maintenance.forEach(maintenance => {
-          const card = createIncidentCard(maintenance, 'maintenance');
-          list.appendChild(card);
-        });
-
-      } catch (error) {
-        list.innerHTML = '<div style="text-align: center; color: #ff4444; padding: 20px;">❌ Failed to load incidents</div>';
       }
-    }
 
-    function createIncidentCard(item, type) {
-      const card = document.createElement('div');
-      card.className = `incident-card ${item.status || 'maintenance'}`;
-      
-      const statusBadge = type === 'maintenance' 
-        ? '<span class="status-badge status-resolved">🔧 Maintenance</span>'
-        : `<span class="status-badge status-${item.status}">${getStatusEmoji(item.status)} ${item.status}</span>`;
+      async function loadIncidents() {
+        const list = document.getElementById("incidentsList");
+        list.innerHTML =
+          '<div style="text-align: center; opacity: 0.5; padding: 20px;">Loading...</div>';
 
-      card.innerHTML = `
+        try {
+          const response = await fetch(`${API_URL}/api/admin/incidents`);
+          const data = await response.json();
+
+          if (data.incidents.length === 0 && data.maintenance.length === 0) {
+            list.innerHTML =
+              '<div style="text-align: center; opacity: 0.5; padding: 40px;">✅ No active incidents or maintenance</div>';
+            return;
+          }
+
+          list.innerHTML = "";
+
+          // Display incidents
+          data.incidents.forEach((incident) => {
+            const card = createIncidentCard(incident, "incident");
+            list.appendChild(card);
+          });
+
+          // Display maintenance
+          data.maintenance.forEach((maintenance) => {
+            const card = createIncidentCard(maintenance, "maintenance");
+            list.appendChild(card);
+          });
+        } catch (error) {
+          list.innerHTML =
+            '<div style="text-align: center; color: #ff4444; padding: 20px;">❌ Failed to load incidents</div>';
+        }
+      }
+
+      function createIncidentCard(item, type) {
+        const card = document.createElement("div");
+        card.className = `incident-card ${item.status || "maintenance"}`;
+
+        const statusBadge =
+          type === "maintenance"
+            ? '<span class="status-badge status-resolved">🔧 Maintenance</span>'
+            : `<span class="status-badge status-${
+                item.status
+              }">${getStatusEmoji(item.status)} ${item.status}</span>`;
+
+        card.innerHTML = `
         <div class="incident-header">
           <div>
             <h3>${item.title}${statusBadge}</h3>
             <p style="opacity: 0.8; margin-top: 5px; font-size: 0.9rem;">
-              ${new Date(item.startTime).toLocaleString()} ${item.endTime ? `→ ${new Date(item.endTime).toLocaleString()}` : '(Ongoing)'}
+              ${new Date(item.startTime).toLocaleString()} ${
+          item.endTime
+            ? `→ ${new Date(item.endTime).toLocaleString()}`
+            : "(Ongoing)"
+        }
             </p>
           </div>
           <div class="incident-actions">
-            <button class="btn btn-danger" onclick="deleteIncident(${item.id}, '${type}')">🗑️ Delete</button>
+            <button class="btn btn-danger" onclick="deleteIncident(${
+              item.id
+            }, '${type}')">🗑️ Delete</button>
           </div>
         </div>
         <p style="margin-top: 10px;">${item.description}</p>
-        ${item.timeline && item.timeline.length > 0 ? `
+        ${
+          item.timeline && item.timeline.length > 0
+            ? `
           <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1);">
             <strong>Timeline:</strong>
             <ul style="margin-top: 10px; margin-left: 20px;">
-              ${item.timeline.map(t => `<li>${new Date(t.time).toLocaleTimeString()}: ${t.text}</li>`).join('')}
+              ${item.timeline
+                .map(
+                  (t) =>
+                    `<li>${new Date(t.time).toLocaleTimeString()}: ${
+                      t.text
+                    }</li>`
+                )
+                .join("")}
             </ul>
           </div>
-        ` : ''}
+        `
+            : ""
+        }
       `;
-      return card;
-    }
-
-    function getStatusEmoji(status) {
-      const emojis = {
-        'investigating': '🔍',
-        'outage': '🔴',
-        'resolved': '✅'
-      };
-      return emojis[status] || '❓';
-    }
-
-    async function createIncident() {
-      const status = document.getElementById('status').value;
-      const title = document.getElementById('title').value;
-      const description = document.getElementById('description').value;
-      const startTime = document.getElementById('startTime').value;
-      const endTime = document.getElementById('endTime').value;
-
-      if (!title || !description || !startTime) {
-        showAlert('❌ Please fill in required fields: Title, Description, and Start Time', 'error');
-        return;
+        return card;
       }
 
-      // Get timeline events
-      const timelineItems = document.querySelectorAll('.timeline-item');
-      const timeline = [];
-      timelineItems.forEach(item => {
-        const time = item.querySelector('.timeline-time').value;
-        const text = item.querySelector('.timeline-text').value;
-        if (time && text) {
-          const date = new Date(startTime);
-          const [hours, minutes] = time.split(':');
-          date.setHours(parseInt(hours), parseInt(minutes));
-          timeline.push({
-            time: date.toISOString(),
-            text: text
+      function getStatusEmoji(status) {
+        const emojis = {
+          investigating: "🔍",
+          outage: "🔴",
+          resolved: "✅",
+        };
+        return emojis[status] || "❓";
+      }
+
+      async function createIncident() {
+        const status = document.getElementById("status").value;
+        const title = document.getElementById("title").value;
+        const description = document.getElementById("description").value;
+        const startTime = document.getElementById("startTime").value;
+        const endTime = document.getElementById("endTime").value;
+
+        if (!title || !description || !startTime) {
+          showAlert(
+            "❌ Please fill in required fields: Title, Description, and Start Time",
+            "error"
+          );
+          return;
+        }
+
+        // Get timeline events
+        const timelineItems = document.querySelectorAll(".timeline-item");
+        const timeline = [];
+        timelineItems.forEach((item) => {
+          const time = item.querySelector(".timeline-time").value;
+          const text = item.querySelector(".timeline-text").value;
+          if (time && text) {
+            const date = new Date(startTime);
+            const [hours, minutes] = time.split(":");
+            date.setHours(parseInt(hours), parseInt(minutes));
+            timeline.push({
+              time: date.toISOString(),
+              text: text,
+            });
+          }
+        });
+
+        const incident = {
+          type: "incident",
+          status: status,
+          title: title,
+          description: description,
+          startTime: new Date(startTime).toISOString(),
+          endTime: endTime ? new Date(endTime).toISOString() : null,
+          timeline: timeline,
+        };
+
+        await saveToAPI(incident);
+      }
+
+      async function createMaintenance() {
+        const title = document.getElementById("maintenanceTitle").value;
+        const description = document.getElementById(
+          "maintenanceDescription"
+        ).value;
+        const startTime = document.getElementById("maintenanceStartTime").value;
+        const endTime = document.getElementById("maintenanceEndTime").value;
+
+        if (!title || !description || !startTime || !endTime) {
+          showAlert("❌ Please fill in all maintenance fields", "error");
+          return;
+        }
+
+        const maintenance = {
+          type: "maintenance",
+          title: title,
+          description: description,
+          startTime: new Date(startTime).toISOString(),
+          endTime: new Date(endTime).toISOString(),
+        };
+
+        await saveToAPI(maintenance);
+      }
+
+      async function saveToAPI(data) {
+        try {
+          const response = await fetch(`${API_URL}/api/admin/incidents`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${authToken}`,
+            },
+            body: JSON.stringify(data),
           });
-        }
-      });
 
-      const incident = {
-        type: 'incident',
-        status: status,
-        title: title,
-        description: description,
-        startTime: new Date(startTime).toISOString(),
-        endTime: endTime ? new Date(endTime).toISOString() : null,
-        timeline: timeline
-      };
+          const result = await response.json();
 
-      await saveToAPI(incident);
-    }
+          if (result.success) {
+            showAlert(
+              "✅ " +
+                (data.type === "maintenance" ? "Maintenance" : "Incident") +
+                " saved successfully!",
+              "success"
+            );
+            loadIncidents();
 
-    async function createMaintenance() {
-      const title = document.getElementById('maintenanceTitle').value;
-      const description = document.getElementById('maintenanceDescription').value;
-      const startTime = document.getElementById('maintenanceStartTime').value;
-      const endTime = document.getElementById('maintenanceEndTime').value;
-
-      if (!title || !description || !startTime || !endTime) {
-        showAlert('❌ Please fill in all maintenance fields', 'error');
-        return;
-      }
-
-      const maintenance = {
-        type: 'maintenance',
-        title: title,
-        description: description,
-        startTime: new Date(startTime).toISOString(),
-        endTime: new Date(endTime).toISOString()
-      };
-
-      await saveToAPI(maintenance);
-    }
-
-    async function saveToAPI(data) {
-      try {
-        const response = await fetch(`${API_URL}/api/admin/incidents`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${authToken}`
-          },
-          body: JSON.stringify(data)
-        });
-
-        const result = await response.json();
-
-        if (result.success) {
-          showAlert('✅ ' + (data.type === 'maintenance' ? 'Maintenance' : 'Incident') + ' saved successfully!', 'success');
-          loadIncidents();
-          
-          // Clear form
-          if (data.type === 'maintenance') {
-            document.getElementById('maintenanceTitle').value = '';
-            document.getElementById('maintenanceDescription').value = '';
-            document.getElementById('maintenanceStartTime').value = '';
-            document.getElementById('maintenanceEndTime').value = '';
+            // Clear form
+            if (data.type === "maintenance") {
+              document.getElementById("maintenanceTitle").value = "";
+              document.getElementById("maintenanceDescription").value = "";
+              document.getElementById("maintenanceStartTime").value = "";
+              document.getElementById("maintenanceEndTime").value = "";
+            } else {
+              document.getElementById("title").value = "";
+              document.getElementById("description").value = "";
+              document.getElementById("endTime").value = "";
+            }
           } else {
-            document.getElementById('title').value = '';
-            document.getElementById('description').value = '';
-            document.getElementById('endTime').value = '';
+            showAlert(
+              "❌ Failed to save: " + (result.error || "Unknown error"),
+              "error"
+            );
           }
-        } else {
-          showAlert('❌ Failed to save: ' + (result.error || 'Unknown error'), 'error');
+        } catch (error) {
+          showAlert("❌ Network error: " + error.message, "error");
         }
-      } catch (error) {
-        showAlert('❌ Network error: ' + error.message, 'error');
-      }
-    }
-
-    async function deleteIncident(id, type) {
-      if (!confirm('Are you sure you want to delete this ' + type + '?')) {
-        return;
       }
 
-      try {
-        const response = await fetch(`${API_URL}/api/admin/incidents/${id}?type=${type}`, {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${authToken}`
+      async function deleteIncident(id, type) {
+        if (!confirm("Are you sure you want to delete this " + type + "?")) {
+          return;
+        }
+
+        try {
+          const response = await fetch(
+            `${API_URL}/api/admin/incidents/${id}?type=${type}`,
+            {
+              method: "DELETE",
+              headers: {
+                Authorization: `Bearer ${authToken}`,
+              },
+            }
+          );
+
+          const result = await response.json();
+
+          if (result.success) {
+            showAlert(
+              "✅ " +
+                (type === "maintenance" ? "Maintenance" : "Incident") +
+                " deleted successfully!",
+              "success"
+            );
+            loadIncidents();
+          } else {
+            showAlert(
+              "❌ Failed to delete: " + (result.error || "Unknown error"),
+              "error"
+            );
           }
-        });
-
-        const result = await response.json();
-
-        if (result.success) {
-          showAlert('✅ ' + (type === 'maintenance' ? 'Maintenance' : 'Incident') + ' deleted successfully!', 'success');
-          loadIncidents();
-        } else {
-          showAlert('❌ Failed to delete: ' + (result.error || 'Unknown error'), 'error');
+        } catch (error) {
+          showAlert("❌ Network error: " + error.message, "error");
         }
-      } catch (error) {
-        showAlert('❌ Network error: ' + error.message, 'error');
       }
-    }
 
-    function addTimelineItem() {
-      const builder = document.getElementById('timelineBuilder');
-      const item = document.createElement('div');
-      item.className = 'timeline-item';
-      item.innerHTML = `
+      function addTimelineItem() {
+        const builder = document.getElementById("timelineBuilder");
+        const item = document.createElement("div");
+        item.className = "timeline-item";
+        item.innerHTML = `
         <input type="time" placeholder="Time" class="timeline-time">
         <input type="text" placeholder="Event description" class="timeline-text">
         <button class="btn btn-danger" onclick="removeTimelineItem(this)">Remove</button>
       `;
-      builder.appendChild(item);
-    }
+        builder.appendChild(item);
+      }
 
-    function removeTimelineItem(btn) {
-      btn.parentElement.remove();
-    }
-  </script>
-</body>
+      function removeTimelineItem(btn) {
+        btn.parentElement.remove();
+      }
+    </script>
+  </body>
 </html>
