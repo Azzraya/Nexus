@@ -257,7 +257,7 @@ module.exports = {
     if (!pollData || !pollData.active) return;
 
     try {
-      const guild = await interaction.guilds.fetch(guildId);
+      const guild = await client.guilds.fetch(guildId);
       const channel = await guild.channels.fetch(pollData.channelId);
       const message = await channel.messages.fetch(messageId);
 
