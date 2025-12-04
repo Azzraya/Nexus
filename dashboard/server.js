@@ -3422,11 +3422,112 @@ class DashboardServer {
       }
     });
 
+    // GET /api/v1/adaptive-protection - Get adaptive protection metrics (public)
+    this.app.get("/api/v1/adaptive-protection", async (req, res) => {
+      try {
+        const guilds = this.client.guilds.cache;
+
+        // Calculate server size distribution
+        const sizeDistribution = {
+          small: 0, // <100
+          medium: 0, // 100-500
+          large: 0, // 500-2K
+          huge: 0, // 2K+
+        };
+
+        const serverDetails = [];
+
+        guilds.forEach((guild) => {
+          const memberCount = guild.memberCount;
+          let tier, antiRaidThreshold, antiNukeMultiplier;
+
+          // Determine tier and thresholds
+          if (memberCount < 100) {
+            tier = "STRICT (Small)";
+            antiRaidThreshold = 5;
+            antiNukeMultiplier = 1.0;
+            sizeDistribution.small++;
+          } else if (memberCount < 500) {
+            tier = "BALANCED (Medium)";
+            antiRaidThreshold = 8;
+            antiNukeMultiplier = 1.0;
+            sizeDistribution.medium++;
+          } else if (memberCount < 2000) {
+            tier = "RELAXED (Large)";
+            antiRaidThreshold = 15;
+            antiNukeMultiplier = memberCount < 1000 ? 1.0 : 1.2;
+            sizeDistribution.large++;
+          } else {
+            tier = "VERY RELAXED (Huge)";
+            antiRaidThreshold = 25;
+            if (memberCount < 5000) antiNukeMultiplier = 1.5;
+            else antiNukeMultiplier = 2.0;
+            sizeDistribution.huge++;
+          }
+
+          serverDetails.push({
+            id: guild.id,
+            name: guild.name,
+            memberCount,
+            tier,
+            antiRaidThreshold,
+            antiNukeMultiplier,
+          });
+        });
+
+        res.json({
+          totalServers: guilds.size,
+          sizeDistribution,
+          averageMemberCount: Math.round(
+            guilds.reduce((sum, g) => sum + g.memberCount, 0) / guilds.size
+          ),
+          largeServerCount: sizeDistribution.large + sizeDistribution.huge,
+          adaptiveProtectionActive: true,
+          version: "3.3.0+",
+          servers: serverDetails.slice(0, 50), // Limit to 50 for performance
+        });
+      } catch (error) {
+        res.status(500).json({ error: error.message });
+      }
+    });
+
     // GET /api/v1/changelog - API changelog (public)
     this.app.get("/api/v1/changelog", (req, res) => {
       res.json({
         version: "1.0.0",
         updates: [
+          {
+            version: "3.3.1",
+            date: "2025-12-04",
+            changes: [
+              "Fixed Top.gg rate limiting (60min interval)",
+              "Improved 429 error handling",
+              "Code style improvements",
+            ],
+          },
+          {
+            version: "3.3.0",
+            date: "2025-12-04",
+            changes: [
+              "Server-size-aware anti-raid protection",
+              "Dynamic thresholds for large servers (500+ members)",
+              "Anti-nuke scaling to prevent false positives",
+              "Enhanced /antiraid status display",
+              "Fixed critical getAdaptiveThresholds error",
+              "Intelligent protection scaling (1.0x to 2.0x multipliers)",
+            ],
+          },
+          {
+            version: "3.2.1",
+            date: "2025-12-04",
+            changes: [
+              "Fixed /share and /refer commands",
+              "Fixed database API calls",
+              "Improved error handling",
+              "Fixed logging issues",
+              "Website improvements",
+            ],
+          },
           {
             version: "3.2.0",
             date: "2025-12-04",

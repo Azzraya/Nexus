@@ -4,7 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Setup Guide - Nexus Discord Bot</title>
-    <link rel="icon" type="image/webp" href="https://cdn.discordapp.com/avatars/1444739230679957646/32f2d77d44c2f3989fecd858be53f396.webp?size=256" />
+    <link
+      rel="icon"
+      type="image/webp"
+      href="https://cdn.discordapp.com/avatars/1444739230679957646/32f2d77d44c2f3989fecd858be53f396.webp?size=256"
+    />
     <meta
       name="description"
       content="Complete setup guide for Nexus Discord bot. Get started in 2 minutes with AI-powered configuration."
@@ -13,16 +17,14 @@
     <link rel="stylesheet" href="pages.css" />
   </head>
   <body>
-        <nav class="navbar">
+    <nav class="navbar">
       <div class="container">
         <a href="index.html" class="nav-brand">NEXUS</a>
-        
+
         <div class="nav-right">
           <!-- Dropdown Menu -->
           <div class="dropdown">
-            <button class="dropdown-toggle">
-              Menu ▼
-            </button>
+            <button class="dropdown-toggle">Menu ▼</button>
             <div class="dropdown-menu">
               <a href="features.html">Features</a>
               <a href="commands.html">Commands</a>
@@ -138,17 +140,25 @@
             <div class="code-block">
               <pre>/antiraid config</pre>
             </div>
+            <p class="success-box" style="margin: 15px 0">
+              <strong>🎯 NEW: Server-Size-Aware Protection!</strong><br />
+              Thresholds automatically scale with your server size. Large
+              servers (500+) get relaxed thresholds to prevent false positives
+              during partnerships or viral growth. Check with
+              <code>/antiraid status</code>
+            </p>
             <p><strong>Settings:</strong></p>
             <ul>
               <li>
                 <strong>Detection Sensitivity:</strong> Low, Medium, High,
-                Paranoid
+                Paranoid (works with automatic scaling)
               </li>
               <li>
                 <strong>Action on Detection:</strong> Ban, Kick, Quarantine
               </li>
               <li>
-                <strong>Join Rate Threshold:</strong> Max joins per time window
+                <strong>Join Rate Threshold:</strong> Automatically scales (5-25
+                joins/10s based on server size)
               </li>
               <li><strong>Whitelist:</strong> Exempt trusted users</li>
             </ul>
@@ -160,6 +170,12 @@
             <div class="code-block">
               <pre>/security config</pre>
             </div>
+            <p class="success-box" style="margin: 15px 0">
+              <strong>🎯 NEW: Intelligent Scaling!</strong><br />
+              Anti-nuke thresholds automatically adjust for server size
+              (1.0x-2.0x multipliers). Large servers can perform legitimate bulk
+              operations without false alerts!
+            </p>
             <p><strong>Protection for:</strong></p>
             <ul>
               <li>Channel deletion/creation</li>

@@ -4,7 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Features - Nexus Discord Bot</title>
-    <link rel="icon" type="image/webp" href="https://cdn.discordapp.com/avatars/1444739230679957646/32f2d77d44c2f3989fecd858be53f396.webp?size=256" />
+    <link
+      rel="icon"
+      type="image/webp"
+      href="https://cdn.discordapp.com/avatars/1444739230679957646/32f2d77d44c2f3989fecd858be53f396.webp?size=256"
+    />
     <meta
       name="description"
       content="Explore all features of Nexus - AI-powered security, anti-raid, anti-nuke, and more."
@@ -16,13 +20,11 @@
     <nav class="navbar">
       <div class="container">
         <a href="index.html" class="nav-brand">NEXUS</a>
-        
+
         <div class="nav-right">
           <!-- Dropdown Menu -->
           <div class="dropdown">
-            <button class="dropdown-toggle">
-              Menu ▼
-            </button>
+            <button class="dropdown-toggle">Menu ▼</button>
             <div class="dropdown-menu">
               <a href="features.html">Features</a>
               <a href="commands.html">Commands</a>
@@ -91,9 +93,40 @@
                 clusters
               </li>
             </ul>
+            <p
+              class="feature-badge"
+              style="
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+              "
+            >
+              NEW: SERVER-SIZE-AWARE
+            </p>
+            <p>
+              <strong>🎯 Adaptive Thresholds:</strong> Protection automatically
+              scales with server size to prevent false positives:
+            </p>
+            <ul>
+              <li>
+                <strong>Small Servers (&lt;100)</strong> - 5 joins/10s (STRICT)
+              </li>
+              <li>
+                <strong>Medium Servers (100-500)</strong> - 8 joins/10s
+                (BALANCED)
+              </li>
+              <li>
+                <strong>Large Servers (500-2K)</strong> - 15 joins/10s (RELAXED)
+              </li>
+              <li>
+                <strong>Huge Servers (2K+)</strong> - 25 joins/10s (VERY
+                RELAXED)
+              </li>
+            </ul>
             <p>
               <strong>Result:</strong> Catches 4x more raid types with fewer
-              false positives than single-algorithm systems. Use `/performance` to see real-time detection speeds.
+              false positives than single-algorithm systems. Large servers (500+
+              members) no longer get false alerts during viral spikes or
+              partnerships. Use `/performance` to see real-time detection
+              speeds.
             </p>
           </div>
 
@@ -130,9 +163,41 @@
                 voice channel attacks
               </li>
             </ul>
+            <p
+              class="feature-badge"
+              style="
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+              "
+            >
+              NEW: SERVER-SIZE-AWARE
+            </p>
+            <p>
+              <strong>🎯 Intelligent Scaling:</strong> Anti-nuke thresholds
+              automatically adjust for server size:
+            </p>
+            <ul>
+              <li>
+                <strong>Small Servers (&lt;1K)</strong> - 1.0x base thresholds
+                (STRICT)
+              </li>
+              <li>
+                <strong>Medium Servers (1K-2K)</strong> - 1.2x thresholds
+                (BALANCED)
+              </li>
+              <li>
+                <strong>Large Servers (2K-5K)</strong> - 1.5x thresholds
+                (RELAXED)
+              </li>
+              <li>
+                <strong>Very Large Servers (5K+)</strong> - 2.0x thresholds
+                (VERY RELAXED)
+              </li>
+            </ul>
             <p>
               <strong>Result:</strong> Prevents attacks before damage occurs,
-              not just after.
+              not just after. Large servers can perform legitimate bulk
+              operations (role cleanups, channel reorganizations) without
+              triggering false alerts.
             </p>
           </div>
 
@@ -174,7 +239,8 @@
                 bypass all security checks
               </li>
               <li>
-                <strong>Sub-millisecond Detection</strong> - 0.15ms average raid detection
+                <strong>Sub-millisecond Detection</strong> - 0.15ms average raid
+                detection
               </li>
               <li>
                 <strong>Auto-Whitelist</strong> - Optionally whitelist server

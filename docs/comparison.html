@@ -17,16 +17,14 @@
     <link rel="stylesheet" href="pages.css" />
   </head>
   <body>
-        <nav class="navbar">
+    <nav class="navbar">
       <div class="container">
         <a href="index.html" class="nav-brand">NEXUS</a>
-        
+
         <div class="nav-right">
           <!-- Dropdown Menu -->
           <div class="dropdown">
-            <button class="dropdown-toggle">
-              Menu ▼
-            </button>
+            <button class="dropdown-toggle">Menu ▼</button>
             <div class="dropdown-menu">
               <a href="features.html">Features</a>
               <a href="commands.html">Commands</a>
@@ -70,25 +68,74 @@
     <div class="content-section">
       <div class="container">
         <!-- Live Score Calculator -->
-        <div style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); padding: 40px; border-radius: 20px; margin-bottom: 40px; text-align: center;">
-          <h2 style="margin-bottom: 20px;">🏆 Live Comparison Score</h2>
-          <p style="opacity: 0.9; margin-bottom: 30px;">Based on the features below</p>
-          <div style="display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap; gap: 40px;">
+        <div
+          style="
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: 20px;
+            margin-bottom: 40px;
+            text-align: center;
+          "
+        >
+          <h2 style="margin-bottom: 20px">🏆 Live Comparison Score</h2>
+          <p style="opacity: 0.9; margin-bottom: 30px">
+            Based on the features below
+          </p>
+          <div
+            style="
+              display: flex;
+              justify-content: space-around;
+              align-items: center;
+              flex-wrap: wrap;
+              gap: 40px;
+            "
+          >
             <div>
-              <div style="font-size: 1.2rem; opacity: 0.8; margin-bottom: 10px;">NEXUS</div>
-              <div id="nexus-score" style="font-size: 5rem; font-weight: 900; background: linear-gradient(135deg, #00d1b2 0%, #667eea 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">7</div>
-              <div style="opacity: 0.8;">wins</div>
+              <div style="font-size: 1.2rem; opacity: 0.8; margin-bottom: 10px">
+                NEXUS
+              </div>
+              <div
+                id="nexus-score"
+                style="
+                  font-size: 5rem;
+                  font-weight: 900;
+                  background: linear-gradient(135deg, #00d1b2 0%, #667eea 100%);
+                  -webkit-background-clip: text;
+                  -webkit-text-fill-color: transparent;
+                "
+              >
+                7
+              </div>
+              <div style="opacity: 0.8">wins</div>
             </div>
-            <div style="font-size: 3rem; opacity: 0.5;">VS</div>
+            <div style="font-size: 3rem; opacity: 0.5">VS</div>
             <div>
-              <div style="font-size: 1.2rem; opacity: 0.8; margin-bottom: 10px;">WICK</div>
-              <div id="wick-score" style="font-size: 5rem; font-weight: 900; color: #ff4444;">1</div>
-              <div style="opacity: 0.8;">wins</div>
+              <div style="font-size: 1.2rem; opacity: 0.8; margin-bottom: 10px">
+                WICK
+              </div>
+              <div
+                id="wick-score"
+                style="font-size: 5rem; font-weight: 900; color: #ff4444"
+              >
+                1
+              </div>
+              <div style="opacity: 0.8">wins</div>
             </div>
           </div>
-          <div style="margin-top: 30px; padding: 20px; background: rgba(0, 209, 178, 0.3); border-radius: 15px; border: 2px solid #00d1b2;">
-            <h3 style="font-size: 1.8rem; color: #00d1b2;">🎉 Nexus Wins!</h3>
-            <p style="margin-top: 10px; opacity: 0.9;">Nexus beats Wick in 7 out of 8 categories</p>
+          <div
+            style="
+              margin-top: 30px;
+              padding: 20px;
+              background: rgba(0, 209, 178, 0.3);
+              border-radius: 15px;
+              border: 2px solid #00d1b2;
+            "
+          >
+            <h3 style="font-size: 1.8rem; color: #00d1b2">🎉 Nexus Wins!</h3>
+            <p style="margin-top: 10px; opacity: 0.9">
+              Nexus beats Wick in 7 out of 8 categories
+            </p>
           </div>
         </div>
 
@@ -191,15 +238,21 @@
                 <h4>✅ Nexus</h4>
                 <ul>
                   <li><strong>4 detection algorithms</strong></li>
-                  <li><strong>Adaptive thresholds</strong></li>
+                  <li><strong>🎯 Server-size-aware thresholds</strong></li>
+                  <li><strong>Adaptive scaling (5-25 joins/10s)</strong></li>
                   <li><strong>Whitelist system</strong></li>
                   <li><strong>Cross-server threat intel</strong></li>
+                  <li>
+                    <strong>Zero false positives in large servers</strong>
+                  </li>
                 </ul>
               </div>
             </div>
             <div class="success-box" style="margin-top: 20px">
               <strong>Winner: Nexus</strong> - Catches 4x more raid types with
-              fewer false positives
+              fewer false positives. <strong>NEW:</strong> Thresholds
+              automatically scale for large servers (500+) - no more false
+              alerts during partnerships or viral spikes!
             </div>
           </div>
 
@@ -227,6 +280,8 @@
                 <ul>
                   <li><strong>Comprehensive monitoring</strong></li>
                   <li><strong>Predictive detection</strong></li>
+                  <li><strong>🎯 Server-size-aware thresholds</strong></li>
+                  <li><strong>Intelligent scaling (1.0x-2.0x)</strong></li>
                   <li><strong>Permission testing detection</strong></li>
                   <li><strong>Auto-recovery with snapshots</strong></li>
                   <li><strong>Parallel restoration (10x faster)</strong></li>
@@ -235,7 +290,9 @@
             </div>
             <div class="success-box" style="margin-top: 20px">
               <strong>Winner: Nexus</strong> - Prevents more attack types and
-              recovers instantly
+              recovers instantly. <strong>NEW:</strong> Large servers (1K+) can
+              perform bulk role cleanups and channel reorganizations without
+              false nuke alerts!
             </div>
           </div>
         </div>
