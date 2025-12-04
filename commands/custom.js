@@ -149,7 +149,7 @@ module.exports = {
         await interaction.editReply({ embeds: [embed] });
       } catch (error) {
         await interaction.editReply({
-          content: ErrorMessages.commandFailed(error.message).embeds[0].description,
+          content: `❌ ${error.message}`,
         });
       }
     } else if (subcommand === "embed") {
@@ -208,7 +208,7 @@ module.exports = {
         await interaction.editReply({ embeds: [embed, preview] });
       } catch (error) {
         await interaction.editReply({
-          content: ErrorMessages.commandFailed(error.message).embeds[0].description,
+          content: `❌ ${error.message}`,
         });
       }
     } else if (subcommand === "list") {

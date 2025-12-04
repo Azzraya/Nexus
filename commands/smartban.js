@@ -138,7 +138,7 @@ module.exports = {
       await interaction.editReply({ embeds: [embed] });
     } else {
       await interaction.editReply({
-        ErrorMessages.commandFailed(result.message).embeds[0].description,
+        content: `❌ ${result.message}`,
       });
     }
   },

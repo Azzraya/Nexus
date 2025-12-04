@@ -138,7 +138,7 @@ module.exports = {
         });
       } else {
         await interaction.reply({
-          content: ErrorMessages.commandFailed(result.error).embeds[0].description,
+          content: `❌ ${result.error}`,
           flags: MessageFlags.Ephemeral,
         });
       }
