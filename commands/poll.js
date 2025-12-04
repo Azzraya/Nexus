@@ -74,7 +74,7 @@ module.exports = {
     const subcommand = interaction.options.getSubcommand();
 
     if (subcommand === "create") {
-      await this.handleCreate(interaction, client);
+      await this.handleCreate(interaction);
     } else if (subcommand === "end") {
       await this.handleEnd(interaction);
     } else if (subcommand === "results") {
@@ -82,7 +82,7 @@ module.exports = {
     }
   },
 
-  async handleCreate(interaction, client) {
+  async handleCreate(interaction) {
     try {
       const question = interaction.options.getString("question");
       const optionsStr = interaction.options.getString("options");
