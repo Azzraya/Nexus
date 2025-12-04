@@ -1621,6 +1621,32 @@ class Database {
       }
     );
 
+    // Migration: Fix polls table schema (drop old, recreate with new schema)
+    this.db.run(`DROP TABLE IF EXISTS polls`, (err) => {
+      if (err) {
+        console.error("Error dropping old polls table:", err);
+      } else {
+        // Recreate with correct schema
+        this.db.run(`
+          CREATE TABLE IF NOT EXISTS polls (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            message_id TEXT UNIQUE NOT NULL,
+            channel_id TEXT NOT NULL,
+            guild_id TEXT NOT NULL,
+            question TEXT NOT NULL,
+            options TEXT NOT NULL,
+            creator_id TEXT NOT NULL,
+            duration INTEGER NOT NULL,
+            anonymous INTEGER DEFAULT 0,
+            multiple_choice INTEGER DEFAULT 0,
+            end_time INTEGER NOT NULL,
+            active INTEGER DEFAULT 1,
+            created_at INTEGER DEFAULT (strftime('%s', 'now') * 1000)
+          )
+        `);
+      }
+    });
+
     // XP & Leveling System Tables
     this.db.run(`
       CREATE TABLE IF NOT EXISTS user_xp (
