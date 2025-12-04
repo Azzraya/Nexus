@@ -90,6 +90,30 @@ client.voteRewards = new VoteRewards(client);
 const DashboardServer = require("./dashboard/server");
 client.dashboardServer = new DashboardServer(client);
 
+// Advanced Automod System (EXCEEDS WICK - comprehensive message scanning)
+const AdvancedAutomod = require("./utils/advancedAutomod");
+client.advancedAutomod = new AdvancedAutomod(client);
+
+// Member Screening System (EXCEEDS WICK - proactive security)
+const MemberScreening = require("./utils/memberScreening");
+client.memberScreening = new MemberScreening(client);
+
+// Scheduled Actions System (EXCEEDS WICK - automation)
+const ScheduledActions = require("./utils/scheduledActions");
+client.scheduledActions = new ScheduledActions(client);
+
+// Voice Monitoring System (EXCEEDS WICK - voice channel protection)
+const VoiceMonitoring = require("./utils/voiceMonitoring");
+client.voiceMonitoring = new VoiceMonitoring(client);
+
+// Webhook Events System (EXCEEDS WICK - real-time integrations)
+const WebhookEvents = require("./utils/webhookEvents");
+client.webhookEvents = new WebhookEvents(client);
+
+// Multi-Server Management (EXCEEDS WICK - cross-server coordination)
+const MultiServerManagement = require("./utils/multiServer");
+client.multiServer = new MultiServerManagement(client);
+
 // Optimized cleanup - run all cleanups in parallel (EXCEEDS WICK - better performance)
 setInterval(async () => {
   const cleanupTasks = [];
@@ -301,14 +325,24 @@ if (!process.env.USING_SHARDING && process.env.TOPGG_TOKEN) {
 
     ap.on("error", (error) => {
       const errorMsg = error.message || error.toString();
-      
+
       // Suppress common non-critical errors
       if (errorMsg.includes("429")) {
         logger.warn("[Top.gg] Rate limited (429) - will retry in 1 hour");
-      } else if (errorMsg.includes("504") || errorMsg.includes("Gateway Timeout")) {
-        logger.warn("[Top.gg] Gateway timeout (504) - Top.gg API slow, will retry in 1 hour");
-      } else if (errorMsg.includes("503") || errorMsg.includes("Service Unavailable")) {
-        logger.warn("[Top.gg] Service unavailable (503) - will retry in 1 hour");
+      } else if (
+        errorMsg.includes("504") ||
+        errorMsg.includes("Gateway Timeout")
+      ) {
+        logger.warn(
+          "[Top.gg] Gateway timeout (504) - Top.gg API slow, will retry in 1 hour"
+        );
+      } else if (
+        errorMsg.includes("503") ||
+        errorMsg.includes("Service Unavailable")
+      ) {
+        logger.warn(
+          "[Top.gg] Service unavailable (503) - will retry in 1 hour"
+        );
       } else {
         // Only log actual errors (connection issues, auth problems, etc.)
         logger.error("[Top.gg] Error posting stats:", error);

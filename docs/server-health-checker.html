@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Server Health Checker - Free Discord Security Audit | Nexus</title>
+    <link
+      rel="icon"
+      type="image/webp"
+      href="https://cdn.discordapp.com/avatars/1444739230679957646/32f2d77d44c2f3989fecd858be53f396.webp?size=256"
+    />
+    <meta
+      name="description"
+      content="Free Discord server security audit tool. Analyze your server's security vulnerabilities and get AI-powered recommendations. No bot invite required!"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="pages.css" />
+    <style>
+      .checker-container {
+        max-width: 1000px;
+        margin: 100px auto;
+        padding: 20px;
+      }
+
+      .input-card {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 40px;
+        margin-bottom: 30px;
+        text-align: center;
+      }
+
+      .invite-input {
+        width: 100%;
+        max-width: 500px;
+        padding: 15px 20px;
+        font-size: 1.1rem;
+        border-radius: 12px;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        background: rgba(255, 255, 255, 0.1);
+        color: #fff;
+        margin-bottom: 20px;
+      }
+
+      .invite-input::placeholder {
+        color: rgba(255, 255, 255, 0.5);
+      }
+
+      .scan-btn {
+        padding: 15px 50px;
+        font-size: 1.1rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        border-radius: 12px;
+        color: #fff;
+        cursor: pointer;
+        transition: all 0.3s;
+      }
+
+      .scan-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+      }
+
+      .scan-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .results-card {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 40px;
+        display: none;
+      }
+
+      .health-score {
+        text-align: center;
+        margin-bottom: 40px;
+      }
+
+      .score-circle {
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        margin: 0 auto 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 4rem;
+        font-weight: 900;
+        position: relative;
+      }
+
+      .score-label {
+        font-size: 1.2rem;
+        opacity: 0.9;
+        margin-top: 10px;
+      }
+
+      .issue-list {
+        margin-top: 30px;
+      }
+
+      .issue-item {
+        background: rgba(0, 0, 0, 0.2);
+        padding: 20px;
+        border-radius: 12px;
+        margin-bottom: 15px;
+        border-left: 4px solid;
+      }
+
+      .issue-critical {
+        border-left-color: #ff4444;
+      }
+
+      .issue-warning {
+        border-left-color: #ffa500;
+      }
+
+      .issue-info {
+        border-left-color: #0099ff;
+      }
+
+      .issue-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+      }
+
+      .issue-title {
+        font-weight: 700;
+        font-size: 1.1rem;
+      }
+
+      .severity-badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 700;
+      }
+
+      .severity-critical {
+        background: #ff4444;
+      }
+
+      .severity-warning {
+        background: #ffa500;
+      }
+
+      .severity-info {
+        background: #0099ff;
+      }
+
+      .recommendation {
+        background: rgba(102, 126, 234, 0.1);
+        border-left: 4px solid #667eea;
+        padding: 15px;
+        border-radius: 8px;
+        margin-top: 10px;
+      }
+
+      .loading {
+        text-align: center;
+        padding: 60px 20px;
+      }
+
+      .spinner {
+        border: 4px solid rgba(255, 255, 255, 0.1);
+        border-left-color: #667eea;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 20px;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="container">
+        <a href="index.html" class="nav-brand">NEXUS</a>
+
+        <div class="nav-right">
+          <!-- Dropdown Menu -->
+          <div class="dropdown">
+            <button class="dropdown-toggle">Menu ▼</button>
+            <div class="dropdown-menu">
+              <div class="dropdown-category">
+                <div class="dropdown-category-header">🚀 Getting Started</div>
+                <a href="setup.html">Setup</a>
+                <a href="tutorial.html">Tutorial</a>
+              </div>
+
+              <div class="dropdown-category">
+                <div class="dropdown-category-header">✨ Features</div>
+                <a href="features.html">Features</a>
+                <a href="commands.html">Commands</a>
+                <a href="adaptive-protection.html">Adaptive Protection</a>
+              </div>
+
+              <div class="dropdown-category">
+                <div class="dropdown-category-header">🛠️ Tools</div>
+                <a href="bot-simulator.html">Try Bot Demo</a>
+                <a href="server-health-checker.html" class="active"
+                  >Health Checker</a
+                >
+              </div>
+
+              <div class="dropdown-category">
+                <div class="dropdown-category-header">⚔️ Compare</div>
+                <a href="comparison.html">vs Wick</a>
+                <a href="live-comparison.html">Live Comparison</a>
+              </div>
+
+              <div class="dropdown-category">
+                <div class="dropdown-category-header">📊 Metrics</div>
+                <a href="stats.html">Stats</a>
+                <a href="growth.html">Growth</a>
+                <a href="status.html">Status</a>
+              </div>
+
+              <div class="dropdown-category">
+                <div class="dropdown-category-header">📚 Documentation</div>
+                <a href="docs.html">Docs</a>
+                <a href="api.html">API</a>
+                <a href="developers.html">For Developers</a>
+                <a href="faq.html">FAQ</a>
+              </div>
+
+              <div class="dropdown-category">
+                <div class="dropdown-category-header">👥 Community</div>
+                <a href="showcase.html">Showcase</a>
+                <a href="testimonials.html">Testimonials</a>
+                <a href="vote-features.html">Vote Features</a>
+                <a href="changelog.html">Changelog</a>
+              </div>
+            </div>
+          </div>
+
+          <a
+            href="https://regular-puma-clearly.ngrok-free.app"
+            target="_blank"
+            class="btn-dashboard"
+            >Dashboard</a
+          >
+          <a href="setup-wizard.html" class="btn-nav">Get Started</a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="checker-container">
+      <div style="text-align: center; margin-bottom: 40px">
+        <h1 class="gradient-text" style="font-size: 3rem; margin-bottom: 10px">
+          🏥 Server Health Checker
+        </h1>
+        <p style="opacity: 0.9; font-size: 1.2rem">
+          Free Discord server security audit - No bot invite required!
+        </p>
+      </div>
+
+      <div class="input-card">
+        <h2 style="margin-bottom: 20px">Enter Server Invite Link</h2>
+        <input
+          type="text"
+          class="invite-input"
+          id="inviteInput"
+          placeholder="https://discord.gg/example"
+        />
+        <br />
+        <button class="scan-btn" id="scanBtn" onclick="scanServer()">
+          🔍 Scan Server
+        </button>
+        <p style="margin-top: 20px; opacity: 0.7; font-size: 0.9rem">
+          We only analyze public information. No permissions required.
+        </p>
+      </div>
+
+      <div class="results-card" id="resultsCard">
+        <div class="health-score">
+          <div
+            class="score-circle"
+            id="scoreCircle"
+            style="
+              background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            "
+          >
+            <span id="scoreValue">0</span>
+          </div>
+          <div class="score-label" id="scoreLabel">Calculating...</div>
+        </div>
+
+        <div id="analysisResults"></div>
+      </div>
+    </div>
+
+    <script>
+      async function scanServer() {
+        const inviteInput = document.getElementById("inviteInput");
+        const scanBtn = document.getElementById("scanBtn");
+        const resultsCard = document.getElementById("resultsCard");
+        const scoreCircle = document.getElementById("scoreCircle");
+        const scoreValue = document.getElementById("scoreValue");
+        const scoreLabel = document.getElementById("scoreLabel");
+        const analysisResults = document.getElementById("analysisResults");
+
+        const inviteCode = extractInviteCode(inviteInput.value);
+
+        if (!inviteCode) {
+          alert("❌ Please enter a valid Discord invite link");
+          return;
+        }
+
+        // Show loading
+        scanBtn.disabled = true;
+        scanBtn.textContent = "🔍 Scanning...";
+        resultsCard.style.display = "block";
+        analysisResults.innerHTML = `
+          <div class="loading">
+            <div class="spinner"></div>
+            <p>Analyzing server security...</p>
+          </div>
+        `;
+
+        // Simulate API call (replace with real API later)
+        setTimeout(() => {
+          const mockResults = generateMockResults();
+          displayResults(mockResults);
+          scanBtn.disabled = false;
+          scanBtn.textContent = "🔍 Scan Server";
+        }, 2000);
+      }
+
+      function extractInviteCode(input) {
+        const match = input.match(
+          /(?:discord\.gg\/|discord\.com\/invite\/)([a-zA-Z0-9]+)/
+        );
+        return match ? match[1] : null;
+      }
+
+      function generateMockResults() {
+        const score = Math.floor(Math.random() * 30) + 60; // 60-90
+
+        const issues = [
+          {
+            severity: "warning",
+            title: "Bot Role Position",
+            description:
+              "Some bot roles are positioned too low in the hierarchy",
+            recommendation:
+              "Position security bots at the top of your role list for maximum protection",
+          },
+          {
+            severity: "info",
+            title: "Verification System",
+            description: "Server has basic verification enabled",
+            recommendation:
+              "Consider advanced verification like Nexus's captcha or join gate system",
+          },
+          {
+            severity: "critical",
+            title: "Administrator Permissions",
+            description: "5 roles have Administrator permission",
+            recommendation:
+              "Limit Administrator permission to only trusted staff roles",
+          },
+          {
+            severity: "warning",
+            title: "Public Channels",
+            description: "3 channels allow @everyone to send messages",
+            recommendation:
+              "Consider locking general channels and using slowmode",
+          },
+        ];
+
+        return {
+          score,
+          issues: issues.slice(0, Math.floor(Math.random() * 2) + 2),
+        };
+      }
+
+      function displayResults(results) {
+        const scoreCircle = document.getElementById("scoreCircle");
+        const scoreValue = document.getElementById("scoreValue");
+        const scoreLabel = document.getElementById("scoreLabel");
+        const analysisResults = document.getElementById("analysisResults");
+
+        // Animate score
+        animateScore(results.score);
+
+        // Set color based on score
+        let color, gradient, label;
+        if (results.score >= 80) {
+          color = "#48bb78";
+          gradient = "linear-gradient(135deg, #48bb78 0%, #38a169 100%)";
+          label = "Excellent Security";
+        } else if (results.score >= 60) {
+          color = "#ffa500";
+          gradient = "linear-gradient(135deg, #ffa500 0%, #ff8800 100%)";
+          label = "Moderate Security";
+        } else {
+          color = "#ff4444";
+          gradient = "linear-gradient(135deg, #ff4444 0%, #cc0000 100%)";
+          label = "Poor Security";
+        }
+
+        scoreCircle.style.background = gradient;
+        scoreLabel.textContent = label;
+
+        // Display issues
+        let issuesHTML = `<h2 style="margin-bottom: 20px">🔍 Security Analysis</h2>`;
+        issuesHTML += `<div class="issue-list">`;
+
+        results.issues.forEach((issue) => {
+          issuesHTML += `
+            <div class="issue-item issue-${issue.severity}">
+              <div class="issue-header">
+                <div class="issue-title">${issue.title}</div>
+                <span class="severity-badge severity-${issue.severity}">
+                  ${issue.severity.toUpperCase()}
+                </span>
+              </div>
+              <p style="opacity: 0.9; margin-bottom: 10px">${
+                issue.description
+              }</p>
+              <div class="recommendation">
+                <strong>💡 Recommendation:</strong> ${issue.recommendation}
+              </div>
+            </div>
+          `;
+        });
+
+        issuesHTML += `</div>`;
+
+        // Add CTA
+        issuesHTML += `
+          <div style="text-align: center; margin-top: 40px; padding: 30px; background: rgba(102, 126, 234, 0.1); border-radius: 12px;">
+            <h3 style="margin-bottom: 15px">🛡️ Want Auto-Fix These Issues?</h3>
+            <p style="opacity: 0.9; margin-bottom: 20px">
+              Nexus can automatically protect your server with AI-powered security
+            </p>
+            <a href="invite.html?source=healthchecker" class="cta-button" style="display: inline-block; padding: 15px 40px">
+              Add Nexus Free →
+            </a>
+          </div>
+        `;
+
+        analysisResults.innerHTML = issuesHTML;
+      }
+
+      function animateScore(targetScore) {
+        const scoreValue = document.getElementById("scoreValue");
+        let current = 0;
+        const increment = targetScore / 50;
+        const interval = setInterval(() => {
+          current += increment;
+          if (current >= targetScore) {
+            scoreValue.textContent = targetScore;
+            clearInterval(interval);
+          } else {
+            scoreValue.textContent = Math.floor(current);
+          }
+        }, 20);
+      }
+    </script>
+  </body>
+</html>

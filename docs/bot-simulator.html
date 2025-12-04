@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bot Simulator - Try Nexus | Nexus</title>
+    <link
+      rel="icon"
+      type="image/webp"
+      href="https://cdn.discordapp.com/avatars/1444739230679957646/32f2d77d44c2f3989fecd858be53f396.webp?size=256"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="pages.css" />
+    <style>
+      .simulator-container {
+        max-width: 900px;
+        margin: 100px auto;
+        padding: 20px;
+      }
+
+      .discord-mockup {
+        background: #36393f;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+      }
+
+      .discord-header {
+        background: #202225;
+        padding: 15px 20px;
+        border-bottom: 1px solid #000;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .discord-header h3 {
+        color: #fff;
+        margin: 0;
+        font-size: 16px;
+        font-weight: 600;
+      }
+
+      .chat-area {
+        padding: 20px;
+        min-height: 400px;
+        max-height: 600px;
+        overflow-y: auto;
+      }
+
+      .message {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 20px;
+        animation: fadeIn 0.3s ease;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+
+      .message-content {
+        flex: 1;
+      }
+
+      .message-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 4px;
+      }
+
+      .username {
+        color: #fff;
+        font-weight: 600;
+        font-size: 15px;
+      }
+
+      .bot-tag {
+        background: #5865f2;
+        color: #fff;
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-size: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+      }
+
+      .timestamp {
+        color: #72767d;
+        font-size: 12px;
+      }
+
+      .message-text {
+        color: #dcddde;
+        font-size: 15px;
+        line-height: 1.4;
+      }
+
+      .embed {
+        background: #2f3136;
+        border-left: 4px solid #5865f2;
+        border-radius: 4px;
+        padding: 12px 16px;
+        margin-top: 8px;
+        max-width: 500px;
+      }
+
+      .embed-title {
+        color: #fff;
+        font-weight: 600;
+        font-size: 16px;
+        margin-bottom: 8px;
+      }
+
+      .embed-description {
+        color: #dcddde;
+        font-size: 14px;
+        line-height: 1.4;
+        margin-bottom: 8px;
+      }
+
+      .embed-field {
+        margin-bottom: 8px;
+      }
+
+      .embed-field-name {
+        color: #fff;
+        font-weight: 600;
+        font-size: 14px;
+        margin-bottom: 2px;
+      }
+
+      .embed-field-value {
+        color: #dcddde;
+        font-size: 14px;
+      }
+
+      .input-area {
+        background: #40444b;
+        padding: 15px;
+        border-top: 1px solid #000;
+      }
+
+      .command-input {
+        background: #40444b;
+        border: 1px solid #202225;
+        border-radius: 8px;
+        padding: 12px 15px;
+        color: #dcddde;
+        font-size: 15px;
+        width: 100%;
+        font-family: inherit;
+      }
+
+      .command-input::placeholder {
+        color: #72767d;
+      }
+
+      .command-buttons {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 10px;
+        margin-top: 20px;
+      }
+
+      .cmd-btn {
+        background: rgba(88, 101, 242, 0.1);
+        border: 2px solid #5865f2;
+        padding: 12px 20px;
+        border-radius: 8px;
+        color: #fff;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-align: left;
+      }
+
+      .cmd-btn:hover {
+        background: rgba(88, 101, 242, 0.3);
+        transform: translateY(-2px);
+      }
+
+      .cmd-btn-title {
+        font-size: 14px;
+        margin-bottom: 4px;
+      }
+
+      .cmd-btn-desc {
+        font-size: 12px;
+        color: #b9bbbe;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="container">
+        <a href="index.html" class="nav-brand">NEXUS</a>
+
+        <div class="nav-right">
+          <!-- Dropdown Menu -->
+          <div class="dropdown">
+            <button class="dropdown-toggle">Menu ▼</button>
+            <div class="dropdown-menu">
+              <div class="dropdown-category">
+                <div class="dropdown-category-header">🚀 Getting Started</div>
+                <a href="setup.html">Setup</a>
+                <a href="tutorial.html">Tutorial</a>
+              </div>
+
+              <div class="dropdown-category">
+                <div class="dropdown-category-header">✨ Features</div>
+                <a href="features.html">Features</a>
+                <a href="commands.html">Commands</a>
+                <a href="adaptive-protection.html">Adaptive Protection</a>
+              </div>
+
+              <div class="dropdown-category">
+                <div class="dropdown-category-header">🛠️ Tools</div>
+                <a href="bot-simulator.html" class="active">Try Bot Demo</a>
+                <a href="server-health-checker.html">Health Checker</a>
+              </div>
+
+              <div class="dropdown-category">
+                <div class="dropdown-category-header">⚔️ Compare</div>
+                <a href="comparison.html">vs Wick</a>
+                <a href="live-comparison.html">Live Comparison</a>
+              </div>
+
+              <div class="dropdown-category">
+                <div class="dropdown-category-header">📊 Metrics</div>
+                <a href="stats.html">Stats</a>
+                <a href="growth.html">Growth</a>
+                <a href="status.html">Status</a>
+              </div>
+
+              <div class="dropdown-category">
+                <div class="dropdown-category-header">📚 Documentation</div>
+                <a href="docs.html">Docs</a>
+                <a href="api.html">API</a>
+                <a href="developers.html">For Developers</a>
+                <a href="faq.html">FAQ</a>
+              </div>
+
+              <div class="dropdown-category">
+                <div class="dropdown-category-header">👥 Community</div>
+                <a href="showcase.html">Showcase</a>
+                <a href="testimonials.html">Testimonials</a>
+                <a href="vote-features.html">Vote Features</a>
+                <a href="changelog.html">Changelog</a>
+              </div>
+            </div>
+          </div>
+
+          <a
+            href="https://regular-puma-clearly.ngrok-free.app"
+            target="_blank"
+            class="btn-dashboard"
+            >Dashboard</a
+          >
+          <a href="setup-wizard.html" class="btn-nav">Get Started</a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="simulator-container">
+      <div style="text-align: center; margin-bottom: 40px">
+        <h1 class="gradient-text" style="font-size: 3rem; margin-bottom: 10px">
+          🎮 Interactive Bot Demo
+        </h1>
+        <p style="opacity: 0.9; font-size: 1.2rem">
+          Try Nexus commands without inviting to Discord
+        </p>
+      </div>
+
+      <div class="discord-mockup">
+        <div class="discord-header">
+          <span style="color: #72767d">#</span>
+          <h3>bot-commands</h3>
+        </div>
+
+        <div class="chat-area" id="chatArea">
+          <div class="message">
+            <img
+              src="https://cdn.discordapp.com/avatars/1444739230679957646/32f2d77d44c2f3989fecd858be53f396.webp?size=128"
+              class="avatar"
+              alt="Nexus"
+            />
+            <div class="message-content">
+              <div class="message-header">
+                <span class="username">Nexus</span>
+                <span class="bot-tag">BOT</span>
+                <span class="timestamp">Today at 12:00 PM</span>
+              </div>
+              <div class="message-text">
+                👋 Welcome to the Nexus simulator! Try clicking the command
+                buttons below or type a command.
+              </div>
+              <div class="embed" style="border-left-color: #00ff00">
+                <div class="embed-title">✅ Available Commands</div>
+                <div class="embed-description">
+                  Click any button below to see how Nexus responds!
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="input-area">
+          <input
+            type="text"
+            class="command-input"
+            id="commandInput"
+            placeholder="Try: /help or /security check or /predict now"
+          />
+
+          <div class="command-buttons">
+            <button class="cmd-btn" onclick="runCommand('/help')">
+              <div class="cmd-btn-title">📚 /help</div>
+              <div class="cmd-btn-desc">View all commands</div>
+            </button>
+            <button
+              class="cmd-btn"
+              onclick="runCommand('/security check @user')"
+            >
+              <div class="cmd-btn-title">🔒 /security check</div>
+              <div class="cmd-btn-desc">Check user threat level</div>
+            </button>
+            <button class="cmd-btn" onclick="runCommand('/predict now')">
+              <div class="cmd-btn-title">🤖 /predict now</div>
+              <div class="cmd-btn-desc">AI threat prediction</div>
+            </button>
+            <button class="cmd-btn" onclick="runCommand('/antiraid status')">
+              <div class="cmd-btn-title">🛡️ /antiraid status</div>
+              <div class="cmd-btn-desc">View anti-raid config</div>
+            </button>
+            <button class="cmd-btn" onclick="runCommand('/performance')">
+              <div class="cmd-btn-title">⚡ /performance</div>
+              <div class="cmd-btn-desc">Bot performance metrics</div>
+            </button>
+            <button class="cmd-btn" onclick="runCommand('/recover list')">
+              <div class="cmd-btn-title">💾 /recover list</div>
+              <div class="cmd-btn-desc">Recovery snapshots</div>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div style="text-align: center; margin-top: 40px">
+        <p style="opacity: 0.7; margin-bottom: 20px">
+          This is a simulation. Real bot has even more features!
+        </p>
+        <a
+          href="invite.html?source=simulator"
+          class="cta-button"
+          style="display: inline-block; padding: 15px 40px; font-size: 1.1rem"
+        >
+          Add Nexus to Your Server →
+        </a>
+      </div>
+    </div>
+
+    <script>
+      const chatArea = document.getElementById("chatArea");
+      const commandInput = document.getElementById("commandInput");
+
+      // Command database with realistic responses
+      const commands = {
+        "/help": {
+          title: "📚 Nexus Command List",
+          color: "#5865f2",
+          fields: [
+            {
+              name: "🛡️ Security (17 commands)",
+              value:
+                "`/antiraid` `/predict` `/security` `/verify` `/scan` `/recover` and more...",
+            },
+            {
+              name: "🔨 Moderation (16 commands)",
+              value:
+                "`/ban` `/kick` `/mute` `/warn` `/timeout` `/purge` and more...",
+            },
+            {
+              name: "📊 Analytics (10 commands)",
+              value:
+                "`/stats` `/analytics` `/dashboard` `/performance` and more...",
+            },
+          ],
+          footer: "Use /commands for the full list!",
+        },
+        "/security check": {
+          title: "🔒 Security Check - @DemoUser",
+          color: "#00ff00",
+          fields: [
+            { name: "Threat Level", value: "LOW", inline: true },
+            { name: "Threat Score", value: "15/100", inline: true },
+            { name: "Recommended Action", value: "None", inline: true },
+            {
+              name: "Account Information",
+              value:
+                "**Age:** 342 days\n**Avatar:** Yes\n**Discriminator:** 1234",
+            },
+          ],
+        },
+        "/predict now": {
+          title: "🤖 AI Threat Prediction Analysis",
+          color: "#48bb78",
+          fields: [
+            {
+              name: "⚠️ Threat Score",
+              value: "**12/100** (Safe)",
+              inline: true,
+            },
+            { name: "📊 Recent Joins", value: "2 in last 60s", inline: true },
+            { name: "🔍 Patterns Detected", value: "None", inline: false },
+            {
+              name: "✅ Status",
+              value: "No immediate action needed. Server looks safe.",
+            },
+          ],
+          footer: "AI prediction based on behavioral analysis",
+        },
+        "/antiraid status": {
+          title: "🛡️ Anti-Raid Status",
+          color: "#0099ff",
+          description:
+            "**Server Size Tier:** Medium (100-500)\n**Members:** 342",
+          fields: [
+            { name: "Status", value: "✅ Enabled", inline: true },
+            { name: "Base Max Joins", value: "5", inline: true },
+            { name: "Scaled Max Joins", value: "**8** (1.6x)", inline: true },
+            { name: "Time Window", value: "10s", inline: true },
+            { name: "Action", value: "ban", inline: true },
+            { name: "Anti-Nuke", value: "✅ Enabled", inline: true },
+            {
+              name: "🧠 Detection Algorithms",
+              value:
+                "✅ Rate-based\n✅ Pattern-based\n✅ Behavioral\n✅ Network-based",
+            },
+          ],
+        },
+        "/performance": {
+          title: "⚡ Nexus Performance Metrics",
+          color: "#10b981",
+          description: "**Independently verifiable real-time metrics**",
+          fields: [
+            { name: "WebSocket Ping", value: "**42ms**", inline: true },
+            { name: "API Latency", value: "**78ms**", inline: true },
+            { name: "Uptime", value: "**99.9%**", inline: true },
+            {
+              name: "🚀 Raid Detection",
+              value:
+                "**Avg:** 0.15ms\n**Min:** 0.08ms\n**Max:** 0.31ms\n**P95:** 0.22ms",
+              inline: true,
+            },
+            {
+              name: "🔨 Total Response",
+              value:
+                "**Avg:** 187ms\n**Min:** 142ms\n**Max:** 234ms\n**P95:** 210ms",
+              inline: true,
+            },
+            {
+              name: "💾 Database",
+              value: "**Avg Query:** 1.2ms\n**Cache Hit:** 94%",
+              inline: true,
+            },
+          ],
+          footer:
+            "Sub-millisecond detection • Sub-200ms response • Measured with process.hrtime.bigint()",
+        },
+        "/recover list": {
+          title: "💾 Recovery Snapshots",
+          color: "#0099ff",
+          description:
+            "**1.** full - Dec 4, 2025 12:30:15 PM\n   Reason: Periodic auto-snapshot\n\n**2.** full - Dec 3, 2025 12:30:15 PM\n   Reason: Scheduled backup\n\n**3.** full - Dec 2, 2025 12:30:15 PM\n   Reason: Manual snapshot",
+          footer: "3 snapshots available",
+        },
+        "/warn": {
+          title: "⚠️ Warning Issued",
+          color: "#ffa500",
+          description: "**@DemoUser** has been warned",
+          fields: [
+            { name: "Moderator", value: "You", inline: true },
+            { name: "Reason", value: "Breaking server rules", inline: true },
+            { name: "Total Warnings", value: "1", inline: true },
+          ],
+        },
+      };
+
+      function runCommand(cmd) {
+        // Show user message
+        addUserMessage(cmd);
+
+        // Get command response
+        const baseCommand = cmd.split(" ")[0];
+        let response = commands[cmd] || commands[baseCommand];
+
+        if (!response) {
+          response = {
+            title: "❓ Unknown Command",
+            color: "#ff0000",
+            description: `Command \`${cmd}\` not recognized. Try \`/help\``,
+          };
+        }
+
+        // Show bot response after delay
+        setTimeout(() => addBotMessage(response), 500);
+
+        // Clear input
+        commandInput.value = "";
+      }
+
+      function addUserMessage(text) {
+        const userAvatar = "https://cdn.discordapp.com/embed/avatars/0.png";
+        const time = new Date().toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+
+        const messageHTML = `
+          <div class="message">
+            <img src="${userAvatar}" class="avatar" alt="User" />
+            <div class="message-content">
+              <div class="message-header">
+                <span class="username">You</span>
+                <span class="timestamp">${time}</span>
+              </div>
+              <div class="message-text">${text}</div>
+            </div>
+          </div>
+        `;
+
+        chatArea.insertAdjacentHTML("beforeend", messageHTML);
+        chatArea.scrollTop = chatArea.scrollHeight;
+      }
+
+      function addBotMessage(response) {
+        const botAvatar =
+          "https://cdn.discordapp.com/avatars/1444739230679957646/32f2d77d44c2f3989fecd858be53f396.webp?size=128";
+        const time = new Date().toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+
+        let embedHTML = `<div class="embed" style="border-left-color: ${
+          response.color || "#5865f2"
+        }">`;
+
+        if (response.title) {
+          embedHTML += `<div class="embed-title">${response.title}</div>`;
+        }
+
+        if (response.description) {
+          embedHTML += `<div class="embed-description">${response.description}</div>`;
+        }
+
+        if (response.fields) {
+          response.fields.forEach((field) => {
+            embedHTML += `
+              <div class="embed-field">
+                <div class="embed-field-name">${field.name}</div>
+                <div class="embed-field-value">${field.value}</div>
+              </div>
+            `;
+          });
+        }
+
+        if (response.footer) {
+          embedHTML += `<div style="color: #72767d; font-size: 12px; margin-top: 8px">${response.footer}</div>`;
+        }
+
+        embedHTML += `</div>`;
+
+        const messageHTML = `
+          <div class="message">
+            <img src="${botAvatar}" class="avatar" alt="Nexus" />
+            <div class="message-content">
+              <div class="message-header">
+                <span class="username">Nexus</span>
+                <span class="bot-tag">BOT</span>
+                <span class="timestamp">${time}</span>
+              </div>
+              ${embedHTML}
+            </div>
+          </div>
+        `;
+
+        chatArea.insertAdjacentHTML("beforeend", messageHTML);
+        chatArea.scrollTop = chatArea.scrollHeight;
+      }
+
+      // Handle Enter key
+      commandInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter" && commandInput.value.trim()) {
+          runCommand(commandInput.value.trim());
+        }
+      });
+    </script>
+  </body>
+</html>

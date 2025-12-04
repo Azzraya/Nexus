@@ -15,14 +15,20 @@ module.exports = {
         client.advancedAntiNuke
           .monitorChannelMessage(message.channel, message.author.id)
           .catch((err) => {
-            logger.debug(`[messageCreate] Channel message monitoring failed:`, err.message);
+            logger.debug(
+              `[messageCreate] Channel message monitoring failed:`,
+              err.message
+            );
           })
       );
       securityChecks.push(
         client.advancedAntiNuke
           .monitorEmojiSpam(message, message.author.id)
           .catch((err) => {
-            logger.debug(`[messageCreate] Emoji spam monitoring failed:`, err.message);
+            logger.debug(
+              `[messageCreate] Emoji spam monitoring failed:`,
+              err.message
+            );
           })
       );
     }
@@ -33,7 +39,10 @@ module.exports = {
       db
         .updateUserStats(message.guild.id, message.author.id, "messages_sent")
         .catch((err) => {
-          logger.debug(`[messageCreate] User stats update failed:`, err.message);
+          logger.debug(
+            `[messageCreate] User stats update failed:`,
+            err.message
+          );
         }),
     ]);
 
@@ -117,6 +126,24 @@ module.exports = {
     // Check auto-moderation
     await AutoMod.checkMessage(message, client);
 
+    // Check ADVANCED automod (EXCEEDS WICK - comprehensive message scanning)
+    if (client.advancedAutomod) {
+      try {
+        const violations = await client.advancedAutomod.checkMessage(message);
+        if (violations && violations.length > 0) {
+          const config = await db.getAutomodConfig(message.guild.id);
+          // Execute action for first violation (could be modified to handle all)
+          await client.advancedAutomod.executeAction(
+            message,
+            violations[0],
+            config
+          );
+        }
+      } catch (error) {
+        logger.error("[AdvancedAutomod] Message check failed:", error);
+      }
+    }
+
     // Advanced Heat System
     if (
       client.heatSystem &&
@@ -184,7 +211,8 @@ module.exports = {
             if (member && punishment.action === "timeout") {
               // Check if bot has permission to timeout
               const botMember = message.guild.members.me;
-              const canTimeout = botMember && botMember.permissions.has("ModerateMembers");
+              const canTimeout =
+                botMember && botMember.permissions.has("ModerateMembers");
 
               if (!canTimeout) {
                 // Silently skip if bot doesn't have permissions (don't log as error)
@@ -204,7 +232,9 @@ module.exports = {
 
               // Delete message if needed (check permission first)
               if (punishment.purgeMessages) {
-                const canDelete = message.channel.permissionsFor(botMember)?.has("ManageMessages");
+                const canDelete = message.channel
+                  .permissionsFor(botMember)
+                  ?.has("ManageMessages");
                 if (canDelete) {
                   await ErrorHandler.safeExecute(
                     message.delete(),

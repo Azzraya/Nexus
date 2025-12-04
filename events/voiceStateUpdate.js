@@ -5,6 +5,11 @@ module.exports = {
   name: "voiceStateUpdate",
   async execute(oldState, newState, client) {
     try {
+      // Voice Monitoring System (EXCEEDS WICK)
+      if (client.voiceMonitoring) {
+        await client.voiceMonitoring.trackVoiceState(oldState, newState);
+      }
+
       // Only monitor joins (when oldState.channel is null and newState.channel exists)
       if (!oldState.channel && newState.channel && client.advancedAntiNuke) {
         const guild = newState.guild;

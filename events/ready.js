@@ -147,6 +147,15 @@ module.exports = {
       );
     }
 
+    // Start Scheduled Actions System (EXCEEDS WICK - automation)
+    if (
+      client.scheduledActions &&
+      (!shardInfo.isSharded || shardInfo.shardId === 0)
+    ) {
+      await client.scheduledActions.start();
+      console.log(`⏰ Scheduled Actions system started`);
+    }
+
     // Generate initial recommendations for all guilds
     const SmartRecommendations = require("../utils/smartRecommendations");
     for (const guild of client.guilds.cache.values()) {
@@ -288,7 +297,6 @@ module.exports = {
           logger.error("[Bots on Discord] Failed to initialize:", error);
         }
       }
-
     }
   },
 };

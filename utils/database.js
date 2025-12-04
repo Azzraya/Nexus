@@ -304,6 +304,219 @@ class Database {
             )
         `);
 
+    // Advanced Automod (EXCEEDS WICK)
+    this.db.run(`
+            CREATE TABLE IF NOT EXISTS automod_config (
+                guild_id TEXT PRIMARY KEY,
+                spam_enabled INTEGER DEFAULT 1,
+                spam_max_messages INTEGER DEFAULT 5,
+                spam_time_window INTEGER DEFAULT 5000,
+                spam_action TEXT DEFAULT 'timeout',
+                link_scanning_enabled INTEGER DEFAULT 1,
+                link_action TEXT DEFAULT 'delete',
+                link_whitelist TEXT,
+                link_blacklist TEXT,
+                block_invites INTEGER DEFAULT 0,
+                invite_whitelist TEXT,
+                caps_enabled INTEGER DEFAULT 1,
+                caps_threshold INTEGER DEFAULT 70,
+                caps_action TEXT DEFAULT 'warn',
+                emoji_spam_enabled INTEGER DEFAULT 1,
+                emoji_max_count INTEGER DEFAULT 10,
+                emoji_action TEXT DEFAULT 'delete',
+                mention_spam_enabled INTEGER DEFAULT 1,
+                mention_max_count INTEGER DEFAULT 5,
+                mention_action TEXT DEFAULT 'timeout',
+                ignored_channels TEXT,
+                ignored_roles TEXT,
+                automod_log_channel TEXT
+            )
+        `);
+
+    this.db.run(`
+            CREATE TABLE IF NOT EXISTS automod_violations (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                guild_id TEXT,
+                user_id TEXT,
+                violation_type TEXT,
+                message_content TEXT,
+                action_taken TEXT,
+                timestamp INTEGER DEFAULT (strftime('%s', 'now') * 1000)
+            )
+        `);
+
+    this.db.run(`CREATE INDEX IF NOT EXISTS idx_automod_guild_user 
+                 ON automod_violations(guild_id, user_id)`);
+    this.db.run(`CREATE INDEX IF NOT EXISTS idx_automod_timestamp 
+                 ON automod_violations(timestamp)`);
+
+    // Member Screening System (EXCEEDS WICK - proactive security)
+    this.db.run(`
+            CREATE TABLE IF NOT EXISTS member_screening_config (
+                guild_id TEXT PRIMARY KEY,
+                enabled INTEGER DEFAULT 0,
+                min_account_age_days INTEGER DEFAULT 7,
+                require_avatar INTEGER DEFAULT 0,
+                check_username_patterns INTEGER DEFAULT 1,
+                check_threat_intel INTEGER DEFAULT 1,
+                check_discriminator INTEGER DEFAULT 1,
+                auto_ban_threshold INTEGER DEFAULT 80,
+                auto_kick_threshold INTEGER DEFAULT 60,
+                quarantine_threshold INTEGER DEFAULT 40,
+                alert_threshold INTEGER DEFAULT 20,
+                quarantine_role TEXT,
+                screening_log_channel TEXT,
+                bypass_roles TEXT
+            )
+        `);
+
+    this.db.run(`
+            CREATE TABLE IF NOT EXISTS member_screening_logs (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                guild_id TEXT,
+                user_id TEXT,
+                action TEXT,
+                reason TEXT,
+                risk_score INTEGER,
+                timestamp INTEGER DEFAULT (strftime('%s', 'now') * 1000)
+            )
+        `);
+
+    this.db.run(`CREATE INDEX IF NOT EXISTS idx_screening_guild_time 
+                 ON member_screening_logs(guild_id, timestamp)`);
+
+    // Scheduled Actions System (EXCEEDS WICK)
+    this.db.run(`
+            CREATE TABLE IF NOT EXISTS scheduled_actions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                guild_id TEXT,
+                action_type TEXT,
+                action_data TEXT,
+                schedule_type TEXT,
+                cron_expression TEXT,
+                execute_at INTEGER,
+                created_by TEXT,
+                created_at INTEGER DEFAULT (strftime('%s', 'now') * 1000),
+                status TEXT DEFAULT 'active',
+                last_execution INTEGER
+            )
+        `);
+
+    this.db.run(`
+            CREATE TABLE IF NOT EXISTS scheduled_action_executions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                action_id INTEGER,
+                executed_at INTEGER DEFAULT (strftime('%s', 'now') * 1000),
+                success INTEGER,
+                error_message TEXT,
+                FOREIGN KEY (action_id) REFERENCES scheduled_actions(id)
+            )
+        `);
+
+    this.db.run(`CREATE INDEX IF NOT EXISTS idx_scheduled_actions_guild 
+                 ON scheduled_actions(guild_id, status)`);
+
+    // Voice Monitoring System (EXCEEDS WICK)
+    this.db.run(`
+            CREATE TABLE IF NOT EXISTS voice_monitoring_config (
+                guild_id TEXT PRIMARY KEY,
+                enabled INTEGER DEFAULT 1,
+                raid_detection_enabled INTEGER DEFAULT 1,
+                raid_threshold INTEGER DEFAULT 10,
+                auto_create_enabled INTEGER DEFAULT 0,
+                auto_delete_enabled INTEGER DEFAULT 0,
+                log_channel TEXT,
+                alert_channel TEXT
+            )
+        `);
+
+    this.db.run(`
+            CREATE TABLE IF NOT EXISTS voice_activity_logs (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                guild_id TEXT,
+                user_id TEXT,
+                channel_id TEXT,
+                action TEXT,
+                session_duration INTEGER,
+                timestamp INTEGER DEFAULT (strftime('%s', 'now') * 1000)
+            )
+        `);
+
+    this.db.run(`CREATE INDEX IF NOT EXISTS idx_voice_activity_guild_time 
+                 ON voice_activity_logs(guild_id, timestamp)`);
+
+    // Webhook Events System (EXCEEDS WICK - real-time integrations)
+    this.db.run(`
+            CREATE TABLE IF NOT EXISTS webhook_subscriptions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                guild_id TEXT,
+                webhook_url TEXT,
+                event_type TEXT,
+                created_by TEXT,
+                created_at INTEGER DEFAULT (strftime('%s', 'now') * 1000),
+                status TEXT DEFAULT 'active'
+            )
+        `);
+
+    this.db.run(`
+            CREATE TABLE IF NOT EXISTS webhook_deliveries (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                subscription_id INTEGER,
+                success INTEGER,
+                status_code INTEGER,
+                error_message TEXT,
+                delivered_at INTEGER DEFAULT (strftime('%s', 'now') * 1000),
+                FOREIGN KEY (subscription_id) REFERENCES webhook_subscriptions(id)
+            )
+        `);
+
+    this.db.run(`CREATE INDEX IF NOT EXISTS idx_webhook_guild 
+                 ON webhook_subscriptions(guild_id, status)`);
+
+    // Multi-Server Networks (EXCEEDS WICK - cross-server management)
+    this.db.run(`
+            CREATE TABLE IF NOT EXISTS server_networks (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                network_name TEXT,
+                owner_id TEXT,
+                config TEXT,
+                created_at INTEGER DEFAULT (strftime('%s', 'now') * 1000)
+            )
+        `);
+
+    this.db.run(`
+            CREATE TABLE IF NOT EXISTS network_guilds (
+                network_id INTEGER,
+                guild_id TEXT,
+                added_by TEXT,
+                added_at INTEGER DEFAULT (strftime('%s', 'now') * 1000),
+                PRIMARY KEY (network_id, guild_id),
+                FOREIGN KEY (network_id) REFERENCES server_networks(id)
+            )
+        `);
+
+    this.db.run(`
+            CREATE TABLE IF NOT EXISTS network_whitelist (
+                network_id INTEGER,
+                user_id TEXT,
+                added_by TEXT,
+                reason TEXT,
+                added_at INTEGER DEFAULT (strftime('%s', 'now') * 1000),
+                PRIMARY KEY (network_id, user_id)
+            )
+        `);
+
+    this.db.run(`
+            CREATE TABLE IF NOT EXISTS network_actions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                network_id INTEGER,
+                guild_id TEXT,
+                action_type TEXT,
+                action_data TEXT,
+                timestamp INTEGER DEFAULT (strftime('%s', 'now') * 1000)
+            )
+        `);
+
     // Security logs
     this.db.run(`
             CREATE TABLE IF NOT EXISTS security_logs (
@@ -909,8 +1122,12 @@ class Database {
             )
         `);
 
-    this.db.run(`CREATE INDEX IF NOT EXISTS idx_referrals_user ON referrals(user_id)`);
-    this.db.run(`CREATE INDEX IF NOT EXISTS idx_referrals_guild ON referrals(guild_id)`);
+    this.db.run(
+      `CREATE INDEX IF NOT EXISTS idx_referrals_user ON referrals(user_id)`
+    );
+    this.db.run(
+      `CREATE INDEX IF NOT EXISTS idx_referrals_guild ON referrals(guild_id)`
+    );
 
     // Add vote rewards config columns to server_config (use run instead of exec for error handling)
     this.db.run(
@@ -918,7 +1135,10 @@ class Database {
       (err) => {
         // Silently ignore duplicate column errors
         if (err && !err.message.includes("duplicate column")) {
-          logger.debug("Database", `vote_rewards_enabled column: ${err.message}`);
+          logger.debug(
+            "Database",
+            `vote_rewards_enabled column: ${err.message}`
+          );
         }
       }
     );
@@ -3361,6 +3581,574 @@ class Database {
               resolve();
             }
           );
+        }
+      );
+    });
+  }
+
+  // Advanced Automod Methods
+  getAutomodConfig(guildId) {
+    return new Promise((resolve, reject) => {
+      this.db.get(
+        "SELECT * FROM automod_config WHERE guild_id = ?",
+        [guildId],
+        (err, row) => {
+          if (err) reject(err);
+          else resolve(row || null);
+        }
+      );
+    });
+  }
+
+  updateAutomodConfig(guildId, config) {
+    return new Promise((resolve, reject) => {
+      const fields = [];
+      const values = [];
+
+      Object.keys(config).forEach((key) => {
+        if (config[key] !== undefined) {
+          fields.push(`${key} = ?`);
+          values.push(
+            typeof config[key] === "object"
+              ? JSON.stringify(config[key])
+              : config[key]
+          );
+        }
+      });
+
+      values.push(guildId);
+
+      const query = `INSERT INTO automod_config (guild_id, ${Object.keys(
+        config
+      ).join(", ")}) 
+                     VALUES (?, ${Object.keys(config)
+                       .map(() => "?")
+                       .join(", ")})
+                     ON CONFLICT(guild_id) DO UPDATE SET ${fields.join(", ")}`;
+
+      this.db.run(
+        query,
+        [
+          guildId,
+          ...Object.values(config).map((v) =>
+            typeof v === "object" ? JSON.stringify(v) : v
+          ),
+        ],
+        (err) => {
+          if (err) reject(err);
+          else resolve();
+        }
+      );
+    });
+  }
+
+  logAutomodViolation(
+    guildId,
+    userId,
+    violationType,
+    messageContent,
+    actionTaken
+  ) {
+    return new Promise((resolve, reject) => {
+      this.db.run(
+        `INSERT INTO automod_violations (guild_id, user_id, violation_type, message_content, action_taken, timestamp)
+         VALUES (?, ?, ?, ?, ?, ?)`,
+        [
+          guildId,
+          userId,
+          violationType,
+          messageContent.substring(0, 1000),
+          actionTaken,
+          Date.now(),
+        ],
+        (err) => {
+          if (err) reject(err);
+          else resolve();
+        }
+      );
+    });
+  }
+
+  getAutomodViolations(guildId, userId = null, limit = 50) {
+    return new Promise((resolve, reject) => {
+      const query = userId
+        ? "SELECT * FROM automod_violations WHERE guild_id = ? AND user_id = ? ORDER BY timestamp DESC LIMIT ?"
+        : "SELECT * FROM automod_violations WHERE guild_id = ? ORDER BY timestamp DESC LIMIT ?";
+
+      const params = userId ? [guildId, userId, limit] : [guildId, limit];
+
+      this.db.all(query, params, (err, rows) => {
+        if (err) reject(err);
+        else resolve(rows || []);
+      });
+    });
+  }
+
+  // Member Screening Methods
+  getMemberScreeningConfig(guildId) {
+    return new Promise((resolve, reject) => {
+      this.db.get(
+        "SELECT * FROM member_screening_config WHERE guild_id = ?",
+        [guildId],
+        (err, row) => {
+          if (err) reject(err);
+          else resolve(row || null);
+        }
+      );
+    });
+  }
+
+  updateMemberScreeningConfig(guildId, config) {
+    return new Promise((resolve, reject) => {
+      const fields = Object.keys(config)
+        .map((k) => `${k} = ?`)
+        .join(", ");
+      const values = Object.values(config).map((v) =>
+        typeof v === "object" ? JSON.stringify(v) : v
+      );
+
+      const insertFields = Object.keys(config).join(", ");
+      const insertPlaceholders = Object.keys(config)
+        .map(() => "?")
+        .join(", ");
+
+      const query = `INSERT INTO member_screening_config (guild_id, ${insertFields}) 
+                     VALUES (?, ${insertPlaceholders})
+                     ON CONFLICT(guild_id) DO UPDATE SET ${fields}`;
+
+      this.db.run(query, [guildId, ...values], (err) => {
+        if (err) reject(err);
+        else resolve();
+      });
+    });
+  }
+
+  logMemberScreening(guildId, userId, action, reason, riskScore) {
+    return new Promise((resolve, reject) => {
+      this.db.run(
+        `INSERT INTO member_screening_logs (guild_id, user_id, action, reason, risk_score, timestamp)
+         VALUES (?, ?, ?, ?, ?, ?)`,
+        [guildId, userId, action, reason, riskScore, Date.now()],
+        (err) => {
+          if (err) reject(err);
+          else resolve();
+        }
+      );
+    });
+  }
+
+  getMemberScreeningLogs(guildId, since = 0, limit = 100) {
+    return new Promise((resolve, reject) => {
+      this.db.all(
+        "SELECT * FROM member_screening_logs WHERE guild_id = ? AND timestamp > ? ORDER BY timestamp DESC LIMIT ?",
+        [guildId, since, limit],
+        (err, rows) => {
+          if (err) reject(err);
+          else resolve(rows || []);
+        }
+      );
+    });
+  }
+
+  // Scheduled Actions Methods
+  createScheduledAction(
+    guildId,
+    actionType,
+    actionData,
+    scheduleType,
+    cronExpression,
+    executeAt,
+    createdBy
+  ) {
+    return new Promise((resolve, reject) => {
+      this.db.run(
+        `INSERT INTO scheduled_actions (guild_id, action_type, action_data, schedule_type, cron_expression, execute_at, created_by)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [
+          guildId,
+          actionType,
+          JSON.stringify(actionData),
+          scheduleType,
+          cronExpression,
+          executeAt,
+          createdBy,
+        ],
+        function (err) {
+          if (err) reject(err);
+          else resolve(this.lastID);
+        }
+      );
+    });
+  }
+
+  getAllScheduledActions() {
+    return new Promise((resolve, reject) => {
+      this.db.all(
+        "SELECT * FROM scheduled_actions WHERE status = 'active'",
+        [],
+        (err, rows) => {
+          if (err) reject(err);
+          else resolve(rows || []);
+        }
+      );
+    });
+  }
+
+  getGuildScheduledActions(guildId) {
+    return new Promise((resolve, reject) => {
+      this.db.all(
+        "SELECT * FROM scheduled_actions WHERE guild_id = ? ORDER BY created_at DESC",
+        [guildId],
+        (err, rows) => {
+          if (err) reject(err);
+          else resolve(rows || []);
+        }
+      );
+    });
+  }
+
+  getDueScheduledActions(now) {
+    return new Promise((resolve, reject) => {
+      this.db.all(
+        "SELECT * FROM scheduled_actions WHERE schedule_type = 'once' AND execute_at <= ? AND status = 'active'",
+        [now],
+        (err, rows) => {
+          if (err) reject(err);
+          else resolve(rows || []);
+        }
+      );
+    });
+  }
+
+  updateScheduledActionStatus(actionId, status) {
+    return new Promise((resolve, reject) => {
+      this.db.run(
+        "UPDATE scheduled_actions SET status = ? WHERE id = ?",
+        [status, actionId],
+        (err) => {
+          if (err) reject(err);
+          else resolve();
+        }
+      );
+    });
+  }
+
+  deleteScheduledAction(actionId) {
+    return new Promise((resolve, reject) => {
+      this.db.run(
+        "DELETE FROM scheduled_actions WHERE id = ?",
+        [actionId],
+        (err) => {
+          if (err) reject(err);
+          else resolve();
+        }
+      );
+    });
+  }
+
+  logScheduledActionExecution(actionId, success, errorMessage = null) {
+    return new Promise((resolve, reject) => {
+      this.db.run(
+        `INSERT INTO scheduled_action_executions (action_id, success, error_message)
+         VALUES (?, ?, ?)`,
+        [actionId, success ? 1 : 0, errorMessage],
+        (err) => {
+          if (err) reject(err);
+          else resolve();
+        }
+      );
+    });
+  }
+
+  // Voice Monitoring Methods
+  getVoiceMonitoringConfig(guildId) {
+    return new Promise((resolve, reject) => {
+      this.db.get(
+        "SELECT * FROM voice_monitoring_config WHERE guild_id = ?",
+        [guildId],
+        (err, row) => {
+          if (err) reject(err);
+          else resolve(row || null);
+        }
+      );
+    });
+  }
+
+  updateVoiceMonitoringConfig(guildId, config) {
+    return new Promise((resolve, reject) => {
+      const fields = Object.keys(config)
+        .map((k) => `${k} = ?`)
+        .join(", ");
+      const values = Object.values(config);
+
+      const insertFields = Object.keys(config).join(", ");
+      const insertPlaceholders = Object.keys(config)
+        .map(() => "?")
+        .join(", ");
+
+      const query = `INSERT INTO voice_monitoring_config (guild_id, ${insertFields}) 
+                     VALUES (?, ${insertPlaceholders})
+                     ON CONFLICT(guild_id) DO UPDATE SET ${fields}`;
+
+      this.db.run(query, [guildId, ...values], (err) => {
+        if (err) reject(err);
+        else resolve();
+      });
+    });
+  }
+
+  logVoiceActivity(guildId, userId, channelId, action, sessionDuration = null) {
+    return new Promise((resolve, reject) => {
+      this.db.run(
+        `INSERT INTO voice_activity_logs (guild_id, user_id, channel_id, action, session_duration, timestamp)
+         VALUES (?, ?, ?, ?, ?, ?)`,
+        [guildId, userId, channelId, action, sessionDuration, Date.now()],
+        (err) => {
+          if (err) reject(err);
+          else resolve();
+        }
+      );
+    });
+  }
+
+  updateVoiceSession(guildId, userId, channelId, duration) {
+    return new Promise((resolve, reject) => {
+      // Update the most recent join log with session duration
+      this.db.run(
+        `UPDATE voice_activity_logs SET session_duration = ? 
+         WHERE guild_id = ? AND user_id = ? AND channel_id = ? AND action = 'join' 
+         AND session_duration IS NULL
+         ORDER BY timestamp DESC LIMIT 1`,
+        [duration, guildId, userId, channelId],
+        (err) => {
+          if (err) reject(err);
+          else resolve();
+        }
+      );
+    });
+  }
+
+  getVoiceActivityLogs(guildId, since = 0, limit = 100) {
+    return new Promise((resolve, reject) => {
+      this.db.all(
+        "SELECT * FROM voice_activity_logs WHERE guild_id = ? AND timestamp > ? ORDER BY timestamp DESC LIMIT ?",
+        [guildId, since, limit],
+        (err, rows) => {
+          if (err) reject(err);
+          else resolve(rows || []);
+        }
+      );
+    });
+  }
+
+  // Webhook Events Methods
+  getWebhookSubscriptions(eventType = null) {
+    return new Promise((resolve, reject) => {
+      const query = eventType
+        ? "SELECT * FROM webhook_subscriptions WHERE event_type = ? AND status = 'active'"
+        : "SELECT * FROM webhook_subscriptions WHERE status = 'active'";
+
+      const params = eventType ? [eventType] : [];
+
+      this.db.all(query, params, (err, rows) => {
+        if (err) reject(err);
+        else resolve(rows || []);
+      });
+    });
+  }
+
+  getGuildWebhookSubscriptions(guildId) {
+    return new Promise((resolve, reject) => {
+      this.db.all(
+        "SELECT * FROM webhook_subscriptions WHERE guild_id = ?",
+        [guildId],
+        (err, rows) => {
+          if (err) reject(err);
+          else resolve(rows || []);
+        }
+      );
+    });
+  }
+
+  createWebhookSubscription(guildId, webhookUrl, eventType, createdBy) {
+    return new Promise((resolve, reject) => {
+      this.db.run(
+        `INSERT INTO webhook_subscriptions (guild_id, webhook_url, event_type, created_by)
+         VALUES (?, ?, ?, ?)`,
+        [guildId, webhookUrl, eventType, createdBy],
+        function (err) {
+          if (err) reject(err);
+          else resolve(this.lastID);
+        }
+      );
+    });
+  }
+
+  deleteWebhookSubscription(subscriptionId) {
+    return new Promise((resolve, reject) => {
+      this.db.run(
+        "DELETE FROM webhook_subscriptions WHERE id = ?",
+        [subscriptionId],
+        (err) => {
+          if (err) reject(err);
+          else resolve();
+        }
+      );
+    });
+  }
+
+  logWebhookDelivery(subscriptionId, success, statusCode, errorMessage = null) {
+    return new Promise((resolve, reject) => {
+      this.db.run(
+        `INSERT INTO webhook_deliveries (subscription_id, success, status_code, error_message)
+         VALUES (?, ?, ?, ?)`,
+        [subscriptionId, success ? 1 : 0, statusCode, errorMessage],
+        (err) => {
+          if (err) reject(err);
+          else resolve();
+        }
+      );
+    });
+  }
+
+  getWebhookDeliveryStats(subscriptionId, days = 7) {
+    return new Promise((resolve, reject) => {
+      const since = Date.now() - days * 24 * 60 * 60 * 1000;
+      this.db.all(
+        `SELECT success, COUNT(*) as count FROM webhook_deliveries 
+         WHERE subscription_id = ? AND delivered_at > ?
+         GROUP BY success`,
+        [subscriptionId, since],
+        (err, rows) => {
+          if (err) reject(err);
+          else {
+            const stats = { success: 0, failed: 0, total: 0 };
+            rows.forEach((row) => {
+              if (row.success) stats.success = row.count;
+              else stats.failed = row.count;
+              stats.total += row.count;
+            });
+            resolve(stats);
+          }
+        }
+      );
+    });
+  }
+
+  // Multi-Server Network Methods
+  createServerNetwork(networkName, ownerId) {
+    return new Promise((resolve, reject) => {
+      const defaultConfig = JSON.stringify({
+        syncBans: true,
+        syncWhitelist: true,
+        syncBlacklist: true,
+        sharedAnnouncements: false,
+      });
+
+      this.db.run(
+        `INSERT INTO server_networks (network_name, owner_id, config) VALUES (?, ?, ?)`,
+        [networkName, ownerId, defaultConfig],
+        function (err) {
+          if (err) reject(err);
+          else resolve(this.lastID);
+        }
+      );
+    });
+  }
+
+  addGuildToNetwork(networkId, guildId, addedBy) {
+    return new Promise((resolve, reject) => {
+      this.db.run(
+        `INSERT INTO network_guilds (network_id, guild_id, added_by) VALUES (?, ?, ?)`,
+        [networkId, guildId, addedBy],
+        (err) => {
+          if (err) reject(err);
+          else resolve();
+        }
+      );
+    });
+  }
+
+  removeGuildFromNetwork(networkId, guildId) {
+    return new Promise((resolve, reject) => {
+      this.db.run(
+        `DELETE FROM network_guilds WHERE network_id = ? AND guild_id = ?`,
+        [networkId, guildId],
+        (err) => {
+          if (err) reject(err);
+          else resolve();
+        }
+      );
+    });
+  }
+
+  getServerNetwork(networkId) {
+    return new Promise((resolve, reject) => {
+      this.db.get(
+        "SELECT * FROM server_networks WHERE id = ?",
+        [networkId],
+        async (err, network) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          if (!network) {
+            resolve(null);
+            return;
+          }
+
+          // Get guilds in network
+          this.db.all(
+            "SELECT * FROM network_guilds WHERE network_id = ?",
+            [networkId],
+            (err, guilds) => {
+              if (err) reject(err);
+              else {
+                network.guilds = guilds || [];
+                network.config = JSON.parse(network.config);
+                resolve(network);
+              }
+            }
+          );
+        }
+      );
+    });
+  }
+
+  getUserNetworks(userId) {
+    return new Promise((resolve, reject) => {
+      this.db.all(
+        "SELECT * FROM server_networks WHERE owner_id = ?",
+        [userId],
+        (err, rows) => {
+          if (err) reject(err);
+          else resolve(rows || []);
+        }
+      );
+    });
+  }
+
+  addToNetworkWhitelist(networkId, userId, addedBy, reason) {
+    return new Promise((resolve, reject) => {
+      this.db.run(
+        `INSERT INTO network_whitelist (network_id, user_id, added_by, reason) VALUES (?, ?, ?, ?)`,
+        [networkId, userId, addedBy, reason],
+        (err) => {
+          if (err) reject(err);
+          else resolve();
+        }
+      );
+    });
+  }
+
+  logNetworkAction(networkId, guildId, actionType, actionData) {
+    return new Promise((resolve, reject) => {
+      this.db.run(
+        `INSERT INTO network_actions (network_id, guild_id, action_type, action_data) VALUES (?, ?, ?, ?)`,
+        [networkId, guildId, actionType, JSON.stringify(actionData)],
+        (err) => {
+          if (err) reject(err);
+          else resolve();
         }
       );
     });

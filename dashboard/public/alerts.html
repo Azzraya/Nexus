@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Real-Time Alerts - Nexus Dashboard</title>
+    <link rel="stylesheet" href="dashboard.css" />
+    <style>
+      .alerts-container {
+        padding: 20px;
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+      }
+
+      .alert-filters {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+      }
+
+      .filter-btn {
+        padding: 8px 16px;
+        border-radius: 8px;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        background: rgba(255, 255, 255, 0.05);
+        color: #fff;
+        cursor: pointer;
+        transition: all 0.3s;
+      }
+
+      .filter-btn.active {
+        background: #5865f2;
+        border-color: #5865f2;
+      }
+
+      .alerts-feed {
+        display: grid;
+        gap: 15px;
+      }
+
+      .alert-card {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        padding: 20px;
+        border-left: 4px solid;
+        animation: slideIn 0.3s ease;
+        transition: all 0.3s;
+      }
+
+      .alert-card:hover {
+        background: rgba(255, 255, 255, 0.08);
+        transform: translateX(5px);
+      }
+
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateX(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+
+      .alert-critical {
+        border-left-color: #ff4444;
+      }
+
+      .alert-warning {
+        border-left-color: #ffa500;
+      }
+
+      .alert-info {
+        border-left-color: #0099ff;
+      }
+
+      .alert-success {
+        border-left-color: #00ff00;
+      }
+
+      .alert-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+      }
+
+      .alert-title {
+        font-weight: 700;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .severity-badge {
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+      }
+
+      .badge-critical {
+        background: #ff4444;
+      }
+
+      .badge-warning {
+        background: #ffa500;
+      }
+
+      .badge-info {
+        background: #0099ff;
+      }
+
+      .badge-success {
+        background: #00ff00;
+        color: #000;
+      }
+
+      .alert-server {
+        color: #72767d;
+        font-size: 0.9rem;
+        margin-bottom: 10px;
+      }
+
+      .alert-description {
+        color: #dcddde;
+        margin-bottom: 10px;
+      }
+
+      .alert-timestamp {
+        color: #72767d;
+        font-size: 0.85rem;
+      }
+
+      .status-indicator {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 15px;
+        background: rgba(0, 255, 0, 0.1);
+        border-radius: 8px;
+        margin-bottom: 20px;
+      }
+
+      .status-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #00ff00;
+        animation: pulse 2s infinite;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
+      }
+
+      .no-alerts {
+        text-align: center;
+        padding: 60px 20px;
+        opacity: 0.6;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="alerts-container">
+      <div class="header">
+        <h1>🚨 Real-Time Security Alerts</h1>
+        <div>
+          <button
+            onclick="window.location.href='dashboard.html'"
+            style="
+              padding: 10px 20px;
+              background: rgba(255, 255, 255, 0.1);
+              border: none;
+              border-radius: 8px;
+              color: #fff;
+              cursor: pointer;
+            "
+          >
+            ← Back to Dashboard
+          </button>
+        </div>
+      </div>
+
+      <div class="status-indicator">
+        <div class="status-dot"></div>
+        <span>Live monitoring active • Updates every 5 seconds</span>
+      </div>
+
+      <div class="alert-filters">
+        <button
+          class="filter-btn active"
+          data-filter="all"
+          onclick="filterAlerts('all')"
+        >
+          All Alerts
+        </button>
+        <button
+          class="filter-btn"
+          data-filter="critical"
+          onclick="filterAlerts('critical')"
+        >
+          🔴 Critical
+        </button>
+        <button
+          class="filter-btn"
+          data-filter="warning"
+          onclick="filterAlerts('warning')"
+        >
+          🟡 Warnings
+        </button>
+        <button
+          class="filter-btn"
+          data-filter="info"
+          onclick="filterAlerts('info')"
+        >
+          🔵 Info
+        </button>
+        <button
+          class="filter-btn"
+          data-filter="success"
+          onclick="filterAlerts('success')"
+        >
+          🟢 Success
+        </button>
+      </div>
+
+      <div class="alerts-feed" id="alertsFeed">
+        <!-- Alerts will be loaded here -->
+      </div>
+    </div>
+
+    <script>
+      let currentFilter = "all";
+      let alerts = [];
+
+      // Mock real-time alerts (replace with WebSocket or Server-Sent Events)
+      async function loadAlerts() {
+        // In production, this would fetch from API or receive via WebSocket
+        const mockAlerts = [
+          {
+            id: 1,
+            severity: "critical",
+            title: "Raid Detected",
+            server: "Gaming Community",
+            description: "15 users joined in 10 seconds. Auto-ban activated.",
+            timestamp: Date.now() - 30000,
+            icon: "🚨",
+          },
+          {
+            id: 2,
+            severity: "warning",
+            title: "Suspicious Member Joined",
+            server: "Meme Server",
+            description:
+              "New account (2 days old) with no avatar. Risk score: 65%",
+            timestamp: Date.now() - 120000,
+            icon: "⚠️",
+          },
+          {
+            id: 3,
+            severity: "info",
+            title: "Automod Violation",
+            server: "Gaming Community",
+            description: "User timed out for spam (8 messages in 3 seconds)",
+            timestamp: Date.now() - 180000,
+            icon: "🤖",
+          },
+          {
+            id: 4,
+            severity: "success",
+            title: "Recovery Complete",
+            server: "Tech Hub",
+            description:
+              "Server restored from snapshot. 45 channels recovered.",
+            timestamp: Date.now() - 240000,
+            icon: "✅",
+          },
+          {
+            id: 5,
+            severity: "critical",
+            title: "Nuke Attempt Blocked",
+            server: "Gaming Community",
+            description: "User attempted to delete 12 channels. Auto-banned.",
+            timestamp: Date.now() - 300000,
+            icon: "🛡️",
+          },
+        ];
+
+        alerts = mockAlerts;
+        displayAlerts();
+      }
+
+      function displayAlerts() {
+        const feed = document.getElementById("alertsFeed");
+
+        const filtered =
+          currentFilter === "all"
+            ? alerts
+            : alerts.filter((a) => a.severity === currentFilter);
+
+        if (filtered.length === 0) {
+          feed.innerHTML = `
+            <div class="no-alerts">
+              <h3>No alerts for this filter</h3>
+              <p>Your servers are secure! 🎉</p>
+            </div>
+          `;
+          return;
+        }
+
+        feed.innerHTML = filtered
+          .map(
+            (alert) => `
+          <div class="alert-card alert-${alert.severity}">
+            <div class="alert-header">
+              <div class="alert-title">
+                <span>${alert.icon}</span>
+                <span>${alert.title}</span>
+              </div>
+              <span class="severity-badge badge-${alert.severity}">${
+              alert.severity
+            }</span>
+            </div>
+            <div class="alert-server">📍 ${alert.server}</div>
+            <div class="alert-description">${alert.description}</div>
+            <div class="alert-timestamp">${formatTimestamp(
+              alert.timestamp
+            )}</div>
+          </div>
+        `
+          )
+          .join("");
+      }
+
+      function filterAlerts(filter) {
+        currentFilter = filter;
+
+        // Update button states
+        document.querySelectorAll(".filter-btn").forEach((btn) => {
+          btn.classList.remove("active");
+          if (btn.dataset.filter === filter) {
+            btn.classList.add("active");
+          }
+        });
+
+        displayAlerts();
+      }
+
+      function formatTimestamp(timestamp) {
+        const diff = Date.now() - timestamp;
+        const seconds = Math.floor(diff / 1000);
+        const minutes = Math.floor(seconds / 60);
+        const hours = Math.floor(minutes / 60);
+
+        if (seconds < 60) return `${seconds}s ago`;
+        if (minutes < 60) return `${minutes}m ago`;
+        if (hours < 24) return `${hours}h ago`;
+        return new Date(timestamp).toLocaleString();
+      }
+
+      // Load alerts on page load
+      loadAlerts();
+
+      // Refresh alerts every 5 seconds
+      setInterval(loadAlerts, 5000);
+
+      // Play sound on critical alert (optional)
+      function playAlertSound() {
+        // You could add audio element here
+      }
+    </script>
+  </body>
+</html>

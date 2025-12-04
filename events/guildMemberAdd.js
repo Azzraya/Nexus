@@ -17,21 +17,68 @@ module.exports = {
     // Run initial checks in parallel for better performance (EXCEEDS WICK)
     const ThreatIntelligence = require("../utils/threatIntelligence");
     const initialChecks = await Promise.all([
-      ThreatIntelligence.checkThreat(member.user.id).catch(() => ({ hasThreat: false, riskScore: 0 })),
-      JoinGate.checkMember(member, member.guild).catch(() => ({ filtered: false })),
+      ThreatIntelligence.checkThreat(member.user.id).catch(() => ({
+        hasThreat: false,
+        riskScore: 0,
+      })),
+      JoinGate.checkMember(member, member.guild).catch(() => ({
+        filtered: false,
+      })),
+      // Member Screening (EXCEEDS WICK - proactive security)
+      client.memberScreening
+        ? client.memberScreening
+            .screenMember(member, member.guild)
+            .catch(() => ({ passed: true }))
+        : Promise.resolve({ passed: true }),
       client.workflows
-        ? client.workflows.checkTriggers(member.guild.id, "guildMemberAdd", {
-            user: member.user,
-            member: member,
-            guild: member.guild,
-          }).catch((err) => {
-            logger.debug(`[guildMemberAdd] Workflow trigger failed:`, err.message);
-          })
-        : Promise.resolve()
+        ? client.workflows
+            .checkTriggers(member.guild.id, "guildMemberAdd", {
+              user: member.user,
+              member: member,
+              guild: member.guild,
+            })
+            .catch((err) => {
+              logger.debug(
+                `[guildMemberAdd] Workflow trigger failed:`,
+                err.message
+              );
+            })
+        : Promise.resolve(),
     ]);
 
     const threatCheck = initialChecks[0];
     const joinGateCheck = initialChecks[1];
+    const screeningResult = initialChecks[2];
+
+    // Handle member screening first (EXCEEDS WICK)
+    if (screeningResult && !screeningResult.passed) {
+      const screeningConfig = await db.getMemberScreeningConfig(
+        member.guild.id
+      );
+      if (client.memberScreening && screeningConfig) {
+        await client.memberScreening.executeScreeningAction(
+          member,
+          screeningResult,
+          screeningConfig
+        );
+
+        // If banned or kicked, stop further processing
+        if (
+          screeningResult.action === "ban" ||
+          screeningResult.action === "kick"
+        ) {
+          const totalPerfResult = performanceMonitor.end(perfId);
+          if (totalPerfResult) {
+            logger.success(
+              `🚀 Screening ${
+                screeningResult.action
+              }: ${totalPerfResult.duration.toFixed(2)}ms`
+            );
+          }
+          return;
+        }
+      }
+    }
 
     // Handle high threat immediately
     if (threatCheck.hasThreat && threatCheck.riskScore >= 50) {
@@ -101,17 +148,19 @@ module.exports = {
         guildId: member.guild.id,
         userId: member.id,
       });
-      
+
       const raidDetected = await AdvancedAntiRaid.detectRaid(
         member.guild,
         member
       );
-      
+
       const raidPerfResult = performanceMonitor.end(raidPerfId);
       if (raidPerfResult) {
-        logger.info(`⚡ Raid detection took ${raidPerfResult.duration.toFixed(2)}ms`);
+        logger.info(
+          `⚡ Raid detection took ${raidPerfResult.duration.toFixed(2)}ms`
+        );
       }
-      
+
       if (raidDetected) {
         // Send notification
         const Notifications = require("../utils/notifications");
@@ -125,15 +174,17 @@ module.exports = {
           },
           client
         );
-        
+
         // Log total response time
         const totalPerfResult = performanceMonitor.end(perfId);
         if (totalPerfResult) {
           logger.success(
-            `🚀 Total raid response: ${totalPerfResult.duration.toFixed(2)}ms (Detection: ${raidPerfResult.duration.toFixed(2)}ms)`
+            `🚀 Total raid response: ${totalPerfResult.duration.toFixed(
+              2
+            )}ms (Detection: ${raidPerfResult.duration.toFixed(2)}ms)`
           );
         }
-        
+
         return; // Advanced system handled it
       }
     }
@@ -144,7 +195,10 @@ module.exports = {
 
     if (daysOld < 7) {
       // Very new account - add heat
-      if (client.heatSystem && typeof client.heatSystem.addHeat === "function") {
+      if (
+        client.heatSystem &&
+        typeof client.heatSystem.addHeat === "function"
+      ) {
         await client.heatSystem.addHeat(
           member.guild.id,
           member.id,
@@ -265,7 +319,7 @@ module.exports = {
           userId: member.id,
           threatScore: threat.score,
         });
-        
+
         await ErrorHandler.safeExecute(
           member.ban({
             reason: `Security threat detected (Score: ${threat.score})`,
@@ -274,15 +328,17 @@ module.exports = {
           `guildMemberAdd [${member.guild.id}]`,
           `Auto-ban for threat score ${threat.score}`
         );
-        
+
         const banPerfResult = performanceMonitor.end(banPerfId);
         const totalPerfResult = performanceMonitor.end(perfId);
         if (banPerfResult && totalPerfResult) {
           logger.success(
-            `🚀 Ban response: ${banPerfResult.duration.toFixed(2)}ms | Total: ${totalPerfResult.duration.toFixed(2)}ms`
+            `🚀 Ban response: ${banPerfResult.duration.toFixed(
+              2
+            )}ms | Total: ${totalPerfResult.duration.toFixed(2)}ms`
           );
         }
-        
+
         return;
       } else if (threat.score >= 60 && threat.action === "kick") {
         const kickPerfId = `kick_action_${member.id}_${Date.now()}`;
@@ -291,21 +347,23 @@ module.exports = {
           userId: member.id,
           threatScore: threat.score,
         });
-        
+
         await ErrorHandler.safeExecute(
           member.kick(`Security threat detected (Score: ${threat.score})`),
           `guildMemberAdd [${member.guild.id}]`,
           `Auto-kick for threat score ${threat.score}`
         );
-        
+
         const kickPerfResult = performanceMonitor.end(kickPerfId);
         const totalPerfResult = performanceMonitor.end(perfId);
         if (kickPerfResult && totalPerfResult) {
           logger.success(
-            `🚀 Kick response: ${kickPerfResult.duration.toFixed(2)}ms | Total: ${totalPerfResult.duration.toFixed(2)}ms`
+            `🚀 Kick response: ${kickPerfResult.duration.toFixed(
+              2
+            )}ms | Total: ${totalPerfResult.duration.toFixed(2)}ms`
           );
         }
-        
+
         return;
       }
     }
@@ -459,13 +517,15 @@ module.exports = {
           );
       }
     }
-    
+
     // End performance tracking for normal joins
     const totalPerfResult = performanceMonitor.end(perfId);
     if (totalPerfResult && totalPerfResult.duration > 100) {
       // Only log if took more than 100ms
       logger.warn(
-        `⚠️ Slow member join processing: ${totalPerfResult.duration.toFixed(2)}ms for ${member.user.tag}`
+        `⚠️ Slow member join processing: ${totalPerfResult.duration.toFixed(
+          2
+        )}ms for ${member.user.tag}`
       );
     }
   },
