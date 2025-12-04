@@ -1621,6 +1621,16 @@ class Database {
       }
     );
 
+    // Migration: Add seasonal_theme column to server_config
+    this.db.run(
+      `ALTER TABLE server_config ADD COLUMN seasonal_theme TEXT`,
+      (err) => {
+        if (err && !err.message.includes("duplicate column")) {
+          console.error("Error adding seasonal_theme column:", err);
+        }
+      }
+    );
+
     // Migration: Fix polls table schema (drop old, recreate with new schema)
     this.db.run(`DROP TABLE IF EXISTS polls`, (err) => {
       if (err) {
