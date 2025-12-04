@@ -34,6 +34,37 @@ class AdvancedAntiNuke {
     this.permissionChanges = new Map(); // Track permission changes per user (userId-guildId -> {changes: [], firstChange, count})
   }
 
+  // Get server-size-aware adaptive thresholds
+  getAdaptiveThresholds(guild) {
+    const memberCount = guild.memberCount || 1;
+    
+    // Calculate multiplier based on server size
+    // Larger servers may have more legitimate bulk operations
+    let multiplier = 1.0;
+    if (memberCount >= 5000) {
+      multiplier = 2.0; // Very large servers: double thresholds
+    } else if (memberCount >= 2000) {
+      multiplier = 1.5; // Large servers: 1.5x thresholds
+    } else if (memberCount >= 1000) {
+      multiplier = 1.2; // Medium-large servers: slight increase
+    }
+    // Small/medium servers (< 1000): use base thresholds (1.0x)
+
+    // Apply multiplier to base thresholds
+    return {
+      channelsDeleted: Math.max(1, Math.ceil(this.baseThresholds.channelsDeleted * multiplier)),
+      channelsCreated: Math.ceil(this.baseThresholds.channelsCreated * multiplier),
+      rolesDeleted: Math.max(1, Math.ceil(this.baseThresholds.rolesDeleted * multiplier)),
+      rolesCreated: Math.ceil(this.baseThresholds.rolesCreated * multiplier),
+      membersBanned: Math.ceil(this.baseThresholds.membersBanned * multiplier),
+      membersKicked: Math.ceil(this.baseThresholds.membersKicked * multiplier),
+      webhooksCreated: Math.ceil(this.baseThresholds.webhooksCreated * multiplier),
+      emojisDeleted: Math.ceil(this.baseThresholds.emojisDeleted * multiplier),
+      emojisCreated: Math.ceil(this.baseThresholds.emojisCreated * multiplier),
+      voiceRaid: Math.ceil(this.baseThresholds.voiceRaid * multiplier),
+    };
+  }
+
   // Check if user is whitelisted (EXCEEDS WICK - prevents false positives)
   async isWhitelisted(guildId, userId) {
     if (!this.whitelistCache.has(guildId)) {

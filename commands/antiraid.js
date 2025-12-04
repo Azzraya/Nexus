@@ -115,15 +115,32 @@ module.exports = {
         ],
       });
     } else if (subcommand === "status") {
+      // Calculate server-size-aware thresholds
+      const AdvancedAntiRaid = require("../utils/advancedAntiRaid");
+      const memberCount = interaction.guild.memberCount || 1;
+      const serverSizeMultiplier = AdvancedAntiRaid.getServerSizeMultiplier(memberCount);
+      const serverSizeTier = AdvancedAntiRaid.getServerSizeTier(memberCount);
+      const scaledMaxJoins = Math.ceil(config.maxJoins * serverSizeMultiplier);
+
       const embed = new EmbedBuilder()
         .setTitle("🛡️ Anti-Raid Status")
+        .setDescription(`**Server Size Tier:** ${serverSizeTier}\n**Members:** ${memberCount.toLocaleString()}`)
         .addFields(
           {
             name: "Status",
             value: config.enabled ? "✅ Enabled" : "❌ Disabled",
             inline: true,
           },
-          { name: "Max Joins", value: `${config.maxJoins}`, inline: true },
+          { 
+            name: "Base Max Joins", 
+            value: `${config.maxJoins}`, 
+            inline: true 
+          },
+          {
+            name: "Scaled Max Joins",
+            value: `**${scaledMaxJoins}** (${serverSizeMultiplier}x)`,
+            inline: true,
+          },
           {
             name: "Time Window",
             value: `${config.timeWindow / 1000}s`,
@@ -146,6 +163,7 @@ module.exports = {
           }
         )
         .setColor(0x0099ff)
+        .setFooter({ text: "Thresholds automatically scale with server size to prevent false positives" })
         .setTimestamp();
 
       await interaction.reply({ embeds: [embed] });

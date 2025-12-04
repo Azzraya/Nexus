@@ -92,9 +92,28 @@ class AdvancedAntiRaid {
     return clusters;
   }
 
+  // Calculate server-size-aware thresholds
+  static getServerSizeMultiplier(memberCount) {
+    if (memberCount < 100) return 1.0;        // Small: 5 joins/10s (STRICT)
+    if (memberCount < 500) return 1.6;        // Medium: 8 joins/10s (BALANCED)
+    if (memberCount < 2000) return 3.0;       // Large: 15 joins/10s (RELAXED)
+    return 5.0;                                // Huge: 25 joins/10s (VERY RELAXED)
+  }
+
+  static getServerSizeTier(memberCount) {
+    if (memberCount < 100) return "Small (< 100)";
+    if (memberCount < 500) return "Medium (100-500)";
+    if (memberCount < 2000) return "Large (500-2K)";
+    return "Huge (2K+)";
+  }
+
   static async detectRaid(guild, member) {
     const config = await db.getServerConfig(guild.id);
     if (!config || !config.anti_raid_enabled) return false;
+
+    // Get server size multiplier (dynamic scaling)
+    const memberCount = guild.memberCount || 1;
+    const serverSizeMultiplier = this.getServerSizeMultiplier(memberCount);
 
     // Get threat sensitivity settings (affects how aggressive detection is)
     const sensitivity = await db.getThreatSensitivity(guild.id);
@@ -102,6 +121,9 @@ class AdvancedAntiRaid {
     // Default threshold is 30, so we scale based on that
     const sensitivityMultiplier = sensitivity.risk_threshold / 30; // 1.0 = default, <1.0 = more sensitive, >1.0 = less sensitive
     const isLessSensitive = sensitivityMultiplier > 1.0; // Higher threshold = less sensitive
+
+    // Combine server size and sensitivity multipliers
+    const finalMultiplier = serverSizeMultiplier * sensitivityMultiplier;
 
     // Check whitelist first (before any detection)
     const isWhitelisted = await new Promise((resolve, reject) => {
@@ -131,23 +153,24 @@ class AdvancedAntiRaid {
 
     joinData.joins.push(memberData);
 
-    // Run all detection algorithms
+    // Run all detection algorithms with server-size-aware thresholds
+    const scaledMaxJoins = Math.ceil((config.anti_raid_max_joins || 5) * finalMultiplier);
     const results = {
       rateBased: this.detectionAlgorithms.rateBased(
         joinData.joins,
         config.anti_raid_time_window || 10000,
-        config.anti_raid_max_joins || 5
+        scaledMaxJoins  // Scale threshold by server size + sensitivity
       ),
       patternBased: this.detectionAlgorithms.patternBased(joinData.joins),
       behavioral: this.detectionAlgorithms.behavioral(joinData.joins),
       networkBased: this.detectionAlgorithms.networkBased(joinData.joins),
     };
 
-    // Calculate threat score (0-100) - adjusted by sensitivity
-    // Adjust minimum joins based on sensitivity (less sensitive = need more joins)
+    // Calculate threat score (0-100) - adjusted by server size + sensitivity
+    // Adjust minimum joins based on combined multiplier
     const baseMinJoins = 5;
     const minJoinsForThreatScore = Math.ceil(
-      baseMinJoins * sensitivityMultiplier
+      baseMinJoins * finalMultiplier
     );
 
     let threatScore = 0;
@@ -170,21 +193,21 @@ class AdvancedAntiRaid {
       threatScore = 0;
     }
 
-    // Adjust minimum joins for raid detection based on sensitivity
-    // Less sensitive (higher threshold) = need more joins
-    const minJoinsForRaid = Math.ceil(baseMinJoins * sensitivityMultiplier);
+    // Adjust minimum joins for raid detection based on server size + sensitivity
+    // Larger servers or less sensitive settings = need more joins
+    const minJoinsForRaid = Math.ceil(baseMinJoins * finalMultiplier);
 
     if (joinData.joins.length < minJoinsForRaid) {
       return false; // Not enough joins to be considered a raid
     }
 
-    // Adjust thresholds based on sensitivity
-    // Less sensitive = need more joins for pattern/behavioral detection
-    const patternBehavioralMinJoins = Math.ceil(7 * sensitivityMultiplier);
-    const networkMinJoins = Math.ceil(10 * sensitivityMultiplier);
+    // Adjust thresholds based on server size + sensitivity
+    // Larger servers = need more joins for pattern/behavioral detection
+    const patternBehavioralMinJoins = Math.ceil(7 * finalMultiplier);
+    const networkMinJoins = Math.ceil(10 * finalMultiplier);
 
-    // Adjust threat score threshold (less sensitive = higher threshold needed)
-    const threatScoreThreshold = Math.ceil(85 * sensitivityMultiplier);
+    // Adjust threat score threshold (larger servers = higher threshold needed)
+    const threatScoreThreshold = Math.ceil(85 * finalMultiplier);
 
     // Only trigger if multiple algorithms agree OR threat score is very high
     const isRaid =
@@ -205,7 +228,7 @@ class AdvancedAntiRaid {
 
       // Only handle raid if we have recent suspicious joins
       if (recentJoins.length > 0) {
-        await this.handleRaid(guild, recentJoins, threatScore, results);
+        await this.handleRaid(guild, recentJoins, threatScore, results, finalMultiplier);
         return true;
       }
     }
@@ -249,25 +272,25 @@ class AdvancedAntiRaid {
     guild,
     suspiciousJoins,
     threatScore,
-    detectionResults
+    detectionResults,
+    finalMultiplier = 1.0
   ) {
     const config = await db.getServerConfig(guild.id);
     const action = config.anti_raid_action || "ban";
 
-    // Get sensitivity settings to adjust suspicion thresholds
-    const sensitivity = await db.getThreatSensitivity(guild.id);
-    const sensitivityMultiplier = sensitivity.risk_threshold / 30;
+    const memberCount = guild.memberCount || 1;
+    const serverSizeTier = this.getServerSizeTier(memberCount);
 
     logger.warn(
-      `Raid detected in ${guild.name} (${guild.id}): Threat score ${threatScore}, ${suspiciousJoins.length} suspicious joins`
+      `Raid detected in ${guild.name} (${guild.id}) [${serverSizeTier}]: Threat score ${threatScore}, ${suspiciousJoins.length} suspicious joins`
     );
 
     // Only take action on the most suspicious members (not all joins)
     // Filter to only ban members that match multiple criteria
-    // Adjust suspicion threshold based on sensitivity (less sensitive = need higher suspicion)
+    // Adjust suspicion threshold based on server size + sensitivity
     const baseSuspicionThreshold = 3;
     const suspicionThreshold = Math.ceil(
-      baseSuspicionThreshold * sensitivityMultiplier
+      baseSuspicionThreshold * finalMultiplier
     );
 
     const highlySuspicious = suspiciousJoins.filter((join) => {
