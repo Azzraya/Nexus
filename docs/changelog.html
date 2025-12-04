@@ -60,8 +60,81 @@
 
       <div class="content-section">
         <div class="changelog-entry">
-          <h2>Version 3.0.0 - December 3, 2025</h2>
+          <h2>Version 3.2.0 - December 4, 2025</h2>
           <span class="version-badge">Latest</span>
+          <h3>🚀 Growth & Security Update</h3>
+          <p>
+            <strong>Major improvements to viral growth systems and security hardening</strong>
+          </p>
+
+          <h3>✨ New Features</h3>
+          <ul>
+            <li>
+              <strong>/share Command:</strong> Generate shareable server stats cards, Nexus vs Wick comparisons, and achievement posts for social media
+            </li>
+            <li>
+              <strong>/refer System:</strong> Complete referral system with leaderboard, rewards (Bronze/Silver/Gold/Diamond/Elite badges), and tracking
+            </li>
+            <li>
+              <strong>SEO Optimization:</strong> Enhanced meta tags, structured data (Schema.org), and improved search rankings for "Wick alternative"
+            </li>
+            <li>
+              <strong>Referral Landing Page:</strong> Dedicated refer.html page for tracking user referrals with reward tiers
+            </li>
+          </ul>
+
+          <h3>🔒 Security Improvements</h3>
+          <ul>
+            <li>
+              <strong>SQL Injection Protection:</strong> Added whitelists for all dynamic SQL queries (server config, workflows, API keys, log searches)
+            </li>
+            <li>
+              <strong>Improved Admin Authentication:</strong> Replaced weak base64 tokens with cryptographically secure tokens (crypto.randomBytes)
+            </li>
+            <li>
+              <strong>Token Expiration:</strong> Admin tokens now expire after 24 hours with automatic cleanup
+            </li>
+            <li>
+              <strong>Input Validation:</strong> Enhanced validation on all API endpoints with proper error handling
+            </li>
+          </ul>
+
+          <h3>🐛 Bug Fixes</h3>
+          <ul>
+            <li>
+              <strong>Database Migration:</strong> Fixed vote reward column creation (changed db.exec to db.run for proper error handling)
+            </li>
+            <li>
+              <strong>Dynamic Server Counts:</strong> All hardcoded server counts now pull from live API (auto-updates as bot grows)
+            </li>
+            <li>
+              <strong>Referral Tracking:</strong> Fixed referral system integration with guildCreate/guildDelete events
+            </li>
+          </ul>
+
+          <h3>📝 Documentation</h3>
+          <ul>
+            <li>
+              <strong>Enhanced README:</strong> Added badges, comparison table, better formatting, and clearer value proposition
+            </li>
+            <li>
+              <strong>Marketing Templates:</strong> Added comprehensive outreach guides for YouTube reviewers and partnerships
+            </li>
+            <li>
+              <strong>API Documentation:</strong> Updated examples to reflect current features
+            </li>
+          </ul>
+
+          <h3>🗑️ Removed</h3>
+          <ul>
+            <li>
+              <strong>Newsletter System:</strong> Removed emailSender.js, newsletter.js, and related features (no longer needed)
+            </li>
+          </ul>
+        </div>
+
+        <div class="changelog-entry">
+          <h2>Version 3.0.0 - December 3, 2025</h2>
           <h3>🚀 MAJOR RELEASE - 20 NEW FEATURES!</h3>
           <p>
             <strong>THE MOST ADVANCED DISCORD BOT UPDATE EVER RELEASED</strong>
