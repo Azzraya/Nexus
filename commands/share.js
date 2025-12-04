@@ -177,12 +177,13 @@ module.exports = {
     });
 
     // Log share for analytics
-    await db
-      .query(
+    await new Promise((resolve) => {
+      db.db.run(
         "INSERT INTO share_stats (guild_id, type, period, timestamp) VALUES (?, ?, ?, ?)",
-        [guild.id, "stats", period, Date.now()]
-      )
-      .catch(() => {});
+        [guild.id, "stats", period, Date.now()],
+        () => resolve() // Ignore errors
+      );
+    }).catch(() => {});
   },
 
   /**

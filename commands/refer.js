@@ -164,15 +164,21 @@ module.exports = {
   async showLeaderboard(interaction) {
     const limit = interaction.options.getInteger("limit") || 10;
 
-    const topReferrers = await db.query(
-      `SELECT user_id, COUNT(*) as referrals, MAX(created_at) as last_referral
-       FROM referrals
-       WHERE status = 'active'
-       GROUP BY user_id
-       ORDER BY referrals DESC
-       LIMIT ?`,
-      [limit]
-    );
+    const topReferrers = await new Promise((resolve, reject) => {
+      db.db.all(
+        `SELECT user_id, COUNT(*) as referrals, MAX(created_at) as last_referral
+         FROM referrals
+         WHERE status = 'active'
+         GROUP BY user_id
+         ORDER BY referrals DESC
+         LIMIT ?`,
+        [limit],
+        (err, rows) => {
+          if (err) reject(err);
+          else resolve(rows || []);
+        }
+      );
+    });
 
     if (!topReferrers || topReferrers.length === 0) {
       return interaction.reply({
@@ -254,46 +260,68 @@ module.exports = {
    */
   async getReferralStats(userId) {
     // Initialize referral table if not exists
-    await db.query(`
-      CREATE TABLE IF NOT EXISTS referrals (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id TEXT NOT NULL,
-        guild_id TEXT NOT NULL,
-        created_at INTEGER DEFAULT (strftime('%s', 'now')),
-        status TEXT DEFAULT 'active'
-      )
-    `);
+    await new Promise((resolve, reject) => {
+      db.db.run(`
+        CREATE TABLE IF NOT EXISTS referrals (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          user_id TEXT NOT NULL,
+          guild_id TEXT NOT NULL,
+          created_at INTEGER DEFAULT (strftime('%s', 'now')),
+          status TEXT DEFAULT 'active'
+        )
+      `, (err) => {
+        if (err) reject(err);
+        else resolve();
+      });
+    });
 
-    await db.query(`
-      CREATE INDEX IF NOT EXISTS idx_referrals_user ON referrals(user_id)
-    `);
+    await new Promise((resolve) => {
+      db.db.run(`CREATE INDEX IF NOT EXISTS idx_referrals_user ON referrals(user_id)`, () => resolve());
+    });
 
-    await db.query(`
-      CREATE INDEX IF NOT EXISTS idx_referrals_guild ON referrals(guild_id)
-    `);
+    await new Promise((resolve) => {
+      db.db.run(`CREATE INDEX IF NOT EXISTS idx_referrals_guild ON referrals(guild_id)`, () => resolve());
+    });
 
     // Get stats
-    const totalResult = await db.query(
-      "SELECT COUNT(*) as count FROM referrals WHERE user_id = ?",
-      [userId]
-    );
+    const totalResult = await new Promise((resolve, reject) => {
+      db.db.get(
+        "SELECT COUNT(*) as count FROM referrals WHERE user_id = ?",
+        [userId],
+        (err, row) => {
+          if (err) reject(err);
+          else resolve(row);
+        }
+      );
+    });
 
-    const activeResult = await db.query(
-      "SELECT COUNT(*) as count FROM referrals WHERE user_id = ? AND status = 'active'",
-      [userId]
-    );
+    const activeResult = await new Promise((resolve, reject) => {
+      db.db.get(
+        "SELECT COUNT(*) as count FROM referrals WHERE user_id = ? AND status = 'active'",
+        [userId],
+        (err, row) => {
+          if (err) reject(err);
+          else resolve(row);
+        }
+      );
+    });
 
-    const totalReferrals = totalResult[0]?.count || 0;
-    const activeReferrals = activeResult[0]?.count || 0;
+    const totalReferrals = totalResult?.count || 0;
+    const activeReferrals = activeResult?.count || 0;
 
     // Get rank
-    const rankResult = await db.query(`
-      SELECT user_id, COUNT(*) as count
-      FROM referrals
-      WHERE status = 'active'
-      GROUP BY user_id
-      ORDER BY count DESC
-    `);
+    const rankResult = await new Promise((resolve, reject) => {
+      db.db.all(`
+        SELECT user_id, COUNT(*) as count
+        FROM referrals
+        WHERE status = 'active'
+        GROUP BY user_id
+        ORDER BY count DESC
+      `, (err, rows) => {
+        if (err) reject(err);
+        else resolve(rows || []);
+      });
+    });
 
     let rank = 0;
     for (let i = 0; i < rankResult.length; i++) {
@@ -349,31 +377,48 @@ module.exports = {
     if (!referrerId) return;
 
     try {
-      await db.query(`
-        CREATE TABLE IF NOT EXISTS referrals (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          user_id TEXT NOT NULL,
-          guild_id TEXT NOT NULL,
-          created_at INTEGER DEFAULT (strftime('%s', 'now')),
-          status TEXT DEFAULT 'active'
-        )
-      `);
+      await new Promise((resolve, reject) => {
+        db.db.run(`
+          CREATE TABLE IF NOT EXISTS referrals (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id TEXT NOT NULL,
+            guild_id TEXT NOT NULL,
+            created_at INTEGER DEFAULT (strftime('%s', 'now')),
+            status TEXT DEFAULT 'active'
+          )
+        `, (err) => {
+          if (err) reject(err);
+          else resolve();
+        });
+      });
 
       // Check if already tracked
-      const existing = await db.query(
-        "SELECT id FROM referrals WHERE guild_id = ?",
-        [guildId]
-      );
+      const existing = await new Promise((resolve, reject) => {
+        db.db.all(
+          "SELECT id FROM referrals WHERE guild_id = ?",
+          [guildId],
+          (err, rows) => {
+            if (err) reject(err);
+            else resolve(rows || []);
+          }
+        );
+      });
 
       if (existing && existing.length > 0) {
         return; // Already tracked
       }
 
       // Add referral
-      await db.query(
-        "INSERT INTO referrals (user_id, guild_id, status) VALUES (?, ?, 'active')",
-        [referrerId, guildId]
-      );
+      await new Promise((resolve, reject) => {
+        db.db.run(
+          "INSERT INTO referrals (user_id, guild_id, status) VALUES (?, ?, 'active')",
+          [referrerId, guildId],
+          (err) => {
+            if (err) reject(err);
+            else resolve();
+          }
+        );
+      });
 
       logger.info(
         `[Referral] New referral tracked: Guild ${guildId} referred by ${referrerId}`
@@ -388,10 +433,16 @@ module.exports = {
    */
   async markReferralInactive(guildId) {
     try {
-      await db.query(
-        "UPDATE referrals SET status = 'inactive' WHERE guild_id = ?",
-        [guildId]
-      );
+      await new Promise((resolve, reject) => {
+        db.db.run(
+          "UPDATE referrals SET status = 'inactive' WHERE guild_id = ?",
+          [guildId],
+          (err) => {
+            if (err) reject(err);
+            else resolve();
+          }
+        );
+      });
     } catch (error) {
       logger.error("[Referral] Error marking referral inactive:", error);
     }
