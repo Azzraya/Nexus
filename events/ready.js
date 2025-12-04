@@ -21,7 +21,7 @@ module.exports = {
         try {
           const DiscordBotList = require("../utils/discordbotlist");
           let dbl = client.discordBotList;
-          
+
           if (!dbl) {
             dbl = new DiscordBotList(client, process.env.DISCORDBOTLIST_TOKEN);
             // Initialize it (this sets up the dbl instance)
@@ -117,7 +117,10 @@ module.exports = {
     }
 
     // Start automatic snapshot scheduler (EXCEEDS WICK - point-in-time recovery)
-    if (client.snapshotScheduler && (!shardInfo.isSharded || shardInfo.shardId === 0)) {
+    if (
+      client.snapshotScheduler &&
+      (!shardInfo.isSharded || shardInfo.shardId === 0)
+    ) {
       client.snapshotScheduler.start();
       console.log(`📸 Snapshot scheduler started (hourly backups enabled)`);
     }
@@ -127,14 +130,21 @@ module.exports = {
       for (const guild of client.guilds.cache.values()) {
         client.voteRewards.startAutoChecking(guild);
       }
-      console.log(`🎁 Vote rewards auto-checking started for ${client.guilds.cache.size} guilds`);
+      console.log(
+        `🎁 Vote rewards auto-checking started for ${client.guilds.cache.size} guilds`
+      );
     }
 
     // Start Dashboard Server (EXCEEDS WICK - free dashboard vs Wick's premium)
-    if (client.dashboardServer && (!shardInfo.isSharded || shardInfo.shardId === 0)) {
+    if (
+      client.dashboardServer &&
+      (!shardInfo.isSharded || shardInfo.shardId === 0)
+    ) {
       client.dashboardServer.start(3000);
       console.log(`🌐 Dashboard server started on port 3000`);
-      console.log(`🔗 Access at: ${process.env.DASHBOARD_URL || 'http://localhost:3000'}`);
+      console.log(
+        `🔗 Access at: ${process.env.DASHBOARD_URL || "http://localhost:3000"}`
+      );
     }
 
     // Generate initial recommendations for all guilds
@@ -276,6 +286,22 @@ module.exports = {
           client.botsOnDiscord = botsOnDiscord;
         } catch (error) {
           logger.error("[Bots on Discord] Failed to initialize:", error);
+        }
+      }
+
+      // Initialize Growth Reminders System
+      if (!client.growthReminders) {
+        try {
+          const GrowthReminders = require("../utils/growthReminders");
+          const growthReminders = new GrowthReminders(client);
+          growthReminders.start();
+          client.growthReminders = growthReminders;
+          logger.info("[Growth] Growth reminders system initialized");
+        } catch (error) {
+          logger.error(
+            "[Growth] Failed to initialize growth reminders:",
+            error
+          );
         }
       }
     }
