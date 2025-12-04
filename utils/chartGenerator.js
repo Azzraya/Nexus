@@ -1,35 +1,18 @@
 const db = require("./database");
+const axios = require("axios");
 
 class ChartGenerator {
   constructor() {
     this.width = 800;
     this.height = 400;
-    
-    // Chart generation is optional - requires chartjs-node-canvas which has Windows compilation issues
-    // For now, we'll provide text-based analytics instead
-    this.chartsEnabled = false;
-    
-    try {
-      const { ChartJSNodeCanvas } = require("chartjs-node-canvas");
-      this.chartJSNodeCanvas = new ChartJSNodeCanvas({
-        width: this.width,
-        height: this.height,
-        backgroundColour: "#36393f",
-      });
-      this.chartsEnabled = true;
-    } catch (error) {
-      console.log("[ChartGenerator] Charts disabled - chartjs-node-canvas not installed (optional)");
-    }
+    // Using QuickChart.io API - no native dependencies needed, works on all platforms
+    this.quickChartUrl = "https://quickchart.io/chart";
   }
 
   /**
    * Generate member growth chart
    */
   async generateGrowthChart(guildId, days = 30) {
-    if (!this.chartsEnabled) {
-      throw new Error("Chart generation not available. Install chartjs-node-canvas if needed (optional).");
-    }
-
     const data = await this.getMemberGrowthData(guildId, days);
 
     const configuration = {
@@ -74,17 +57,14 @@ class ChartGenerator {
       },
     };
 
-    return await this.chartJSNodeCanvas.renderToBuffer(configuration);
+    // Use QuickChart API - works on all platforms, no native dependencies
+    return await this.generateChartFromConfig(configuration);
   }
 
   /**
    * Generate activity heatmap
    */
   async generateActivityHeatmap(guildId, days = 7) {
-    if (!this.chartsEnabled) {
-      throw new Error("Chart generation not available. Install chartjs-node-canvas if needed (optional).");
-    }
-
     const data = await this.getActivityHeatmapData(guildId, days);
 
     const configuration = {
@@ -131,17 +111,13 @@ class ChartGenerator {
       },
     };
 
-    return await this.chartJSNodeCanvas.renderToBuffer(configuration);
+    return await this.generateChartFromConfig(configuration);
   }
 
   /**
    * Generate threat score distribution
    */
   async generateThreatDistribution(guildId, days = 30) {
-    if (!this.chartsEnabled) {
-      throw new Error("Chart generation not available. Install chartjs-node-canvas if needed (optional).");
-    }
-
     const data = await this.getThreatDistributionData(guildId, days);
 
     const configuration = {
@@ -176,7 +152,29 @@ class ChartGenerator {
       },
     };
 
-    return await this.chartJSNodeCanvas.renderToBuffer(configuration);
+    return await this.generateChartFromConfig(configuration);
+  }
+
+  /**
+   * Generate chart using QuickChart API (works on all platforms)
+   */
+  async generateChartFromConfig(configuration) {
+    try {
+      // QuickChart API - free, no dependencies, works everywhere
+      const response = await axios.get(this.quickChartUrl, {
+        params: {
+          c: JSON.stringify(configuration),
+          width: this.width,
+          height: this.height,
+          backgroundColor: "#36393f",
+        },
+        responseType: "arraybuffer",
+      });
+
+      return Buffer.from(response.data);
+    } catch (error) {
+      throw new Error(`Chart generation failed: ${error.message}`);
+    }
   }
 
   async getMemberGrowthData(guildId, days) {
