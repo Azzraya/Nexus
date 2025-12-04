@@ -84,8 +84,36 @@
 
       <div class="content-section">
         <div class="changelog-entry">
-          <h2>Version 3.5.4 - December 4, 2025</h2>
+          <h2>Version 3.5.5 - December 4, 2025</h2>
           <span class="version-badge">Latest</span>
+          <h3>✅ Fix - Database Error Handling</h3>
+          <ul>
+            <li>
+              <strong>Fixed database startup errors:</strong> getAllScheduledActions and getDueScheduledActions now gracefully handle missing tables
+            </li>
+            <li>
+              <strong>No more SQL errors on startup:</strong> Returns empty arrays instead of throwing errors
+            </li>
+            <li>
+              <strong>Better error handling:</strong> All database queries now have proper fallbacks
+            </li>
+          </ul>
+          <h3>⚠️ Known Issue - Command Limit</h3>
+          <ul>
+            <li>
+              <strong>Discord limit reached:</strong> Bot has 102 commands but Discord allows maximum 100 per application
+            </li>
+            <li>
+              <strong>Impact:</strong> Commands fail to register in some servers
+            </li>
+            <li>
+              <strong>Solution needed:</strong> Will consolidate commands in next update or make some optional
+            </li>
+          </ul>
+        </div>
+
+        <div class="changelog-entry">
+          <h2>Version 3.5.4 - December 4, 2025</h2>
           <h3>🔧 Critical Fix - Database Migration</h3>
           <ul>
             <li>

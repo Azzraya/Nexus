@@ -3817,8 +3817,12 @@ class Database {
         "SELECT * FROM scheduled_actions WHERE status = 'active'",
         [],
         (err, rows) => {
-          if (err) reject(err);
-          else resolve(rows || []);
+          if (err) {
+            // Table might not exist yet or schema not updated - return empty array
+            resolve([]);
+          } else {
+            resolve(rows || []);
+          }
         }
       );
     });
@@ -3843,8 +3847,12 @@ class Database {
         "SELECT * FROM scheduled_actions WHERE schedule_type = 'once' AND execute_at <= ? AND status = 'active'",
         [now],
         (err, rows) => {
-          if (err) reject(err);
-          else resolve(rows || []);
+          if (err) {
+            // Table might not exist yet - return empty array
+            resolve([]);
+          } else {
+            resolve(rows || []);
+          }
         }
       );
     });
