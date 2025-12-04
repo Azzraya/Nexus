@@ -113,7 +113,7 @@ class AutoRecovery {
           id: emoji.id,
           name: emoji.name,
           animated: emoji.animated,
-          url: emoji.url,
+          url: emoji.imageURL(),
         }));
         logger.info(
           `[AutoRecovery] Captured ${snapshotData.emojis.length} emojis in snapshot`
