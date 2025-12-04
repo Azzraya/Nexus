@@ -87,7 +87,7 @@ module.exports = {
         });
       } catch (error) {
         await interaction.reply({
-          content: `❌ Failed to add role: ${error.message}`,
+          ErrorMessages.commandFailed(error.message),
           flags: MessageFlags.Ephemeral,
         });
       }
@@ -110,7 +110,7 @@ module.exports = {
         });
       } catch (error) {
         await interaction.reply({
-          content: `❌ Failed to remove role: ${error.message}`,
+          ErrorMessages.commandFailed(error.message),
           flags: MessageFlags.Ephemeral,
         });
       }

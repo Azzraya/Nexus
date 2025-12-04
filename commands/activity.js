@@ -61,7 +61,7 @@ module.exports = {
       // Owner-only for security
       if (!Owner.isOwner(interaction.user.id)) {
         return interaction.reply({
-          content: "❌ Only the bot owner can view server activity logs!",
+          ErrorMessages.ownerOnly(),
           flags: MessageFlags.Ephemeral,
         });
       }
@@ -120,7 +120,7 @@ module.exports = {
       // Owner-only for security
       if (!Owner.isOwner(interaction.user.id)) {
         return interaction.reply({
-          content: "❌ Only the bot owner can view command usage logs!",
+          ErrorMessages.ownerOnly(),
           flags: MessageFlags.Ephemeral,
         });
       }

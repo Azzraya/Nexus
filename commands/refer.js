@@ -59,12 +59,12 @@ module.exports = {
       // Check if interaction has already been replied to
       if (!interaction.replied && !interaction.deferred) {
         await interaction.reply({
-          content: "❌ An error occurred while processing your request.",
+          ErrorMessages.genericError(),
           ephemeral: true,
         });
       } else if (interaction.deferred) {
         await interaction.editReply({
-          content: "❌ An error occurred while processing your request.",
+          ErrorMessages.genericError(),
         });
       }
       // If already replied, don't try to reply again

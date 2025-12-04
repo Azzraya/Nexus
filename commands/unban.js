@@ -52,7 +52,7 @@ module.exports = {
       });
     } catch (error) {
       await interaction.reply({
-        content: `❌ Failed to unban: ${error.message}`,
+        ErrorMessages.commandFailed(error.message),
         flags: MessageFlags.Ephemeral,
       });
     }

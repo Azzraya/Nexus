@@ -128,7 +128,7 @@ module.exports = {
     } catch (error) {
       logger.error("Error searching:", error);
       await interaction.editReply({
-        content: "❌ An error occurred while searching.",
+        ErrorMessages.genericError(),
       });
     }
   },

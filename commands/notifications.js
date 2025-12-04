@@ -64,12 +64,12 @@ module.exports = {
       
       if (!interaction.replied && !interaction.deferred) {
         await interaction.reply({
-          content: "❌ An error occurred.",
+          ErrorMessages.genericError(),
           ephemeral: true,
         });
       } else if (interaction.deferred) {
         await interaction.editReply({
-          content: "❌ An error occurred.",
+          ErrorMessages.genericError(),
         });
       }
     }

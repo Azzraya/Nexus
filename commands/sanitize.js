@@ -28,7 +28,7 @@ module.exports = {
 
     if (!member) {
       return interaction.reply({
-        content: "❌ User not found in this server!",
+        ErrorMessages.userNotFound(),
         flags: MessageFlags.Ephemeral,
       });
     }
@@ -97,7 +97,7 @@ module.exports = {
       await interaction.reply({ embeds: [embed] });
     } catch (error) {
       await interaction.reply({
-        content: `❌ Failed to sanitize nickname: ${error.message}`,
+        ErrorMessages.commandFailed(error.message),
         flags: MessageFlags.Ephemeral,
       });
     }

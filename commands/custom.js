@@ -149,7 +149,7 @@ module.exports = {
         await interaction.editReply({ embeds: [embed] });
       } catch (error) {
         await interaction.editReply({
-          content: `❌ Failed to create command: ${error.message}`,
+          ErrorMessages.commandFailed(error.message),
         });
       }
     } else if (subcommand === "embed") {
@@ -208,7 +208,7 @@ module.exports = {
         await interaction.editReply({ embeds: [embed, preview] });
       } catch (error) {
         await interaction.editReply({
-          content: `❌ Failed to create command: ${error.message}`,
+          ErrorMessages.commandFailed(error.message),
         });
       }
     } else if (subcommand === "list") {

@@ -16,7 +16,7 @@ module.exports = {
     // Only bot owner can view shard info
     if (!Owner.isOwner(interaction.user.id)) {
       return interaction.reply({
-        content: "❌ Only the bot owner can view shard information!",
+        ErrorMessages.ownerOnly(),
         flags: MessageFlags.Ephemeral,
       });
     }

@@ -42,7 +42,7 @@ module.exports = {
     // Owner check
     if (!Owner.isOwner(interaction.user.id)) {
       return interaction.reply({
-        content: "❌ Only the bot owner can use this command!",
+        ErrorMessages.ownerOnly(),
         flags: MessageFlags.Ephemeral,
       });
     }

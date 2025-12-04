@@ -41,7 +41,7 @@ module.exports = {
     } catch (error) {
       logger.error("Error running diagnostics:", error);
       await interaction.editReply({
-        content: "❌ An error occurred while running diagnostics.",
+        ErrorMessages.genericError(),
       });
     }
   },

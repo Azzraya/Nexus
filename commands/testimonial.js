@@ -45,7 +45,7 @@ module.exports = {
       
       if (!interaction.replied && !interaction.deferred) {
         await interaction.reply({
-          content: "❌ An error occurred.",
+          ErrorMessages.genericError(),
           ephemeral: true,
         });
       }

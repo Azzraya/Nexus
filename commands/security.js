@@ -338,7 +338,7 @@ module.exports = {
 const ErrorMessages = require("../utils/errorMessages");
         logger.error("Error in rolecheck:", error);
         await interaction.editReply({
-          content: "❌ An error occurred while checking bot role position.",
+          ErrorMessages.genericError(),
           flags: MessageFlags.Ephemeral,
         });
       }

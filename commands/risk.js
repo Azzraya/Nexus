@@ -48,7 +48,7 @@ module.exports = {
 
       if (!member) {
         return await interaction.editReply({
-          content: "❌ User not found in this server.",
+          ErrorMessages.userNotFound(),
         });
       }
 

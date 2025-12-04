@@ -109,7 +109,7 @@ module.exports = {
         await interaction.editReply({ embeds: [embed] });
       } else {
         await interaction.editReply({
-          content: `❌ Failed to create backup: ${result.error}`
+          ErrorMessages.commandFailed(result.error)
         });
       }
     } else if (subcommand === 'list') {
@@ -204,7 +204,7 @@ module.exports = {
         await interaction.editReply({ embeds: [successEmbed] });
       } else {
         await interaction.editReply({
-          content: `❌ Failed to restore backup: ${result.error}`
+          ErrorMessages.commandFailed(result.error)
         });
       }
     } else if (subcommand === 'delete') {
@@ -219,7 +219,7 @@ module.exports = {
         });
       } else {
         await interaction.editReply({
-          content: `❌ Failed to delete backup: ${result.error}`
+          ErrorMessages.commandFailed(result.error)
         });
       }
     } else if (subcommand === 'info') {

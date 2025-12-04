@@ -432,7 +432,7 @@ const ErrorMessages = require("../utils/errorMessages");
       // Owner only
       if (!Owner.isOwner(interaction.user.id)) {
         return interaction.reply({
-          content: "❌ Only the bot owner can add voting links.",
+          ErrorMessages.ownerOnly(),
           flags: MessageFlags.Ephemeral,
         });
       }
@@ -498,7 +498,7 @@ const ErrorMessages = require("../utils/errorMessages");
       // Owner only
       if (!Owner.isOwner(interaction.user.id)) {
         return interaction.reply({
-          content: "❌ Only the bot owner can remove voting links.",
+          ErrorMessages.ownerOnly(),
           flags: MessageFlags.Ephemeral,
         });
       }

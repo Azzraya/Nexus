@@ -152,7 +152,7 @@ module.exports = {
         });
       } catch (error) {
         await interaction.reply({
-          content: `❌ Failed to send test message: ${error.message}`,
+          ErrorMessages.commandFailed(error.message),
           flags: MessageFlags.Ephemeral,
         });
       }

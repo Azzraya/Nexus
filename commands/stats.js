@@ -29,7 +29,7 @@ module.exports = {
     if (subcommand === "global") {
       if (!Owner.isOwner(interaction.user.id)) {
         return interaction.reply({
-          content: "❌ Only the bot owner can view global statistics!",
+          ErrorMessages.ownerOnly(),
           flags: MessageFlags.Ephemeral,
         });
       }

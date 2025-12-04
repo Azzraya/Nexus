@@ -185,8 +185,7 @@ module.exports = {
         } catch (error) {
           logger.error("Error exporting server data:", error);
           await interaction.editReply({
-            content:
-              "❌ An error occurred while exporting your data. Please try again or contact support.",
+            ErrorMessages.genericError(),
             flags: MessageFlags.Ephemeral,
           });
         }
@@ -253,8 +252,7 @@ module.exports = {
         } catch (error) {
           logger.error("Error exporting user data:", error);
           await interaction.editReply({
-            content:
-              "❌ An error occurred while exporting your data. Please try again or contact support.",
+            ErrorMessages.genericError(),
             flags: MessageFlags.Ephemeral,
           });
         }
@@ -325,8 +323,7 @@ module.exports = {
         } catch (error) {
           logger.error("Error deleting server data:", error);
           await interaction.editReply({
-            content:
-              "❌ An error occurred while deleting server data. Please contact support.",
+            ErrorMessages.genericError(),
             flags: MessageFlags.Ephemeral,
           });
         }
@@ -376,8 +373,7 @@ module.exports = {
         } catch (error) {
           logger.error("Error deleting user data:", error);
           await interaction.editReply({
-            content:
-              "❌ An error occurred while deleting your data. Please contact support.",
+            ErrorMessages.genericError(),
             flags: MessageFlags.Ephemeral,
           });
         }

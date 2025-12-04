@@ -142,7 +142,7 @@ module.exports = {
     } catch (error) {
       logger.error("Error generating report:", error);
       await interaction.editReply({
-        content: "❌ An error occurred while generating the report.",
+        ErrorMessages.genericError(),
       });
     }
   },
@@ -322,7 +322,7 @@ module.exports = {
     } catch (error) {
       logger.error("Error scheduling report:", error);
       await interaction.editReply({
-        content: "❌ An error occurred while scheduling the report.",
+        ErrorMessages.genericError(),
       });
     }
   },
@@ -382,7 +382,7 @@ module.exports = {
     } catch (error) {
       logger.error("Error listing schedules:", error);
       await interaction.editReply({
-        content: "❌ An error occurred while listing scheduled reports.",
+        ErrorMessages.genericError(),
       });
     }
   },
@@ -410,7 +410,7 @@ module.exports = {
     } catch (error) {
       logger.error("Error cancelling schedule:", error);
       await interaction.editReply({
-        content: "❌ An error occurred while cancelling the schedule.",
+        ErrorMessages.genericError(),
       });
     }
   },

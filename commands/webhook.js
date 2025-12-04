@@ -120,7 +120,7 @@ module.exports = {
         await interaction.editReply({ embeds: [embed] });
       } catch (error) {
         await interaction.editReply({
-          content: `❌ Failed to add webhook: ${error.message}`,
+          ErrorMessages.commandFailed(error.message),
         });
       }
     } else if (subcommand === "list") {

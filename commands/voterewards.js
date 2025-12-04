@@ -49,7 +49,7 @@ module.exports = {
     // Owner only
     if (!Owner.isOwner(interaction.user.id)) {
       return interaction.reply({
-        content: "❌ Only the bot owner can configure vote rewards.",
+        ErrorMessages.ownerOnly(),
         flags: MessageFlags.Ephemeral,
       });
     }

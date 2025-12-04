@@ -123,7 +123,7 @@ const ErrorMessages = require("../utils/errorMessages");
         return interaction.editReply({ embeds: [embed] });
       } catch (error) {
         return interaction.editReply({
-          content: `❌ Failed to create snapshot: ${error.message}`,
+          ErrorMessages.commandFailed(error.message),
         });
       }
     }
@@ -176,7 +176,7 @@ const ErrorMessages = require("../utils/errorMessages");
         return interaction.editReply({ embeds: [embed] });
       } catch (error) {
         return interaction.editReply({
-          content: `❌ Failed to restore snapshot: ${error.message}`,
+          ErrorMessages.commandFailed(error.message),
         });
       }
     }

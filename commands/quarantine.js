@@ -75,7 +75,7 @@ module.exports = {
 
       if (!member) {
         return interaction.reply({
-          content: "❌ User not found in this server!",
+          ErrorMessages.userNotFound(),
           flags: MessageFlags.Ephemeral,
         });
       }
@@ -347,7 +347,7 @@ module.exports = {
             await member.roles.remove(quarantineRole);
           } catch (error) {
             return interaction.editReply({
-              content: `❌ Failed to remove quarantine role: ${error.message}`,
+              ErrorMessages.commandFailed(error.message),
             });
           }
         }

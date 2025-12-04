@@ -56,7 +56,7 @@ module.exports = {
       // Only bot owner can set up rescue key
       if (!Owner.isOwner(interaction.user.id)) {
         return interaction.reply({
-          content: "❌ Only the bot owner can set up the rescue key!",
+          ErrorMessages.ownerOnly(),
           flags: MessageFlags.Ephemeral,
         });
       }
@@ -110,7 +110,7 @@ module.exports = {
       // Only bot owner can view rescue key
       if (!Owner.isOwner(interaction.user.id)) {
         return interaction.reply({
-          content: "❌ Only the bot owner can view the rescue key!",
+          ErrorMessages.ownerOnly(),
           flags: MessageFlags.Ephemeral,
         });
       }
@@ -163,7 +163,7 @@ module.exports = {
       // Only bot owner can regenerate
       if (!Owner.isOwner(interaction.user.id)) {
         return interaction.reply({
-          content: "❌ Only the bot owner can regenerate the rescue key!",
+          ErrorMessages.ownerOnly(),
           flags: MessageFlags.Ephemeral,
         });
       }

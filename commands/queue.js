@@ -102,7 +102,7 @@ module.exports = {
         .catch(() => null);
       if (!user) {
         return interaction.editReply({
-          content: "❌ User not found",
+          ErrorMessages.userNotFound(),
         });
       }
 

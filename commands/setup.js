@@ -367,8 +367,7 @@ module.exports = {
     } catch (error) {
       logger.error("Error applying preset:", error);
       await interaction.editReply({
-        content:
-          "❌ An error occurred while applying the preset. Please try again or contact support.",
+        ErrorMessages.genericError(),
       });
     }
   },
@@ -456,7 +455,7 @@ module.exports = {
     } catch (error) {
       logger.error("Error showing setup status:", error);
       await interaction.editReply({
-        content: "❌ An error occurred while checking setup status.",
+        ErrorMessages.genericError(),
       });
     }
   },

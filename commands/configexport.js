@@ -196,7 +196,7 @@ const ErrorMessages = require("../utils/errorMessages");
     } catch (error) {
       logger.error("Error exporting config:", error);
       await interaction.editReply({
-        content: "❌ An error occurred while exporting configuration.",
+        ErrorMessages.genericError(),
       });
     }
   },
@@ -296,8 +296,7 @@ const ErrorMessages = require("../utils/errorMessages");
     } catch (error) {
       logger.error("Error importing config:", error);
       await interaction.editReply({
-        content:
-          "❌ An error occurred while importing configuration. Please check the file format.",
+        ErrorMessages.genericError(),
       });
     }
   },
@@ -372,7 +371,7 @@ const ErrorMessages = require("../utils/errorMessages");
     } catch (error) {
       logger.error("Error comparing configs:", error);
       await interaction.editReply({
-        content: "❌ An error occurred while comparing configurations.",
+        ErrorMessages.genericError(),
       });
     }
   },

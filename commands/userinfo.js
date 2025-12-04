@@ -22,7 +22,7 @@ module.exports = {
 
     if (!member) {
       return interaction.reply({
-        content: "❌ User not found in this server!",
+        ErrorMessages.userNotFound(),
         flags: MessageFlags.Ephemeral,
       });
     }
