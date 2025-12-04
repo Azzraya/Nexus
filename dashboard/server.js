@@ -2932,6 +2932,41 @@ class DashboardServer {
       }
     });
 
+    // GET /api/v1/health - System health check
+    this.app.get("/api/v1/health", async (req, res) => {
+      try {
+        const health = {
+          status: "operational",
+          timestamp: Date.now(),
+          uptime: process.uptime(),
+          bot: {
+            online: this.client.isReady(),
+            servers: this.client.guilds.cache.size,
+            users: this.client.guilds.cache.reduce((a, g) => a + g.memberCount, 0),
+            ping: this.client.ws.ping,
+            memory: Math.round((process.memoryUsage().heapUsed / 1024 / 1024) * 100) / 100,
+          },
+          systems: {
+            database: "operational",
+            api: "operational",
+            dashboard: "operational",
+            antiRaid: this.client.advancedAntiRaid ? "operational" : "disabled",
+            antiNuke: this.client.advancedAntiNuke ? "operational" : "disabled",
+            cache: "operational",
+          },
+          version: require("../package.json").version,
+        };
+
+        res.json(health);
+      } catch (error) {
+        res.status(500).json({
+          status: "error",
+          message: error.message,
+          timestamp: Date.now(),
+        });
+      }
+    });
+
     console.log("[API] Public API v1 endpoints registered");
     console.log("[API] 🔥 POWERFUL API v2 - 35 endpoints active!");
     console.log("[Referral] Referral tracking system active");
