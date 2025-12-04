@@ -50,9 +50,7 @@ module.exports = {
         // Log command usage in parallel (non-blocking)
         Promise.all([
           Promise.resolve(
-            logger.info(`Command used: /${interaction.commandName}`, {
-              guildId: interaction.guild.id,
-              guildName: interaction.guild.name,
+            logger.info(`Command used: /${interaction.commandName} in ${interaction.guild.name} (${interaction.guild.id}) by ${interaction.user.tag}`);
               userId: interaction.user.id,
               userTag: interaction.user.tag,
               commandName: interaction.commandName,
