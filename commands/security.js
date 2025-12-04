@@ -154,8 +154,7 @@ module.exports = {
 
       if (action === "add") {
         if (!user) {
-          return interaction.reply({
-            content: "❌ Please specify a user!",
+          return interaction.reply(ErrorMessages.missingArgument a user!",
             flags: MessageFlags.Ephemeral,
           });
         }
@@ -182,8 +181,7 @@ module.exports = {
         });
       } else if (action === "remove") {
         if (!user) {
-          return interaction.reply({
-            content: "❌ Please specify a user!",
+          return interaction.reply(ErrorMessages.missingArgument a user!",
             flags: MessageFlags.Ephemeral,
           });
         }

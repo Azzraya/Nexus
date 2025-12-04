@@ -98,8 +98,7 @@ module.exports = {
       if (type === "channel") {
         const channel = interaction.options.getChannel("channel");
         if (!channel) {
-          return interaction.reply({
-            content: "❌ Please specify a channel!",
+          return interaction.reply(ErrorMessages.missingArgument a channel!",
             flags: MessageFlags.Ephemeral,
           });
         }
@@ -206,8 +205,7 @@ module.exports = {
       } else if (type === "roles") {
         const role = interaction.options.getRole("role");
         if (!role) {
-          return interaction.reply({
-            content: "❌ Please specify a role!",
+          return interaction.reply(ErrorMessages.missingArgument a role!",
             flags: MessageFlags.Ephemeral,
           });
         }
@@ -240,8 +238,7 @@ module.exports = {
       if (type === "channel") {
         const channel = interaction.options.getChannel("channel");
         if (!channel) {
-          return interaction.reply({
-            content: "❌ Please specify a channel!",
+          return interaction.reply(ErrorMessages.missingArgument a channel!",
             flags: MessageFlags.Ephemeral,
           });
         }
@@ -346,8 +343,7 @@ const ErrorMessages = require("../utils/errorMessages");
       } else if (type === "roles") {
         const role = interaction.options.getRole("role");
         if (!role) {
-          return interaction.reply({
-            content: "❌ Please specify a role!",
+          return interaction.reply(ErrorMessages.missingArgument a role!",
             flags: MessageFlags.Ephemeral,
           });
         }

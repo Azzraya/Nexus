@@ -247,7 +247,7 @@ module.exports = {
 
       if (!result.valid) {
         return interaction.editReply({
-          content: `❌ ${result.message}`,
+          ErrorMessages.commandFailed(result.message).embeds[0].description,
         });
       }
 
