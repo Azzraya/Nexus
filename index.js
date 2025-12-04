@@ -289,17 +289,26 @@ client.checkAntiNuke = async (guild, user, action) => {
 if (!process.env.USING_SHARDING && process.env.TOPGG_TOKEN) {
   try {
     const { AutoPoster } = require("topgg-autoposter");
-    const ap = AutoPoster(process.env.TOPGG_TOKEN, client);
+    // Post every 60 minutes (3600000ms) to avoid rate limits
+    // Top.gg allows updates every 30min, but 60min is safer
+    const ap = AutoPoster(process.env.TOPGG_TOKEN, client, {
+      interval: 3600000, // 1 hour in milliseconds
+    });
 
     ap.on("posted", (stats) => {
       logger.info(`[Top.gg] Posted stats: ${stats.serverCount} servers`);
     });
 
     ap.on("error", (error) => {
-      logger.error("[Top.gg] Error posting stats:", error);
+      // 429 errors are expected after bot restarts (rate limit)
+      if (error.message && error.message.includes("429")) {
+        logger.warn("[Top.gg] Rate limited (429) - will retry in 1 hour");
+      } else {
+        logger.error("[Top.gg] Error posting stats:", error);
+      }
     });
 
-    logger.info("[Top.gg] Stats posting initialized");
+    logger.info("[Top.gg] Stats posting initialized (60min interval)");
   } catch (error) {
     logger.error("[Top.gg] Failed to initialize:", error);
   }

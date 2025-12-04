@@ -22,7 +22,11 @@ const manager = new ShardingManager(path.join(__dirname, "index.js"), {
 if (process.env.TOPGG_TOKEN) {
   try {
     const { AutoPoster } = require("topgg-autoposter");
-    const ap = AutoPoster(process.env.TOPGG_TOKEN, manager);
+    // Post every 60 minutes (3600000ms) to avoid rate limits
+    // Top.gg allows updates every 30min, but 60min is safer
+    const ap = AutoPoster(process.env.TOPGG_TOKEN, manager, {
+      interval: 3600000 // 1 hour in milliseconds
+    });
 
     ap.on("posted", (stats) => {
       console.log(
@@ -31,10 +35,15 @@ if (process.env.TOPGG_TOKEN) {
     });
 
     ap.on("error", (error) => {
-      console.error("❌ [Top.gg] Error posting stats:", error.message);
+      // 429 errors are expected after bot restarts (rate limit)
+      if (error.message && error.message.includes("429")) {
+        console.log("⚠️ [Top.gg] Rate limited (429) - will retry in 1 hour");
+      } else {
+        console.error("❌ [Top.gg] Error posting stats:", error.message);
+      }
     });
 
-    console.log("✅ [Top.gg] Stats posting initialized");
+    console.log("✅ [Top.gg] Stats posting initialized (60min interval)");
   } catch (error) {
     console.error("❌ [Top.gg] Failed to initialize:", error.message);
   }
