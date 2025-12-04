@@ -60,8 +60,66 @@
 
       <div class="content-section">
         <div class="changelog-entry">
-          <h2>Version 3.2.1 - December 4, 2025</h2>
+          <h2>Version 3.3.0 - December 4, 2025</h2>
           <span class="version-badge">Latest</span>
+          <h3>🎯 Server-Size-Aware Protection Update</h3>
+          <p>
+            <strong>Major enhancement to prevent false positives in large servers (500+ members)</strong>
+          </p>
+
+          <h3>🛡️ Anti-Raid Improvements</h3>
+          <ul>
+            <li>
+              <strong>Dynamic Thresholds:</strong> Anti-raid thresholds now automatically scale based on server size
+              <ul>
+                <li>Small servers (&lt;100): 5 joins/10s (STRICT)</li>
+                <li>Medium servers (100-500): 8 joins/10s (BALANCED)</li>
+                <li>Large servers (500-2K): 15 joins/10s (RELAXED)</li>
+                <li>Huge servers (2K+): 25 joins/10s (VERY RELAXED)</li>
+              </ul>
+            </li>
+            <li>
+              <strong>Prevents False Positives:</strong> Large servers with legitimate traffic spikes (announcements, partnerships, viral mentions) no longer trigger false raid alerts
+            </li>
+            <li>
+              <strong>Enhanced /antiraid status:</strong> Now displays current server size tier, member count, base thresholds, and scaled thresholds with multiplier
+            </li>
+            <li>
+              <strong>Intelligent Scaling:</strong> Works seamlessly with existing sensitivity settings - multipliers stack for maximum flexibility
+            </li>
+          </ul>
+
+          <h3>🚨 Anti-Nuke Improvements</h3>
+          <ul>
+            <li>
+              <strong>Server-Size-Aware Thresholds:</strong> Anti-nuke detection now scales with server size to prevent false alerts during legitimate bulk operations
+              <ul>
+                <li>Small servers (&lt;1000): 1.0x base thresholds</li>
+                <li>Medium-large (1000-2000): 1.2x thresholds</li>
+                <li>Large (2000-5000): 1.5x thresholds</li>
+                <li>Very large (5000+): 2.0x thresholds</li>
+              </ul>
+            </li>
+            <li>
+              <strong>Fixed Critical Bug:</strong> Resolved "this.getAdaptiveThresholds is not a function" error that caused crashes on voice state updates
+            </li>
+            <li>
+              <strong>Legitimate Operations Protected:</strong> Large servers can now perform role cleanups, channel reorganizations, and bulk moderation without triggering false nuke alerts
+            </li>
+          </ul>
+
+          <h3>📊 Technical Details</h3>
+          <ul>
+            <li>All thresholds scale automatically - no admin configuration needed</li>
+            <li>Server size detection uses guild.memberCount for real-time scaling</li>
+            <li>Pattern detection, behavioral analysis, and network analysis all scale proportionally</li>
+            <li>Maintains strict security for small servers while being practical for large ones</li>
+          </ul>
+        </div>
+
+        <div class="changelog-entry">
+          <h2>Version 3.2.1 - December 4, 2025</h2>
+          <span class="version-badge">Previous</span>
           <h3>🐛 Bug Fix & Website Enhancement Update</h3>
           <p>
             <strong>Critical bug fixes and major website improvements</strong>
