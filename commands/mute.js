@@ -114,10 +114,7 @@ const ErrorMessages = require("../utils/errorMessages");
         }
       }
     } else {
-      await interaction.reply({
-        ErrorMessages.commandFailed(result.message).embeds[0].description,
-        flags: MessageFlags.Ephemeral,
-      });
+        await interaction.reply(ErrorMessages.commandFailed(result.message));
     }
   },
 };
