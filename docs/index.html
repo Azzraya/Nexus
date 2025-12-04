@@ -965,7 +965,7 @@
     <div class="cta-section">
       <div class="container">
         <h2>Ready to Protect Your Server?</h2>
-        <p>Join 11 servers already using Nexus. Setup takes 2 minutes.</p>
+        <p>Join <span id="serverCount">18+</span> servers already using Nexus. Setup takes 2 minutes.</p>
         <a
           href="#"
           class="btn btn-primary btn-large"
@@ -1341,11 +1341,13 @@
           const data = await response.json();
 
           // Update live counters
-          const serverCount = document.getElementById("liveServerCount");
+          const liveServerCount = document.getElementById("liveServerCount");
           const userCount = document.getElementById("liveUserCount");
+          const ctaServerCount = document.getElementById("serverCount");
           const status = document.getElementById("botStatus");
 
-          if (serverCount) serverCount.textContent = data.serverCount || "17";
+          if (liveServerCount) liveServerCount.textContent = data.serverCount || "17";
+          if (ctaServerCount) ctaServerCount.textContent = (data.serverCount || 17) + "+";
           if (userCount)
             userCount.textContent =
               data.userCount?.toLocaleString() || "1,000+";
