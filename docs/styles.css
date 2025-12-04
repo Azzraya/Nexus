@@ -402,14 +402,18 @@ footer p {
 .dropdown-menu {
   position: absolute;
   top: 100%; /* No gap! Sits directly below button */
-  left: 0;
+  right: 0; /* Changed from left: 0 to right: 0 for better positioning */
   background: rgba(255, 255, 255, 0.98);
   backdrop-filter: blur(10px);
   border-radius: 12px;
-  min-width: 200px;
+  min-width: 700px; /* Increased for mega-menu */
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
   opacity: 0;
   visibility: hidden;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 3 columns */
+  gap: 20px;
+  padding: 20px;
   transform: translateY(-10px);
   transition: all 0.2s ease; /* Faster transition */
   z-index: 1000;
@@ -440,25 +444,39 @@ footer p {
   pointer-events: auto; /* Ensure clicks work */
 }
 
+/* Mega-menu category sections */
+.dropdown-category {
+  display: flex;
+  flex-direction: column;
+}
+
+.dropdown-category-header {
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: #667eea;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+  padding: 0 10px;
+  border-left: 3px solid #667eea;
+}
+
 .dropdown-menu a {
   display: block;
-  padding: 12px 20px;
+  padding: 8px 15px;
   color: #333;
   text-decoration: none;
   font-weight: 500;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   transition: all 0.2s;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-}
-
-.dropdown-menu a:last-child {
-  border-bottom: none;
+  border-radius: 6px;
+  margin-bottom: 4px;
 }
 
 .dropdown-menu a:hover {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
-  padding-left: 25px;
+  transform: translateX(5px);
 }
 
 /* Keep old nav-links class for other pages */
