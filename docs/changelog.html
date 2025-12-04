@@ -84,8 +84,80 @@
 
       <div class="content-section">
         <div class="changelog-entry">
-          <h2>Version 3.8.7 - December 4, 2025</h2>
+          <h2>Version 3.9.0 - December 4, 2025</h2>
           <span class="version-badge">Latest</span>
+          <h3>🎮 MAJOR FEATURE: XP & Leveling System</h3>
+          <ul>
+            <li>
+              <strong>Complete gamification system for server engagement:</strong>
+              <ul>
+                <li>🎯 <strong>XP Tracking</strong> - Earn XP from messages and voice activity</li>
+                <li>📈 <strong>Level Progression</strong> - Smooth leveling curve with visual progress bars</li>
+                <li>🏆 <strong>Leaderboards</strong> - Server-wide rankings with medal emojis</li>
+                <li>🎁 <strong>Level Rewards</strong> - Auto-assign roles when reaching milestones</li>
+                <li>⚙️ <strong>Full Configuration</strong> - Customize XP rates, cooldowns, messages</li>
+                <li>👑 <strong>Manual Control</strong> - Add/remove/reset XP for moderation</li>
+                <li>📊 <strong>Detailed Stats</strong> - Track messages sent, voice time, rank position</li>
+                <li>🎨 <strong>Beautiful Embeds</strong> - Rich XP cards with avatars and progress</li>
+              </ul>
+            </li>
+            <li>
+              <strong>New Command: <code>/xp</code></strong>
+              <ul>
+                <li><code>/xp rank</code> - View your or someone's XP card</li>
+                <li><code>/xp leaderboard</code> - See top ranked members</li>
+                <li><code>/xp config</code> - Configure XP system settings</li>
+                <li><code>/xp reward</code> - Set up level milestone rewards</li>
+                <li><code>/xp rewards</code> - View all configured rewards</li>
+                <li><code>/xp add/remove</code> - Manually adjust user XP</li>
+                <li><code>/xp reset</code> - Reset a user's progression</li>
+              </ul>
+            </li>
+            <li>
+              <strong>Database Additions:</strong>
+              <ul>
+                <li>📊 <code>user_xp</code> table - Track XP, levels, messages, voice time</li>
+                <li>🎁 <code>level_rewards</code> table - Store role rewards per level</li>
+                <li>⚙️ <code>xp_config</code> table - Server-specific XP settings</li>
+                <li>🏆 <code>achievements</code> table - Achievement definitions</li>
+                <li>✅ <code>user_achievements</code> table - Track unlocked achievements</li>
+                <li>🎉 <code>seasonal_events</code> table - Holiday/special events</li>
+                <li>📅 <code>server_events</code> table - Server event calendar</li>
+                <li>✋ <code>event_rsvp</code> table - RSVP tracking</li>
+                <li>🔗 <code>integrations</code> table - Platform integrations</li>
+              </ul>
+            </li>
+            <li>
+              <strong>Features:</strong>
+              <ul>
+                <li>✅ Automatic XP gain from messages (configurable cooldown)</li>
+                <li>✅ Voice channel XP tracking (per minute)</li>
+                <li>✅ Level-up announcements with custom messages</li>
+                <li>✅ Stack or replace role rewards</li>
+                <li>✅ Ignore specific channels/roles from XP</li>
+                <li>✅ Role-based XP multipliers</li>
+                <li>✅ Beautiful rank cards with progress bars</li>
+                <li>✅ Paginated leaderboards</li>
+                <li>✅ Admin controls for manual XP management</li>
+              </ul>
+            </li>
+          </ul>
+          <h3>🏗️ Infrastructure Preparation</h3>
+          <ul>
+            <li>
+              <strong>Database tables created for upcoming features:</strong>
+              <ul>
+                <li>🏆 Achievements & badges system</li>
+                <li>🎉 Seasonal events</li>
+                <li>📅 Server events calendar with RSVP</li>
+                <li>🔗 Platform integrations (Twitch, YouTube, etc.)</li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+
+        <div class="changelog-entry">
+          <h2>Version 3.8.7 - December 4, 2025</h2>
           <h3>🎨 Website Fix - Dropdown Menu (pages.css)</h3>
           <ul>
             <li>

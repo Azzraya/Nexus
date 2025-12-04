@@ -1620,6 +1620,131 @@ class Database {
         }
       }
     );
+
+    // XP & Leveling System Tables
+    this.db.run(`
+      CREATE TABLE IF NOT EXISTS user_xp (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        guild_id TEXT NOT NULL,
+        user_id TEXT NOT NULL,
+        xp INTEGER DEFAULT 0,
+        level INTEGER DEFAULT 0,
+        messages_sent INTEGER DEFAULT 0,
+        voice_minutes INTEGER DEFAULT 0,
+        last_xp_gain INTEGER DEFAULT 0,
+        UNIQUE(guild_id, user_id)
+      )
+    `);
+
+    this.db.run(`
+      CREATE TABLE IF NOT EXISTS level_rewards (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        guild_id TEXT NOT NULL,
+        level INTEGER NOT NULL,
+        role_id TEXT NOT NULL,
+        UNIQUE(guild_id, level)
+      )
+    `);
+
+    this.db.run(`
+      CREATE TABLE IF NOT EXISTS xp_config (
+        guild_id TEXT PRIMARY KEY,
+        enabled INTEGER DEFAULT 1,
+        xp_per_message INTEGER DEFAULT 15,
+        xp_per_minute_voice INTEGER DEFAULT 10,
+        xp_cooldown INTEGER DEFAULT 60000,
+        level_up_channel TEXT,
+        level_up_message TEXT DEFAULT 'GG {user}, you just advanced to level {level}!',
+        stack_rewards INTEGER DEFAULT 0,
+        ignored_channels TEXT,
+        ignored_roles TEXT,
+        multiplier_roles TEXT
+      )
+    `);
+
+    // Achievements & Badges System
+    this.db.run(`
+      CREATE TABLE IF NOT EXISTS achievements (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        achievement_id TEXT UNIQUE NOT NULL,
+        name TEXT NOT NULL,
+        description TEXT NOT NULL,
+        icon TEXT NOT NULL,
+        requirement_type TEXT NOT NULL,
+        requirement_value INTEGER NOT NULL,
+        reward_xp INTEGER DEFAULT 0,
+        reward_role TEXT,
+        rarity TEXT DEFAULT 'common',
+        seasonal INTEGER DEFAULT 0
+      )
+    `);
+
+    this.db.run(`
+      CREATE TABLE IF NOT EXISTS user_achievements (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        guild_id TEXT NOT NULL,
+        user_id TEXT NOT NULL,
+        achievement_id TEXT NOT NULL,
+        unlocked_at INTEGER NOT NULL,
+        UNIQUE(guild_id, user_id, achievement_id)
+      )
+    `);
+
+    // Seasonal Events
+    this.db.run(`
+      CREATE TABLE IF NOT EXISTS seasonal_events (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        event_id TEXT UNIQUE NOT NULL,
+        name TEXT NOT NULL,
+        description TEXT NOT NULL,
+        start_date INTEGER NOT NULL,
+        end_date INTEGER NOT NULL,
+        theme_color TEXT DEFAULT '#667eea',
+        active INTEGER DEFAULT 0
+      )
+    `);
+
+    // Server Events Calendar
+    this.db.run(`
+      CREATE TABLE IF NOT EXISTS server_events (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        guild_id TEXT NOT NULL,
+        event_name TEXT NOT NULL,
+        description TEXT,
+        start_time INTEGER NOT NULL,
+        end_time INTEGER,
+        host_id TEXT NOT NULL,
+        channel_id TEXT,
+        max_participants INTEGER,
+        created_at INTEGER NOT NULL
+      )
+    `);
+
+    this.db.run(`
+      CREATE TABLE IF NOT EXISTS event_rsvp (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        event_id INTEGER NOT NULL,
+        user_id TEXT NOT NULL,
+        status TEXT DEFAULT 'going',
+        rsvp_time INTEGER NOT NULL,
+        UNIQUE(event_id, user_id),
+        FOREIGN KEY(event_id) REFERENCES server_events(id)
+      )
+    `);
+
+    // Platform Integrations
+    this.db.run(`
+      CREATE TABLE IF NOT EXISTS integrations (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        guild_id TEXT NOT NULL,
+        platform TEXT NOT NULL,
+        channel_id TEXT NOT NULL,
+        config TEXT,
+        enabled INTEGER DEFAULT 1,
+        created_at INTEGER NOT NULL,
+        UNIQUE(guild_id, platform, channel_id)
+      )
+    `);
   }
 
   // Server config methods
@@ -4254,6 +4379,323 @@ class Database {
       this.db.run(
         `INSERT INTO network_actions (network_id, guild_id, action_type, action_data) VALUES (?, ?, ?, ?)`,
         [networkId, guildId, actionType, JSON.stringify(actionData)],
+        (err) => {
+          if (err) reject(err);
+          else resolve();
+        }
+      );
+    });
+  }
+
+  // ==================== XP & LEVELING SYSTEM ====================
+
+  // Get user XP data
+  async getUserXP(guildId, userId) {
+    return new Promise((resolve, reject) => {
+      this.db.get(
+        `SELECT * FROM user_xp WHERE guild_id = ? AND user_id = ?`,
+        [guildId, userId],
+        (err, row) => {
+          if (err) reject(err);
+          else resolve(row || null);
+        }
+      );
+    });
+  }
+
+  // Add XP to user
+  async addUserXP(guildId, userId, xpAmount, source = "message") {
+    return new Promise((resolve, reject) => {
+      this.db.run(
+        `INSERT INTO user_xp (guild_id, user_id, xp, level, messages_sent, last_xp_gain)
+         VALUES (?, ?, ?, 0, ?, ?)
+         ON CONFLICT(guild_id, user_id) DO UPDATE SET
+         xp = xp + ?,
+         messages_sent = messages_sent + ?,
+         last_xp_gain = ?`,
+        [
+          guildId,
+          userId,
+          xpAmount,
+          source === "message" ? 1 : 0,
+          Date.now(),
+          xpAmount,
+          source === "message" ? 1 : 0,
+          Date.now(),
+        ],
+        (err) => {
+          if (err) reject(err);
+          else resolve();
+        }
+      );
+    });
+  }
+
+  // Update user level
+  async updateUserLevel(guildId, userId, newLevel) {
+    return new Promise((resolve, reject) => {
+      this.db.run(
+        `UPDATE user_xp SET level = ? WHERE guild_id = ? AND user_id = ?`,
+        [newLevel, guildId, userId],
+        (err) => {
+          if (err) reject(err);
+          else resolve();
+        }
+      );
+    });
+  }
+
+  // Get XP leaderboard
+  async getXPLeaderboard(guildId, limit = 10) {
+    return new Promise((resolve, reject) => {
+      this.db.all(
+        `SELECT * FROM user_xp WHERE guild_id = ? ORDER BY xp DESC LIMIT ?`,
+        [guildId, limit],
+        (err, rows) => {
+          if (err) reject(err);
+          else resolve(rows || []);
+        }
+      );
+    });
+  }
+
+  // Get XP config
+  async getXPConfig(guildId) {
+    return new Promise((resolve, reject) => {
+      this.db.get(
+        `SELECT * FROM xp_config WHERE guild_id = ?`,
+        [guildId],
+        (err, row) => {
+          if (err) reject(err);
+          else
+            resolve(
+              row || {
+                guild_id: guildId,
+                enabled: 1,
+                xp_per_message: 15,
+                xp_cooldown: 60000,
+              }
+            );
+        }
+      );
+    });
+  }
+
+  // Update XP config
+  async updateXPConfig(guildId, config) {
+    const keys = Object.keys(config);
+    const values = keys.map((k) => config[k]);
+
+    return new Promise((resolve, reject) => {
+      this.db.run(
+        `INSERT INTO xp_config (guild_id, ${keys.join(", ")})
+         VALUES (?, ${keys.map(() => "?").join(", ")})
+         ON CONFLICT(guild_id) DO UPDATE SET ${keys
+           .map((k) => `${k} = excluded.${k}`)
+           .join(", ")}`,
+        [guildId, ...values],
+        (err) => {
+          if (err) reject(err);
+          else resolve();
+        }
+      );
+    });
+  }
+
+  // Level rewards
+  async addLevelReward(guildId, level, roleId) {
+    return new Promise((resolve, reject) => {
+      this.db.run(
+        `INSERT OR REPLACE INTO level_rewards (guild_id, level, role_id) VALUES (?, ?, ?)`,
+        [guildId, level, roleId],
+        (err) => {
+          if (err) reject(err);
+          else resolve();
+        }
+      );
+    });
+  }
+
+  async getLevelRewards(guildId) {
+    return new Promise((resolve, reject) => {
+      this.db.all(
+        `SELECT * FROM level_rewards WHERE guild_id = ? ORDER BY level ASC`,
+        [guildId],
+        (err, rows) => {
+          if (err) reject(err);
+          else resolve(rows || []);
+        }
+      );
+    });
+  }
+
+  async removeLevelReward(guildId, level) {
+    return new Promise((resolve, reject) => {
+      this.db.run(
+        `DELETE FROM level_rewards WHERE guild_id = ? AND level = ?`,
+        [guildId, level],
+        (err) => {
+          if (err) reject(err);
+          else resolve();
+        }
+      );
+    });
+  }
+
+  // ==================== ACHIEVEMENTS & BADGES ====================
+
+  async unlockAchievement(guildId, userId, achievementId) {
+    return new Promise((resolve, reject) => {
+      this.db.run(
+        `INSERT OR IGNORE INTO user_achievements (guild_id, user_id, achievement_id, unlocked_at)
+         VALUES (?, ?, ?, ?)`,
+        [guildId, userId, achievementId, Date.now()],
+        (err) => {
+          if (err) reject(err);
+          else resolve();
+        }
+      );
+    });
+  }
+
+  async getUserAchievements(guildId, userId) {
+    return new Promise((resolve, reject) => {
+      this.db.all(
+        `SELECT a.*, ua.unlocked_at 
+         FROM user_achievements ua
+         JOIN achievements a ON ua.achievement_id = a.achievement_id
+         WHERE ua.guild_id = ? AND ua.user_id = ?
+         ORDER BY ua.unlocked_at DESC`,
+        [guildId, userId],
+        (err, rows) => {
+          if (err) reject(err);
+          else resolve(rows || []);
+        }
+      );
+    });
+  }
+
+  async getAllAchievements() {
+    return new Promise((resolve, reject) => {
+      this.db.all(
+        `SELECT * FROM achievements ORDER BY rarity, name`,
+        [],
+        (err, rows) => {
+          if (err) reject(err);
+          else resolve(rows || []);
+        }
+      );
+    });
+  }
+
+  // ==================== SERVER EVENTS ====================
+
+  async createServerEvent(guildId, eventData) {
+    return new Promise((resolve, reject) => {
+      this.db.run(
+        `INSERT INTO server_events (guild_id, event_name, description, start_time, end_time, host_id, channel_id, max_participants, created_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          guildId,
+          eventData.name,
+          eventData.description,
+          eventData.startTime,
+          eventData.endTime,
+          eventData.hostId,
+          eventData.channelId,
+          eventData.maxParticipants,
+          Date.now(),
+        ],
+        function (err) {
+          if (err) reject(err);
+          else resolve(this.lastID);
+        }
+      );
+    });
+  }
+
+  async getServerEvents(guildId, upcoming = true) {
+    return new Promise((resolve, reject) => {
+      const query = upcoming
+        ? `SELECT * FROM server_events WHERE guild_id = ? AND start_time > ? ORDER BY start_time ASC`
+        : `SELECT * FROM server_events WHERE guild_id = ? ORDER BY start_time DESC`;
+      const params = upcoming ? [guildId, Date.now()] : [guildId];
+
+      this.db.all(query, params, (err, rows) => {
+        if (err) reject(err);
+        else resolve(rows || []);
+      });
+    });
+  }
+
+  async rsvpToEvent(eventId, userId, status = "going") {
+    return new Promise((resolve, reject) => {
+      this.db.run(
+        `INSERT OR REPLACE INTO event_rsvp (event_id, user_id, status, rsvp_time) VALUES (?, ?, ?, ?)`,
+        [eventId, userId, status, Date.now()],
+        (err) => {
+          if (err) reject(err);
+          else resolve();
+        }
+      );
+    });
+  }
+
+  async getEventRSVPs(eventId) {
+    return new Promise((resolve, reject) => {
+      this.db.all(
+        `SELECT * FROM event_rsvp WHERE event_id = ?`,
+        [eventId],
+        (err, rows) => {
+          if (err) reject(err);
+          else resolve(rows || []);
+        }
+      );
+    });
+  }
+
+  // ==================== PLATFORM INTEGRATIONS ====================
+
+  async addIntegration(guildId, platform, channelId, config) {
+    return new Promise((resolve, reject) => {
+      this.db.run(
+        `INSERT OR REPLACE INTO integrations (guild_id, platform, channel_id, config, enabled, created_at)
+         VALUES (?, ?, ?, ?, 1, ?)`,
+        [guildId, platform, channelId, JSON.stringify(config), Date.now()],
+        (err) => {
+          if (err) reject(err);
+          else resolve();
+        }
+      );
+    });
+  }
+
+  async getIntegrations(guildId, platform = null) {
+    return new Promise((resolve, reject) => {
+      const query = platform
+        ? `SELECT * FROM integrations WHERE guild_id = ? AND platform = ? AND enabled = 1`
+        : `SELECT * FROM integrations WHERE guild_id = ? AND enabled = 1`;
+      const params = platform ? [guildId, platform] : [guildId];
+
+      this.db.all(query, params, (err, rows) => {
+        if (err) reject(err);
+        else {
+          // Parse config JSON
+          const integrations = (rows || []).map((row) => ({
+            ...row,
+            config: row.config ? JSON.parse(row.config) : {},
+          }));
+          resolve(integrations);
+        }
+      });
+    });
+  }
+
+  async removeIntegration(guildId, platform, channelId) {
+    return new Promise((resolve, reject) => {
+      this.db.run(
+        `DELETE FROM integrations WHERE guild_id = ? AND platform = ? AND channel_id = ?`,
+        [guildId, platform, channelId],
         (err) => {
           if (err) reject(err);
           else resolve();

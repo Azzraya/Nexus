@@ -311,5 +311,14 @@ module.exports = {
         guild: message.guild,
       });
     }
+
+    // Award XP for message
+    if (client.xpSystem) {
+      try {
+        await client.xpSystem.awardMessageXP(message);
+      } catch (error) {
+        console.error('[XP] Failed to award XP:', error);
+      }
+    }
   },
 };

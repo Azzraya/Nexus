@@ -106,6 +106,10 @@ client.scheduledActions = new ScheduledActions(client);
 const VoiceMonitoring = require("./utils/voiceMonitoring");
 client.voiceMonitoring = new VoiceMonitoring(client);
 
+// XP & Leveling System (EXCEEDS WICK - gamification & engagement)
+const XPSystem = require("./utils/xpSystem");
+client.xpSystem = new XPSystem(client);
+
 // Webhook Events System (EXCEEDS WICK - real-time integrations)
 const WebhookEvents = require("./utils/webhookEvents");
 client.webhookEvents = new WebhookEvents(client);
