@@ -431,10 +431,7 @@ const ErrorMessages = require("../utils/errorMessages");
     if (subcommand === "add") {
       // Owner only
       if (!Owner.isOwner(interaction.user.id)) {
-        return interaction.reply({
-          ErrorMessages.ownerOnly(),
-          flags: MessageFlags.Ephemeral,
-        });
+        return interaction.reply(ErrorMessages.ownerOnly());
       }
 
       const name = interaction.options.getString("name");
@@ -497,10 +494,7 @@ const ErrorMessages = require("../utils/errorMessages");
     if (subcommand === "remove") {
       // Owner only
       if (!Owner.isOwner(interaction.user.id)) {
-        return interaction.reply({
-          ErrorMessages.ownerOnly(),
-          flags: MessageFlags.Ephemeral,
-        });
+        return interaction.reply(ErrorMessages.ownerOnly());
       }
 
       const name = interaction.options.getString("name");
