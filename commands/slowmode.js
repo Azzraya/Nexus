@@ -76,10 +76,7 @@ module.exports = {
           ],
         });
       } catch (error) {
-        await interaction.reply({
-          ErrorMessages.commandFailed(error.message),
-          flags: MessageFlags.Ephemeral,
-        });
+        await interaction.reply(ErrorMessages.commandFailed(error.message));
       }
     } else if (subcommand === "remove") {
       try {
@@ -101,10 +98,7 @@ module.exports = {
           flags: MessageFlags.Ephemeral,
         });
       } catch (error) {
-        await interaction.reply({
-          ErrorMessages.commandFailed(error.message),
-          flags: MessageFlags.Ephemeral,
-        });
+        await interaction.reply(ErrorMessages.commandFailed(error.message));
       }
     }
   },

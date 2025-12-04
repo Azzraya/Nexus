@@ -119,9 +119,7 @@ module.exports = {
 
         await interaction.editReply({ embeds: [embed] });
       } catch (error) {
-        await interaction.editReply({
-          ErrorMessages.commandFailed(error.message),
-        });
+        await interaction.editReply(ErrorMessages.commandFailed(error.message));
       }
     } else if (subcommand === "list") {
       await interaction.deferReply({ ephemeral: true });

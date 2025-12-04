@@ -86,10 +86,7 @@ module.exports = {
           ],
         });
       } catch (error) {
-        await interaction.reply({
-          ErrorMessages.commandFailed(error.message),
-          flags: MessageFlags.Ephemeral,
-        });
+        await interaction.reply(ErrorMessages.commandFailed(error.message));
       }
     } else if (subcommand === "remove") {
       const user = interaction.options.getUser("user");
@@ -109,10 +106,7 @@ module.exports = {
           ],
         });
       } catch (error) {
-        await interaction.reply({
-          ErrorMessages.commandFailed(error.message),
-          flags: MessageFlags.Ephemeral,
-        });
+        await interaction.reply(ErrorMessages.commandFailed(error.message));
       }
     } else if (subcommand === "all") {
       const role = interaction.options.getRole("role");

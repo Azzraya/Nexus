@@ -151,10 +151,7 @@ module.exports = {
           flags: MessageFlags.Ephemeral,
         });
       } catch (error) {
-        await interaction.reply({
-          ErrorMessages.commandFailed(error.message),
-          flags: MessageFlags.Ephemeral,
-        });
+        await interaction.reply(ErrorMessages.commandFailed(error.message));
       }
     } else if (subcommand === "preview") {
       if (!config?.welcome_channel || !config?.welcome_message) {

@@ -93,10 +93,7 @@ module.exports = {
 
       await interaction.reply({ embeds: [embed] });
     } catch (error) {
-      await interaction.reply({
-        ErrorMessages.commandFailed(error.message),
-        flags: MessageFlags.Ephemeral,
-      });
+      await interaction.reply(ErrorMessages.commandFailed(error.message));
     }
   },
 };

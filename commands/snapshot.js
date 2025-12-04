@@ -122,9 +122,7 @@ const ErrorMessages = require("../utils/errorMessages");
 
         return interaction.editReply({ embeds: [embed] });
       } catch (error) {
-        return interaction.editReply({
-          ErrorMessages.commandFailed(error.message),
-        });
+        return interaction.editReply(ErrorMessages.commandFailed(error.message));
       }
     }
 
@@ -175,9 +173,7 @@ const ErrorMessages = require("../utils/errorMessages");
 
         return interaction.editReply({ embeds: [embed] });
       } catch (error) {
-        return interaction.editReply({
-          ErrorMessages.commandFailed(error.message),
-        });
+        return interaction.editReply(ErrorMessages.commandFailed(error.message));
       }
     }
 
