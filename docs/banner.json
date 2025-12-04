@@ -1,7 +1,7 @@
 {
   "enabled": true,
   "emoji": "🎉",
-  "text": "NEW: Complete API with Interactive Playground + 34 Endpoints!",
+  "text": "testing",
   "buttonText": "Check it out",
   "buttonLink": "api.html",
   "dismissible": true,
@@ -10,4 +10,3 @@
     "to": "#764ba2"
   }
 }
-
