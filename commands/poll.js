@@ -149,10 +149,11 @@ module.exports = {
 
     await this.storePoll(pollData);
 
-    // Schedule poll end
+    // Schedule poll end - capture client from interaction
     const self = this;
+    const botClient = interaction.client;
     setTimeout(() => {
-      self.endPoll(message.id, interaction.guild.id, client).catch(err => {
+      self.endPoll(message.id, interaction.guild.id, botClient).catch(err => {
         console.error('[Poll] Error in scheduled poll end:', err);
       });
     }, duration * 60 * 1000);
