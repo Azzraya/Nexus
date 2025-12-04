@@ -84,8 +84,27 @@
 
       <div class="content-section">
         <div class="changelog-entry">
-          <h2>Version 3.5.3 - December 4, 2025</h2>
+          <h2>Version 3.5.4 - December 4, 2025</h2>
           <span class="version-badge">Latest</span>
+          <h3>🔧 Critical Fix - Database Migration</h3>
+          <ul>
+            <li>
+              <strong>Fixed scheduled_actions table conflict:</strong> Database had duplicate table definitions causing "no such column: status" error
+            </li>
+            <li>
+              <strong>Added automatic migration:</strong> Bot now automatically updates old table schema to new enhanced version
+            </li>
+            <li>
+              <strong>Backward compatible:</strong> Existing scheduled messages are preserved
+            </li>
+            <li>
+              <strong>Clean startup:</strong> No more SQL errors on bot start
+            </li>
+          </ul>
+        </div>
+
+        <div class="changelog-entry">
+          <h2>Version 3.5.3 - December 4, 2025</h2>
           <h3>✅ Enhancement - Chart Generation Alternative</h3>
           <ul>
             <li>

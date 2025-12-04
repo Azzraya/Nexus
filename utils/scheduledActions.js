@@ -10,19 +10,24 @@ class ScheduledActions {
   }
 
   async start() {
-    // Load all scheduled actions and start them
-    const actions = await db.getAllScheduledActions();
-    
-    for (const action of actions) {
-      if (action.status === 'active') {
-        await this.scheduleAction(action);
+    try {
+      // Load all scheduled actions and start them
+      const actions = await db.getAllScheduledActions();
+      
+      for (const action of actions) {
+        if (action.status === 'active') {
+          await this.scheduleAction(action);
+        }
       }
-    }
 
-    // Check for one-time actions every minute
-    this.checkInterval = setInterval(() => this.checkOneTimeActions(), 60 * 1000);
-    
-    logger.info(`[ScheduledActions] Started ${actions.length} scheduled actions`);
+      // Check for one-time actions every minute
+      this.checkInterval = setInterval(() => this.checkOneTimeActions(), 60 * 1000);
+      
+      logger.info(`[ScheduledActions] Started ${actions.length} scheduled actions`);
+    } catch (error) {
+      // If table doesn't exist yet, it's fine - first startup
+      logger.debug('[ScheduledActions] No scheduled actions table yet (first startup)');
+    }
   }
 
   async scheduleAction(action) {

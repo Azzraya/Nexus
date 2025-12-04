@@ -710,19 +710,7 @@ class Database {
 
     // API keys table removed - now using Discord user-bound api_keys at line 706
 
-    // Scheduled actions
-    this.db.run(`
-            CREATE TABLE IF NOT EXISTS scheduled_actions (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                guild_id TEXT,
-                user_id TEXT,
-                action_type TEXT,
-                reason TEXT,
-                execute_at INTEGER,
-                created_by TEXT,
-                executed INTEGER DEFAULT 0
-            )
-        `);
+    // Scheduled actions - OLD TABLE REMOVED (now using enhanced version at line 390)
 
     // Polls
     this.db.run(`
@@ -1418,6 +1406,48 @@ class Database {
   }
 
   runMigrations() {
+    // Migration: Fix scheduled_actions table - check if old schema exists
+    this.db.all(`PRAGMA table_info(scheduled_actions)`, [], (err, columns) => {
+      if (err) return;
+      
+      const hasStatusColumn = columns && columns.some(col => col.name === 'status');
+      const hasScheduleType = columns && columns.some(col => col.name === 'schedule_type');
+      
+      // If table exists but doesn't have new columns, drop and recreate
+      if (columns && columns.length > 0 && (!hasStatusColumn || !hasScheduleType)) {
+        logger.info('[Migration] Updating scheduled_actions table schema...');
+        
+        this.db.run(`DROP TABLE IF EXISTS scheduled_actions`, (err) => {
+          if (err) {
+            logger.error('Migration error (drop scheduled_actions):', err);
+          } else {
+            // Recreate with new schema
+            this.db.run(`
+              CREATE TABLE IF NOT EXISTS scheduled_actions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                guild_id TEXT,
+                action_type TEXT,
+                action_data TEXT,
+                schedule_type TEXT,
+                cron_expression TEXT,
+                execute_at INTEGER,
+                created_by TEXT,
+                created_at INTEGER DEFAULT (strftime('%s', 'now') * 1000),
+                status TEXT DEFAULT 'active',
+                last_execution INTEGER
+              )
+            `, (err) => {
+              if (err) {
+                logger.error('Migration error (recreate scheduled_actions):', err);
+              } else {
+                logger.success('[Migration] Scheduled actions table updated successfully');
+              }
+            });
+          }
+        });
+      }
+    });
+
     // Migration: Add threat_type and action_taken columns to security_logs if they don't exist
     this.db.run(
       `ALTER TABLE security_logs ADD COLUMN threat_type TEXT`,
