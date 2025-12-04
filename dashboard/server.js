@@ -1025,6 +1025,31 @@ class DashboardServer {
     // Bot Statistics Endpoint
     this.app.get("/api/v1/stats", async (req, res) => {
       try {
+        // Get security stats from database
+        const raidsBlocked = await new Promise((resolve) => {
+          db.db.get(
+            "SELECT COUNT(*) as count FROM anti_raid_logs",
+            [],
+            (err, row) => resolve(row?.count || 0)
+          );
+        });
+
+        const nukesBlocked = await new Promise((resolve) => {
+          db.db.get(
+            "SELECT COUNT(*) as count FROM anti_nuke_logs WHERE action_taken = 1",
+            [],
+            (err, row) => resolve(row?.count || 0)
+          );
+        });
+
+        const threatsDetected = await new Promise((resolve) => {
+          db.db.get(
+            "SELECT COUNT(*) as count FROM security_logs WHERE threat_score >= 60",
+            [],
+            (err, row) => resolve(row?.count || 0)
+          );
+        });
+
         const stats = {
           serverCount: this.client.guilds.cache.size,
           userCount: this.client.guilds.cache.reduce(
@@ -1036,6 +1061,10 @@ class DashboardServer {
           version: require("../package.json").version,
           ping: this.client.ws.ping,
           shardCount: this.client.shard ? this.client.shard.count : 1,
+          // Security stats (EXCEEDS WICK - they don't show these)
+          raidsBlocked: raidsBlocked,
+          nukesBlocked: nukesBlocked,
+          threatsDetected: threatsDetected,
           features: {
             antiRaid: 4,
             antiNuke: true,

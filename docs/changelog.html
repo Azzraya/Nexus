@@ -84,8 +84,31 @@
 
       <div class="content-section">
         <div class="changelog-entry">
-          <h2>Version 3.7.0 - December 4, 2025</h2>
+          <h2>Version 3.7.1 - December 4, 2025</h2>
           <span class="version-badge">Latest</span>
+          <h3>✨ Enhancement - Live Stats Widget Expansion</h3>
+          <ul>
+            <li>
+              <strong>3 new security metrics added:</strong> Raids Stopped, Nukes Blocked, Threats Detected
+            </li>
+            <li>
+              <strong>Real-time database queries:</strong> Stats pulled from anti_raid_logs, anti_nuke_logs, and security_logs
+            </li>
+            <li>
+              <strong>Color-coded display:</strong> Red (raids), Orange (nukes), Purple (threats) for visual impact
+            </li>
+            <li>
+              <strong>Updated API endpoint:</strong> GET /api/v1/stats now includes raidsBlocked, nukesBlocked, threatsDetected
+            </li>
+            <li>
+              <strong>Homepage widget:</strong> Now shows 6 metrics total (servers, users, raids, nukes, threats, status)
+            </li>
+          </ul>
+          <p><strong>EXCEEDS WICK:</strong> Live security metrics visible to everyone - shows bot's real impact!</p>
+        </div>
+
+        <div class="changelog-entry">
+          <h2>Version 3.7.0 - December 4, 2025</h2>
           <h3>🎉 MAJOR FEATURE UPDATE: 9 New Additions</h3>
           <p>
             This update adds significant improvements across the website, API, and bot with features focused
