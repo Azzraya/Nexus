@@ -9,6 +9,7 @@ const {
 } = require("discord.js");
 const AutoRecovery = require("../utils/autoRecovery");
 const db = require("../utils/database");
+const ErrorMessages = require("../utils/errorMessages");
 
 module.exports = {
   data: new SlashCommandBuilder()

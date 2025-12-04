@@ -3,6 +3,7 @@ const {
   PermissionFlagsBits,
   EmbedBuilder,
 } = require("discord.js");
+const ErrorMessages = require("../utils/errorMessages");
 
 module.exports = {
   data: new SlashCommandBuilder()

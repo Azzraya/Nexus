@@ -1,5 +1,6 @@
 const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
 const Leveling = require("../utils/leveling");
+const ErrorMessages = require("../utils/errorMessages");
 
 module.exports = {
   data: new SlashCommandBuilder()

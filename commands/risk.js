@@ -4,6 +4,7 @@ const {
   PermissionFlagsBits,
 } = require("discord.js");
 const memberIntelligence = require("../utils/memberIntelligence");
+const ErrorMessages = require("../utils/errorMessages");
 
 module.exports = {
   data: new SlashCommandBuilder()

@@ -8,6 +8,7 @@ const DataPrivacy = require("../utils/dataPrivacy");
 const logger = require("../utils/logger");
 const fs = require("fs");
 const path = require("path");
+const ErrorMessages = require("../utils/errorMessages");
 
 module.exports = {
   data: new SlashCommandBuilder()

@@ -96,6 +96,7 @@ module.exports = {
 
       // Threat intelligence
       const ThreatIntelligence = require("../utils/threatIntelligence");
+const ErrorMessages = require("../utils/errorMessages");
       
       // Get recent threats from this server
       const recentThreats = await new Promise((resolve, reject) => {

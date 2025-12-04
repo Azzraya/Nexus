@@ -35,6 +35,7 @@ module.exports = {
       interaction.options.getString("reason") || "No reason provided";
 
     const constants = require("../utils/constants");
+const ErrorMessages = require("../utils/errorMessages");
     const duration = ms(durationStr);
     if (
       !duration ||

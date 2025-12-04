@@ -4,6 +4,7 @@ const {
   MessageFlags,
 } = require("discord.js");
 const db = require("../utils/database");
+const ErrorMessages = require("../utils/errorMessages");
 
 module.exports = {
   data: new SlashCommandBuilder()

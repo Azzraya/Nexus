@@ -6,6 +6,7 @@ const {
 } = require("discord.js");
 const SmartRecommendations = require("../utils/smartRecommendations");
 const db = require("../utils/database");
+const ErrorMessages = require("../utils/errorMessages");
 
 module.exports = {
   data: new SlashCommandBuilder()

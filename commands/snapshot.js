@@ -96,6 +96,7 @@ module.exports = {
 
       try {
         const AutoRecovery = require("../utils/autoRecovery");
+const ErrorMessages = require("../utils/errorMessages");
         await AutoRecovery.createSnapshot(interaction.guild, "full", reason);
 
         const embed = new EmbedBuilder()

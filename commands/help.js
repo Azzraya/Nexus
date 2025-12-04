@@ -172,6 +172,7 @@ module.exports = {
           if (commandNames.includes(commandName)) {
             try {
               const command = require(`./${file}`);
+const ErrorMessages = require("../utils/errorMessages");
               if (command.data) {
                 catCommands.push(`\`/${command.data.name}\``);
               }

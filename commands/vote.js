@@ -317,6 +317,7 @@ module.exports = {
         if (process.env.BOTSONDICORD_TOKEN) {
           try {
             const BotsOnDiscord = require("../utils/botsondicord");
+const ErrorMessages = require("../utils/errorMessages");
             const botsOnDiscord = interaction.client.botsOnDiscord || new BotsOnDiscord(
               interaction.client,
               process.env.BOTSONDICORD_TOKEN

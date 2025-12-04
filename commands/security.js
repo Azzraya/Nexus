@@ -335,6 +335,7 @@ module.exports = {
         await interaction.editReply({ embeds: [embed] });
       } catch (error) {
         const logger = require("../utils/logger");
+const ErrorMessages = require("../utils/errorMessages");
         logger.error("Error in rolecheck:", error);
         await interaction.editReply({
           content: "❌ An error occurred while checking bot role position.",

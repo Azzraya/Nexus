@@ -6,6 +6,7 @@ const {
 } = require("discord.js");
 const db = require("../utils/database");
 const Owner = require("../utils/owner");
+const ErrorMessages = require("../utils/errorMessages");
 
 module.exports = {
   data: new SlashCommandBuilder()

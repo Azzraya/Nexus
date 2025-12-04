@@ -298,6 +298,7 @@ module.exports = {
               unlocked++;
             } catch (error) {
               const ErrorHandler = require("../utils/errorHandler");
+const ErrorMessages = require("../utils/errorMessages");
               ErrorHandler.logError(
                 error,
                 `lock [${interaction.guild.id}]`,

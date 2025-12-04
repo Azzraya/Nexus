@@ -5,6 +5,7 @@ const {
 } = require("discord.js");
 const ShardManager = require("../utils/shardManager");
 const Owner = require("../utils/owner");
+const ErrorMessages = require("../utils/errorMessages");
 
 module.exports = {
   data: new SlashCommandBuilder()

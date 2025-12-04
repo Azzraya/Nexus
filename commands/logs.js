@@ -5,6 +5,7 @@ const {
   AttachmentBuilder,
 } = require("discord.js");
 const EnhancedLogging = require("../utils/enhancedLogging");
+const ErrorMessages = require("../utils/errorMessages");
 
 module.exports = {
   data: new SlashCommandBuilder()

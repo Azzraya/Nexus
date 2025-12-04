@@ -382,6 +382,7 @@ module.exports = {
 
       // Get health score
       const serverHealth = require("../utils/serverHealth");
+const ErrorMessages = require("../utils/errorMessages");
       const health = await serverHealth.calculateHealth(guildId);
 
       // Calculate days protected
