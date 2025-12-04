@@ -167,7 +167,7 @@
         </div>
         <div class="stat-comparison">
           <span class="stat-label">Response Time</span>
-          <span class="stat-value better" id="nexus-response">~50ms</span>
+          <span class="stat-value better" id="nexus-response">Sub-200ms</span>
         </div>
         <div class="stat-comparison">
           <span class="stat-label">Commands</span>
@@ -193,7 +193,7 @@
         </div>
         <div class="stat-comparison">
           <span class="stat-label">Response Time</span>
-          <span class="stat-value worse">~200ms</span>
+          <span class="stat-value worse">Unknown</span>
         </div>
         <div class="stat-comparison">
           <span class="stat-label">Commands</span>
@@ -309,7 +309,7 @@
     <!-- CTA -->
     <div style="text-align: center; margin: 80px 0;">
       <h2>Why Pay for Less?</h2>
-      <p style="font-size: 1.2rem; margin: 20px 0;">Get more features, better performance, and zero cost.</p>
+      <p style="font-size: 1.2rem; margin: 20px 0;">Get more features, verifiable performance, and zero cost.</p>
       <a href="setup-wizard.html" class="btn btn-primary" style="font-size: 1.3rem; padding: 20px 50px;">
         Switch to Nexus Now →
       </a>
@@ -417,7 +417,7 @@
         const data = await response.json();
         
         document.getElementById('nexus-servers').textContent = data.serverCount || 18;
-        document.getElementById('nexus-response').textContent = `~${data.avgResponseTime || 50}ms`;
+        document.getElementById('nexus-response').textContent = data.avgResponseTime ? `${data.avgResponseTime}ms` : 'Sub-200ms';
       } catch (error) {
         console.error('Failed to fetch live stats');
       }
