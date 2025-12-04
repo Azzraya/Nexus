@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Embed Generator - Nexus Bot</title>
+  <link rel="icon" type="image/webp" href="https://cdn.discordapp.com/avatars/1444739230679957646/32f2d77d44c2f3989fecd858be53f396.webp?size=256">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="pages.css">
+  <style>
+    .generator-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      max-width: 1400px;
+      margin: 40px auto;
+    }
+
+    .control-panel {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 30px;
+      border-radius: 15px;
+    }
+
+    .preview-panel {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 30px;
+      border-radius: 15px;
+      position: sticky;
+      top: 100px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 10px;
+      background: rgba(0, 0, 0, 0.3);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      color: #fff;
+    }
+
+    .embed-preview {
+      background: #2f3136;
+      border-left: 4px solid #667eea;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+
+    .embed-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .embed-description {
+      opacity: 0.9;
+      margin-bottom: 15px;
+    }
+
+    .embed-field {
+      margin: 10px 0;
+      padding: 10px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 5px;
+    }
+
+    .embed-field-name {
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+
+    .code-box {
+      background: #1e1e1e;
+      padding: 20px;
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.85rem;
+      overflow-x: auto;
+      margin-top: 20px;
+    }
+
+    .btn {
+      background: #667eea;
+      color: white;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    .btn:hover {
+      background: #5568d3;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <a href="index.html" class="nav-brand">NEXUS</a>
+      <div class="nav-right">
+        <a href="index.html" class="btn-nav">← Back</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="page-header">
+    <div class="container">
+      <h1>✨ Embed Generator</h1>
+      <p>Create Discord embed code for announcements & notifications</p>
+    </div>
+  </div>
+
+  <div class="content-section">
+    <div class="generator-grid">
+      <div class="control-panel">
+        <h2>⚙️ Customize Embed</h2>
+
+        <div class="form-group">
+          <label>Title</label>
+          <input type="text" id="embedTitle" placeholder="Your Title Here" value="Server Update">
+        </div>
+
+        <div class="form-group">
+          <label>Description</label>
+          <textarea id="embedDescription" rows="4" placeholder="Your description...">We've upgraded our security with Nexus!</textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Color (Hex)</label>
+          <input type="text" id="embedColor" value="#667eea">
+        </div>
+
+        <div class="form-group">
+          <label>Thumbnail URL (optional)</label>
+          <input type="text" id="embedThumbnail" placeholder="https://...">
+        </div>
+
+        <div class="form-group">
+          <label>Add Fields</label>
+          <div id="fieldsContainer"></div>
+          <button class="btn" onclick="addField()" style="margin-top: 10px; width: auto; padding: 8px 16px;">➕ Add Field</button>
+        </div>
+
+        <div class="form-group">
+          <label>Footer Text</label>
+          <input type="text" id="embedFooter" value="Powered by Nexus">
+        </div>
+
+        <button class="btn" onclick="copyEmbedCode()">📋 Copy Discord.js Code</button>
+        <button class="btn" style="background: #5865f2;" onclick="copyWebhookCode()">🪝 Copy Webhook Code</button>
+      </div>
+
+      <div class="preview-panel">
+        <h2>👁️ Preview</h2>
+        <div class="embed-preview" id="embedPreview">
+          <!-- Preview will be rendered here -->
+        </div>
+
+        <h3 style="margin-top: 30px;">📝 Code</h3>
+        <div class="code-box" id="codeBox">
+          <!-- Code will appear here -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let fields = [];
+
+    function addField() {
+      const id = Date.now();
+      fields.push({ id, name: 'Field Name', value: 'Field Value', inline: false });
+      renderFields();
+      updatePreview();
+    }
+
+    function removeField(id) {
+      fields = fields.filter(f => f.id !== id);
+      renderFields();
+      updatePreview();
+    }
+
+    function renderFields() {
+      const container = document.getElementById('fieldsContainer');
+      container.innerHTML = fields.map(f => `
+        <div style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 5px; margin: 10px 0;">
+          <input type="text" placeholder="Name" value="${f.name}" onchange="updateField(${f.id}, 'name', this.value)" style="margin-bottom: 5px;">
+          <input type="text" placeholder="Value" value="${f.value}" onchange="updateField(${f.id}, 'value', this.value)" style="margin-bottom: 5px;">
+          <label><input type="checkbox" ${f.inline ? 'checked' : ''} onchange="updateField(${f.id}, 'inline', this.checked)"> Inline</label>
+          <button onclick="removeField(${f.id})" style="background: #ff4444; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; float: right;">❌</button>
+        </div>
+      `).join('');
+    }
+
+    function updateField(id, key, value) {
+      const field = fields.find(f => f.id === id);
+      if (field) {
+        field[key] = value;
+        updatePreview();
+      }
+    }
+
+    function updatePreview() {
+      const title = document.getElementById('embedTitle').value;
+      const description = document.getElementById('embedDescription').value;
+      const color = document.getElementById('embedColor').value;
+      const thumbnail = document.getElementById('embedThumbnail').value;
+      const footer = document.getElementById('embedFooter').value;
+
+      let preview = `
+        <div class="embed-title" style="color: ${color};">${title}</div>
+        <div class="embed-description">${description}</div>
+      `;
+
+      fields.forEach(f => {
+        preview += `
+          <div class="embed-field" style="${f.inline ? 'display: inline-block; width: 48%; margin-right: 2%;' : ''}">
+            <div class="embed-field-name">${f.name}</div>
+            <div>${f.value}</div>
+          </div>
+        `;
+      });
+
+      if (footer) {
+        preview += `<div style="opacity: 0.6; font-size: 0.85rem; margin-top: 15px;">${footer}</div>`;
+      }
+
+      document.getElementById('embedPreview').innerHTML = preview;
+      document.getElementById('embedPreview').style.borderLeftColor = color;
+
+      // Generate code
+      generateCode();
+    }
+
+    function generateCode() {
+      const title = document.getElementById('embedTitle').value;
+      const description = document.getElementById('embedDescription').value;
+      const color = document.getElementById('embedColor').value.replace('#', '0x');
+      const thumbnail = document.getElementById('embedThumbnail').value;
+      const footer = document.getElementById('embedFooter').value;
+
+      const code = `const { EmbedBuilder } = require('discord.js');
+
+const embed = new EmbedBuilder()
+  .setTitle('${title}')
+  .setDescription('${description}')
+  .setColor(${color})${thumbnail ? `\n  .setThumbnail('${thumbnail}')` : ''}${
+  fields.length > 0 ? '\n  .addFields(\n' + fields.map(f => 
+    `    { name: '${f.name}', value: '${f.value}', inline: ${f.inline} }`
+  ).join(',\n') + '\n  )' : ''
+}${footer ? `\n  .setFooter({ text: '${footer}' })` : ''}
+  .setTimestamp();
+
+// Send embed
+channel.send({ embeds: [embed] });`;
+
+      document.getElementById('codeBox').textContent = code;
+    }
+
+    function copyEmbedCode() {
+      const code = document.getElementById('codeBox').textContent;
+      navigator.clipboard.writeText(code).then(() => {
+        alert('✅ Code copied to clipboard!');
+      });
+    }
+
+    function copyWebhookCode() {
+      const title = document.getElementById('embedTitle').value;
+      const description = document.getElementById('embedDescription').value;
+      const color = parseInt(document.getElementById('embedColor').value.replace('#', ''), 16);
+
+      const webhookPayload = {
+        embeds: [{
+          title: title,
+          description: description,
+          color: color,
+          fields: fields.map(f => ({ name: f.name, value: f.value, inline: f.inline })),
+          footer: { text: document.getElementById('embedFooter').value },
+          timestamp: new Date().toISOString()
+        }]
+      };
+
+      const code = `// Send to Discord Webhook
+fetch('YOUR_WEBHOOK_URL', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify(${JSON.stringify(webhookPayload, null, 2)})
+});`;
+
+      navigator.clipboard.writeText(code).then(() => {
+        alert('✅ Webhook code copied!');
+      });
+    }
+
+    // Event listeners
+    document.getElementById('embedTitle').addEventListener('input', updatePreview);
+    document.getElementById('embedDescription').addEventListener('input', updatePreview);
+    document.getElementById('embedColor').addEventListener('input', updatePreview);
+    document.getElementById('embedThumbnail').addEventListener('input', updatePreview);
+    document.getElementById('embedFooter').addEventListener('input', updatePreview);
+
+    // Initial render
+    updatePreview();
+  </script>
+</body>
+</html>
+
