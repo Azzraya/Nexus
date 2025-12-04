@@ -462,6 +462,28 @@ class DashboardServer {
     });
 
     // Create incident (admin only)
+    // Get all incidents
+    this.app.get("/api/admin/incidents", async (req, res) => {
+      try {
+        const incidentsPath = path.join(
+          __dirname,
+          "..",
+          "docs",
+          "incidents.json"
+        );
+
+        if (!fs.existsSync(incidentsPath)) {
+          return res.json({ incidents: [], maintenance: [] });
+        }
+
+        const data = JSON.parse(fs.readFileSync(incidentsPath, "utf8"));
+        res.json(data);
+      } catch (error) {
+        res.status(500).json({ error: error.message });
+      }
+    });
+
+    // Create new incident
     this.app.post("/api/admin/incidents", async (req, res) => {
       try {
         const authHeader = req.headers.authorization;
@@ -482,15 +504,138 @@ class DashboardServer {
           return res.status(401).json({ error: "Token expired" });
         }
 
+        const incidentsPath = path.join(
+          __dirname,
+          "..",
+          "docs",
+          "incidents.json"
+        );
+
+        // Read existing incidents
+        let data = { incidents: [], maintenance: [] };
+        if (fs.existsSync(incidentsPath)) {
+          data = JSON.parse(fs.readFileSync(incidentsPath, "utf8"));
+        }
+
         const incident = {
-          id: Date.now(),
+          id: req.body.id || Date.now(),
           ...req.body,
         };
 
-        // In a real app, you'd save this to a database
-        // For now, we'll just return success and let the admin update incidents.json manually
-        res.json({ success: true, incident });
+        // Add to appropriate array
+        if (req.body.type === "maintenance") {
+          delete incident.type;
+          data.maintenance.push(incident);
+        } else {
+          delete incident.type;
+          data.incidents.push(incident);
+        }
+
+        // Save to file
+        fs.writeFileSync(incidentsPath, JSON.stringify(data, null, 2));
+
+        res.json({ success: true, incident, data });
       } catch (error) {
+        logger.error("Create incident error:", error);
+        res.status(500).json({ error: error.message });
+      }
+    });
+
+    // Update incident
+    this.app.put("/api/admin/incidents/:id", async (req, res) => {
+      try {
+        const authHeader = req.headers.authorization;
+        if (!authHeader || !authHeader.startsWith("Bearer ")) {
+          return res.status(401).json({ error: "Unauthorized" });
+        }
+
+        const token = authHeader.replace("Bearer ", "");
+        if (!this.adminTokens || !this.adminTokens.has(token)) {
+          return res.status(401).json({ error: "Invalid or expired token" });
+        }
+
+        const tokenData = this.adminTokens.get(token);
+        if (Date.now() > tokenData.expires) {
+          this.adminTokens.delete(token);
+          return res.status(401).json({ error: "Token expired" });
+        }
+
+        const incidentsPath = path.join(
+          __dirname,
+          "..",
+          "docs",
+          "incidents.json"
+        );
+        const data = JSON.parse(fs.readFileSync(incidentsPath, "utf8"));
+
+        const id = parseInt(req.params.id);
+        const type = req.body.type;
+
+        // Find and update
+        const array =
+          type === "maintenance" ? data.maintenance : data.incidents;
+        const index = array.findIndex((item) => item.id === id);
+
+        if (index === -1) {
+          return res.status(404).json({ error: "Incident not found" });
+        }
+
+        delete req.body.type;
+        array[index] = { ...array[index], ...req.body };
+
+        fs.writeFileSync(incidentsPath, JSON.stringify(data, null, 2));
+        res.json({ success: true, data });
+      } catch (error) {
+        logger.error("Update incident error:", error);
+        res.status(500).json({ error: error.message });
+      }
+    });
+
+    // Delete incident
+    this.app.delete("/api/admin/incidents/:id", async (req, res) => {
+      try {
+        const authHeader = req.headers.authorization;
+        if (!authHeader || !authHeader.startsWith("Bearer ")) {
+          return res.status(401).json({ error: "Unauthorized" });
+        }
+
+        const token = authHeader.replace("Bearer ", "");
+        if (!this.adminTokens || !this.adminTokens.has(token)) {
+          return res.status(401).json({ error: "Invalid or expired token" });
+        }
+
+        const tokenData = this.adminTokens.get(token);
+        if (Date.now() > tokenData.expires) {
+          this.adminTokens.delete(token);
+          return res.status(401).json({ error: "Token expired" });
+        }
+
+        const incidentsPath = path.join(
+          __dirname,
+          "..",
+          "docs",
+          "incidents.json"
+        );
+        const data = JSON.parse(fs.readFileSync(incidentsPath, "utf8"));
+
+        const id = parseInt(req.params.id);
+        const type = req.query.type;
+
+        // Find and remove
+        const array =
+          type === "maintenance" ? data.maintenance : data.incidents;
+        const index = array.findIndex((item) => item.id === id);
+
+        if (index === -1) {
+          return res.status(404).json({ error: "Incident not found" });
+        }
+
+        array.splice(index, 1);
+
+        fs.writeFileSync(incidentsPath, JSON.stringify(data, null, 2));
+        res.json({ success: true, data });
+      } catch (error) {
+        logger.error("Delete incident error:", error);
         res.status(500).json({ error: error.message });
       }
     });
@@ -2942,9 +3087,14 @@ class DashboardServer {
           bot: {
             online: this.client.isReady(),
             servers: this.client.guilds.cache.size,
-            users: this.client.guilds.cache.reduce((a, g) => a + g.memberCount, 0),
+            users: this.client.guilds.cache.reduce(
+              (a, g) => a + g.memberCount,
+              0
+            ),
             ping: this.client.ws.ping,
-            memory: Math.round((process.memoryUsage().heapUsed / 1024 / 1024) * 100) / 100,
+            memory:
+              Math.round((process.memoryUsage().heapUsed / 1024 / 1024) * 100) /
+              100,
           },
           systems: {
             database: "operational",
@@ -3004,8 +3154,7 @@ class DashboardServer {
     // GET /api/v1/rate-limit-status - Check API key rate limit (requires key)
     this.app.get("/api/v1/rate-limit-status", async (req, res) => {
       try {
-        const apiKey =
-          req.headers["x-api-key"] || req.query.api_key;
+        const apiKey = req.headers["x-api-key"] || req.query.api_key;
 
         if (!apiKey) {
           return res.status(400).json({ error: "API key required" });
@@ -3017,7 +3166,7 @@ class DashboardServer {
         }
 
         const rateLimit = await db.checkRateLimit(apiKey);
-        
+
         res.json({
           limit: keyData.rate_limit,
           used: keyData.requests_today,
@@ -3081,9 +3230,7 @@ class DashboardServer {
             "Content-Disposition",
             `attachment; filename=nexus-${guild.name}-${Date.now()}.csv`
           );
-          res.send(
-            "timestamp,action,user,moderator,reason\n" + csv
-          );
+          res.send("timestamp,action,user,moderator,reason\n" + csv);
         } else {
           res.json(data);
         }
@@ -3173,7 +3320,11 @@ class DashboardServer {
           memory: {
             used: Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
             total: Math.round(process.memoryUsage().heapTotal / 1024 / 1024),
-            percentage: Math.round((process.memoryUsage().heapUsed / process.memoryUsage().heapTotal) * 100),
+            percentage: Math.round(
+              (process.memoryUsage().heapUsed /
+                process.memoryUsage().heapTotal) *
+                100
+            ),
           },
           uptime: {
             current: process.uptime(),
@@ -3261,7 +3412,9 @@ class DashboardServer {
           period: "Last 30 days",
           joins: joins,
           leaves: leaves,
-          netGrowth: joins.reduce((a, b) => a + b.joins, 0) - leaves.reduce((a, b) => a + b.leaves, 0),
+          netGrowth:
+            joins.reduce((a, b) => a + b.joins, 0) -
+            leaves.reduce((a, b) => a + b.leaves, 0),
           currentServers: this.client.guilds.cache.size,
         });
       } catch (error) {

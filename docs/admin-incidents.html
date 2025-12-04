@@ -90,6 +90,7 @@
       font-size: 1rem;
       cursor: pointer;
       transition: all 0.3s ease;
+      margin-right: 10px;
     }
 
     .btn-primary {
@@ -110,6 +111,15 @@
     .btn-danger {
       background: #ff4444;
       color: #fff;
+      padding: 8px 16px;
+      font-size: 0.85rem;
+    }
+
+    .btn-warning {
+      background: #ffa500;
+      color: #fff;
+      padding: 8px 16px;
+      font-size: 0.85rem;
     }
 
     .timeline-builder {
@@ -127,37 +137,23 @@
       align-items: center;
     }
 
-    .output-section {
-      background: rgba(0, 0, 0, 0.3);
-      padding: 20px;
-      border-radius: 10px;
-      margin-top: 20px;
-    }
-
-    .json-output {
-      background: #1a1a1a;
-      padding: 20px;
-      border-radius: 10px;
-      color: #00ff00;
-      font-family: 'Courier New', monospace;
-      font-size: 0.9rem;
-      overflow-x: auto;
-      white-space: pre;
-      max-height: 400px;
-      overflow-y: auto;
-    }
-
-    .copy-btn {
-      float: right;
-      padding: 8px 16px;
-      font-size: 0.85rem;
-    }
-
     .alert {
       padding: 15px 20px;
       border-radius: 10px;
       margin-bottom: 20px;
       font-weight: 600;
+      animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     .alert-success {
@@ -165,27 +161,139 @@
       border: 2px solid #00ff00;
     }
 
+    .alert-error {
+      background: rgba(255, 0, 0, 0.2);
+      border: 2px solid #ff4444;
+    }
+
     .alert-info {
       background: rgba(0, 170, 255, 0.2);
       border: 2px solid #00aaff;
     }
+
+    .incident-list {
+      display: grid;
+      gap: 15px;
+    }
+
+    .incident-card {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 20px;
+      border-radius: 10px;
+      border-left: 4px solid #667eea;
+    }
+
+    .incident-card.resolved {
+      border-left-color: #00ff00;
+    }
+
+    .incident-card.outage {
+      border-left-color: #ff4444;
+    }
+
+    .incident-card.investigating {
+      border-left-color: #ffa500;
+    }
+
+    .incident-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      margin-bottom: 10px;
+    }
+
+    .incident-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-left: 10px;
+    }
+
+    .status-resolved {
+      background: rgba(0, 255, 0, 0.2);
+      color: #00ff00;
+    }
+
+    .status-outage {
+      background: rgba(255, 0, 0, 0.2);
+      color: #ff4444;
+    }
+
+    .status-investigating {
+      background: rgba(255, 165, 0, 0.2);
+      color: #ffa500;
+    }
+
+    #authOverlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+    }
+
+    .auth-card {
+      background: #667eea;
+      padding: 40px;
+      border-radius: 20px;
+      max-width: 400px;
+      text-align: center;
+    }
+
+    .loading {
+      opacity: 0.5;
+      pointer-events: none;
+    }
   </style>
 </head>
 <body>
+  <!-- Auth Overlay -->
+  <div id="authOverlay">
+    <div class="auth-card">
+      <h2>🔐 Admin Authentication</h2>
+      <p style="margin: 20px 0;">Enter admin password to manage incidents</p>
+      <input type="password" id="adminPassword" placeholder="Password" style="margin-bottom: 20px;" onkeypress="if(event.key === 'Enter') authenticate()">
+      <button class="btn btn-primary" onclick="authenticate()">Login</button>
+      <div id="authError" style="display: none; margin-top: 15px; color: #ff4444; font-weight: 600;"></div>
+    </div>
+  </div>
+
   <div style="position: fixed; top: 20px; left: 20px; z-index: 1000;">
     <a href="admin.html" style="display: inline-block; padding: 12px 20px; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border-radius: 10px; color: white; text-decoration: none; font-weight: 600; transition: all 0.3s;">← Admin Hub</a>
   </div>
 
   <div class="container">
     <h1>🛠️ Incident Manager</h1>
-    <p class="subtitle">Create and manage status page incidents</p>
+    <p class="subtitle">Create and manage status page incidents in real-time</p>
 
-    <div class="alert alert-info">
-      ℹ️ <strong>How to use:</strong> Fill in the form below, then copy the generated JSON and paste it into <code>docs/incidents.json</code>
+    <div id="alertContainer"></div>
+
+    <!-- Existing Incidents -->
+    <div class="card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2>📊 Current Incidents</h2>
+        <button class="btn btn-secondary" onclick="loadIncidents()">🔄 Refresh</button>
+      </div>
+      <div id="incidentsList" class="incident-list">
+        <div style="text-align: center; opacity: 0.5; padding: 40px;">Loading incidents...</div>
+      </div>
     </div>
 
+    <!-- Create New Incident -->
     <div class="card">
-      <h2>Create New Incident</h2>
+      <h2>➕ Create New Incident</h2>
       
       <div class="form-group">
         <label>Status</label>
@@ -228,11 +336,12 @@
         <button class="btn btn-secondary" onclick="addTimelineItem()">+ Add Timeline Event</button>
       </div>
 
-      <button class="btn btn-primary" onclick="generateIncident()">Generate JSON</button>
+      <button class="btn btn-primary" onclick="createIncident()">💾 Save Incident</button>
     </div>
 
+    <!-- Create Maintenance -->
     <div class="card">
-      <h2>Create Scheduled Maintenance</h2>
+      <h2>🔧 Schedule Maintenance</h2>
       
       <div class="form-group">
         <label>Title</label>
@@ -254,43 +363,132 @@
         <input type="datetime-local" id="maintenanceEndTime">
       </div>
 
-      <button class="btn btn-primary" onclick="generateMaintenance()">Generate Maintenance JSON</button>
-    </div>
-
-    <div class="card output-section" id="outputSection" style="display: none;">
-      <button class="btn btn-primary copy-btn" onclick="copyJSON()">📋 Copy JSON</button>
-      <h2>Generated JSON</h2>
-      <p style="opacity: 0.8; margin-bottom: 15px;">Copy this and paste it into <code>docs/incidents.json</code></p>
-      <div class="json-output" id="jsonOutput"></div>
-      <div id="copyAlert" style="display: none;" class="alert alert-success" style="margin-top: 15px;">
-        ✅ JSON copied to clipboard!
-      </div>
+      <button class="btn btn-primary" onclick="createMaintenance()">💾 Save Maintenance</button>
     </div>
   </div>
 
   <script>
+    let authToken = null;
+    const API_URL = window.location.hostname === 'localhost' 
+      ? 'http://localhost:3000'
+      : 'https://regular-puma-clearly.ngrok-free.app';
+
     // Set current time as default
     const now = new Date();
     now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
     document.getElementById('startTime').value = now.toISOString().slice(0, 16);
 
-    function addTimelineItem() {
-      const builder = document.getElementById('timelineBuilder');
-      const item = document.createElement('div');
-      item.className = 'timeline-item';
-      item.innerHTML = `
-        <input type="time" placeholder="Time" class="timeline-time">
-        <input type="text" placeholder="Event description" class="timeline-text">
-        <button class="btn btn-danger" onclick="removeTimelineItem(this)">Remove</button>
+    function showAlert(message, type = 'success') {
+      const container = document.getElementById('alertContainer');
+      const alert = document.createElement('div');
+      alert.className = `alert alert-${type}`;
+      alert.textContent = message;
+      container.appendChild(alert);
+      setTimeout(() => alert.remove(), 5000);
+    }
+
+    async function authenticate() {
+      const password = document.getElementById('adminPassword').value;
+      const errorDiv = document.getElementById('authError');
+
+      try {
+        const response = await fetch(`${API_URL}/api/admin/auth`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password })
+        });
+
+        const data = await response.json();
+
+        if (data.token) {
+          authToken = data.token;
+          document.getElementById('authOverlay').style.display = 'none';
+          loadIncidents();
+        } else {
+          errorDiv.textContent = '❌ Invalid password';
+          errorDiv.style.display = 'block';
+        }
+      } catch (error) {
+        errorDiv.textContent = '❌ Authentication failed';
+        errorDiv.style.display = 'block';
+      }
+    }
+
+    async function loadIncidents() {
+      const list = document.getElementById('incidentsList');
+      list.innerHTML = '<div style="text-align: center; opacity: 0.5; padding: 20px;">Loading...</div>';
+
+      try {
+        const response = await fetch(`${API_URL}/api/admin/incidents`);
+        const data = await response.json();
+
+        if (data.incidents.length === 0 && data.maintenance.length === 0) {
+          list.innerHTML = '<div style="text-align: center; opacity: 0.5; padding: 40px;">✅ No active incidents or maintenance</div>';
+          return;
+        }
+
+        list.innerHTML = '';
+
+        // Display incidents
+        data.incidents.forEach(incident => {
+          const card = createIncidentCard(incident, 'incident');
+          list.appendChild(card);
+        });
+
+        // Display maintenance
+        data.maintenance.forEach(maintenance => {
+          const card = createIncidentCard(maintenance, 'maintenance');
+          list.appendChild(card);
+        });
+
+      } catch (error) {
+        list.innerHTML = '<div style="text-align: center; color: #ff4444; padding: 20px;">❌ Failed to load incidents</div>';
+      }
+    }
+
+    function createIncidentCard(item, type) {
+      const card = document.createElement('div');
+      card.className = `incident-card ${item.status || 'maintenance'}`;
+      
+      const statusBadge = type === 'maintenance' 
+        ? '<span class="status-badge status-resolved">🔧 Maintenance</span>'
+        : `<span class="status-badge status-${item.status}">${getStatusEmoji(item.status)} ${item.status}</span>`;
+
+      card.innerHTML = `
+        <div class="incident-header">
+          <div>
+            <h3>${item.title}${statusBadge}</h3>
+            <p style="opacity: 0.8; margin-top: 5px; font-size: 0.9rem;">
+              ${new Date(item.startTime).toLocaleString()} ${item.endTime ? `→ ${new Date(item.endTime).toLocaleString()}` : '(Ongoing)'}
+            </p>
+          </div>
+          <div class="incident-actions">
+            <button class="btn btn-danger" onclick="deleteIncident(${item.id}, '${type}')">🗑️ Delete</button>
+          </div>
+        </div>
+        <p style="margin-top: 10px;">${item.description}</p>
+        ${item.timeline && item.timeline.length > 0 ? `
+          <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1);">
+            <strong>Timeline:</strong>
+            <ul style="margin-top: 10px; margin-left: 20px;">
+              ${item.timeline.map(t => `<li>${new Date(t.time).toLocaleTimeString()}: ${t.text}</li>`).join('')}
+            </ul>
+          </div>
+        ` : ''}
       `;
-      builder.appendChild(item);
+      return card;
     }
 
-    function removeTimelineItem(btn) {
-      btn.parentElement.remove();
+    function getStatusEmoji(status) {
+      const emojis = {
+        'investigating': '🔍',
+        'outage': '🔴',
+        'resolved': '✅'
+      };
+      return emojis[status] || '❓';
     }
 
-    function generateIncident() {
+    async function createIncident() {
       const status = document.getElementById('status').value;
       const title = document.getElementById('title').value;
       const description = document.getElementById('description').value;
@@ -298,7 +496,7 @@
       const endTime = document.getElementById('endTime').value;
 
       if (!title || !description || !startTime) {
-        alert('Please fill in required fields: Title, Description, and Start Time');
+        showAlert('❌ Please fill in required fields: Title, Description, and Start Time', 'error');
         return;
       }
 
@@ -320,7 +518,7 @@
       });
 
       const incident = {
-        id: Date.now(),
+        type: 'incident',
         status: status,
         title: title,
         description: description,
@@ -329,64 +527,108 @@
         timeline: timeline
       };
 
-      displayJSON(incident, 'incident');
+      await saveToAPI(incident);
     }
 
-    function generateMaintenance() {
+    async function createMaintenance() {
       const title = document.getElementById('maintenanceTitle').value;
       const description = document.getElementById('maintenanceDescription').value;
       const startTime = document.getElementById('maintenanceStartTime').value;
       const endTime = document.getElementById('maintenanceEndTime').value;
 
       if (!title || !description || !startTime || !endTime) {
-        alert('Please fill in all maintenance fields');
+        showAlert('❌ Please fill in all maintenance fields', 'error');
         return;
       }
 
       const maintenance = {
-        id: Date.now(),
+        type: 'maintenance',
         title: title,
         description: description,
         startTime: new Date(startTime).toISOString(),
         endTime: new Date(endTime).toISOString()
       };
 
-      displayJSON(maintenance, 'maintenance');
+      await saveToAPI(maintenance);
     }
 
-    function displayJSON(data, type) {
-      const output = document.getElementById('jsonOutput');
-      const section = document.getElementById('outputSection');
-      
-      let jsonStructure;
-      if (type === 'incident') {
-        jsonStructure = {
-          incidents: [data],
-          maintenance: []
-        };
-      } else {
-        jsonStructure = {
-          incidents: [],
-          maintenance: [data]
-        };
+    async function saveToAPI(data) {
+      try {
+        const response = await fetch(`${API_URL}/api/admin/incidents`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authToken}`
+          },
+          body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          showAlert('✅ ' + (data.type === 'maintenance' ? 'Maintenance' : 'Incident') + ' saved successfully!', 'success');
+          loadIncidents();
+          
+          // Clear form
+          if (data.type === 'maintenance') {
+            document.getElementById('maintenanceTitle').value = '';
+            document.getElementById('maintenanceDescription').value = '';
+            document.getElementById('maintenanceStartTime').value = '';
+            document.getElementById('maintenanceEndTime').value = '';
+          } else {
+            document.getElementById('title').value = '';
+            document.getElementById('description').value = '';
+            document.getElementById('endTime').value = '';
+          }
+        } else {
+          showAlert('❌ Failed to save: ' + (result.error || 'Unknown error'), 'error');
+        }
+      } catch (error) {
+        showAlert('❌ Network error: ' + error.message, 'error');
+      }
+    }
+
+    async function deleteIncident(id, type) {
+      if (!confirm('Are you sure you want to delete this ' + type + '?')) {
+        return;
       }
 
-      output.textContent = JSON.stringify(jsonStructure, null, 2);
-      section.style.display = 'block';
-      section.scrollIntoView({ behavior: 'smooth' });
+      try {
+        const response = await fetch(`${API_URL}/api/admin/incidents/${id}?type=${type}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${authToken}`
+          }
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          showAlert('✅ ' + (type === 'maintenance' ? 'Maintenance' : 'Incident') + ' deleted successfully!', 'success');
+          loadIncidents();
+        } else {
+          showAlert('❌ Failed to delete: ' + (result.error || 'Unknown error'), 'error');
+        }
+      } catch (error) {
+        showAlert('❌ Network error: ' + error.message, 'error');
+      }
     }
 
-    function copyJSON() {
-      const output = document.getElementById('jsonOutput');
-      navigator.clipboard.writeText(output.textContent);
-      
-      const alert = document.getElementById('copyAlert');
-      alert.style.display = 'block';
-      setTimeout(() => {
-        alert.style.display = 'none';
-      }, 3000);
+    function addTimelineItem() {
+      const builder = document.getElementById('timelineBuilder');
+      const item = document.createElement('div');
+      item.className = 'timeline-item';
+      item.innerHTML = `
+        <input type="time" placeholder="Time" class="timeline-time">
+        <input type="text" placeholder="Event description" class="timeline-text">
+        <button class="btn btn-danger" onclick="removeTimelineItem(this)">Remove</button>
+      `;
+      builder.appendChild(item);
+    }
+
+    function removeTimelineItem(btn) {
+      btn.parentElement.remove();
     }
   </script>
 </body>
 </html>
-
