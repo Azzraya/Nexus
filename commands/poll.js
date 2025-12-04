@@ -150,8 +150,11 @@ module.exports = {
     await this.storePoll(pollData);
 
     // Schedule poll end
+    const self = this;
     setTimeout(() => {
-      this.endPoll(message.id, interaction.guild.id, client);
+      self.endPoll(message.id, interaction.guild.id, client).catch(err => {
+        console.error('[Poll] Error in scheduled poll end:', err);
+      });
     }, duration * 60 * 1000);
     } catch (error) {
       console.error('[Poll] Error creating poll:', error);
@@ -254,7 +257,7 @@ module.exports = {
     if (!pollData || !pollData.active) return;
 
     try {
-      const guild = await client.guilds.fetch(guildId);
+      const guild = await interaction.guilds.fetch(guildId);
       const channel = await guild.channels.fetch(pollData.channelId);
       const message = await channel.messages.fetch(messageId);
 
