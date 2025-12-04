@@ -7,7 +7,7 @@
 [![Discord](https://img.shields.io/badge/Discord-Join%20Support-7289DA?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/UHNcUKheZP)
 [![Top.gg](https://img.shields.io/badge/Top.gg-Vote-FF3366?style=for-the-badge&logo=))](https://top.gg/bot/1444739230679957646)
 [![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
-[![Version](https://img.shields.io/badge/Version-3.2.0-blue?style=for-the-badge)](https://github.com/Azzraya/Nexus)
+[![Version](https://img.shields.io/badge/Version-3.2.1-blue?style=for-the-badge)](https://github.com/Azzraya/Nexus)
 
 **Everything Wick does, Nexus does better. 100% FREE.**
 

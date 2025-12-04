@@ -60,8 +60,90 @@
 
       <div class="content-section">
         <div class="changelog-entry">
-          <h2>Version 3.2.0 - December 4, 2025</h2>
+          <h2>Version 3.2.1 - December 4, 2025</h2>
           <span class="version-badge">Latest</span>
+          <h3>🐛 Bug Fix & Website Enhancement Update</h3>
+          <p>
+            <strong>Critical bug fixes and major website improvements</strong>
+          </p>
+
+          <h3>🐛 Bug Fixes</h3>
+          <ul>
+            <li>
+              <strong>Fixed /share Command:</strong> Resolved "db.query is not a
+              function" error preventing stats sharing (replaced with proper
+              Promise-wrapped db.db.all/get calls)
+            </li>
+            <li>
+              <strong>Fixed /refer Command:</strong> Corrected database API calls
+              that were causing referral system crashes
+            </li>
+            <li>
+              <strong>Fixed Interaction Errors:</strong> Improved error handling to
+              prevent "interaction already replied" errors in share and refer
+              commands
+            </li>
+            <li>
+              <strong>Fixed Logging Issue:</strong> Resolved [object Object] being
+              printed in command logs - now shows proper guild name, ID, and user
+              tag
+            </li>
+            <li>
+              <strong>Fixed Referrals Table:</strong> Added referrals table creation
+              to initTables() to prevent "no such table" errors on server leave
+            </li>
+          </ul>
+
+          <h3>🌐 Website Improvements</h3>
+          <ul>
+            <li>
+              <strong>New Developer Hub:</strong> Complete redesign with language
+              tabs (JS/Python/cURL), copy buttons, real code examples, and modern
+              card styling
+            </li>
+            <li>
+              <strong>New Interactive Tools:</strong> Added widget generator,
+              embed builder, and API quickstart pages
+            </li>
+            <li>
+              <strong>New Live Activity Page:</strong> Real-time bot activity feed
+              for transparency
+            </li>
+            <li>
+              <strong>Unified Navigation:</strong> All pages now have consistent
+              Menu dropdown, Dashboard, and Get Started buttons
+            </li>
+            <li>
+              <strong>Improved Navigation Menu:</strong> Organized pages into
+              logical sections with better structure and consistent emoji usage
+            </li>
+          </ul>
+
+          <h3>✨ New Features</h3>
+          <ul>
+            <li>
+              <strong>/migrate Command:</strong> Assists users in migrating from
+              Wick to Nexus with setup guides
+            </li>
+            <li>
+              <strong>/testimonial Command:</strong> Allows users to submit and
+              view testimonials directly in Discord
+            </li>
+            <li>
+              <strong>/notifications Command:</strong> Manage external webhook
+              notifications for bot events
+            </li>
+            <li>
+              <strong>10 New API Endpoints:</strong> Added /health, /compare-servers,
+              /rate-limit-status, /export/all-data, /command-usage-analytics,
+              /server-leaderboard, /threat-map-data, /webhooks/subscribe,
+              /performance-metrics, and /changelog
+            </li>
+          </ul>
+        </div>
+
+        <div class="changelog-entry">
+          <h2>Version 3.2.0 - December 4, 2025</h2>
           <h3>🚀 Growth & Security Update</h3>
           <p>
             <strong
