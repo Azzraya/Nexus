@@ -60,8 +60,58 @@
 
       <div class="content-section">
         <div class="changelog-entry">
-          <h2>Version 3.3.7 - December 4, 2025</h2>
+          <h2>Version 3.3.9 - December 4, 2025</h2>
           <span class="version-badge">Latest</span>
+          <h3>🔧 Discord.js Deprecation Fix</h3>
+          <ul>
+            <li>
+              <strong>Fixed Emoji API Deprecation:</strong> Updated emoji.url to emoji.imageURL() in auto-recovery system
+            </li>
+            <li>
+              <strong>Eliminated Warning:</strong> No more "(node:xxx) DeprecationWarning" messages in logs
+            </li>
+            <li>
+              <strong>Future-Proof:</strong> Compatible with latest Discord.js API standards
+            </li>
+          </ul>
+        </div>
+
+        <div class="changelog-entry">
+          <h2>Version 3.3.8 - December 4, 2025</h2>
+          <span class="version-badge">Previous</span>
+          <h3>🐛 Critical CSS Fix - Dropdown Display</h3>
+          <p>
+            <strong>Fixed mega-menu dropdown not displaying all items</strong>
+          </p>
+
+          <h3>🔧 Bug Fixes</h3>
+          <ul>
+            <li>
+              <strong>Removed Conflicting CSS:</strong> Fixed duplicate display properties (display: grid + display: none)
+            </li>
+            <li>
+              <strong>Fixed Overflow:</strong> Removed overflow: hidden that blocked scrolling
+            </li>
+            <li>
+              <strong>Cleaned Duplicates:</strong> Removed duplicate margin-top declarations
+            </li>
+            <li>
+              <strong>Updated commands.html:</strong> Added mega-menu structure to commands page
+            </li>
+          </ul>
+
+          <h3>✨ Impact</h3>
+          <ul>
+            <li>All 6 dropdown categories now display properly</li>
+            <li>All menu items visible (Documentation section shows all 4 links)</li>
+            <li>Community section now accessible</li>
+            <li>Grid layout works correctly across all browsers</li>
+          </ul>
+        </div>
+
+        <div class="changelog-entry">
+          <h2>Version 3.3.7 - December 4, 2025</h2>
+          <span class="version-badge">Previous</span>
           <h3>🐛 Critical Fix - Missing ErrorHandler Method</h3>
           <p>
             <strong>Fixed "ErrorHandler.createSafeCatch is not a function" crashes</strong>
