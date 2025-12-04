@@ -55,10 +55,7 @@ module.exports = {
     if (subcommand === "setup") {
       // Only bot owner can set up rescue key
       if (!Owner.isOwner(interaction.user.id)) {
-        return interaction.reply({
-          ErrorMessages.ownerOnly(),
-          flags: MessageFlags.Ephemeral,
-        });
+        return interaction.reply(ErrorMessages.ownerOnly());
       }
 
       await interaction.deferReply({ flags: MessageFlags.Ephemeral });
@@ -109,10 +106,7 @@ module.exports = {
     } else if (subcommand === "view") {
       // Only bot owner can view rescue key
       if (!Owner.isOwner(interaction.user.id)) {
-        return interaction.reply({
-          ErrorMessages.ownerOnly(),
-          flags: MessageFlags.Ephemeral,
-        });
+        return interaction.reply(ErrorMessages.ownerOnly());
       }
 
       await interaction.deferReply({ flags: MessageFlags.Ephemeral });
@@ -162,10 +156,7 @@ module.exports = {
     } else if (subcommand === "regenerate") {
       // Only bot owner can regenerate
       if (!Owner.isOwner(interaction.user.id)) {
-        return interaction.reply({
-          ErrorMessages.ownerOnly(),
-          flags: MessageFlags.Ephemeral,
-        });
+        return interaction.reply(ErrorMessages.ownerOnly());
       }
 
       await interaction.deferReply({ flags: MessageFlags.Ephemeral });
