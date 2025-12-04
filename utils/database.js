@@ -898,34 +898,31 @@ class Database {
             )
         `);
 
-    // Add vote rewards config columns to server_config (use exec with error handling)
-    this.db.exec(
-      `
-            ALTER TABLE server_config ADD COLUMN vote_rewards_enabled INTEGER DEFAULT 0;
-        `,
+    // Add vote rewards config columns to server_config (use run instead of exec for error handling)
+    this.db.run(
+      `ALTER TABLE server_config ADD COLUMN vote_rewards_enabled INTEGER DEFAULT 0`,
       (err) => {
+        // Silently ignore duplicate column errors
         if (err && !err.message.includes("duplicate column")) {
-          // Ignore duplicate column errors
+          logger.debug("Database", `vote_rewards_enabled column: ${err.message}`);
         }
       }
     );
-    this.db.exec(
-      `
-            ALTER TABLE server_config ADD COLUMN vote_reward_role TEXT;
-        `,
+    this.db.run(
+      `ALTER TABLE server_config ADD COLUMN vote_reward_role TEXT`,
       (err) => {
+        // Silently ignore duplicate column errors
         if (err && !err.message.includes("duplicate column")) {
-          // Ignore duplicate column errors
+          logger.debug("Database", `vote_reward_role column: ${err.message}`);
         }
       }
     );
-    this.db.exec(
-      `
-            ALTER TABLE server_config ADD COLUMN vote_webhook_url TEXT;
-        `,
+    this.db.run(
+      `ALTER TABLE server_config ADD COLUMN vote_webhook_url TEXT`,
       (err) => {
+        // Silently ignore duplicate column errors
         if (err && !err.message.includes("duplicate column")) {
-          // Ignore duplicate column errors
+          logger.debug("Database", `vote_webhook_url column: ${err.message}`);
         }
       }
     );
