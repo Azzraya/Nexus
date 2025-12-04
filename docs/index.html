@@ -88,25 +88,31 @@
   </head>
   <body>
     <!-- Dynamic Banner (loaded from API) -->
-    <div id="updateBanner" style="display: none;"></div>
+    <div id="updateBanner" style="display: none"></div>
     <script>
       // Load and display dynamic banner
-      (async function() {
+      (async function () {
         try {
-          const response = await fetch('https://regular-puma-clearly.ngrok-free.app/api/v1/banner', {
-            headers: { 'ngrok-skip-browser-warning': 'true' }
-          });
-          
+          const response = await fetch(
+            "https://regular-puma-clearly.ngrok-free.app/api/v1/banner",
+            {
+              headers: { "ngrok-skip-browser-warning": "true" },
+            }
+          );
+
           if (!response.ok) return;
-          
+
           const banner = await response.json();
-          
+
           // Check if banner is dismissed in localStorage
-          if (!banner.enabled || localStorage.getItem('bannerDismissed') === 'true') {
+          if (
+            !banner.enabled ||
+            localStorage.getItem("bannerDismissed") === "true"
+          ) {
             return;
           }
-          
-          const bannerEl = document.getElementById('updateBanner');
+
+          const bannerEl = document.getElementById("updateBanner");
           bannerEl.style.cssText = `
             background: linear-gradient(135deg, ${banner.gradient.from} 0%, ${banner.gradient.to} 100%);
             color: white;
@@ -117,17 +123,27 @@
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
             display: block;
           `;
-          
+
           bannerEl.innerHTML = `
             <div style="display: flex; align-items: center; justify-content: center; gap: 15px; flex-wrap: wrap;">
               <span style="font-size: 20px">${banner.emoji}</span>
-              <span style="font-weight: 600; font-size: 15px">${banner.text}</span>
-              <a href="${banner.buttonLink}" style="background: white; color: ${banner.gradient.from}; padding: 6px 20px; border-radius: 20px; text-decoration: none; font-weight: bold; font-size: 13px; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">${banner.buttonText} →</a>
-              ${banner.dismissible ? `<button onclick="localStorage.setItem('bannerDismissed', 'true'); document.getElementById('updateBanner').style.display='none';" style="background: rgba(255, 255, 255, 0.2); border: none; color: white; padding: 4px 12px; border-radius: 15px; cursor: pointer; font-size: 12px;">Dismiss</button>` : ''}
+              <span style="font-weight: 600; font-size: 15px">${
+                banner.text
+              }</span>
+              <a href="${banner.buttonLink}" style="background: white; color: ${
+            banner.gradient.from
+          }; padding: 6px 20px; border-radius: 20px; text-decoration: none; font-weight: bold; font-size: 13px; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">${
+            banner.buttonText
+          } →</a>
+              ${
+                banner.dismissible
+                  ? `<button onclick="localStorage.setItem('bannerDismissed', 'true'); document.getElementById('updateBanner').style.display='none';" style="background: rgba(255, 255, 255, 0.2); border: none; color: white; padding: 4px 12px; border-radius: 15px; cursor: pointer; font-size: 12px;">Dismiss</button>`
+                  : ""
+              }
             </div>
           `;
         } catch (error) {
-          console.error('Failed to load banner:', error);
+          console.error("Failed to load banner:", error);
         }
       })();
     </script>
@@ -191,27 +207,33 @@
                 <a href="setup.html">Setup</a>
                 <a href="tutorial.html">Tutorial</a>
               </div>
-              
+
               <div class="dropdown-category">
                 <div class="dropdown-category-header">✨ Features</div>
                 <a href="features.html">Features</a>
                 <a href="commands.html">Commands</a>
                 <a href="adaptive-protection.html">Adaptive Protection</a>
               </div>
-              
+
+              <div class="dropdown-category">
+                <div class="dropdown-category-header">🛠️ Tools</div>
+                <a href="bot-simulator.html">Try Bot Demo</a>
+                <a href="server-health-checker.html">Health Checker</a>
+              </div>
+
               <div class="dropdown-category">
                 <div class="dropdown-category-header">⚔️ Compare</div>
                 <a href="comparison.html">vs Wick</a>
                 <a href="live-comparison.html">Live Comparison</a>
               </div>
-              
+
               <div class="dropdown-category">
                 <div class="dropdown-category-header">📊 Metrics</div>
                 <a href="stats.html">Stats</a>
                 <a href="growth.html">Growth</a>
                 <a href="status.html">Status</a>
               </div>
-              
+
               <div class="dropdown-category">
                 <div class="dropdown-category-header">📚 Documentation</div>
                 <a href="docs.html">Docs</a>
@@ -219,7 +241,7 @@
                 <a href="developers.html">For Developers</a>
                 <a href="faq.html">FAQ</a>
               </div>
-              
+
               <div class="dropdown-category">
                 <div class="dropdown-category-header">👥 Community</div>
                 <a href="showcase.html">Showcase</a>
@@ -290,6 +312,20 @@
                 />
               </svg>
               View Source
+            </a>
+            <a
+              href="bot-simulator.html"
+              class="btn btn-secondary"
+              style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none"
+            >
+              🎮 Try Demo
+            </a>
+            <a
+              href="server-health-checker.html"
+              class="btn btn-secondary"
+              style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border: none"
+            >
+              🏥 Check Server Health
             </a>
           </div>
 
