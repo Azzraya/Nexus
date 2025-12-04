@@ -86,7 +86,6 @@ module.exports = {
     try {
       const question = interaction.options.getString("question");
       const optionsStr = interaction.options.getString("options");
-      const duration = interaction.options.getInteger("duration") || 60;
       const anonymous = interaction.options.getBoolean("anonymous") || false;
       const multiple = interaction.options.getBoolean("multiple") || false;
 
@@ -115,11 +114,10 @@ module.exports = {
       )
       .setColor(0x667eea)
       .addFields(
-        { name: "Duration", value: `${duration} minutes`, inline: true },
         { name: "Multiple Choices", value: multiple ? "✅ Yes" : "❌ No", inline: true },
         { name: "Anonymous", value: anonymous ? "✅ Yes" : "❌ No", inline: true }
       )
-      .setFooter({ text: `Poll by ${interaction.user.username} • Use /poll end to end early` })
+      .setFooter({ text: `Poll by ${interaction.user.username} • Use /poll end <message_id> to end poll` })
       .setTimestamp();
 
     const message = await interaction.reply({
@@ -140,10 +138,10 @@ module.exports = {
       question,
       options,
       creatorId: interaction.user.id,
-      duration,
+      duration: 0,
       anonymous,
       multiple,
-      endTime: Date.now() + (duration * 60 * 1000),
+      endTime: 0,
       active: true
     };
 
