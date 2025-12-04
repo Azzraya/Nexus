@@ -423,7 +423,7 @@ footer p {
 
 /* Add invisible hover bridge before menu appears */
 .dropdown::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 100%;
   left: 0;
