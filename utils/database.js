@@ -1407,14 +1407,11 @@ class Database {
 
   runMigrations() {
     // Migration: Add new columns to suggestions table for /suggest command
-    this.db.run(
-      `ALTER TABLE suggestions ADD COLUMN title TEXT`,
-      (err) => {
-        if (err && !err.message.includes("duplicate column")) {
-          logger.error("Migration error (suggestions title):", err);
-        }
+    this.db.run(`ALTER TABLE suggestions ADD COLUMN title TEXT`, (err) => {
+      if (err && !err.message.includes("duplicate column")) {
+        logger.error("Migration error (suggestions title):", err);
       }
-    );
+    });
     this.db.run(
       `ALTER TABLE suggestions ADD COLUMN description TEXT`,
       (err) => {
@@ -1423,14 +1420,11 @@ class Database {
         }
       }
     );
-    this.db.run(
-      `ALTER TABLE suggestions ADD COLUMN use_case TEXT`,
-      (err) => {
-        if (err && !err.message.includes("duplicate column")) {
-          logger.error("Migration error (suggestions use_case):", err);
-        }
+    this.db.run(`ALTER TABLE suggestions ADD COLUMN use_case TEXT`, (err) => {
+      if (err && !err.message.includes("duplicate column")) {
+        logger.error("Migration error (suggestions use_case):", err);
       }
-    );
+    });
     this.db.run(
       `ALTER TABLE suggestions ADD COLUMN votes INTEGER DEFAULT 0`,
       (err) => {
@@ -1451,20 +1445,27 @@ class Database {
     // Migration: Fix scheduled_actions table - check if old schema exists
     this.db.all(`PRAGMA table_info(scheduled_actions)`, [], (err, columns) => {
       if (err) return;
-      
-      const hasStatusColumn = columns && columns.some(col => col.name === 'status');
-      const hasScheduleType = columns && columns.some(col => col.name === 'schedule_type');
-      
+
+      const hasStatusColumn =
+        columns && columns.some((col) => col.name === "status");
+      const hasScheduleType =
+        columns && columns.some((col) => col.name === "schedule_type");
+
       // If table exists but doesn't have new columns, drop and recreate
-      if (columns && columns.length > 0 && (!hasStatusColumn || !hasScheduleType)) {
-        logger.info('[Migration] Updating scheduled_actions table schema...');
-        
+      if (
+        columns &&
+        columns.length > 0 &&
+        (!hasStatusColumn || !hasScheduleType)
+      ) {
+        logger.info("[Migration] Updating scheduled_actions table schema...");
+
         this.db.run(`DROP TABLE IF EXISTS scheduled_actions`, (err) => {
           if (err) {
-            logger.error('Migration error (drop scheduled_actions):', err);
+            logger.error("Migration error (drop scheduled_actions):", err);
           } else {
             // Recreate with new schema
-            this.db.run(`
+            this.db.run(
+              `
               CREATE TABLE IF NOT EXISTS scheduled_actions (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 guild_id TEXT,
@@ -1478,13 +1479,20 @@ class Database {
                 status TEXT DEFAULT 'active',
                 last_execution INTEGER
               )
-            `, (err) => {
-              if (err) {
-                logger.error('Migration error (recreate scheduled_actions):', err);
-              } else {
-                logger.success('[Migration] Scheduled actions table updated successfully');
+            `,
+              (err) => {
+                if (err) {
+                  logger.error(
+                    "Migration error (recreate scheduled_actions):",
+                    err
+                  );
+                } else {
+                  logger.success(
+                    "[Migration] Scheduled actions table updated successfully"
+                  );
+                }
               }
-            });
+            );
           }
         });
       }
@@ -1599,6 +1607,16 @@ class Database {
       (err) => {
         if (err && !err.message.includes("duplicate column")) {
           console.error("Error adding join_gate_enabled column:", err);
+        }
+      }
+    );
+
+    // Migration: Add enabled column to automod_config
+    this.db.run(
+      `ALTER TABLE automod_config ADD COLUMN enabled INTEGER DEFAULT 1`,
+      (err) => {
+        if (err && !err.message.includes("duplicate column")) {
+          console.error("Error adding automod_config enabled column:", err);
         }
       }
     );

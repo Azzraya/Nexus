@@ -75,6 +75,9 @@ module.exports = {
       }
 
       if (i.customId === "setup_security") {
+        // Defer reply to prevent timeout
+        await i.deferReply({ ephemeral: true });
+        
         // Enable security features
         await db.setServerConfig(guild.id, {
           anti_raid_enabled: 1,
@@ -84,7 +87,7 @@ module.exports = {
           security_alerts_enabled: 1,
         });
 
-        await i.reply({
+        await i.editReply({
           embeds: [
             new EmbedBuilder()
               .setTitle("🛡️ Security Features Enabled")
@@ -201,6 +204,9 @@ module.exports = {
           });
         }
       } else if (i.customId === "setup_automod") {
+        // Defer reply to prevent timeout
+        await i.deferReply({ ephemeral: true });
+        
         // Enable automod
         await new Promise((resolve, reject) => {
           db.db.run(
@@ -213,7 +219,7 @@ module.exports = {
           );
         });
 
-        await i.reply({
+        await i.editReply({
           embeds: [
             new EmbedBuilder()
               .setTitle("🤖 Automod Enabled")

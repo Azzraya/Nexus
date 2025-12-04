@@ -84,8 +84,32 @@
 
       <div class="content-section">
         <div class="changelog-entry">
-          <h2>Version 3.8.3 - December 4, 2025</h2>
+          <h2>Version 3.8.4 - December 4, 2025</h2>
           <span class="version-badge">Latest</span>
+          <h3>🐛 Critical Fixes - Quicksetup Command</h3>
+          <ul>
+            <li>
+              <strong>Fixed "Unknown interaction" errors:</strong>
+              <ul>
+                <li>✅ Added proper reply deferral before async database operations</li>
+                <li>✅ Security setup button now defers before enabling features</li>
+                <li>✅ Automod setup button now defers before database write</li>
+                <li>✅ No more interaction timeouts (3 second limit)</li>
+              </ul>
+            </li>
+            <li>
+              <strong>Fixed "SQLITE_ERROR: no column named enabled":</strong>
+              <ul>
+                <li>✅ Added migration for <code>automod_config.enabled</code> column</li>
+                <li>✅ Column defaults to 1 (enabled) for new configs</li>
+                <li>✅ Quicksetup automod button now works correctly</li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+
+        <div class="changelog-entry">
+          <h2>Version 3.8.3 - December 4, 2025</h2>
           <h3>✨ Improved Error Communication</h3>
           <ul>
             <li>
