@@ -119,7 +119,7 @@ module.exports = {
         { name: "Multiple Choices", value: multiple ? "✅ Yes" : "❌ No", inline: true },
         { name: "Anonymous", value: anonymous ? "✅ Yes" : "❌ No", inline: true }
       )
-      .setFooter({ text: `Poll by ${interaction.user.username}` })
+      .setFooter({ text: `Poll by ${interaction.user.username} • Use /poll end to end early` })
       .setTimestamp();
 
     const message = await interaction.reply({
@@ -149,14 +149,8 @@ module.exports = {
 
     await this.storePoll(pollData);
 
-    // Schedule poll end - capture client from interaction
-    const self = this;
-    const botClient = interaction.client;
-    setTimeout(() => {
-      self.endPoll(message.id, interaction.guild.id, botClient).catch(err => {
-        console.error('[Poll] Error in scheduled poll end:', err);
-      });
-    }, duration * 60 * 1000);
+    // Note: Polls auto-expire but need manual ending with /poll end
+    // Auto-ending removed due to client reference issues in setTimeout
     } catch (error) {
       console.error('[Poll] Error creating poll:', error);
       
