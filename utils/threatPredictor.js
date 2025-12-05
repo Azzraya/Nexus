@@ -22,6 +22,11 @@ class ThreatPredictor {
   }
 
   createTable() {
+    if (!db.db) {
+      // Database not ready yet, retry
+      setTimeout(() => this.createTable(), 100);
+      return;
+    }
     db.db.run(`
       CREATE TABLE IF NOT EXISTS threat_predictions (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
