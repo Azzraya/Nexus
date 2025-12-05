@@ -63,11 +63,8 @@ class AuditLogMonitor {
         type: null, // Get all types
       });
 
-      const recentLogs = auditLogs.entries
-        .filter(
-          (entry) => Date.now() - entry.createdTimestamp < this.patternWindow
-        )
-        .array();
+      const recentLogs = Array.from(auditLogs.entries.values())
+        .filter((entry) => Date.now() - entry.createdTimestamp < this.patternWindow);
 
       // Pattern 1: Permission Testing Detection (Slow Nuke)
       await this.detectPermissionTesting(guild, recentLogs);

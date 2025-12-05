@@ -379,6 +379,8 @@ class AdvancedAntiRaid {
         results.behavioral &&
         joinData.joins.length >= patternBehavioralMinJoins) || // Pattern + behavioral (needs more joins if less sensitive)
       (results.networkBased && joinData.joins.length >= networkMinJoins) || // Network needs many joins
+      (results.temporalPattern && joinData.joins.length >= minJoinsForRaid) || // Temporal pattern detection
+      (results.graphBased && joinData.joins.length >= networkMinJoins) || // Graph-based network detection
       threatScore >= threatScoreThreshold; // Threshold adjusted by sensitivity
 
     if (isRaid) {
