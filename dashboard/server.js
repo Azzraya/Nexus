@@ -596,7 +596,13 @@ class DashboardServer {
     // Verify admin token
     this.app.post("/api/admin/verify-token", async (req, res) => {
       try {
-        const { token } = req.body;
+        // Get token from Authorization header
+        const authHeader = req.headers.authorization;
+        if (!authHeader || !authHeader.startsWith("Bearer ")) {
+          return res.status(401).json({ valid: false });
+        }
+
+        const token = authHeader.substring(7); // Remove "Bearer " prefix
 
         if (!this.adminTokens) {
           return res.status(401).json({ valid: false });
