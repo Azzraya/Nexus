@@ -70,6 +70,14 @@ client.advancedAntiNuke = new AdvancedAntiNuke(client);
 const AutoBackup = require("./utils/autoBackup");
 client.autoBackup = new AutoBackup(client);
 
+// Real-Time Audit Log Monitor (EXCEEDS WICK - continuous audit log analysis)
+const AuditLogMonitor = require("./utils/auditLogMonitor");
+client.auditLogMonitor = new AuditLogMonitor(client);
+
+// Zero-Day Attack Detection (EXCEEDS WICK - detects unknown attack patterns)
+const ZeroDayDetection = require("./utils/zeroDayDetection");
+client.zeroDayDetection = new ZeroDayDetection(client);
+
 // Webhook Server removed - web verification no longer supported
 
 // Performance monitor is a singleton, automatically used in events/interactionCreate.js

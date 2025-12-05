@@ -8,6 +8,11 @@ module.exports = {
   async execute(guild, client) {
     logger.info("Guild Delete", `Left server: ${guild.name} (${guild.id})`);
 
+    // Stop audit log monitoring for removed guild
+    if (client.auditLogMonitor) {
+      client.auditLogMonitor.stopMonitoring(guild.id);
+    }
+
     // Get invite source info if we tracked this guild
     let inviteSource = "unknown";
     let joinedAt = null;

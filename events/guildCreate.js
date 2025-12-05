@@ -367,10 +367,19 @@ module.exports = {
       logger.info(
         `📸 Created initial recovery snapshot for ${guild.name} (${guild.id})`
       );
-      logger.info(
-        "Guild Create",
-        `Created initial recovery snapshot for ${guild.name}`
-      );
+    logger.info(
+      "Guild Create",
+      `Created initial recovery snapshot for ${guild.name}`
+    );
+
+    // Start audit log monitoring for new guild (EXCEEDS WICK)
+    if (client.auditLogMonitor) {
+      try {
+        client.auditLogMonitor.startMonitoring(guild);
+      } catch (error) {
+        logger.debug("GuildCreate", `Could not start audit log monitoring: ${error.message}`);
+      }
+    }
     } catch (error) {
       logger.error(
         "Guild Create",

@@ -72,7 +72,163 @@ class AdvancedAntiRaid {
       if (timeClusters.length > 0 && timeClusters[0].length >= 3) return true;
       return false;
     },
+
+    // Algorithm 5: Temporal Pattern Analysis (EXCEEDS WICK - time-based attack detection)
+    temporalPattern: (joins) => {
+      if (joins.length < 5) return false;
+
+      const timestamps = joins.map((j) => j.timestamp).sort((a, b) => a - b);
+      
+      // Detect burst patterns (many joins in very short time)
+      const burstWindows = [];
+      for (let i = 0; i < timestamps.length - 1; i++) {
+        const window = timestamps.slice(i, i + 5);
+        if (window.length === 5) {
+          const span = window[4] - window[0];
+          if (span < 5000) {
+            // 5 joins in < 5 seconds = burst pattern
+            burstWindows.push(window);
+          }
+        }
+      }
+      if (burstWindows.length > 0) return true;
+
+      // Detect wave patterns (coordinated waves of joins)
+      const intervals = [];
+      for (let i = 1; i < timestamps.length; i++) {
+        intervals.push(timestamps[i] - timestamps[i - 1]);
+      }
+      const avgInterval = intervals.reduce((a, b) => a + b, 0) / intervals.length;
+      const variance = intervals.reduce((sum, interval) => sum + Math.pow(interval - avgInterval, 2), 0) / intervals.length;
+      
+      // Low variance = consistent timing = coordinated wave attack
+      if (variance < 1000000 && intervals.length >= 5) return true; // < 1 second variance
+
+      return false;
+    },
+
+    // Algorithm 6: Graph-Based Network Analysis (EXCEEDS WICK - detect attack networks)
+    graphBased: (joins) => {
+      if (joins.length < 7) return false;
+
+      // Build similarity graph
+      const similarities = [];
+      for (let i = 0; i < joins.length; i++) {
+        for (let j = i + 1; j < joins.length; j++) {
+          const similarity = this.calculateUserSimilarity(joins[i], joins[j]);
+          if (similarity > 0.6) {
+            similarities.push({ i, j, similarity });
+          }
+        }
+      }
+
+      // Find connected components (clusters of similar accounts)
+      const visited = new Set();
+      const components = [];
+      
+      for (let i = 0; i < joins.length; i++) {
+        if (visited.has(i)) continue;
+        
+        const component = [];
+        const queue = [i];
+        visited.add(i);
+        
+        while (queue.length > 0) {
+          const current = queue.shift();
+          component.push(current);
+          
+          similarities.forEach(({ i: idx1, j: idx2 }) => {
+            if (idx1 === current && !visited.has(idx2)) {
+              visited.add(idx2);
+              queue.push(idx2);
+            } else if (idx2 === current && !visited.has(idx1)) {
+              visited.add(idx1);
+              queue.push(idx1);
+            }
+          });
+        }
+        
+        if (component.length >= 3) {
+          components.push(component);
+        }
+      }
+
+      // Multiple large components = attack network
+      if (components.length >= 2 && components.some(c => c.length >= 4)) return true;
+      
+      return false;
+    },
   };
+
+  // Calculate similarity between two users (for graph analysis)
+  static calculateUserSimilarity(user1, user2) {
+    let similarity = 0;
+    let factors = 0;
+
+    // Account age similarity
+    const ageDiff = Math.abs(user1.accountAge - user2.accountAge);
+    const maxAge = Math.max(user1.accountAge, user2.accountAge);
+    if (maxAge > 0) {
+      similarity += 1 - (ageDiff / maxAge);
+      factors++;
+    }
+
+    // Username similarity
+    const usernameSim = this.stringSimilarity(user1.username, user2.username);
+    similarity += usernameSim;
+    factors++;
+
+    // Avatar similarity
+    if (user1.hasAvatar === user2.hasAvatar) {
+      similarity += 1;
+      factors++;
+    }
+
+    // Discriminator similarity (if close, might be sequential)
+    const disc1 = parseInt(user1.discriminator) || 0;
+    const disc2 = parseInt(user2.discriminator) || 0;
+    if (Math.abs(disc1 - disc2) < 100) {
+      similarity += 0.5;
+      factors++;
+    }
+
+    return factors > 0 ? similarity / factors : 0;
+  }
+
+  // String similarity (Levenshtein-based)
+  static stringSimilarity(str1, str2) {
+    const longer = str1.length > str2.length ? str1 : str2;
+    const shorter = str1.length > str2.length ? str2 : str1;
+    
+    if (longer.length === 0) return 1.0;
+    
+    const distance = this.levenshteinDistance(longer, shorter);
+    return (longer.length - distance) / longer.length;
+  }
+
+  static levenshteinDistance(str1, str2) {
+    const matrix = [];
+    for (let i = 0; i <= str2.length; i++) {
+      matrix[i] = [i];
+    }
+    for (let j = 0; j <= str1.length; j++) {
+      matrix[0][j] = j;
+    }
+    for (let i = 1; i <= str2.length; i++) {
+      for (let j = 1; j <= str1.length; j++) {
+        if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
+          matrix[i][j] = matrix[i - 1][j - 1];
+        } else {
+          matrix[i][j] = Math.min(
+            matrix[i - 1][j - 1] + 1,
+            matrix[i][j - 1] + 1,
+            matrix[i - 1][j] + 1
+          );
+        }
+      }
+    }
+    return matrix[str2.length][str1.length];
+  }
 
   static findClusters(times, window) {
     const clusters = [];
@@ -176,10 +332,12 @@ class AdvancedAntiRaid {
     let threatScore = 0;
     if (joinData.joins.length >= minJoinsForThreatScore) {
       // Adjust threat score contributions based on sensitivity
-      const baseRateScore = 30;
-      const basePatternScore = 25;
+      const baseRateScore = 25;
+      const basePatternScore = 20;
       const baseBehavioralScore = 15;
       const baseNetworkScore = 10;
+      const baseTemporalScore = 15;
+      const baseGraphScore = 15;
 
       if (results.rateBased)
         threatScore += Math.ceil(baseRateScore / sensitivityMultiplier);
@@ -189,6 +347,10 @@ class AdvancedAntiRaid {
         threatScore += Math.ceil(baseBehavioralScore / sensitivityMultiplier);
       if (results.networkBased)
         threatScore += Math.ceil(baseNetworkScore / sensitivityMultiplier);
+      if (results.temporalPattern)
+        threatScore += Math.ceil(baseTemporalScore / sensitivityMultiplier);
+      if (results.graphBased)
+        threatScore += Math.ceil(baseGraphScore / sensitivityMultiplier);
     } else {
       threatScore = 0;
     }

@@ -209,6 +209,18 @@ module.exports = {
       }
     });
 
+    // Start audit log monitoring for all servers (EXCEEDS WICK)
+    if (client.auditLogMonitor) {
+      client.guilds.cache.forEach((guild) => {
+        try {
+          client.auditLogMonitor.startMonitoring(guild);
+        } catch (error) {
+          logger.debug("Ready", `Could not start audit log monitoring for ${guild.name}: ${error.message}`);
+        }
+      });
+      logger.info("Ready", `Started audit log monitoring for ${client.guilds.cache.size} servers`);
+    }
+
     // Create recovery snapshots for all servers (if auto-recovery is enabled)
     // Process in batches for better performance
     const AutoRecovery = require("../utils/autoRecovery");
