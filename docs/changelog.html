@@ -84,8 +84,18 @@
 
       <div class="content-section">
         <div class="changelog-entry">
-          <h2>Version 3.12.0 - December 4, 2025</h2>
+          <h2>Version 3.16.3 - December 5, 2025</h2>
           <span class="version-badge">Latest</span>
+          <h3>🔧 Database Schema Fix</h3>
+          <ul>
+            <li>✅ Added migration for missing <code>guild_name</code> column in backups table</li>
+            <li>✅ Fixed "no such column: guild_name" error in backup manager</li>
+            <li>✅ Backup metadata now saves correctly</li>
+          </ul>
+        </div>
+
+        <div class="changelog-entry">
+          <h2>Version 3.12.0 - December 4, 2025</h2>
           <h3>🔧 Poll System - Manual Ending</h3>
           <ul>
             <li>✅ Removed problematic auto-ending via setTimeout</li>
