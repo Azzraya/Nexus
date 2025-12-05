@@ -1403,6 +1403,44 @@ class Database {
           logger.error("Error creating index idx_polls_guild_active:", err);
       }
     );
+
+    // Indexes for XP system (performance optimization)
+    this.db.run(
+      `CREATE INDEX IF NOT EXISTS idx_user_xp_guild_user ON user_xp(guild_id, user_id)`,
+      (err) => {
+        if (err) logger.error("Error creating index idx_user_xp_guild_user:", err);
+      }
+    );
+    this.db.run(
+      `CREATE INDEX IF NOT EXISTS idx_user_xp_guild_xp ON user_xp(guild_id, xp DESC)`,
+      (err) => {
+        if (err) logger.error("Error creating index idx_user_xp_guild_xp:", err);
+      }
+    );
+
+    // Indexes for achievements
+    this.db.run(
+      `CREATE INDEX IF NOT EXISTS idx_user_achievements_guild_user ON user_achievements(guild_id, user_id)`,
+      (err) => {
+        if (err) logger.error("Error creating index idx_user_achievements_guild_user:", err);
+      }
+    );
+
+    // Indexes for server events
+    this.db.run(
+      `CREATE INDEX IF NOT EXISTS idx_server_events_guild_time ON server_events(guild_id, start_time)`,
+      (err) => {
+        if (err) logger.error("Error creating index idx_server_events_guild_time:", err);
+      }
+    );
+
+    // Indexes for event RSVPs
+    this.db.run(
+      `CREATE INDEX IF NOT EXISTS idx_event_rsvp_event ON event_rsvp(event_id)`,
+      (err) => {
+        if (err) logger.error("Error creating index idx_event_rsvp_event:", err);
+      }
+    );
   }
 
   runMigrations() {
