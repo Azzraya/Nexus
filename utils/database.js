@@ -15,33 +15,30 @@ class Database {
     }
 
     this.db = new sqlite3.Database(dbPath, (err) => {
-      // Defer logger usage to next tick to ensure it's initialized
-      setImmediate(() => {
-        if (err) {
-          logger.error("Database connection error:", err);
-        } else {
-          logger.success("Database", "Connected");
+      if (err) {
+        logger.error("Database connection error:", err);
+      } else {
+        logger.success("Database", "Connected");
 
-          // Optimize database performance (EXCEEDS WICK - better performance)
-          this.db.serialize(() => {
-            // Enable WAL mode for better concurrency (EXCEEDS WICK)
-            this.db.run("PRAGMA journal_mode = WAL;", (err) => {
-              if (err) logger.warn("Failed to enable WAL mode:", err);
-            });
-
-            // Optimize for performance (EXCEEDS WICK)
-            this.db.run("PRAGMA synchronous = NORMAL;"); // Faster writes
-            this.db.run("PRAGMA cache_size = -64000;"); // 64MB cache
-            this.db.run("PRAGMA temp_store = MEMORY;"); // Use memory for temp tables
-            this.db.run("PRAGMA mmap_size = 268435456;"); // 256MB memory-mapped I/O
-
-            // Initialize tables - serialize ensures they're created in order
-            this.initTables();
-            // Run migrations after tables are created
-            this.runMigrations();
+        // Optimize database performance (EXCEEDS WICK - better performance)
+        this.db.serialize(() => {
+          // Enable WAL mode for better concurrency (EXCEEDS WICK)
+          this.db.run("PRAGMA journal_mode = WAL;", (err) => {
+            if (err) logger.warn("Failed to enable WAL mode:", err);
           });
-        }
-      });
+
+          // Optimize for performance (EXCEEDS WICK)
+          this.db.run("PRAGMA synchronous = NORMAL;"); // Faster writes
+          this.db.run("PRAGMA cache_size = -64000;"); // 64MB cache
+          this.db.run("PRAGMA temp_store = MEMORY;"); // Use memory for temp tables
+          this.db.run("PRAGMA mmap_size = 268435456;"); // 256MB memory-mapped I/O
+
+          // Initialize tables - serialize ensures they're created in order
+          this.initTables();
+          // Run migrations after tables are created
+          this.runMigrations();
+        });
+      }
     });
   }
 

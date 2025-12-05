@@ -10,8 +10,8 @@ const { Client, GatewayIntentBits, Collection } = require("discord.js");
 const fs = require("fs");
 const path = require("path");
 require("dotenv").config();
-const logger = require("./utils/logger");
 const db = require("./utils/database");
+const logger = require("./utils/logger");
 
 // API removed - not needed for local use
 
