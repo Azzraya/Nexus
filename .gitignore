@@ -25,5 +25,3 @@ other/
 logs/
 data/
 *.db
-.prettierrc
-.prettierignore
