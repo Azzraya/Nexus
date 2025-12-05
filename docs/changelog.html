@@ -84,8 +84,21 @@
 
       <div class="content-section">
         <div class="changelog-entry">
-          <h2>Version 3.20.19 - December 5, 2025</h2>
+          <h2>Version 3.20.20 - December 5, 2025</h2>
           <span class="version-badge">Latest</span>
+          <h3>🔧 Code Quality Improvements</h3>
+          <ul>
+            <li>
+              ✅ <strong>Consistent Logging:</strong> Replaced all remaining console.log/console.error calls with logger calls in events/ready.js and utils/database.js for consistent logging throughout the codebase
+            </li>
+            <li>
+              ✅ <strong>Improved Startup Logging:</strong> Guild list and shard stats now use logger.info for better log management
+            </li>
+          </ul>
+        </div>
+
+        <div class="changelog-entry">
+          <h2>Version 3.20.19 - December 5, 2025</h2>
           <h3>🐛 Bug Fixes</h3>
           <ul>
             <li>
