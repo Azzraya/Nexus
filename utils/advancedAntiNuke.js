@@ -131,9 +131,7 @@ class AdvancedAntiNuke {
 
       if (recentPatterns.length >= 3) {
         threatData.confidence += 30;
-        logger.warn(
-          `[Anti-Nuke] Predictive threat detected: ${userId} showing rapid permission testing pattern (confidence: ${threatData.confidence}%)`
-        );
+        // Silent monitoring - only log on action
       }
     }
 
@@ -142,24 +140,8 @@ class AdvancedAntiNuke {
       (p) => Date.now() - p.timestamp < 60000
     );
 
-    // If confidence is high enough, pre-emptively warn admins
-    if (threatData.confidence >= 50 && threatData.confidence < 80) {
-      logger.warn(
-        `[Anti-Nuke] ⚠️ PREDICTIVE THREAT: ${userId} in ${guild.name} showing suspicious patterns (confidence: ${threatData.confidence}%)`
-      );
-      // Could send early warning to admins here
-    }
-
-    // If confidence is very high, take pre-emptive action
-    if (threatData.confidence >= 80) {
-      logger.error(
-        `[Anti-Nuke] 🚨 HIGH CONFIDENCE PREDICTIVE THREAT: ${userId} in ${guild.name} (confidence: ${threatData.confidence}%)`
-      );
-      // Could pre-emptively remove permissions or alert admins
-      return true; // Indicates high threat
-    }
-
-    return false;
+    // Silent monitoring - detection happens, but only critical actions are logged
+    return threatData.confidence >= 80;
   }
 
   // Permission change rate limiting (EXCEEDS WICK - prevents permission testing)
@@ -275,14 +257,18 @@ class AdvancedAntiNuke {
       );
 
       if (permCheck.suspicious) {
-        logger.error(
-          `[Anti-Nuke] 🚨 PERMISSION TESTING DETECTED: ${userId} in ${guild.name} - ${permCheck.reason} (confidence: ${permCheck.confidence}%)`
-        );
+        // Only log if confidence is very high (reduce spam)
+        if (permCheck.confidence >= 80) {
+          logger.warn(
+            `[Anti-Nuke] 🚨 Permission testing: ${userId} (${permCheck.confidence}%)`
+          );
+        }
 
         // If confidence is high enough, take action
         if (permCheck.confidence >= 60) {
           try {
-            const member = await guild.members.fetch(userId);
+            const member = await guild.members.fetch(userId).catch(() => null);
+            if (!member) return; // Member already banned/kicked - stop processing
 
             // Remove dangerous permissions immediately
             const roles = member.roles.cache.filter(
@@ -303,7 +289,7 @@ class AdvancedAntiNuke {
                   `[Anti-Nuke] Removed role ${role.name} from ${member.user.tag}`
                 );
               } catch (err) {
-                logger.error(`[Anti-Nuke] Failed to remove role:`, err);
+                // Silent - role removal failures are expected when member is banned
               }
             }
 
@@ -341,12 +327,7 @@ class AdvancedAntiNuke {
       userId,
       actionType
     );
-    if (isHighThreat) {
-      // Pre-emptive action could be taken here
-      logger.warn(
-        `[Anti-Nuke] High confidence predictive threat detected for ${userId} - monitoring closely`
-      );
-    }
+    // Predictive threat detection runs silently unless action is taken
 
     // Use adaptive thresholds (EXCEEDS WICK - intelligent adaptation)
     const thresholds = this.getAdaptiveThresholds(guild);
@@ -433,9 +414,12 @@ class AdvancedAntiNuke {
             // 2 channels deleted within 1 second = DEFINITE NUKE
             threatDetected = true;
             threatType = "rapid_channel_deletion";
-            logger.warn(
-              `[Anti-Nuke] 🚨 RAPID NUKE DETECTED: 2 channels deleted ${timeDiff}ms apart by ${userId} - IMMEDIATE BAN`
-            );
+            // Only log once per threat (not on every subsequent channel)
+            if (!this.processedThreats.has(`${guild.id}-${userId}-rapid_nuke`)) {
+              logger.warn(
+                `[Anti-Nuke] 🚨 RAPID NUKE: 2 channels ${timeDiff}ms apart - Banning ${userId}`
+              );
+            }
             break;
           }
         }
@@ -508,10 +492,7 @@ class AdvancedAntiNuke {
     }
 
     if (threatDetected) {
-      logger.warn(`[Anti-Nuke] 🔥 THREAT DETECTED - Calling handleThreat for ${userId} - Type: ${threatType}`);
       await this.handleThreat(guild, userId, threatType, counts);
-    } else {
-      logger.debug(`[Anti-Nuke] No threat detected yet for ${userId} - Counts: ${JSON.stringify(counts)}`);
     }
 
     // Update threat score
@@ -604,10 +585,6 @@ class AdvancedAntiNuke {
     const hasBanPerms = botMember.permissions.has("BanMembers");
     const hasKickPerms = botMember.permissions.has("KickMembers");
 
-    logger.warn(
-      `[Anti-Nuke] Immediate action - Bot has Ban: ${hasBanPerms}, Kick: ${hasKickPerms}`
-    );
-
     // TRY TO BAN IMMEDIATELY
     let actionTaken = false;
     if (hasBanPerms) {
@@ -617,14 +594,13 @@ class AdvancedAntiNuke {
           deleteMessageSeconds: 604800,
         });
         logger.success(
-          `[Anti-Nuke] ✅ IMMEDIATE BAN SUCCESS: ${userId} removed from ${guild.name}`
+          `[Anti-Nuke] ✅ BANNED ${userId} | ${threatType} | Starting recovery...`
         );
         actionTaken = true;
         
         // Trigger auto-recovery IMMEDIATELY after ban
-        logger.info(`[Anti-Nuke] Starting auto-recovery after successful ban...`);
         this.attemptRecovery(guild, threatType, counts).catch((error) => {
-          logger.error(`[Anti-Nuke] Auto-recovery failed:`, error);
+          logger.error(`[Anti-Nuke] Recovery failed:`, error);
         });
         
         return; // Success - exit early
@@ -639,14 +615,13 @@ class AdvancedAntiNuke {
       try {
         await member.kick(`Anti-Nuke: ${threatType} detected`);
         logger.success(
-          `[Anti-Nuke] ✅ IMMEDIATE KICK SUCCESS: ${userId} removed from ${guild.name}`
+          `[Anti-Nuke] ✅ KICKED ${userId} | ${threatType} | Starting recovery...`
         );
         actionTaken = true;
         
         // Trigger auto-recovery IMMEDIATELY after kick
-        logger.info(`[Anti-Nuke] Starting auto-recovery after successful kick...`);
         this.attemptRecovery(guild, threatType, counts).catch((error) => {
-          logger.error(`[Anti-Nuke] Auto-recovery failed:`, error);
+          logger.error(`[Anti-Nuke] Recovery failed:`, error);
         });
         
         return; // Success - exit early
