@@ -565,9 +565,13 @@ class AdvancedAntiNuke {
 
     // PERFORMANCE FIX: Attempt ban IMMEDIATELY, don't wait for role manipulation
     // Get bot permissions right away
-    const botMember = await guild.members.fetch(this.client.user.id).catch(() => null);
+    const botMember = await guild.members
+      .fetch(this.client.user.id)
+      .catch(() => null);
     if (!botMember) {
-      logger.error(`[Anti-Nuke] Could not fetch bot member - cannot take action`);
+      logger.error(
+        `[Anti-Nuke] Could not fetch bot member - cannot take action`
+      );
       return;
     }
 
@@ -584,9 +588,11 @@ class AdvancedAntiNuke {
       try {
         await member.ban({
           reason: `Anti-Nuke EMERGENCY: ${threatType} detected`,
-          deleteMessageSeconds: 604800
+          deleteMessageSeconds: 604800,
         });
-        logger.success(`[Anti-Nuke] ✅ IMMEDIATE BAN SUCCESS: ${userId} removed from ${guild.name}`);
+        logger.success(
+          `[Anti-Nuke] ✅ IMMEDIATE BAN SUCCESS: ${userId} removed from ${guild.name}`
+        );
         actionTaken = true;
         return; // Success - exit early
       } catch (banError) {
@@ -599,7 +605,9 @@ class AdvancedAntiNuke {
     if (!actionTaken && hasKickPerms) {
       try {
         await member.kick(`Anti-Nuke: ${threatType} detected`);
-        logger.success(`[Anti-Nuke] ✅ IMMEDIATE KICK SUCCESS: ${userId} removed from ${guild.name}`);
+        logger.success(
+          `[Anti-Nuke] ✅ IMMEDIATE KICK SUCCESS: ${userId} removed from ${guild.name}`
+        );
         actionTaken = true;
         return; // Success - exit early
       } catch (kickError) {
@@ -609,7 +617,9 @@ class AdvancedAntiNuke {
 
     // If immediate action failed, THEN try role manipulation (slower fallback)
     if (!actionTaken) {
-      logger.warn(`[Anti-Nuke] Immediate ban/kick failed - attempting role manipulation fallback`);
+      logger.warn(
+        `[Anti-Nuke] Immediate ban/kick failed - attempting role manipulation fallback`
+      );
     }
 
     // FALLBACK: Try role manipulation (this is slower and often fails)
