@@ -135,14 +135,16 @@ module.exports = {
     await interaction.reply({ embeds: [embed], ephemeral: true });
   },
 
-  async handleStatus(interaction, client) {
+  async handleStatus(interaction) {
     await interaction.deferReply();
 
     const config = await db.getServerConfig(interaction.guild.id);
     const enabled = config?.anti_nuke_enabled !== 0; // Default to enabled
 
     // Get bot role position
-    const botMember = await interaction.guild.members.fetch(client.user.id);
+    const botMember = await interaction.guild.members.fetch(
+      interaction.client.user.id
+    );
     const botRole = botMember.roles.highest;
     const allRoles = Array.from(interaction.guild.roles.cache.values())
       .filter((r) => r.id !== interaction.guild.id)
