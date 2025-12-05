@@ -84,6 +84,20 @@
 
       <div class="content-section">
         <div class="changelog-entry">
+          <h2>Version 3.20.12 - December 5, 2025</h2>
+          <span class="version-badge">Latest</span>
+          <h3>🐛 Critical Bug Fix</h3>
+          <ul>
+            <li>
+              ✅ <strong>Fixed Logger Initialization Error:</strong> Deferred logger usage in database constructor using setTimeout to prevent "Cannot access 'logger' before initialization" error
+            </li>
+            <li>
+              ✅ <strong>Module Initialization:</strong> Database connection callbacks now execute after module initialization completes
+            </li>
+          </ul>
+        </div>
+
+        <div class="changelog-entry">
           <h2>Version 3.20.11 - December 5, 2025</h2>
           <span class="version-badge">Latest</span>
           <h3>🐛 Critical Bug Fix</h3>
