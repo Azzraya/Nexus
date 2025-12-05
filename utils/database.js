@@ -1456,8 +1456,7 @@ class Database {
     );
   }
 
-  runMigrations(skipCheck = false) {
-    if (!skipCheck) this._ensureInitialized();
+  runMigrations() {
     // Migration: Add new columns to suggestions table for /suggest command
     this.db.run(`ALTER TABLE suggestions ADD COLUMN title TEXT`, (err) => {
       if (err && !err.message.includes("duplicate column")) {
