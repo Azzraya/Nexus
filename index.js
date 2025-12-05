@@ -364,6 +364,12 @@ if (!process.env.USING_SHARDING && process.env.TOPGG_TOKEN) {
 
 // Top.gg webhook server removed - not using webhooks
 
+// Initialize Redis cache (optional - falls back to in-memory if unavailable)
+const redisCache = require("./utils/redisCache");
+redisCache.connect().catch(err => {
+  logger.warn("[Redis] Initialization failed, using in-memory cache:", err.message);
+});
+
 // Login with shard support
 // If we're being spawned by ShardingManager (shard.js), it handles login automatically via the token passed to it
 // Only login if we're running index.js directly (not via shard.js)

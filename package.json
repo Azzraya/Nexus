@@ -1,6 +1,6 @@
 {
   "name": "nexus-bot",
-  "version": "3.12.3",
+  "version": "3.13.0",
   "description": "Advanced Discord bot that exceeds Wick and all competitors",
   "main": "index.js",
   "scripts": {
@@ -42,5 +42,8 @@
     "topgg-autoposter": "^2.0.2",
     "voidbots": "^2.6.3",
     "winston": "^3.11.0"
+  },
+  "optionalDependencies": {
+    "redis": "^4.7.1"
   }
 }

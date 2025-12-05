@@ -1408,13 +1408,15 @@ class Database {
     this.db.run(
       `CREATE INDEX IF NOT EXISTS idx_user_xp_guild_user ON user_xp(guild_id, user_id)`,
       (err) => {
-        if (err) logger.error("Error creating index idx_user_xp_guild_user:", err);
+        if (err)
+          logger.error("Error creating index idx_user_xp_guild_user:", err);
       }
     );
     this.db.run(
       `CREATE INDEX IF NOT EXISTS idx_user_xp_guild_xp ON user_xp(guild_id, xp DESC)`,
       (err) => {
-        if (err) logger.error("Error creating index idx_user_xp_guild_xp:", err);
+        if (err)
+          logger.error("Error creating index idx_user_xp_guild_xp:", err);
       }
     );
 
@@ -1422,7 +1424,11 @@ class Database {
     this.db.run(
       `CREATE INDEX IF NOT EXISTS idx_user_achievements_guild_user ON user_achievements(guild_id, user_id)`,
       (err) => {
-        if (err) logger.error("Error creating index idx_user_achievements_guild_user:", err);
+        if (err)
+          logger.error(
+            "Error creating index idx_user_achievements_guild_user:",
+            err
+          );
       }
     );
 
@@ -1430,7 +1436,11 @@ class Database {
     this.db.run(
       `CREATE INDEX IF NOT EXISTS idx_server_events_guild_time ON server_events(guild_id, start_time)`,
       (err) => {
-        if (err) logger.error("Error creating index idx_server_events_guild_time:", err);
+        if (err)
+          logger.error(
+            "Error creating index idx_server_events_guild_time:",
+            err
+          );
       }
     );
 
@@ -1438,7 +1448,8 @@ class Database {
     this.db.run(
       `CREATE INDEX IF NOT EXISTS idx_event_rsvp_event ON event_rsvp(event_id)`,
       (err) => {
-        if (err) logger.error("Error creating index idx_event_rsvp_event:", err);
+        if (err)
+          logger.error("Error creating index idx_event_rsvp_event:", err);
       }
     );
   }
@@ -1842,9 +1853,15 @@ class Database {
 
   // Server config methods
   async getServerConfig(guildId) {
-    // Check cache first
-    const cache = require("./cache");
-    const cached = cache.get(`config_${guildId}`);
+    // Check Redis cache first, then memory cache
+    const cacheKey = `config_${guildId}`;
+
+    // Try Redis first
+    const redisCached = await redisCache.get(cacheKey);
+    if (redisCached) return redisCached;
+
+    // Try memory cache
+    const cached = cache.get(cacheKey);
     if (cached) return cached;
 
     return new Promise((resolve, reject) => {
@@ -1855,8 +1872,11 @@ class Database {
           if (err) reject(err);
           else {
             const config = row || null;
-            // Cache for 5 minutes
-            cache.set(`config_${guildId}`, config, 300000);
+            if (config) {
+              // Cache in both Redis and memory
+              redisCache.set(cacheKey, config, 300).catch(() => {}); // 5 min
+              cache.set(cacheKey, config, 300000);
+            }
             resolve(config);
           }
         }
@@ -1865,9 +1885,10 @@ class Database {
   }
 
   async setServerConfig(guildId, data) {
-    // Clear cache when config changes
-    const cache = require("./cache");
-    cache.delete(`config_${guildId}`);
+    // Clear both Redis and memory cache when config changes
+    const cacheKey = `config_${guildId}`;
+    await redisCache.del(cacheKey).catch(() => {});
+    cache.delete(cacheKey);
 
     // WHITELIST allowed config keys (prevent SQL injection)
     const ALLOWED_CONFIG_KEYS = [

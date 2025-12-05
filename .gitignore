@@ -24,3 +24,4 @@ marketing/
 other/
 logs/
 data/
+*.db
