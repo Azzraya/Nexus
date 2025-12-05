@@ -3,7 +3,14 @@ const path = require("path");
 const fs = require("fs");
 const logger = require("./logger");
 const cache = require("./cache");
-const redisCache = require("./redisCache");
+// Lazy load redisCache to avoid initialization order issues
+let redisCache = null;
+const getRedisCache = () => {
+  if (!redisCache) {
+    redisCache = require("./redisCache");
+  }
+  return redisCache;
+};
 
 class Database {
   constructor() {
@@ -1890,7 +1897,7 @@ class Database {
     const cacheKey = `config_${guildId}`;
 
     // Try Redis first
-    const redisCached = await redisCache.get(cacheKey);
+    const redisCached = await getRedisCache().get(cacheKey);
     if (redisCached) return redisCached;
 
     // Try memory cache
@@ -1907,7 +1914,7 @@ class Database {
             const config = row || null;
             if (config) {
               // Cache in both Redis and memory
-              redisCache.set(cacheKey, config, 300).catch(() => {}); // 5 min
+              getRedisCache().set(cacheKey, config, 300).catch(() => {}); // 5 min
               cache.set(cacheKey, config, 300000);
             }
             resolve(config);
@@ -1920,7 +1927,7 @@ class Database {
   async setServerConfig(guildId, data) {
     // Clear both Redis and memory cache when config changes
     const cacheKey = `config_${guildId}`;
-    await redisCache.del(cacheKey).catch(() => {});
+    await getRedisCache().del(cacheKey).catch(() => {});
     cache.delete(cacheKey);
 
     // WHITELIST allowed config keys (prevent SQL injection)
