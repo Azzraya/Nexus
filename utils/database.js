@@ -2,6 +2,8 @@ const sqlite3 = require("sqlite3").verbose();
 const path = require("path");
 const fs = require("fs");
 const logger = require("./logger");
+const cache = require("./cache");
+const redisCache = require("./redisCache");
 
 class Database {
   constructor() {
