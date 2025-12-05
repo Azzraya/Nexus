@@ -144,10 +144,13 @@
             border: none;
             font-size: 1rem;
           "
-          onkeypress="if(event.key==='Enter') login()"
+          onkeypress="if (event.key === 'Enter') login();"
         />
         <button onclick="login()" style="width: 100%">Login</button>
-        <p id="error" style="color: #ff6b6b; margin-top: 10px; display: none"></p>
+        <p
+          id="error"
+          style="color: #ff6b6b; margin-top: 10px; display: none"
+        ></p>
       </div>
     </div>
 
@@ -155,8 +158,11 @@
     <div id="dashboard" style="display: none">
       <div class="container">
         <h1>📊 Usage Patterns Analysis</h1>
-        <p style="opacity: 0.8; margin-bottom: 30px">
+        <p style="opacity: 0.8; margin-bottom: 10px">
           Internal analytics for maintenance planning
+        </p>
+        <p id="timezoneLabel" style="opacity: 0.6; margin-bottom: 30px; font-size: 0.9rem">
+          Times shown in: <strong id="currentTimezone">Loading...</strong>
         </p>
 
         <div id="currentStatus"></div>
@@ -175,7 +181,7 @@
         <div id="maintenanceInfo"></div>
 
         <div style="margin-top: 30px">
-          <button onclick="window.location.href='admin.html'">
+          <button onclick="window.location.href = 'admin.html'">
             ← Back to Admin
           </button>
         </div>
@@ -191,7 +197,9 @@
       // Check if already authenticated
       const isAuthenticated = sessionStorage.getItem("adminAuthenticated");
       if (isAuthenticated === "true") {
-        const expiry = parseInt(sessionStorage.getItem("adminTokenExpiry") || "0");
+        const expiry = parseInt(
+          sessionStorage.getItem("adminTokenExpiry") || "0"
+        );
         if (Date.now() < expiry) {
           document.getElementById("auth-screen").style.display = "none";
           document.getElementById("dashboard").style.display = "block";
@@ -249,6 +257,10 @@
 
           const data = await response.json();
 
+          // Display timezone
+          document.getElementById("currentTimezone").textContent = 
+            data.timezone ? data.timezone.label : 'GMT';
+
           // Current status
           document.getElementById("currentStatus").innerHTML = `
             <div class="maintenance-window">
@@ -294,8 +306,11 @@
                   label: "Commands",
                   data: data.hourlyData.map((d) => d.commands),
                   backgroundColor: data.hourlyData.map((d) => {
-                    const max = Math.max(...data.hourlyData.map((h) => h.commands));
-                    if (d.commands > max * 0.7) return "rgba(255, 107, 107, 0.7)";
+                    const max = Math.max(
+                      ...data.hourlyData.map((h) => h.commands)
+                    );
+                    if (d.commands > max * 0.7)
+                      return "rgba(255, 107, 107, 0.7)";
                     if (d.commands > max * 0.4) return "rgba(255, 193, 7, 0.7)";
                     return "rgba(0, 255, 136, 0.7)";
                   }),
@@ -307,11 +322,22 @@
               responsive: true,
               plugins: {
                 legend: { display: false },
-                title: { display: true, text: "Commands by Hour (UTC)", color: "#fff" },
+                title: {
+                  display: true,
+                  text: `Commands by Hour (${data.timezone ? data.timezone.name : 'GMT'})`,
+                  color: "#fff",
+                },
               },
               scales: {
-                y: { beginAtZero: true, ticks: { color: "#fff" }, grid: { color: "rgba(255,255,255,0.1)" } },
-                x: { ticks: { color: "#fff" }, grid: { color: "rgba(255,255,255,0.1)" } },
+                y: {
+                  beginAtZero: true,
+                  ticks: { color: "#fff" },
+                  grid: { color: "rgba(255,255,255,0.1)" },
+                },
+                x: {
+                  ticks: { color: "#fff" },
+                  grid: { color: "rgba(255,255,255,0.1)" },
+                },
               },
             },
           });
@@ -334,11 +360,22 @@
               responsive: true,
               plugins: {
                 legend: { display: false },
-                title: { display: true, text: "Commands by Day", color: "#fff" },
+                title: {
+                  display: true,
+                  text: "Commands by Day",
+                  color: "#fff",
+                },
               },
               scales: {
-                y: { beginAtZero: true, ticks: { color: "#fff" }, grid: { color: "rgba(255,255,255,0.1)" } },
-                x: { ticks: { color: "#fff" }, grid: { color: "rgba(255,255,255,0.1)" } },
+                y: {
+                  beginAtZero: true,
+                  ticks: { color: "#fff" },
+                  grid: { color: "rgba(255,255,255,0.1)" },
+                },
+                x: {
+                  ticks: { color: "#fff" },
+                  grid: { color: "rgba(255,255,255,0.1)" },
+                },
               },
             },
           });
@@ -348,7 +385,7 @@
             <div class="maintenance-window">
               <h2>🟢 Recommended Maintenance Window</h2>
               <p style="font-size: 1.5rem; margin: 15px 0;">
-                <strong>${data.maintenanceWindow.start} - ${data.maintenanceWindow.end} UTC</strong>
+                <strong>${data.maintenanceWindow.start} - ${data.maintenanceWindow.end} ${data.timezone ? data.timezone.name : 'GMT'}</strong>
               </p>
               <p>${data.maintenanceWindow.reason}</p>
             </div>
@@ -356,24 +393,32 @@
             <div class="warning-box">
               <h2>🔴 Peak Hours (Avoid)</h2>
               <div class="hour-list">
-                ${data.peakHours.map((h) => `
+                ${data.peakHours
+                  .map(
+                    (h) => `
                   <div class="hour-item" style="border-left-color: #ff6b6b;">
-                    <strong>${h.hour}:00</strong><br>
+                    <strong>${h.hour}:00 ${data.timezone ? data.timezone.name : 'GMT'}</strong><br>
                     <span style="color: #ff6b6b;">${h.commands} commands</span>
                   </div>
-                `).join("")}
+                `
+                  )
+                  .join("")}
               </div>
             </div>
 
             <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 10px;">
               <h2>🟢 Quiet Hours (Best for Updates)</h2>
               <div class="hour-list">
-                ${data.quietHours.map((h) => `
+                ${data.quietHours
+                  .map(
+                    (h) => `
                   <div class="hour-item" style="border-left-color: #00ff88;">
-                    <strong>${h.hour}:00</strong><br>
+                    <strong>${h.hour}:00 ${data.timezone ? data.timezone.name : 'GMT'}</strong><br>
                     <span style="color: #00ff88;">${h.commands} commands</span>
                   </div>
-                `).join("")}
+                `
+                  )
+                  .join("")}
               </div>
             </div>
           `;
@@ -396,4 +441,3 @@
     </script>
   </body>
 </html>
-

@@ -2,12 +2,47 @@ const db = require("./database");
 
 class UsageAnalyzer {
   /**
+   * Check if currently in British Summer Time
+   * @returns {boolean}
+   */
+  static isBST() {
+    const now = new Date();
+    const year = now.getFullYear();
+    
+    // BST starts last Sunday of March at 1:00 UTC
+    const marchSunday = new Date(year, 2, 31); // March 31
+    while (marchSunday.getDay() !== 0) marchSunday.setDate(marchSunday.getDate() - 1);
+    const bstStart = new Date(Date.UTC(year, 2, marchSunday.getDate(), 1, 0, 0));
+    
+    // BST ends last Sunday of October at 1:00 UTC
+    const octoberSunday = new Date(year, 9, 31); // October 31
+    while (octoberSunday.getDay() !== 0) octoberSunday.setDate(octoberSunday.getDate() - 1);
+    const bstEnd = new Date(Date.UTC(year, 9, octoberSunday.getDate(), 1, 0, 0));
+    
+    return now >= bstStart && now < bstEnd;
+  }
+
+  /**
+   * Get current timezone info
+   * @returns {Object} Timezone name and offset
+   */
+  static getTimezone() {
+    const isBST = this.isBST();
+    return {
+      name: isBST ? 'BST' : 'GMT',
+      offset: isBST ? 1 : 0,
+      label: isBST ? 'BST (UTC+1)' : 'GMT (UTC+0)'
+    };
+  }
+
+  /**
    * Analyze command usage patterns for the last N days
    * @param {number} days - Number of days to analyze (default: 7)
    * @returns {Promise<Object>} Analysis results
    */
   static async analyzeUsagePatterns(days = 7) {
     const since = Date.now() - days * 24 * 60 * 60 * 1000;
+    const timezone = this.getTimezone();
 
     // Get hourly breakdown
     const hourlyData = await new Promise((resolve, reject) => {
