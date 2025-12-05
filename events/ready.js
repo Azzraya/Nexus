@@ -207,11 +207,11 @@ module.exports = {
     // Process in batches for better performance
     const AutoRecovery = require("../utils/autoRecovery");
     const db = client.db;
-    const guilds = Array.from(client.guilds.cache.values());
+    const allGuilds = Array.from(client.guilds.cache.values());
     const batchSize = 5;
     
-    for (let i = 0; i < guilds.length; i += batchSize) {
-      const batch = guilds.slice(i, i + batchSize);
+    for (let i = 0; i < allGuilds.length; i += batchSize) {
+      const batch = allGuilds.slice(i, i + batchSize);
       await Promise.all(
         batch.map(async (guild) => {
           try {

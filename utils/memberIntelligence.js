@@ -268,10 +268,11 @@ class MemberIntelligence {
 
       return riskScores.slice(0, limit);
     } catch (error) {
-      console.error(
-        "[Member Intelligence] Error getting risky members:",
-        error
-      );
+      logger.error("Member Intelligence", "Error getting risky members", {
+        message: error?.message || String(error),
+        stack: error?.stack,
+        name: error?.name,
+      });
       return [];
     }
   }

@@ -156,7 +156,11 @@ module.exports = {
           );
         }
       } catch (error) {
-        logger.error("[AdvancedAutomod] Message check failed:", error);
+        logger.error("AdvancedAutomod", "Message check failed", {
+          message: error?.message || String(error),
+          stack: error?.stack,
+          name: error?.name,
+        });
       }
     }
 
@@ -298,7 +302,11 @@ module.exports = {
           }
         }
       } catch (error) {
-        logger.error(`[HeatSystem] Error processing message heat:`, error);
+        logger.error("HeatSystem", "Error processing message heat", {
+          message: error?.message || String(error),
+          stack: error?.stack,
+          name: error?.name,
+        });
       }
     }
 

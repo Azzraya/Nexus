@@ -84,8 +84,21 @@
 
       <div class="content-section">
         <div class="changelog-entry">
-          <h2>Version 3.20.18 - December 5, 2025</h2>
+          <h2>Version 3.20.19 - December 5, 2025</h2>
           <span class="version-badge">Latest</span>
+          <h3>🐛 Bug Fixes</h3>
+          <ul>
+            <li>
+              ✅ <strong>Fixed Variable Redeclaration:</strong> Fixed "Cannot redeclare block-scoped variable 'guilds'" error in events/ready.js by renaming variable to avoid conflict
+            </li>
+            <li>
+              ✅ <strong>Improved Error Logging:</strong> Updated remaining logger.error calls in events/messageCreate.js and utils/memberIntelligence.js to include full stack traces
+            </li>
+          </ul>
+        </div>
+
+        <div class="changelog-entry">
+          <h2>Version 3.20.18 - December 5, 2025</h2>
           <h3>🔧 Code Quality & Performance Improvements</h3>
           <ul>
             <li>
