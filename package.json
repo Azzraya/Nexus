@@ -1,11 +1,25 @@
 {
-  "name": "nexus",
-  "version": "1.0.0",
-  "description": "<div align=\"center\">",
+  "name": "nexus-bot",
+  "version": "3.16.5",
+  "description": "Advanced Discord bot that exceeds Wick and all competitors",
   "main": "index.js",
-  "directories": {
-    "doc": "docs"
+  "scripts": {
+    "start": "node shard.js",
+    "dev": "node index.js",
+    "shard": "node shard.js",
+    "git:pull": "scripts\\pull.bat",
+    "git:push": "scripts\\push.bat",
+    "git:sync": "scripts\\sync.bat"
   },
+  "keywords": [
+    "discord",
+    "bot",
+    "moderation",
+    "anti-raid",
+    "anti-nuke"
+  ],
+  "author": "",
+  "license": "ISC",
   "dependencies": {
     "abbrev": "^1.1.1",
     "accepts": "^1.3.8",
@@ -259,16 +273,12 @@
     "yargs-parser": "^18.1.3"
   },
   "devDependencies": {},
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Azzraya/Nexus.git"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  
   "type": "commonjs",
   "bugs": {
     "url": "https://github.com/Azzraya/Nexus/issues"
