@@ -56,6 +56,7 @@ class QueryOptimizer {
    * Execute raw query with error handling
    */
   async executeQuery(query, params = []) {
+    db._ensureInitialized();
     return new Promise((resolve, reject) => {
       const method = query.trim().toUpperCase().startsWith("SELECT")
         ? "all"

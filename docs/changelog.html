@@ -84,8 +84,24 @@
 
       <div class="content-section">
         <div class="changelog-entry">
-          <h2>Version 3.20.12 - December 5, 2025</h2>
+          <h2>Version 3.20.13 - December 5, 2025</h2>
           <span class="version-badge">Latest</span>
+          <h3>🐛 Critical Bug Fix</h3>
+          <ul>
+            <li>
+              ✅ <strong>Fixed Logger Initialization Error:</strong> Implemented lazy initialization pattern for database - database connection now initializes on next tick using process.nextTick() to ensure all modules are fully loaded before logger is accessed
+            </li>
+            <li>
+              ✅ <strong>Lazy Initialization:</strong> Database constructor no longer immediately connects - connection is deferred until after module loading completes
+            </li>
+            <li>
+              ✅ <strong>Safety Checks:</strong> Added _ensureInitialized() calls to database helper methods to guarantee initialization before use
+            </li>
+          </ul>
+        </div>
+
+        <div class="changelog-entry">
+          <h2>Version 3.20.12 - December 5, 2025</h2>
           <h3>🐛 Critical Bug Fix</h3>
           <ul>
             <li>

@@ -60,6 +60,7 @@ module.exports = {
         );
 
         // Log to database (non-blocking)
+        db._ensureInitialized();
         db.db.run(
           "INSERT INTO command_usage_log (guild_id, guild_name, user_id, user_tag, command_name, timestamp) VALUES (?, ?, ?, ?, ?, ?)",
           [

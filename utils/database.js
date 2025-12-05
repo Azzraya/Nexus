@@ -7,6 +7,14 @@ const redisCache = require("./redisCache");
 
 class Database {
   constructor() {
+    this.db = null;
+    this._initialized = false;
+  }
+
+  _initialize() {
+    if (this._initialized) return;
+    this._initialized = true;
+
     const dbPath = path.join(__dirname, "..", "data", "nexus.db");
     const dataDir = path.dirname(dbPath);
 
@@ -15,37 +23,41 @@ class Database {
     }
 
     this.db = new sqlite3.Database(dbPath, (err) => {
-      // Use setTimeout to defer logger usage until after module initialization
-      setTimeout(() => {
-        if (err) {
-          logger.error("Database connection error:", err);
-        } else {
-          logger.success("Database", "Connected");
+      if (err) {
+        logger.error("Database connection error:", err);
+      } else {
+        logger.success("Database", "Connected");
 
-          // Optimize database performance (EXCEEDS WICK - better performance)
-          this.db.serialize(() => {
-            // Enable WAL mode for better concurrency (EXCEEDS WICK)
-            this.db.run("PRAGMA journal_mode = WAL;", (err) => {
-              if (err) logger.warn("Failed to enable WAL mode:", err);
-            });
-
-            // Optimize for performance (EXCEEDS WICK)
-            this.db.run("PRAGMA synchronous = NORMAL;"); // Faster writes
-            this.db.run("PRAGMA cache_size = -64000;"); // 64MB cache
-            this.db.run("PRAGMA temp_store = MEMORY;"); // Use memory for temp tables
-            this.db.run("PRAGMA mmap_size = 268435456;"); // 256MB memory-mapped I/O
-
-            // Initialize tables - serialize ensures they're created in order
-            this.initTables();
-            // Run migrations after tables are created
-            this.runMigrations();
+        // Optimize database performance (EXCEEDS WICK - better performance)
+        this.db.serialize(() => {
+          // Enable WAL mode for better concurrency (EXCEEDS WICK)
+          this.db.run("PRAGMA journal_mode = WAL;", (err) => {
+            if (err) logger.warn("Failed to enable WAL mode:", err);
           });
-        }
-      }, 0);
+
+          // Optimize for performance (EXCEEDS WICK)
+          this.db.run("PRAGMA synchronous = NORMAL;"); // Faster writes
+          this.db.run("PRAGMA cache_size = -64000;"); // 64MB cache
+          this.db.run("PRAGMA temp_store = MEMORY;"); // Use memory for temp tables
+          this.db.run("PRAGMA mmap_size = 268435456;"); // 256MB memory-mapped I/O
+
+          // Initialize tables - serialize ensures they're created in order
+          this.initTables(true); // Skip check since we're already initializing
+          // Run migrations after tables are created
+          this.runMigrations(true); // Skip check since we're already initializing
+        });
+      }
     });
   }
 
-  initTables() {
+  _ensureInitialized() {
+    if (!this._initialized) {
+      this._initialize();
+    }
+  }
+
+  initTables(skipCheck = false) {
+    if (!skipCheck) this._ensureInitialized();
     // Server configurations
     this.db.run(`
             CREATE TABLE IF NOT EXISTS server_config (
@@ -1459,7 +1471,8 @@ class Database {
     );
   }
 
-  runMigrations() {
+  runMigrations(skipCheck = false) {
+    if (!skipCheck) this._ensureInitialized();
     // Migration: Add new columns to suggestions table for /suggest command
     this.db.run(`ALTER TABLE suggestions ADD COLUMN title TEXT`, (err) => {
       if (err && !err.message.includes("duplicate column")) {
@@ -4869,4 +4882,9 @@ class Database {
   }
 }
 
-module.exports = new Database();
+const dbInstance = new Database();
+// Initialize on next tick to ensure all modules are loaded
+process.nextTick(() => {
+  dbInstance._initialize();
+});
+module.exports = dbInstance;

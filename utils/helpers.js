@@ -14,6 +14,7 @@ class DatabaseHelpers {
    * Run a query that modifies data (INSERT, UPDATE, DELETE)
    */
   static async run(query, params = []) {
+    db._ensureInitialized();
     return new Promise((resolve, reject) => {
       db.db.run(query, params, function (err) {
         if (err) {
@@ -33,6 +34,7 @@ class DatabaseHelpers {
    * Get all rows from a query
    */
   static async all(query, params = []) {
+    db._ensureInitialized();
     return new Promise((resolve, reject) => {
       db.db.all(query, params, (err, rows) => {
         if (err) {
@@ -52,6 +54,7 @@ class DatabaseHelpers {
    * Get single row from a query
    */
   static async get(query, params = []) {
+    db._ensureInitialized();
     return new Promise((resolve, reject) => {
       db.db.get(query, params, (err, row) => {
         if (err) {
