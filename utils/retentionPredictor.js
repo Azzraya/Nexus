@@ -146,7 +146,11 @@ class RetentionPredictor {
         insights,
       };
     } catch (error) {
-      console.error("[Retention Predictor] Error:", error);
+      logger.error("Retention Predictor", "Error", {
+        message: error?.message || String(error),
+        stack: error?.stack,
+        name: error?.name,
+      });
       return {
         totalMembers: 0,
         avgRetentionDays: 0,
@@ -221,7 +225,11 @@ class RetentionPredictor {
         factors,
       };
     } catch (error) {
-      console.error("[Retention Predictor] Predict churn error:", error);
+      logger.error("Retention Predictor", "Predict churn error", {
+        message: error?.message || String(error),
+        stack: error?.stack,
+        name: error?.name,
+      });
       return { risk: 0, factors: ["Error calculating risk"] };
     }
   }

@@ -137,7 +137,11 @@ class MemberIntelligence {
         activity: activity.totalMessages,
       };
     } catch (error) {
-      console.error("[Member Intelligence] Error calculating risk:", error);
+      logger.error("Member Intelligence", "Error calculating risk", {
+        message: error?.message || String(error),
+        stack: error?.stack,
+        name: error?.name,
+      });
       return {
         score: 0,
         level: "Unknown",

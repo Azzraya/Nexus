@@ -204,31 +204,41 @@ module.exports = {
     });
 
     // Create recovery snapshots for all servers (if auto-recovery is enabled)
+    // Process in batches for better performance
     const AutoRecovery = require("../utils/autoRecovery");
     const db = client.db;
-    for (const guild of client.guilds.cache.values()) {
-      try {
-        const config = await db.getServerConfig(guild.id);
-        // Default to enabled if not set
-        if (config?.auto_recovery_enabled !== 0) {
-          // Check if we have a recent snapshot (within last 24 hours)
-          const recentSnapshots = await db.getRecoverySnapshots(guild.id, 1);
-          const hasRecentSnapshot =
-            recentSnapshots.length > 0 &&
-            Date.now() - recentSnapshots[0].created_at < 24 * 60 * 60 * 1000;
+    const guilds = Array.from(client.guilds.cache.values());
+    const batchSize = 5;
+    
+    for (let i = 0; i < guilds.length; i += batchSize) {
+      const batch = guilds.slice(i, i + batchSize);
+      await Promise.all(
+        batch.map(async (guild) => {
+          try {
+            const config = await db.getServerConfig(guild.id);
+            // Default to enabled if not set
+            if (config?.auto_recovery_enabled !== 0) {
+              // Check if we have a recent snapshot (within last 24 hours)
+              const recentSnapshots = await db.getRecoverySnapshots(guild.id, 1);
+              const hasRecentSnapshot =
+                recentSnapshots.length > 0 &&
+                Date.now() - recentSnapshots[0].created_at < 24 * 60 * 60 * 1000;
 
-          if (!hasRecentSnapshot) {
-            await AutoRecovery.autoSnapshot(guild, "Periodic auto-snapshot");
-            logger.info(`📸 Created recovery snapshot for ${guild.name}`);
+              if (!hasRecentSnapshot) {
+                await AutoRecovery.autoSnapshot(guild, "Periodic auto-snapshot");
+                logger.info("Ready", `Created recovery snapshot for ${guild.name}`);
+              }
+            }
+          } catch (error) {
+            // Silently continue - not critical
+            logger.debug("Ready", `Failed to create snapshot for ${guild.name}`, {
+              message: error?.message || String(error),
+              stack: error?.stack,
+              name: error?.name,
+            });
           }
-        }
-      } catch (error) {
-        // Silently continue - not critical
-        logger.debug(
-          `Failed to create snapshot for ${guild.name}:`,
-          error.message
-        );
-      }
+        })
+      );
     }
 
     // Check bot role position in all servers (warn if not high enough)

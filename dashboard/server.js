@@ -2946,7 +2946,11 @@ class DashboardServer {
           totalPages: Math.ceil(totalCount / limit),
         });
       } catch (error) {
-        console.error("[Log Search] Error:", error);
+        logger.error("API", "Log Search error", {
+          message: error?.message || String(error),
+          stack: error?.stack,
+          name: error?.name,
+        });
         res.status(500).json({ error: "Failed to search logs" });
       }
     });
@@ -2959,7 +2963,11 @@ class DashboardServer {
         const sources = await db.getAllInviteSources();
         res.json({ sources });
       } catch (error) {
-        console.error("Error fetching invite sources:", error);
+        logger.error("API", "Error fetching invite sources", {
+          message: error?.message || String(error),
+          stack: error?.stack,
+          name: error?.name,
+        });
         res.status(500).json({ error: "Failed to fetch invite sources" });
       }
     });
@@ -2976,7 +2984,11 @@ class DashboardServer {
         const result = await db.createInviteSource(source, description);
         res.json({ success: true, source: result });
       } catch (error) {
-        console.error("Error creating invite source:", error);
+        logger.error("API", "Error creating invite source", {
+          message: error?.message || String(error),
+          stack: error?.stack,
+          name: error?.name,
+        });
         if (error.message?.includes("UNIQUE")) {
           res.status(400).json({ error: "Source already exists" });
         } else {
@@ -2992,7 +3004,11 @@ class DashboardServer {
         await db.deleteInviteSource(source);
         res.json({ success: true });
       } catch (error) {
-        console.error("Error deleting invite source:", error);
+        logger.error("API", "Error deleting invite source", {
+          message: error?.message || String(error),
+          stack: error?.stack,
+          name: error?.name,
+        });
         res.status(500).json({ error: "Failed to delete invite source" });
       }
     });
@@ -3003,7 +3019,11 @@ class DashboardServer {
         const stats = await db.getInviteSourceStats();
         res.json({ stats });
       } catch (error) {
-        console.error("Error fetching invite stats:", error);
+        logger.error("API", "Error fetching invite stats", {
+          message: error?.message || String(error),
+          stack: error?.stack,
+          name: error?.name,
+        });
         res.status(500).json({ error: "Failed to fetch invite stats" });
       }
     });
@@ -3022,14 +3042,16 @@ class DashboardServer {
 
         if (source) {
           await db.trackInviteClick(source, ipAddress, userAgent);
-          console.log(
-            `[Invite Tracking] Click tracked: ${source} from ${ipAddress}`
-          );
+          logger.info("API", `Invite click tracked: ${source} from ${ipAddress}`);
         }
 
         res.json({ success: true });
       } catch (error) {
-        console.error("Error tracking invite click:", error);
+        logger.error("API", "Error tracking invite click", {
+          message: error?.message || String(error),
+          stack: error?.stack,
+          name: error?.name,
+        });
         res.status(500).json({ error: "Failed to track click" });
       }
     });
@@ -3041,14 +3063,16 @@ class DashboardServer {
 
         if (userId && source) {
           await db.trackPendingInviteSource(userId, source);
-          console.log(
-            `[Invite Tracking] Associated user ${userId} with source: ${source}`
-          );
+          logger.info("API", `Associated user ${userId} with source: ${source}`);
         }
 
         res.json({ success: true });
       } catch (error) {
-        console.error("Error associating invite source:", error);
+        logger.error("API", "Error associating invite source", {
+          message: error?.message || String(error),
+          stack: error?.stack,
+          name: error?.name,
+        });
         res.status(500).json({ error: "Failed to associate source" });
       }
     });
@@ -3096,7 +3120,11 @@ class DashboardServer {
 
         res.json(servers.slice(0, limit));
       } catch (error) {
-        console.error("Showcase servers error:", error);
+        logger.error("API", "Showcase servers error", {
+          message: error?.message || String(error),
+          stack: error?.stack,
+          name: error?.name,
+        });
         res.json([]);
       }
     });
@@ -4058,7 +4086,11 @@ class DashboardServer {
 
         res.json({ success: true, message: "Referral tracked" });
       } catch (error) {
-        console.error("Referral tracking error:", error);
+        logger.error("API", "Referral tracking error", {
+          message: error?.message || String(error),
+          stack: error?.stack,
+          name: error?.name,
+        });
         res.status(500).json({ error: error.message });
       }
     });
@@ -4101,7 +4133,11 @@ class DashboardServer {
 
         res.json({ success: true });
       } catch (error) {
-        console.error("Click tracking error:", error);
+        logger.error("API", "Click tracking error", {
+          message: error?.message || String(error),
+          stack: error?.stack,
+          name: error?.name,
+        });
         res.status(500).json({ error: error.message });
       }
     });
@@ -4634,7 +4670,11 @@ class DashboardServer {
         logger.info("Banner", "Updated successfully");
         res.json({ success: true, banner: bannerData });
       } catch (error) {
-        console.error("❌ [Banner] Error updating banner:", error.message);
+        logger.error("API", "Error updating banner", {
+          message: error?.message || String(error),
+          stack: error?.stack,
+          name: error?.name,
+        });
         res
           .status(500)
           .json({ error: "Failed to update banner configuration" });

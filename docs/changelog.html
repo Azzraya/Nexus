@@ -84,8 +84,24 @@
 
       <div class="content-section">
         <div class="changelog-entry">
-          <h2>Version 3.20.17 - December 5, 2025</h2>
+          <h2>Version 3.20.18 - December 5, 2025</h2>
           <span class="version-badge">Latest</span>
+          <h3>🔧 Code Quality & Performance Improvements</h3>
+          <ul>
+            <li>
+              ✅ <strong>Replaced All Console Calls with Logger:</strong> Updated dashboard/server.js, utils/database.js, utils/retentionPredictor.js, and utils/memberIntelligence.js to use centralized logger for consistent error logging with stack traces
+            </li>
+            <li>
+              ✅ <strong>Performance Optimization:</strong> Optimized ready event to process recovery snapshots in parallel batches (5 at a time) instead of sequentially, improving startup performance
+            </li>
+            <li>
+              ✅ <strong>Improved Error Logging:</strong> All error handlers now include full stack traces for better debugging
+            </li>
+          </ul>
+        </div>
+
+        <div class="changelog-entry">
+          <h2>Version 3.20.17 - December 5, 2025</h2>
           <h3>🔧 Code Quality Improvements</h3>
           <ul>
             <li>
