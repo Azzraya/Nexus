@@ -331,7 +331,7 @@ module.exports = {
       try {
         await client.xpSystem.awardMessageXP(message);
       } catch (error) {
-        console.error("[XP] Failed to award XP:", error);
+        logger.debug("[XP] Failed to award XP:", error.message);
       }
     }
   },

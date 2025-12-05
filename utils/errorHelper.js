@@ -136,7 +136,7 @@ class ErrorHelper {
         errorMessage = error.toString();
       }
     }
-    
+
     const errorData = {
       error: {
         message: error?.message || errorMessage,

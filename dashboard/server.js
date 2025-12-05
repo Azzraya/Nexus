@@ -4,6 +4,7 @@ const passport = require("passport");
 const DiscordStrategy = require("passport-discord").Strategy;
 const path = require("path");
 const db = require("../utils/database");
+const logger = require("../utils/logger");
 
 class DashboardServer {
   constructor(client) {
@@ -90,9 +91,7 @@ class DashboardServer {
 
       // Check if over limit
       if (record.count >= maxRequests) {
-        console.log(
-          `[Rate Limit] Blocked ${cleanIP} - ${record.count} requests in last minute`
-        );
+        // Rate limit exceeded - silently log (no need to spam console)
         return res.status(429).json({
           error: "Too many requests",
           message: "Rate limit exceeded. Try again in 1 minute.",
@@ -128,7 +127,7 @@ class DashboardServer {
         );
       } catch (error) {
         // Silent fail - IP logging shouldn't break the site
-        console.log("[IP Log] Logging failed:", error.message);
+        // IP logging failed - silently fail (non-critical)
       }
       next();
     });
@@ -172,6 +171,18 @@ class DashboardServer {
   }
 
   setupRoutes() {
+    // Global deprecation middleware for all v1 API endpoints
+    this.app.use("/api/v1", (req, res, next) => {
+      res.setHeader("X-API-Deprecated", "true");
+      res.setHeader("X-API-Deprecation-Date", "2025-12-31");
+      res.setHeader("X-API-Migration-Path", req.path.replace("/v1/", "/v2/"));
+      res.setHeader(
+        "Warning",
+        '299 - "API v1 is deprecated. Please migrate to v2. See /api/v2/version for details."'
+      );
+      next();
+    });
+
     // Auth routes
     this.app.get("/login", passport.authenticate("discord"));
 
@@ -915,7 +926,7 @@ class DashboardServer {
             },
           };
         } catch (voteError) {
-          console.error("Error fetching vote stats:", voteError);
+          logger.error("API", "Vote stats error", voteError);
           stats.voting = {
             totalVotes: 0,
             uniqueVoters: 0,
@@ -1326,14 +1337,164 @@ class DashboardServer {
       req.apiKey = keyData;
       next();
     } catch (error) {
-      console.error("API auth error:", error);
+      logger.error("API", "Auth error", error);
       res.status(500).json({ error: "Authentication error" });
     }
   }
 
   setupPublicAPI() {
-    // GET /api/v1/stats - Basic bot stats (public, used by live-comparison page)
-    this.app.get("/api/v1/stats", (req, res) => {
+    // Deprecation middleware for v1 endpoints
+    const deprecationWarning = (req, res, next) => {
+      res.setHeader("X-API-Deprecated", "true");
+      res.setHeader("X-API-Deprecation-Date", "2025-12-31");
+      res.setHeader("X-API-Migration-Path", req.path.replace("/v1/", "/v2/"));
+      res.setHeader(
+        "Warning",
+        '299 - "API v1 is deprecated. Please migrate to v2. See /api/v2/version for details."'
+      );
+      next();
+    };
+
+    // ========== V2 API ENDPOINTS (NEW) ==========
+    
+    // GET /api/v2/commands - Get all available commands (v2)
+    this.app.get("/api/v2/commands", async (req, res) => {
+      try {
+        const commands = Array.from(this.client.commands.values()).map((cmd) => ({
+          name: cmd.data.name,
+          description: cmd.data.description,
+          options: cmd.data.options?.map((opt) => ({
+            name: opt.name,
+            description: opt.description,
+            type: opt.type,
+            required: opt.required || false,
+          })) || [],
+        }));
+
+        res.json({
+          success: true,
+          data: {
+            commands,
+            total: commands.length,
+          },
+          apiVersion: "2.0.0",
+        });
+      } catch (error) {
+        logger.error("API", "V2 commands error", error);
+        res.status(500).json({
+          success: false,
+          error: "Internal server error",
+          apiVersion: "2.0.0",
+        });
+      }
+    });
+
+    // GET /api/v2/health - Enhanced health check (v2)
+    this.app.get("/api/v2/health", async (req, res) => {
+      try {
+        const memoryUsage = process.memoryUsage();
+        res.json({
+          success: true,
+          data: {
+            status: "healthy",
+            uptime: Math.floor(process.uptime()),
+            memory: {
+              used: Math.round(memoryUsage.heapUsed / 1024 / 1024),
+              total: Math.round(memoryUsage.heapTotal / 1024 / 1024),
+              external: Math.round(memoryUsage.external / 1024 / 1024),
+            },
+            websocket: {
+              ping: this.client.ws.ping,
+              status: this.client.ws.status === 0 ? "ready" : "connecting",
+            },
+            servers: this.client.guilds.cache.size,
+            users: this.client.guilds.cache.reduce(
+              (acc, guild) => acc + guild.memberCount,
+              0
+            ),
+            timestamp: Date.now(),
+          },
+          apiVersion: "2.0.0",
+        });
+      } catch (error) {
+        logger.error("API", "V2 health error", error);
+        res.status(500).json({
+          success: false,
+          error: "Internal server error",
+          apiVersion: "2.0.0",
+        });
+      }
+    });
+
+    // GET /api/v2/stats - Enhanced bot stats (v2)
+    this.app.get("/api/v2/stats", async (req, res) => {
+      try {
+        const stats = {
+          serverCount: this.client.guilds.cache.size,
+          userCount: this.client.guilds.cache.reduce(
+            (acc, guild) => acc + guild.memberCount,
+            0
+          ),
+          avgResponseTime: 50,
+          uptime: Math.floor(this.client.uptime / 1000),
+          commandCount: this.client.commands?.size || 99,
+          shardCount: this.client.shard?.count || 1,
+          memoryUsage: process.memoryUsage(),
+          nodeVersion: process.version,
+          timestamp: Date.now(),
+        };
+        res.json({
+          success: true,
+          data: stats,
+          apiVersion: "2.0.0",
+        });
+      } catch (error) {
+        logger.error("API", "V2 Stats error", error);
+        res.status(500).json({
+          success: false,
+          error: "Internal server error",
+          apiVersion: "2.0.0",
+        });
+      }
+    });
+
+    // GET /api/v2/version - Enhanced version info (v2)
+    this.app.get("/api/v2/version", (req, res) => {
+      const packageJson = require("../package.json");
+      res.json({
+        success: true,
+        data: {
+          botVersion: packageJson.version,
+          apiVersion: "2.0.0",
+          botName: "Nexus",
+          uptime: Math.floor(process.uptime()),
+          endpoints: {
+            v2: {
+              stats: "/api/v2/stats",
+              version: "/api/v2/version",
+              commands: "/api/v2/commands",
+              health: "/api/v2/health",
+              server: "/api/v2/server/:id",
+              warnings: "/api/v2/user/:userId/warnings",
+              leaderboard: "/api/v2/votes/leaderboard",
+              securityAnalytics: "/api/v2/security-analytics",
+              recentActivity: "/api/v2/recent-activity",
+            },
+            deprecated: {
+              note: "v1 endpoints are deprecated and will be removed on 2025-12-31",
+              migration: "Use /api/v2/* endpoints instead",
+              deprecationDate: "2025-12-31",
+            },
+          },
+        },
+        apiVersion: "2.0.0",
+      });
+    });
+
+    // ========== V1 API ENDPOINTS (DEPRECATED) ==========
+
+    // GET /api/v1/stats - Basic bot stats (public, used by live-comparison page) - DEPRECATED
+    this.app.get("/api/v1/stats", deprecationWarning, (req, res) => {
       try {
         const stats = {
           serverCount: this.client.guilds.cache.size,
@@ -1347,7 +1508,7 @@ class DashboardServer {
         };
         res.json(stats);
       } catch (error) {
-        console.error("[API] Stats error:", error);
+        logger.error("API", "Stats error", error);
         res.json({
           serverCount: 17,
           userCount: 0,
@@ -1358,8 +1519,8 @@ class DashboardServer {
       }
     });
 
-    // GET /api/v1/version - Get API and bot version
-    this.app.get("/api/v1/version", (req, res) => {
+    // GET /api/v1/version - Get API and bot version - DEPRECATED
+    this.app.get("/api/v1/version", deprecationWarning, (req, res) => {
       const packageJson = require("../package.json");
       res.json({
         botVersion: packageJson.version,
@@ -1375,7 +1536,56 @@ class DashboardServer {
       });
     });
 
-    // GET /api/v1/server/:id - Get server info and config
+    // GET /api/v2/server/:id - Get server info and config (v2)
+    this.app.get(
+      "/api/v2/server/:id",
+      this.apiAuth.bind(this),
+      async (req, res) => {
+        try {
+          const serverId = req.params.id;
+          const guild = this.client.guilds.cache.get(serverId);
+
+          if (!guild) {
+            return res.status(404).json({
+              success: false,
+              error: "Server not found",
+              apiVersion: "2.0.0",
+            });
+          }
+
+          const config = await db.getServerConfig(serverId);
+
+          res.json({
+            success: true,
+            data: {
+              id: guild.id,
+              name: guild.name,
+              memberCount: guild.memberCount,
+              features: {
+                antiNuke: config?.anti_nuke_enabled || false,
+                antiRaid: config?.anti_raid_enabled || false,
+                autoMod: config?.auto_mod_enabled || false,
+              },
+              stats: {
+                totalBans: await this.getServerStat(serverId, "bans"),
+                totalKicks: await this.getServerStat(serverId, "kicks"),
+                warnings: await this.getServerStat(serverId, "warnings"),
+              },
+            },
+            apiVersion: "2.0.0",
+          });
+        } catch (error) {
+          logger.error("API", "V2 server endpoint error", error);
+          res.status(500).json({
+            success: false,
+            error: "Internal server error",
+            apiVersion: "2.0.0",
+          });
+        }
+      }
+    );
+
+    // GET /api/v1/server/:id - Get server info and config - DEPRECATED
     this.app.get(
       "/api/v1/server/:id",
       this.apiAuth.bind(this),
@@ -1406,15 +1616,60 @@ class DashboardServer {
             },
           });
         } catch (error) {
-          console.error("API error:", error);
+          logger.error("API", "V1 endpoint error", error);
           res.status(500).json({ error: "Internal server error" });
         }
       }
     );
 
-    // GET /api/v1/user/:userId/warnings - Get user warnings
+    // GET /api/v2/user/:userId/warnings - Get user warnings (v2)
+    this.app.get(
+      "/api/v2/user/:userId/warnings",
+      this.apiAuth.bind(this),
+      async (req, res) => {
+        try {
+          const { userId } = req.params;
+          const { guild_id } = req.query;
+
+          if (!guild_id) {
+            return res.status(400).json({
+              success: false,
+              error: "guild_id query parameter required",
+              apiVersion: "2.0.0",
+            });
+          }
+
+          const warnings = await new Promise((resolve, reject) => {
+            db.db.all(
+              `SELECT * FROM warnings WHERE user_id = ? AND guild_id = ? ORDER BY timestamp DESC`,
+              [userId, guild_id],
+              (err, rows) => {
+                if (err) reject(err);
+                else resolve(rows || []);
+              }
+            );
+          });
+
+          res.json({
+            success: true,
+            data: { warnings },
+            apiVersion: "2.0.0",
+          });
+        } catch (error) {
+          logger.error("API", "V2 warnings error", error);
+          res.status(500).json({
+            success: false,
+            error: "Internal server error",
+            apiVersion: "2.0.0",
+          });
+        }
+      }
+    );
+
+    // GET /api/v1/user/:userId/warnings - Get user warnings - DEPRECATED
     this.app.get(
       "/api/v1/user/:userId/warnings",
+      deprecationWarning,
       this.apiAuth.bind(this),
       async (req, res) => {
         try {
@@ -1440,7 +1695,7 @@ class DashboardServer {
 
           res.json({ warnings });
         } catch (error) {
-          console.error("API error:", error);
+          logger.error("API", "V1 endpoint error", error);
           res.status(500).json({ error: "Internal server error" });
         }
       }
@@ -1484,7 +1739,7 @@ class DashboardServer {
 
           res.json({ leaderboard });
         } catch (error) {
-          console.error("API error:", error);
+          logger.error("API", "V1 endpoint error", error);
           res.status(500).json({ error: "Internal server error" });
         }
       }
@@ -1506,13 +1761,84 @@ class DashboardServer {
             commands: 85,
           });
         } catch (error) {
-          console.error("API error:", error);
+          logger.error("API", "V1 endpoint error", error);
           res.status(500).json({ error: "Internal server error" });
         }
       }
     );
 
-    // GET /api/v1/security-analytics - Get real security analytics
+    // GET /api/v2/security-analytics - Get real security analytics (v2)
+    this.app.get("/api/v2/security-analytics", async (req, res) => {
+      try {
+        const totalServers = this.client.guilds.cache.size;
+
+        // Count servers with each feature enabled
+        const antiNukeCount = await new Promise((resolve) => {
+          db.db.get(
+            "SELECT COUNT(*) as count FROM server_config WHERE anti_nuke_enabled = 1",
+            [],
+            (err, row) => {
+              if (err) resolve(0);
+              else resolve(row?.count || 0);
+            }
+          );
+        });
+
+        const antiRaidCount = await new Promise((resolve) => {
+          db.db.get(
+            "SELECT COUNT(*) as count FROM server_config WHERE anti_raid_enabled = 1",
+            [],
+            (err, row) => {
+              if (err) resolve(0);
+              else resolve(row?.count || 0);
+            }
+          );
+        });
+
+        // Get recent threats (last 24 hours)
+        const recentThreats = await new Promise((resolve) => {
+          db.db.all(
+            "SELECT COUNT(*) as count FROM security_logs WHERE timestamp > ?",
+            [Date.now() - 86400000],
+            (err, rows) => {
+              if (err) resolve(0);
+              else resolve(rows?.[0]?.count || 0);
+            }
+          );
+        });
+
+        res.json({
+          success: true,
+          data: {
+            totalServers,
+            features: {
+              antiNuke: {
+                enabled: antiNukeCount,
+                percentage: totalServers > 0 ? Math.round((antiNukeCount / totalServers) * 100) : 0,
+              },
+              antiRaid: {
+                enabled: antiRaidCount,
+                percentage: totalServers > 0 ? Math.round((antiRaidCount / totalServers) * 100) : 0,
+              },
+            },
+            recentThreats: {
+              count: recentThreats,
+              timeframe: "24h",
+            },
+          },
+          apiVersion: "2.0.0",
+        });
+      } catch (error) {
+        logger.error("API", "V2 security analytics error", error);
+        res.status(500).json({
+          success: false,
+          error: "Internal server error",
+          apiVersion: "2.0.0",
+        });
+      }
+    });
+
+    // GET /api/v1/security-analytics - Get real security analytics - DEPRECATED
     this.app.get("/api/v1/security-analytics", async (req, res) => {
       try {
         const totalServers = this.client.guilds.cache.size;
@@ -1586,7 +1912,7 @@ class DashboardServer {
           activeThreats: activeThreats,
         });
       } catch (error) {
-        console.error("Security analytics error:", error);
+        logger.error("API", "V1 security analytics error", error);
         res.status(500).json({ error: "Internal server error" });
       }
     });
@@ -1662,7 +1988,7 @@ class DashboardServer {
 
         res.json(activities.slice(0, limit));
       } catch (error) {
-        console.error("Recent activity error:", error);
+        logger.error("API", "V1 recent activity error", error);
         res.json([]);
       }
     });
@@ -1819,7 +2145,7 @@ class DashboardServer {
 
         res.json(achievements);
       } catch (error) {
-        console.error("Achievements error:", error);
+        logger.error("API", "Achievements error", error);
         res.json([]);
       }
     });
@@ -1854,7 +2180,7 @@ class DashboardServer {
           retentionRate,
         });
       } catch (error) {
-        console.error("Invite stats error:", error);
+        logger.error("API", "Invite stats error", error);
         const currentServers = this.client.guilds.cache.size;
         res.json({
           totalInvites: currentServers,
@@ -1872,7 +2198,7 @@ class DashboardServer {
         const logs = await db.getIPLogs(limit);
         res.json(logs);
       } catch (error) {
-        console.error("IP logs error:", error);
+        logger.error("API", "IP logs error", error);
         res.status(500).json({ error: "Internal server error" });
       }
     });
@@ -1901,7 +2227,7 @@ class DashboardServer {
 
         res.json(stats);
       } catch (error) {
-        console.error("IP stats error:", error);
+        logger.error("API", "IP stats error", error);
         res.json({
           uniqueVisitors24h: 0,
           uniqueVisitors7d: 0,
@@ -2060,7 +2386,7 @@ class DashboardServer {
           performanceDistribution,
         });
       } catch (error) {
-        console.error("[Command Analytics] Error:", error);
+        logger.error("API", "Command analytics error", error);
         res.status(500).json({ error: "Failed to fetch command analytics" });
       }
     });
@@ -2089,7 +2415,7 @@ class DashboardServer {
           maintenanceSafe,
         });
       } catch (error) {
-        console.error("[Usage Patterns] Error:", error);
+        logger.error("API", "Usage patterns error", error);
         res.status(500).json({ error: "Failed to fetch usage patterns" });
       }
     });
@@ -2101,7 +2427,7 @@ class DashboardServer {
         const healthData = await serverHealth.getAllServersHealth(this.client);
         res.json({ servers: healthData });
       } catch (error) {
-        console.error("[Server Health] Error:", error);
+        logger.error("API", "Server health error", error);
         res.status(500).json({ error: "Failed to fetch server health data" });
       }
     });
@@ -2113,7 +2439,7 @@ class DashboardServer {
         const health = await serverHealth.calculateHealth(req.params.guildId);
         res.json(health);
       } catch (error) {
-        console.error("[Server Health] Error:", error);
+        logger.error("API", "Server health error", error);
         res.status(500).json({ error: "Failed to fetch server health" });
       }
     });

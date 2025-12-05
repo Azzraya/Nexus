@@ -1,6 +1,6 @@
 # Privacy Policy
 
-**Last Updated: December 1, 2025**
+**Last Updated: December 5, 2025**
 
 ## Introduction
 
@@ -23,6 +23,7 @@ Nexus Bot ("we", "our", "us") is committed to protecting your privacy. This Priv
 - User IDs (Discord snowflakes)
 - Usernames and discriminators
 - Messages (for moderation purposes only)
+- **Message edit and delete events** (logged for moderation and security purposes)
 - Moderation history
 - Behavioral patterns (for threat detection)
 - **Role and permission data** (stored in recovery snapshots for restoration purposes)
@@ -80,6 +81,7 @@ Nexus Bot ("we", "our", "us") is committed to protecting your privacy. This Priv
 - Threat intelligence: 30 days
 - **Performance metrics**: 90 days (command times, query performance, memory usage)
 - Message content: Not stored permanently (only processed in real-time for moderation)
+- **Message edit/delete events**: 90 days (logged for moderation and security purposes, includes message content at time of edit/delete)
 - Behavioral patterns: 90 days (anonymized after 30 days)
 - **Security logs with threat types**: 90 days (includes threat classification and actions taken)
 - **Whitelist data**: Retained while bot is in server, deleted 30 days after bot removal
@@ -399,6 +401,7 @@ We may update this Privacy Policy from time to time. We will:
 
 ## Version History
 
+- **December 5, 2025** - Added message edit/delete event logging documentation, API v2 deprecation notice
 - **December 1, 2025** - Added enhanced recovery features (webhooks, emojis, stickers, server settings), whitelist system, predictive threat detection documentation
 - **December 1, 2025** - Added auto-recovery snapshots documentation, performance metrics, enhanced security logging, server lockdown features
 - **December 1, 2025** - Initial comprehensive privacy policy with GDPR, CCPA, and Discord ToS compliance

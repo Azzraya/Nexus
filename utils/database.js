@@ -1627,7 +1627,7 @@ class Database {
       `ALTER TABLE server_config ADD COLUMN suggestions_channel_id TEXT`,
       (err) => {
         if (err && !err.message.includes("duplicate column")) {
-          console.error("Error adding suggestions_channel_id column:", err);
+          // Migration error - silently continue (non-critical)
         }
       }
     );
@@ -1645,28 +1645,28 @@ class Database {
     // Migration: Add guild_name column to backups table
     this.db.run(`ALTER TABLE backups ADD COLUMN guild_name TEXT`, (err) => {
       if (err && !err.message.includes("duplicate column")) {
-        console.error("Error adding guild_name to backups:", err);
+        // Migration error - silently continue (non-critical)
       }
     });
 
     // Migration: Add timestamp column to backups table
     this.db.run(`ALTER TABLE backups ADD COLUMN timestamp INTEGER`, (err) => {
       if (err && !err.message.includes("duplicate column")) {
-        console.error("Error adding timestamp to backups:", err);
+        // Migration error - silently continue (non-critical)
       }
     });
 
     // Migration: Add size column to backups table
     this.db.run(`ALTER TABLE backups ADD COLUMN size INTEGER`, (err) => {
       if (err && !err.message.includes("duplicate column")) {
-        console.error("Error adding size to backups:", err);
+        // Migration error - silently continue (non-critical)
       }
     });
 
     // Migration: Add version column to backups table
     this.db.run(`ALTER TABLE backups ADD COLUMN version TEXT`, (err) => {
       if (err && !err.message.includes("duplicate column")) {
-        console.error("Error adding version to backups:", err);
+        // Migration error - silently continue (non-critical)
       }
     });
 

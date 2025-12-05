@@ -35,7 +35,7 @@ class Logger {
     const timestamp = chalk.gray(`[${this.getTimestamp()}]`);
     const prefix = levelConfig.prefix;
     const coloredCategory = levelConfig.color(`[${category}]`);
-    
+
     // Ensure message is always a string
     let messageStr = message;
     if (typeof message !== "string") {
@@ -47,7 +47,7 @@ class Logger {
         messageStr = String(message);
       }
     }
-    
+
     const coloredMessage = levelConfig.color(messageStr);
 
     let logMessage = `${timestamp} ${prefix} ${coloredCategory} ${coloredMessage}`;

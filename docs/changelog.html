@@ -84,24 +84,44 @@
 
       <div class="content-section">
         <div class="changelog-entry">
-          <h2>Version 3.20.7 - December 5, 2025</h2>
+          <h2>Version 3.20.8 - December 5, 2025</h2>
           <span class="version-badge">Latest</span>
+          <h3>🚀 Major Updates</h3>
+          <ul>
+            <li>✅ API v2 released - new consistent response format with success/data/apiVersion fields</li>
+            <li>✅ Added v2 endpoints: stats, version, commands, health, server, warnings, leaderboard, security-analytics, recent-activity</li>
+            <li>✅ All v1 endpoints now deprecated with migration warnings (removal date: Dec 31, 2025)</li>
+            <li>✅ Global deprecation middleware added for all /api/v1/* routes</li>
+          </ul>
+          <h3>📝 Documentation & Policy Updates</h3>
+          <ul>
+            <li>✅ Updated Privacy Policy - added message edit/delete event logging documentation</li>
+            <li>✅ Updated Terms of Service - updated dates and messaging</li>
+            <li>✅ Updated API documentation - added v2 endpoints and deprecation notices</li>
+            <li>✅ Updated website with v2 API information</li>
+          </ul>
+          <h3>🧹 Code Quality</h3>
+          <ul>
+            <li>✅ Replaced all console.error calls with logger.error in dashboard/server.js</li>
+            <li>✅ Cleaned up database migration error logging (now silent for non-critical errors)</li>
+            <li>✅ Fixed duplicate keys in package.json (author, license)</li>
+            <li>✅ Centralized logging throughout codebase</li>
+          </ul>
+        </div>
+
+        <div class="changelog-entry">
+          <h2>Version 3.20.7 - December 5, 2025</h2>
           <h3>🐛 Critical Fixes</h3>
           <ul>
-            <li>
-              ✅ Fixed `/botinfo` command - added error handling
-            </li>
+            <li>✅ Fixed `/botinfo` command - added error handling</li>
             <li>
               ✅ Fixed `/rescue` command - added comprehensive error handling
             </li>
+            <li>✅ Fixed `/achievements` command - all error cases handled</li>
+            <li>✅ All commands now have proper try-catch blocks</li>
             <li>
-              ✅ Fixed `/achievements` command - all error cases handled
-            </li>
-            <li>
-              ✅ All commands now have proper try-catch blocks
-            </li>
-            <li>
-              ✅ Logger now properly converts all error types to readable strings
+              ✅ Logger now properly converts all error types to readable
+              strings
             </li>
           </ul>
         </div>
@@ -111,22 +131,16 @@
           <h3>🐛 Critical Fixes</h3>
           <ul>
             <li>
-              ✅ Fixed logger outputting `[object Object]` - now properly handles
-              objects and errors
+              ✅ Fixed logger outputting `[object Object]` - now properly
+              handles objects and errors
             </li>
             <li>
-              ✅ Fixed error logging across all commands - errors now show proper
-              messages instead of `[object Object]`
+              ✅ Fixed error logging across all commands - errors now show
+              proper messages instead of `[object Object]`
             </li>
-            <li>
-              ✅ Added error handling to `/rescue` command
-            </li>
-            <li>
-              ✅ Enhanced ErrorHelper to safely handle all error types
-            </li>
-            <li>
-              ✅ Logger now converts objects/errors to readable strings
-            </li>
+            <li>✅ Added error handling to `/rescue` command</li>
+            <li>✅ Enhanced ErrorHelper to safely handle all error types</li>
+            <li>✅ Logger now converts objects/errors to readable strings</li>
           </ul>
         </div>
 

@@ -1,7 +1,10 @@
 {
   "name": "nexus-bot",
-  "version": "3.20.7",
+  "version": "3.20.8",
   "description": "Advanced Discord bot that exceeds Wick and all competitors",
+  "author": "Nexus Bot Team",
+  "license": "MIT",
+  "copyright": "Copyright (c) 2025 Nexus Bot. All rights reserved.",
   "main": "index.js",
   "scripts": {
     "start": "node shard.js",
@@ -20,8 +23,6 @@
     "anti-raid",
     "anti-nuke"
   ],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
     "@top-gg/sdk": "^3.1.6",
     "axios": "^1.6.2",

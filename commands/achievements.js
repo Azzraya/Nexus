@@ -60,12 +60,16 @@ module.exports = {
       try {
         if (interaction.replied || interaction.deferred) {
           await interaction.editReply({
-            content: errorInfo.message || "❌ An error occurred while processing this command.",
+            content:
+              errorInfo.message ||
+              "❌ An error occurred while processing this command.",
             flags: MessageFlags.Ephemeral,
           });
         } else {
           await interaction.reply({
-            content: errorInfo.message || "❌ An error occurred while processing this command.",
+            content:
+              errorInfo.message ||
+              "❌ An error occurred while processing this command.",
             flags: MessageFlags.Ephemeral,
           });
         }
@@ -90,96 +94,96 @@ module.exports = {
         });
       }
 
-    const rarityColors = {
-      common: 0x808080,
-      uncommon: 0x00ff00,
-      rare: 0x0080ff,
-      epic: 0x8000ff,
-      legendary: 0xffd700,
-    };
+      const rarityColors = {
+        common: 0x808080,
+        uncommon: 0x00ff00,
+        rare: 0x0080ff,
+        epic: 0x8000ff,
+        legendary: 0xffd700,
+      };
 
-    const pages = [];
-    const perPage = 5;
+      const pages = [];
+      const perPage = 5;
 
-    for (let i = 0; i < achievements.length; i += perPage) {
-      const pageAchievements = achievements.slice(i, i + perPage);
+      for (let i = 0; i < achievements.length; i += perPage) {
+        const pageAchievements = achievements.slice(i, i + perPage);
 
-      const embed = new EmbedBuilder()
-        .setTitle(`${user.username}'s Achievements`)
-        .setThumbnail(user.displayAvatarURL())
-        .setColor(0x667eea)
-        .setDescription(
-          pageAchievements
-            .map(
-              (a) =>
-                `${a.icon || "🏆"} **${a.name || "Unknown"}** (${a.rarity || "common"})\n` +
-                `${a.description || "No description"}\n` +
-                `Unlocked: <t:${Math.floor((a.unlocked_at || Date.now()) / 1000)}:R>`
-            )
-            .join("\n\n")
-        )
-        .setFooter({
-          text: `Page ${pages.length + 1} • ${achievements.length} total achievements`,
-        });
+        const embed = new EmbedBuilder()
+          .setTitle(`${user.username}'s Achievements`)
+          .setThumbnail(user.displayAvatarURL())
+          .setColor(0x667eea)
+          .setDescription(
+            pageAchievements
+              .map(
+                (a) =>
+                  `${a.icon || "🏆"} **${a.name || "Unknown"}** (${a.rarity || "common"})\n` +
+                  `${a.description || "No description"}\n` +
+                  `Unlocked: <t:${Math.floor((a.unlocked_at || Date.now()) / 1000)}:R>`
+              )
+              .join("\n\n")
+          )
+          .setFooter({
+            text: `Page ${pages.length + 1} • ${achievements.length} total achievements`,
+          });
 
-      pages.push(embed);
-    }
-
-    if (pages.length === 1) {
-      return interaction.reply({ embeds: [pages[0]] });
-    }
-
-    // Multiple pages - add navigation buttons
-    let currentPage = 0;
-    const row = new ActionRowBuilder().addComponents(
-      new ButtonBuilder()
-        .setCustomId("prev")
-        .setLabel("◀")
-        .setStyle(ButtonStyle.Primary)
-        .setDisabled(true),
-      new ButtonBuilder()
-        .setCustomId("next")
-        .setLabel("▶")
-        .setStyle(ButtonStyle.Primary)
-    );
-
-    const message = await interaction.reply({
-      embeds: [pages[0]],
-      components: [row],
-      fetchReply: true,
-    });
-
-    const collector = message.createMessageComponentCollector({
-      time: 60000,
-    });
-
-    collector.on("collect", async (i) => {
-      if (i.user.id !== interaction.user.id) {
-        return i.reply({
-          content: "These aren't your achievements!",
-          flags: MessageFlags.Ephemeral,
-        });
+        pages.push(embed);
       }
 
-      if (i.customId === "prev") {
-        currentPage--;
-      } else {
-        currentPage++;
+      if (pages.length === 1) {
+        return interaction.reply({ embeds: [pages[0]] });
       }
 
-      row.components[0].setDisabled(currentPage === 0);
-      row.components[1].setDisabled(currentPage === pages.length - 1);
+      // Multiple pages - add navigation buttons
+      let currentPage = 0;
+      const row = new ActionRowBuilder().addComponents(
+        new ButtonBuilder()
+          .setCustomId("prev")
+          .setLabel("◀")
+          .setStyle(ButtonStyle.Primary)
+          .setDisabled(true),
+        new ButtonBuilder()
+          .setCustomId("next")
+          .setLabel("▶")
+          .setStyle(ButtonStyle.Primary)
+      );
 
-      await i.update({
-        embeds: [pages[currentPage]],
+      const message = await interaction.reply({
+        embeds: [pages[0]],
         components: [row],
+        fetchReply: true,
       });
-    });
 
-    collector.on("end", () => {
-      row.components.forEach((button) => button.setDisabled(true));
-      message.edit({ components: [row] }).catch(() => {});
-    });
+      const collector = message.createMessageComponentCollector({
+        time: 60000,
+      });
+
+      collector.on("collect", async (i) => {
+        if (i.user.id !== interaction.user.id) {
+          return i.reply({
+            content: "These aren't your achievements!",
+            flags: MessageFlags.Ephemeral,
+          });
+        }
+
+        if (i.customId === "prev") {
+          currentPage--;
+        } else {
+          currentPage++;
+        }
+
+        row.components[0].setDisabled(currentPage === 0);
+        row.components[1].setDisabled(currentPage === pages.length - 1);
+
+        await i.update({
+          embeds: [pages[currentPage]],
+          components: [row],
+        });
+      });
+
+      collector.on("end", () => {
+        row.components.forEach((button) => button.setDisabled(true));
+        message.edit({ components: [row] }).catch(() => {});
+      });
     } catch (error) {
       throw error; // Re-throw to be caught by execute
     }
@@ -192,44 +196,47 @@ module.exports = {
       const achievements = await db.getAllAchievements();
 
       if (!achievements || achievements.length === 0) {
-      // Create default achievements
-      await this.createDefaultAchievements();
-      const newAchievements = await db.getAllAchievements();
+        // Create default achievements
+        await this.createDefaultAchievements();
+        const newAchievements = await db.getAllAchievements();
+
+        const embed = new EmbedBuilder()
+          .setTitle("🏆 All Achievements")
+          .setDescription(
+            newAchievements
+              .map(
+                (a) => `${a.icon} **${a.name}** (${a.rarity})\n${a.description}`
+              )
+              .join("\n\n")
+          )
+          .setColor(0xffd700);
+
+        return interaction.editReply({ embeds: [embed] });
+      }
+
+      const rarityOrder = {
+        common: 1,
+        uncommon: 2,
+        rare: 3,
+        epic: 4,
+        legendary: 5,
+      };
+      const sorted = achievements.sort(
+        (a, b) => rarityOrder[a.rarity] - rarityOrder[b.rarity]
+      );
 
       const embed = new EmbedBuilder()
         .setTitle("🏆 All Achievements")
         .setDescription(
-          newAchievements
+          sorted
             .map(
-              (a) => `${a.icon} **${a.name}** (${a.rarity})\n${a.description}`
+              (a) =>
+                `${a.icon || "🏆"} **${a.name || "Unknown"}** (${a.rarity || "common"})\n${a.description || "No description"}`
             )
             .join("\n\n")
         )
-        .setColor(0xffd700);
-
-      return interaction.editReply({ embeds: [embed] });
-    }
-
-    const rarityOrder = {
-      common: 1,
-      uncommon: 2,
-      rare: 3,
-      epic: 4,
-      legendary: 5,
-    };
-    const sorted = achievements.sort(
-      (a, b) => rarityOrder[a.rarity] - rarityOrder[b.rarity]
-    );
-
-    const embed = new EmbedBuilder()
-      .setTitle("🏆 All Achievements")
-      .setDescription(
-        sorted
-            .map((a) => `${a.icon || "🏆"} **${a.name || "Unknown"}** (${a.rarity || "common"})\n${a.description || "No description"}`)
-          .join("\n\n")
-      )
-      .setColor(0xffd700)
-      .setFooter({ text: `${achievements.length} achievements available` });
+        .setColor(0xffd700)
+        .setFooter({ text: `${achievements.length} achievements available` });
 
       await interaction.editReply({ embeds: [embed] });
     } catch (error) {
@@ -245,13 +252,16 @@ module.exports = {
         interaction.guild.id,
         interaction.user.id
       );
-      const userAchievements = await db.getUserAchievements(
-        interaction.guild.id,
-        interaction.user.id
-      ) || [];
-      const allAchievements = await db.getAllAchievements() || [];
+      const userAchievements =
+        (await db.getUserAchievements(
+          interaction.guild.id,
+          interaction.user.id
+        )) || [];
+      const allAchievements = (await db.getAllAchievements()) || [];
 
-      const unlocked = new Set((userAchievements || []).map((a) => a.achievement_id));
+      const unlocked = new Set(
+        (userAchievements || []).map((a) => a.achievement_id)
+      );
       const pending = (allAchievements || []).filter(
         (a) => !unlocked.has(a.achievement_id)
       );
@@ -275,25 +285,25 @@ module.exports = {
       if (userData && pending.length > 0 && client.xpSystem) {
         const level = client.xpSystem.calculateLevel(userData.xp);
 
-      const closest = pending
-        .filter((a) => a.requirement_type === "level")
-        .sort((a, b) => a.requirement_value - b.requirement_value)
-        .slice(0, 3);
+        const closest = pending
+          .filter((a) => a.requirement_type === "level")
+          .sort((a, b) => a.requirement_value - b.requirement_value)
+          .slice(0, 3);
 
-      if (closest.length > 0) {
-        embed.addFields({
-          name: "Next Achievements",
-          value: closest
-            .map((a) => {
-              const progress =
-                level >= a.requirement_value
-                  ? 100
-                  : Math.floor((level / a.requirement_value) * 100);
-              return `${a.icon || "🏆"} **${a.name || "Unknown"}**\nProgress: ${progress}% (${level}/${a.requirement_value || 0})`;
-            })
-            .join("\n\n"),
-        });
-      }
+        if (closest.length > 0) {
+          embed.addFields({
+            name: "Next Achievements",
+            value: closest
+              .map((a) => {
+                const progress =
+                  level >= a.requirement_value
+                    ? 100
+                    : Math.floor((level / a.requirement_value) * 100);
+                return `${a.icon || "🏆"} **${a.name || "Unknown"}**\nProgress: ${progress}% (${level}/${a.requirement_value || 0})`;
+              })
+              .join("\n\n"),
+          });
+        }
       }
 
       await interaction.editReply({ embeds: [embed] });
