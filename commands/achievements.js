@@ -4,6 +4,7 @@ const {
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
+  MessageFlags,
 } = require("discord.js");
 const db = require("../utils/database");
 
@@ -33,30 +34,61 @@ module.exports = {
     ),
 
   async execute(interaction, client) {
-    const subcommand = interaction.options.getSubcommand();
+    try {
+      const subcommand = interaction.options.getSubcommand();
 
-    if (subcommand === "view") {
-      await this.handleView(interaction);
-    } else if (subcommand === "list") {
-      await this.handleList(interaction);
-    } else if (subcommand === "progress") {
-      await this.handleProgress(interaction, client);
+      if (subcommand === "view") {
+        await this.handleView(interaction);
+      } else if (subcommand === "list") {
+        await this.handleList(interaction);
+      } else if (subcommand === "progress") {
+        await this.handleProgress(interaction, client);
+      }
+    } catch (error) {
+      const ErrorHelper = require("../utils/errorHelper");
+      ErrorHelper.logError(error, {
+        commandName: "achievements",
+        userId: interaction.user?.id,
+        guildId: interaction.guild?.id,
+        channelId: interaction.channel?.id,
+      });
+
+      const errorInfo = ErrorHelper.getErrorMessage(error, {
+        commandName: "achievements",
+      });
+
+      try {
+        if (interaction.replied || interaction.deferred) {
+          await interaction.editReply({
+            content: errorInfo.message || "❌ An error occurred while processing this command.",
+            flags: MessageFlags.Ephemeral,
+          });
+        } else {
+          await interaction.reply({
+            content: errorInfo.message || "❌ An error occurred while processing this command.",
+            flags: MessageFlags.Ephemeral,
+          });
+        }
+      } catch (replyError) {
+        // Interaction expired or invalid - silently ignore
+      }
     }
   },
 
   async handleView(interaction) {
-    const user = interaction.options.getUser("user") || interaction.user;
-    const achievements = await db.getUserAchievements(
-      interaction.guild.id,
-      user.id
-    );
+    try {
+      const user = interaction.options.getUser("user") || interaction.user;
+      const achievements = await db.getUserAchievements(
+        interaction.guild.id,
+        user.id
+      );
 
-    if (achievements.length === 0) {
-      return interaction.reply({
-        content: `${user.tag} hasn't unlocked any achievements yet!`,
-        ephemeral: true,
-      });
-    }
+      if (!achievements || achievements.length === 0) {
+        return interaction.reply({
+          content: `${user.username || user.tag} hasn't unlocked any achievements yet!`,
+          flags: MessageFlags.Ephemeral,
+        });
+      }
 
     const rarityColors = {
       common: 0x808080,
@@ -80,9 +112,9 @@ module.exports = {
           pageAchievements
             .map(
               (a) =>
-                `${a.icon} **${a.name}** (${a.rarity})\n` +
-                `${a.description}\n` +
-                `Unlocked: <t:${Math.floor(a.unlocked_at / 1000)}:R>`
+                `${a.icon || "🏆"} **${a.name || "Unknown"}** (${a.rarity || "common"})\n` +
+                `${a.description || "No description"}\n` +
+                `Unlocked: <t:${Math.floor((a.unlocked_at || Date.now()) / 1000)}:R>`
             )
             .join("\n\n")
         )
@@ -125,7 +157,7 @@ module.exports = {
       if (i.user.id !== interaction.user.id) {
         return i.reply({
           content: "These aren't your achievements!",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 
@@ -148,14 +180,18 @@ module.exports = {
       row.components.forEach((button) => button.setDisabled(true));
       message.edit({ components: [row] }).catch(() => {});
     });
+    } catch (error) {
+      throw error; // Re-throw to be caught by execute
+    }
   },
 
   async handleList(interaction) {
-    await interaction.deferReply();
+    try {
+      await interaction.deferReply();
 
-    const achievements = await db.getAllAchievements();
+      const achievements = await db.getAllAchievements();
 
-    if (achievements.length === 0) {
+      if (!achievements || achievements.length === 0) {
       // Create default achievements
       await this.createDefaultAchievements();
       const newAchievements = await db.getAllAchievements();
@@ -189,51 +225,55 @@ module.exports = {
       .setTitle("🏆 All Achievements")
       .setDescription(
         sorted
-          .map((a) => `${a.icon} **${a.name}** (${a.rarity})\n${a.description}`)
+            .map((a) => `${a.icon || "🏆"} **${a.name || "Unknown"}** (${a.rarity || "common"})\n${a.description || "No description"}`)
           .join("\n\n")
       )
       .setColor(0xffd700)
       .setFooter({ text: `${achievements.length} achievements available` });
 
-    await interaction.editReply({ embeds: [embed] });
+      await interaction.editReply({ embeds: [embed] });
+    } catch (error) {
+      throw error; // Re-throw to be caught by execute
+    }
   },
 
   async handleProgress(interaction, client) {
-    await interaction.deferReply({ ephemeral: true });
+    try {
+      await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
-    const userData = await db.getUserXP(
-      interaction.guild.id,
-      interaction.user.id
-    );
-    const userAchievements = await db.getUserAchievements(
-      interaction.guild.id,
-      interaction.user.id
-    );
-    const allAchievements = await db.getAllAchievements();
+      const userData = await db.getUserXP(
+        interaction.guild.id,
+        interaction.user.id
+      );
+      const userAchievements = await db.getUserAchievements(
+        interaction.guild.id,
+        interaction.user.id
+      ) || [];
+      const allAchievements = await db.getAllAchievements() || [];
 
-    const unlocked = new Set(userAchievements.map((a) => a.achievement_id));
-    const pending = allAchievements.filter(
-      (a) => !unlocked.has(a.achievement_id)
-    );
-
-    const embed = new EmbedBuilder()
-      .setTitle("📊 Achievement Progress")
-      .setColor(0x667eea)
-      .addFields(
-        {
-          name: "Unlocked",
-          value: `${userAchievements.length} / ${allAchievements.length}`,
-          inline: true,
-        },
-        {
-          name: "Progress",
-          value: `${Math.floor((userAchievements.length / allAchievements.length) * 100)}%`,
-          inline: true,
-        }
+      const unlocked = new Set((userAchievements || []).map((a) => a.achievement_id));
+      const pending = (allAchievements || []).filter(
+        (a) => !unlocked.has(a.achievement_id)
       );
 
-    if (userData && pending.length > 0) {
-      const level = client.xpSystem.calculateLevel(userData.xp);
+      const embed = new EmbedBuilder()
+        .setTitle("📊 Achievement Progress")
+        .setColor(0x667eea)
+        .addFields(
+          {
+            name: "Unlocked",
+            value: `${userAchievements.length} / ${allAchievements.length}`,
+            inline: true,
+          },
+          {
+            name: "Progress",
+            value: `${Math.floor((userAchievements.length / allAchievements.length) * 100)}%`,
+            inline: true,
+          }
+        );
+
+      if (userData && pending.length > 0 && client.xpSystem) {
+        const level = client.xpSystem.calculateLevel(userData.xp);
 
       const closest = pending
         .filter((a) => a.requirement_type === "level")
@@ -249,14 +289,17 @@ module.exports = {
                 level >= a.requirement_value
                   ? 100
                   : Math.floor((level / a.requirement_value) * 100);
-              return `${a.icon} **${a.name}**\nProgress: ${progress}% (${level}/${a.requirement_value})`;
+              return `${a.icon || "🏆"} **${a.name || "Unknown"}**\nProgress: ${progress}% (${level}/${a.requirement_value || 0})`;
             })
             .join("\n\n"),
         });
       }
-    }
+      }
 
-    await interaction.editReply({ embeds: [embed] });
+      await interaction.editReply({ embeds: [embed] });
+    } catch (error) {
+      throw error; // Re-throw to be caught by execute
+    }
   },
 
   async createDefaultAchievements() {

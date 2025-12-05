@@ -50,7 +50,8 @@ module.exports = {
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 
   async execute(interaction) {
-    const subcommand = interaction.options.getSubcommand();
+    try {
+      const subcommand = interaction.options.getSubcommand();
 
     if (subcommand === "setup") {
       // Only bot owner can set up rescue key
@@ -251,6 +252,35 @@ module.exports = {
         .setTimestamp();
 
       await interaction.editReply({ embeds: [embed] });
+    }
+    } catch (error) {
+      const ErrorHelper = require("../utils/errorHelper");
+      ErrorHelper.logError(error, {
+        commandName: "rescue",
+        userId: interaction.user?.id,
+        guildId: interaction.guild?.id,
+        channelId: interaction.channel?.id,
+      });
+
+      const errorInfo = ErrorHelper.getErrorMessage(error, {
+        commandName: "rescue",
+      });
+
+      try {
+        if (interaction.replied || interaction.deferred) {
+          await interaction.editReply({
+            content: errorInfo.message || "❌ An error occurred while processing this command.",
+            flags: MessageFlags.Ephemeral,
+          });
+        } else {
+          await interaction.reply({
+            content: errorInfo.message || "❌ An error occurred while processing this command.",
+            flags: MessageFlags.Ephemeral,
+          });
+        }
+      } catch (replyError) {
+        // Interaction expired or invalid - silently ignore
+      }
     }
   },
 };

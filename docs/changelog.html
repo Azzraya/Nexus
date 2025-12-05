@@ -84,17 +84,85 @@
 
       <div class="content-section">
         <div class="changelog-entry">
-          <h2>Version 3.20.4 - December 5, 2025</h2>
+          <h2>Version 3.20.7 - December 5, 2025</h2>
           <span class="version-badge">Latest</span>
+          <h3>🐛 Critical Fixes</h3>
+          <ul>
+            <li>
+              ✅ Fixed `/botinfo` command - added error handling
+            </li>
+            <li>
+              ✅ Fixed `/rescue` command - added comprehensive error handling
+            </li>
+            <li>
+              ✅ Fixed `/achievements` command - all error cases handled
+            </li>
+            <li>
+              ✅ All commands now have proper try-catch blocks
+            </li>
+            <li>
+              ✅ Logger now properly converts all error types to readable strings
+            </li>
+          </ul>
+        </div>
+
+        <div class="changelog-entry">
+          <h2>Version 3.20.6 - December 5, 2025</h2>
+          <h3>🐛 Critical Fixes</h3>
+          <ul>
+            <li>
+              ✅ Fixed logger outputting `[object Object]` - now properly handles
+              objects and errors
+            </li>
+            <li>
+              ✅ Fixed error logging across all commands - errors now show proper
+              messages instead of `[object Object]`
+            </li>
+            <li>
+              ✅ Added error handling to `/rescue` command
+            </li>
+            <li>
+              ✅ Enhanced ErrorHelper to safely handle all error types
+            </li>
+            <li>
+              ✅ Logger now converts objects/errors to readable strings
+            </li>
+          </ul>
+        </div>
+
+        <div class="changelog-entry">
+          <h2>Version 3.20.5 - December 5, 2025</h2>
+          <h3>🐛 Bug Fixes</h3>
+          <ul>
+            <li>
+              ✅ Fixed `/achievements` command errors - added proper error
+              handling
+            </li>
+            <li>
+              ✅ Fixed deprecation warning - replaced `ephemeral: true` with
+              `flags: MessageFlags.Ephemeral`
+            </li>
+            <li>
+              ✅ Added try-catch blocks to all achievement handlers for better
+              error reporting
+            </li>
+            <li>
+              ✅ Fixed `[object Object]` errors by properly catching and logging
+              errors
+            </li>
+          </ul>
+        </div>
+
+        <div class="changelog-entry">
+          <h2>Version 3.20.4 - December 5, 2025</h2>
           <h3>🐛 Bug Fix</h3>
           <ul>
             <li>
-              ✅ Fixed user count in logs to show total members (not cached users)
+              ✅ Fixed user count in logs to show total members (not cached
+              users)
             </li>
             <li>✅ Now matches API calculation for consistency</li>
-            <li>
-              ✅ Logs now show accurate member count across all servers
-            </li>
+            <li>✅ Logs now show accurate member count across all servers</li>
           </ul>
         </div>
 
@@ -103,7 +171,8 @@
           <h3>🐛 Critical Fix</h3>
           <ul>
             <li>
-              ✅ Fixed verify-token endpoint - now reads from Authorization header
+              ✅ Fixed verify-token endpoint - now reads from Authorization
+              header
             </li>
             <li>✅ Admin pages no longer redirect in infinite loop</li>
             <li>✅ Auth system works properly after login</li>
@@ -117,7 +186,9 @@
             <li>
               ✅ Removed deleted refer command reference from guildDelete event
             </li>
-            <li>✅ No more "Cannot find module refer" errors on server leave</li>
+            <li>
+              ✅ No more "Cannot find module refer" errors on server leave
+            </li>
           </ul>
         </div>
 
@@ -142,7 +213,8 @@
               activity patterns
             </li>
             <li>
-              ✅ <strong>NEW:</strong> Admin usage patterns page (password protected)
+              ✅ <strong>NEW:</strong> Admin usage patterns page (password
+              protected)
             </li>
             <li>
               ✅ Shows hourly and daily command usage with color-coded charts
@@ -151,16 +223,10 @@
               ✅ Identifies peak hours (avoid maintenance) and quiet hours (best
               for updates)
             </li>
-            <li>
-              ✅ Real-time activity monitor: "Safe to update?" indicator
-            </li>
-            <li>
-              ✅ Automatic GMT/BST timezone detection and conversion
-            </li>
+            <li>✅ Real-time activity monitor: "Safe to update?" indicator</li>
+            <li>✅ Automatic GMT/BST timezone detection and conversion</li>
             <li>✅ Auto-refresh every 5 minutes with proper chart cleanup</li>
-            <li>
-              ✅ API endpoint: <code>/api/admin/usage-patterns</code>
-            </li>
+            <li>✅ API endpoint: <code>/api/admin/usage-patterns</code></li>
             <li>
               ✅ Added <code>/api/admin/verify-token</code> endpoint for auth
             </li>

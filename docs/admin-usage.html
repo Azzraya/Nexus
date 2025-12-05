@@ -160,7 +160,10 @@
         <p style="opacity: 0.8; margin-bottom: 10px">
           Internal analytics for maintenance planning
         </p>
-        <p id="timezoneLabel" style="opacity: 0.6; margin-bottom: 30px; font-size: 0.9rem">
+        <p
+          id="timezoneLabel"
+          style="opacity: 0.6; margin-bottom: 30px; font-size: 0.9rem"
+        >
           Times shown in: <strong id="currentTimezone">Loading...</strong>
         </p>
 
@@ -261,8 +264,9 @@
           const data = await response.json();
 
           // Display timezone
-          document.getElementById("currentTimezone").textContent = 
-            data.timezone ? data.timezone.label : 'GMT';
+          document.getElementById("currentTimezone").textContent = data.timezone
+            ? data.timezone.label
+            : "GMT";
 
           // Current status
           document.getElementById("currentStatus").innerHTML = `
@@ -330,7 +334,7 @@
                 legend: { display: false },
                 title: {
                   display: true,
-                  text: `Commands by Hour (${data.timezone ? data.timezone.name : 'GMT'})`,
+                  text: `Commands by Hour (${data.timezone ? data.timezone.name : "GMT"})`,
                   color: "#fff",
                 },
               },
@@ -394,7 +398,7 @@
             <div class="maintenance-window">
               <h2>🟢 Recommended Maintenance Window</h2>
               <p style="font-size: 1.5rem; margin: 15px 0;">
-                <strong>${data.maintenanceWindow.start} - ${data.maintenanceWindow.end} ${data.timezone ? data.timezone.name : 'GMT'}</strong>
+                <strong>${data.maintenanceWindow.start} - ${data.maintenanceWindow.end} ${data.timezone ? data.timezone.name : "GMT"}</strong>
               </p>
               <p>${data.maintenanceWindow.reason}</p>
             </div>
@@ -406,7 +410,7 @@
                   .map(
                     (h) => `
                   <div class="hour-item" style="border-left-color: #ff6b6b;">
-                    <strong>${h.hour}:00 ${data.timezone ? data.timezone.name : 'GMT'}</strong><br>
+                    <strong>${h.hour}:00 ${data.timezone ? data.timezone.name : "GMT"}</strong><br>
                     <span style="color: #ff6b6b;">${h.commands} commands</span>
                   </div>
                 `
@@ -422,7 +426,7 @@
                   .map(
                     (h) => `
                   <div class="hour-item" style="border-left-color: #00ff88;">
-                    <strong>${h.hour}:00 ${data.timezone ? data.timezone.name : 'GMT'}</strong><br>
+                    <strong>${h.hour}:00 ${data.timezone ? data.timezone.name : "GMT"}</strong><br>
                     <span style="color: #00ff88;">${h.commands} commands</span>
                   </div>
                 `

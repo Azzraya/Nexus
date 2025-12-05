@@ -125,21 +125,34 @@ class ErrorHelper {
    * Log error with full context
    */
   static logError(error, context) {
-    logger.error("Command execution error", {
+    // Ensure error.message is a string
+    let errorMessage = "Unknown error";
+    if (error) {
+      if (typeof error.message === "string") {
+        errorMessage = error.message;
+      } else if (typeof error === "string") {
+        errorMessage = error;
+      } else if (error.toString && typeof error.toString === "function") {
+        errorMessage = error.toString();
+      }
+    }
+    
+    const errorData = {
       error: {
-        message: error.message,
-        code: error.code,
-        status: error.status,
-        stack: error.stack,
+        message: error?.message || errorMessage,
+        code: error?.code,
+        status: error?.status,
+        stack: error?.stack,
       },
       context: {
-        command: context.commandName,
-        userId: context.userId,
-        guildId: context.guildId,
-        channelId: context.channelId,
+        command: context?.commandName || "unknown",
+        userId: context?.userId,
+        guildId: context?.guildId,
+        channelId: context?.channelId,
         timestamp: new Date().toISOString(),
       },
-    });
+    };
+    logger.error("Command execution error", errorMessage, errorData);
   }
 }
 

@@ -7,7 +7,8 @@ module.exports = {
     .setDescription("View bot statistics, version, and information"),
 
   async execute(interaction, client) {
-    const uptime = process.uptime();
+    try {
+      const uptime = process.uptime();
     const days = Math.floor(uptime / 86400);
     const hours = Math.floor((uptime % 86400) / 3600);
     const minutes = Math.floor((uptime % 3600) / 60);
@@ -88,6 +89,35 @@ module.exports = {
       })
       .setTimestamp();
 
-    await interaction.reply({ embeds: [embed] });
+      await interaction.reply({ embeds: [embed] });
+    } catch (error) {
+      const ErrorHelper = require("../utils/errorHelper");
+      ErrorHelper.logError(error, {
+        commandName: "botinfo",
+        userId: interaction.user?.id,
+        guildId: interaction.guild?.id,
+        channelId: interaction.channel?.id,
+      });
+
+      const errorInfo = ErrorHelper.getErrorMessage(error, {
+        commandName: "botinfo",
+      });
+
+      try {
+        if (interaction.replied || interaction.deferred) {
+          await interaction.editReply({
+            content: errorInfo.message || "❌ An error occurred while processing this command.",
+            flags: require("discord.js").MessageFlags.Ephemeral,
+          });
+        } else {
+          await interaction.reply({
+            content: errorInfo.message || "❌ An error occurred while processing this command.",
+            flags: require("discord.js").MessageFlags.Ephemeral,
+          });
+        }
+      } catch (replyError) {
+        // Interaction expired or invalid - silently ignore
+      }
+    }
   },
 };
