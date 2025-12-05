@@ -84,8 +84,27 @@
 
       <div class="content-section">
         <div class="changelog-entry">
-          <h2>Version 3.20.13 - December 5, 2025</h2>
+          <h2>Version 3.20.14 - December 5, 2025</h2>
           <span class="version-badge">Latest</span>
+          <h3>🐛 Bug Fixes & Improvements</h3>
+          <ul>
+            <li>
+              ✅ <strong>Fixed Logger Initialization Error:</strong> Resolved "Cannot access 'logger' before initialization" error by ensuring logger is required before database in all files, deferring database operations, and adding proper initialization checks
+            </li>
+            <li>
+              ✅ <strong>Improved Error Logging:</strong> All error handlers now include full stack traces (message, stack, name) instead of just error messages, making debugging significantly easier
+            </li>
+            <li>
+              ✅ <strong>Module Initialization Fixes:</strong> Fixed initialization order issues in multiple utility files (serverHealth, threatPredictor, webhookHub, voteRewards, growthTracker) by reordering requires and deferring database operations
+            </li>
+            <li>
+              ✅ <strong>Dashboard Server Fixes:</strong> Removed duplicate database requires and reordered module loading to prevent initialization errors
+            </li>
+          </ul>
+        </div>
+
+        <div class="changelog-entry">
+          <h2>Version 3.20.13 - December 5, 2025</h2>
           <h3>🐛 Critical Bug Fix</h3>
           <ul>
             <li>
