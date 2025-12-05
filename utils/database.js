@@ -1642,6 +1642,16 @@ class Database {
       }
     );
 
+    // Migration: Add guild_name column to backups table
+    this.db.run(
+      `ALTER TABLE backups ADD COLUMN guild_name TEXT`,
+      (err) => {
+        if (err && !err.message.includes("duplicate column")) {
+          console.error("Error adding guild_name to backups:", err);
+        }
+      }
+    );
+
     // Migration: Add auto_recovery_enabled column
     this.db.run(
       `ALTER TABLE server_config ADD COLUMN auto_recovery_enabled INTEGER DEFAULT 1`,
