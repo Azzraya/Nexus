@@ -1,12 +1,15 @@
 // Owner utility for bot owner checks
 // IMPORTANT: Set OWNER_ID in .env file for production
 const OWNER_ID = process.env.OWNER_ID;
-const logger = require("./logger");
 
+// Defer logger usage to avoid initialization order issues
 if (!OWNER_ID) {
-  logger.error(
-    "⚠️ WARNING: OWNER_ID not set in .env file! Owner-only commands will not work."
-  );
+  setImmediate(() => {
+    const logger = require("./logger");
+    logger.error(
+      "⚠️ WARNING: OWNER_ID not set in .env file! Owner-only commands will not work."
+    );
+  });
 }
 
 class Owner {
