@@ -84,8 +84,19 @@
 
       <div class="content-section">
         <div class="changelog-entry">
-          <h2>Version 3.16.3 - December 5, 2025</h2>
+          <h2>Version 3.16.4 - December 5, 2025</h2>
           <span class="version-badge">Latest</span>
+          <h3>🔧 Database Schema Fix - Complete</h3>
+          <ul>
+            <li>✅ Added migrations for ALL missing backups table columns</li>
+            <li>✅ Added <code>guild_name</code>, <code>timestamp</code>, <code>size</code>, and <code>version</code> columns</li>
+            <li>✅ Fixed "no such column: timestamp" error in backup manager</li>
+            <li>✅ Backup metadata now saves completely and correctly</li>
+          </ul>
+        </div>
+
+        <div class="changelog-entry">
+          <h2>Version 3.16.3 - December 5, 2025</h2>
           <h3>🔧 Database Schema Fix</h3>
           <ul>
             <li>✅ Added migration for missing <code>guild_name</code> column in backups table</li>
