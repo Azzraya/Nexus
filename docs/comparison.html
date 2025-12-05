@@ -626,17 +626,20 @@
                   </p>
                 </div>
                 <div>
-                  <h4>Nexus Response:</h4>
+                  <h4>Nexus Response (with proper role hierarchy):</h4>
                   <ol>
-                    <li><strong>Detects on FIRST deletion</strong></li>
-                    <li><strong>Instant ban + permission removal</strong></li>
-                    <li><strong>Auto-recovery starts immediately</strong></li>
+                    <li><strong>Detects on 3rd deletion</strong> (configurable threshold)</li>
+                    <li><strong>Attempts ban + permission removal</strong></li>
+                    <li><strong>⚠️ Success if bot role > attacker role</strong></li>
+                    <li><strong>Auto-recovery starts if ban succeeds</strong></li>
                     <li><strong>Channels restored from snapshot</strong></li>
-                    <li><strong>Permissions restored</strong></li>
-                    <li><strong>Server fully restored in seconds</strong></li>
+                    <li><strong>Server restoration in seconds</strong></li>
                   </ol>
-                  <p style="color: #00ff00; margin-top: 10px">
-                    <strong>Result:</strong> Zero damage, instant recovery
+                  <p style="color: #ffa500; margin-top: 10px">
+                    <strong>Result:</strong> Some damage possible, but fast recovery (depends on role positioning)
+                  </p>
+                  <p style="color: #ff6b6b; margin-top: 10px; font-size: 0.9rem;">
+                    <strong>⚠️ Without proper role hierarchy:</strong> Detection works, action fails - alerts sent but damage occurs
                   </p>
                 </div>
               </div>
@@ -679,10 +682,10 @@
                     </li>
                     <li><strong>Threat intel checks known raiders</strong></li>
                     <li><strong>Auto-quarantine activated</strong></li>
-                    <li><strong>All raiders caught and banned</strong></li>
+                    <li><strong>Raiders detected and action attempted</strong></li>
                   </ul>
                   <p style="color: #00ff00; margin-top: 10px">
-                    <strong>Result:</strong> Complete protection
+                    <strong>Result:</strong> Superior detection, fast response (effectiveness depends on configuration)
                   </p>
                 </div>
               </div>
@@ -722,12 +725,12 @@
                     <li>
                       <strong>Detects 3+ permission changes in 10s</strong>
                     </li>
-                    <li><strong>60%+ confidence = instant action</strong></li>
-                    <li><strong>Removes dangerous permissions</strong></li>
-                    <li><strong>Attack prevented before it starts</strong></li>
+                    <li><strong>60%+ confidence = action attempted</strong></li>
+                    <li><strong>Attempts to remove dangerous permissions</strong></li>
+                    <li><strong>⚠️ Success depends on role hierarchy</strong></li>
                   </ul>
-                  <p style="color: #00ff00; margin-top: 10px">
-                    <strong>Result:</strong> Attack stopped before damage
+                  <p style="color: #ffa500; margin-top: 10px">
+                    <strong>Result:</strong> Fast detection, action attempted (requires proper setup)
                   </p>
                 </div>
               </div>
@@ -1006,12 +1009,19 @@
         <div class="feature-category">
           <h2>🔄 Migrating from Wick to Nexus</h2>
 
+          <div style="background: rgba(255,165,0,0.2); padding: 20px; border-radius: 10px; border-left: 4px solid #ffa500; margin-bottom: 30px;">
+            <strong style="color: #ffa500;">⚠️ IMPORTANT:</strong>
+            <p style="margin: 10px 0 0 0;">
+              Running multiple security bots simultaneously has NOT been extensively tested and may cause conflicts.
+              We recommend <strong>removing Wick before adding Nexus</strong> or using a test server first.
+            </p>
+          </div>
+
           <div class="setup-steps">
             <div class="setup-step">
-              <h3>Keep Wick Running</h3>
+              <h3>Recommended: Test Server First</h3>
               <p>
-                Don't remove Wick yet - run both bots side-by-side during
-                migration
+                Add Nexus to a test/staging server to familiarize yourself with features before production deployment
               </p>
             </div>
             <div class="setup-step">
@@ -1021,47 +1031,36 @@
               </p>
             </div>
             <div class="setup-step">
-              <h3>Run Quick Setup</h3>
+              <h3>⚠️ CRITICAL: Position Bot Role at TOP</h3>
               <p>
-                Use <code>/setup preset</code> for instant configuration based
-                on your server type
+                Server Settings → Roles → Drag Nexus role to highest position. Use <code>/security rolecheck</code> to verify.
+                <strong style="color: #ff6b6b;">This is NOT optional.</strong>
               </p>
             </div>
             <div class="setup-step">
-              <h3>Get AI Recommendations</h3>
+              <h3>Run Quick Setup</h3>
               <p>
-                Run <code>/recommend analyze</code> for AI-powered security
-                suggestions
+                Use <code>/quicksetup</code> for guided configuration or <code>/setup preset</code> for instant setup
               </p>
             </div>
             <div class="setup-step">
               <h3>Configure Protection</h3>
               <p>
-                Enable anti-raid, anti-nuke, and join gate to match your Wick
-                setup
+                Enable anti-raid, anti-nuke, and automod. Test with <code>/security test</code> if available.
               </p>
             </div>
             <div class="setup-step">
-              <h3>Test Nexus</h3>
+              <h3>Remove Wick (Optional)</h3>
               <p>
-                Use both bots for 1-2 weeks. Compare performance, features, and
-                reliability
-              </p>
-            </div>
-            <div class="setup-step">
-              <h3>Remove Wick</h3>
-              <p>
-                Once confident in Nexus, remove Wick and enjoy all features for
-                free
+                Once Nexus is configured and verified working, you can remove Wick. Or keep both if you prefer redundancy.
               </p>
             </div>
           </div>
 
           <div class="info-box">
             <p>
-              <strong>Note:</strong> Cases and warnings don't auto-transfer
-              (different databases). Nexus creates new moderation history going
-              forward. Roles, channels, and server structure are preserved.
+              <strong>Note:</strong> Cases and warnings don't auto-transfer (different databases).
+              Nexus starts fresh moderation history. Use <code>/migrate</code> command to attempt data migration (experimental).
             </p>
           </div>
         </div>
