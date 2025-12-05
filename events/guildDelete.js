@@ -88,15 +88,6 @@ module.exports = {
       console.error("Failed to log guild leave:", error.message);
     }
 
-    // Mark referral as inactive
-    try {
-      const referCommand = require("../commands/refer");
-      await referCommand.markReferralInactive(guild.id);
-      console.log(`   🎯 Referral marked as inactive`);
-    } catch (referralError) {
-      console.error("Failed to mark referral inactive:", referralError.message);
-    }
-
     // Send webhook notification to admin
     if (
       process.env.ADMIN_WEBHOOK_URL &&
