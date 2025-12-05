@@ -38,7 +38,7 @@ class AdvancedAntiNuke {
   // Get server-size-aware adaptive thresholds
   getAdaptiveThresholds(guild) {
     const memberCount = guild.memberCount || 1;
-    
+
     // Calculate multiplier based on server size
     // Larger servers may have more legitimate bulk operations
     let multiplier = 1.0;
@@ -53,13 +53,23 @@ class AdvancedAntiNuke {
 
     // Apply multiplier to base thresholds
     return {
-      channelsDeleted: Math.max(1, Math.ceil(this.baseThresholds.channelsDeleted * multiplier)),
-      channelsCreated: Math.ceil(this.baseThresholds.channelsCreated * multiplier),
-      rolesDeleted: Math.max(1, Math.ceil(this.baseThresholds.rolesDeleted * multiplier)),
+      channelsDeleted: Math.max(
+        1,
+        Math.ceil(this.baseThresholds.channelsDeleted * multiplier)
+      ),
+      channelsCreated: Math.ceil(
+        this.baseThresholds.channelsCreated * multiplier
+      ),
+      rolesDeleted: Math.max(
+        1,
+        Math.ceil(this.baseThresholds.rolesDeleted * multiplier)
+      ),
       rolesCreated: Math.ceil(this.baseThresholds.rolesCreated * multiplier),
       membersBanned: Math.ceil(this.baseThresholds.membersBanned * multiplier),
       membersKicked: Math.ceil(this.baseThresholds.membersKicked * multiplier),
-      webhooksCreated: Math.ceil(this.baseThresholds.webhooksCreated * multiplier),
+      webhooksCreated: Math.ceil(
+        this.baseThresholds.webhooksCreated * multiplier
+      ),
       emojisDeleted: Math.ceil(this.baseThresholds.emojisDeleted * multiplier),
       emojisCreated: Math.ceil(this.baseThresholds.emojisCreated * multiplier),
       voiceRaid: Math.ceil(this.baseThresholds.voiceRaid * multiplier),
@@ -156,7 +166,7 @@ class AdvancedAntiNuke {
   async trackPermissionChange(guild, userId, changeType, targetId, targetType) {
     const key = `${userId}-${guild.id}`;
     const now = Date.now();
-    
+
     if (!this.permissionChanges.has(key)) {
       this.permissionChanges.set(key, {
         changes: [],
@@ -166,7 +176,7 @@ class AdvancedAntiNuke {
     }
 
     const data = this.permissionChanges.get(key);
-    
+
     // Add this change
     data.changes.push({
       type: changeType,
@@ -177,8 +187,8 @@ class AdvancedAntiNuke {
     data.count++;
 
     // Clean old changes (older than 30 seconds)
-    data.changes = data.changes.filter(c => now - c.timestamp < 30000);
-    
+    data.changes = data.changes.filter((c) => now - c.timestamp < 30000);
+
     // Reset if no activity for 30 seconds
     if (data.changes.length > 0 && now - data.changes[0].timestamp > 30000) {
       data.firstChange = now;
@@ -186,8 +196,8 @@ class AdvancedAntiNuke {
     }
 
     // Check for suspicious permission testing patterns
-    const recentChanges = data.changes.filter(c => now - c.timestamp < 10000);
-    
+    const recentChanges = data.changes.filter((c) => now - c.timestamp < 10000);
+
     // Pattern 1: Rapid permission changes (3+ in 10 seconds)
     if (recentChanges.length >= 3) {
       logger.warn(
@@ -197,12 +207,12 @@ class AdvancedAntiNuke {
         suspicious: true,
         reason: "rapid_permission_changes",
         count: recentChanges.length,
-        confidence: 40 + (recentChanges.length * 10),
+        confidence: 40 + recentChanges.length * 10,
       };
     }
 
     // Pattern 2: Testing on multiple targets (5+ different targets in 30 seconds)
-    const uniqueTargets = new Set(data.changes.map(c => c.targetId));
+    const uniqueTargets = new Set(data.changes.map((c) => c.targetId));
     if (uniqueTargets.size >= 5) {
       logger.warn(
         `[Anti-Nuke] Permission testing detected: ${userId} modified permissions on ${uniqueTargets.size} different targets`
@@ -211,14 +221,15 @@ class AdvancedAntiNuke {
         suspicious: true,
         reason: "multiple_target_testing",
         count: uniqueTargets.size,
-        confidence: 50 + (uniqueTargets.size * 5),
+        confidence: 50 + uniqueTargets.size * 5,
       };
     }
 
     // Pattern 3: Escalation pattern (creating/modifying admin roles)
-    const escalations = recentChanges.filter(c => 
-      c.type === "role_create" || 
-      (c.type === "role_update" && c.targetType === "admin")
+    const escalations = recentChanges.filter(
+      (c) =>
+        c.type === "role_create" ||
+        (c.type === "role_update" && c.targetType === "admin")
     );
     if (escalations.length >= 2) {
       logger.warn(
@@ -251,8 +262,8 @@ class AdvancedAntiNuke {
 
     // Track permission changes if this is a permission-related action
     if (
-      actionType.includes("role") || 
-      actionType.includes("channel") || 
+      actionType.includes("role") ||
+      actionType.includes("channel") ||
       actionType.includes("permission")
     ) {
       const permCheck = await this.trackPermissionChange(
@@ -262,29 +273,35 @@ class AdvancedAntiNuke {
         details.targetId,
         details.targetType
       );
-      
+
       if (permCheck.suspicious) {
         logger.error(
           `[Anti-Nuke] 🚨 PERMISSION TESTING DETECTED: ${userId} in ${guild.name} - ${permCheck.reason} (confidence: ${permCheck.confidence}%)`
         );
-        
+
         // If confidence is high enough, take action
         if (permCheck.confidence >= 60) {
           try {
             const member = await guild.members.fetch(userId);
-            
+
             // Remove dangerous permissions immediately
-            const roles = member.roles.cache.filter(r => 
-              r.permissions.has("Administrator") ||
-              r.permissions.has("ManageGuild") ||
-              r.permissions.has("ManageRoles") ||
-              r.permissions.has("ManageChannels")
+            const roles = member.roles.cache.filter(
+              (r) =>
+                r.permissions.has("Administrator") ||
+                r.permissions.has("ManageGuild") ||
+                r.permissions.has("ManageRoles") ||
+                r.permissions.has("ManageChannels")
             );
-            
+
             for (const [, role] of roles) {
               try {
-                await member.roles.remove(role, `Anti-Nuke: ${permCheck.reason}`);
-                logger.info(`[Anti-Nuke] Removed role ${role.name} from ${member.user.tag}`);
+                await member.roles.remove(
+                  role,
+                  `Anti-Nuke: ${permCheck.reason}`
+                );
+                logger.info(
+                  `[Anti-Nuke] Removed role ${role.name} from ${member.user.tag}`
+                );
               } catch (err) {
                 logger.error(`[Anti-Nuke] Failed to remove role:`, err);
               }
@@ -292,22 +309,27 @@ class AdvancedAntiNuke {
 
             // Notify admins
             const logChannel = guild.channels.cache.find(
-              ch => ch.name.includes("log") || ch.name.includes("mod")
+              (ch) => ch.name.includes("log") || ch.name.includes("mod")
             );
             if (logChannel) {
               await logChannel.send({
-                embeds: [{
-                  title: "🚨 Permission Testing Detected",
-                  description: `**User:** <@${userId}>\n**Reason:** ${permCheck.reason}\n**Confidence:** ${permCheck.confidence}%\n**Action:** Removed dangerous permissions`,
-                  color: 0xff0000,
-                  timestamp: new Date().toISOString(),
-                }],
+                embeds: [
+                  {
+                    title: "🚨 Permission Testing Detected",
+                    description: `**User:** <@${userId}>\n**Reason:** ${permCheck.reason}\n**Confidence:** ${permCheck.confidence}%\n**Action:** Removed dangerous permissions`,
+                    color: 0xff0000,
+                    timestamp: new Date().toISOString(),
+                  },
+                ],
               });
             }
 
             return; // Stop further monitoring, threat neutralized
           } catch (error) {
-            logger.error("[Anti-Nuke] Failed to handle permission testing:", error);
+            logger.error(
+              "[Anti-Nuke] Failed to handle permission testing:",
+              error
+            );
           }
         }
       }
@@ -328,7 +350,7 @@ class AdvancedAntiNuke {
 
     // Use adaptive thresholds (EXCEEDS WICK - intelligent adaptation)
     const thresholds = this.getAdaptiveThresholds(guild);
-    
+
     const key = `${guild.id}-${userId}`;
     const now = Date.now();
 
@@ -351,7 +373,10 @@ class AdvancedAntiNuke {
             await channel
               .delete("Anti-Nuke: Channel created during lockdown")
               .catch((err) => {
-                logger.debug(`[Anti-Nuke] Failed to delete channel ${channel.id} during lockdown:`, err.message);
+                logger.debug(
+                  `[Anti-Nuke] Failed to delete channel ${channel.id} during lockdown:`,
+                  err.message
+                );
               });
             this.spamChannels.delete(details.channelId);
             logger.warn(
@@ -399,7 +424,10 @@ class AdvancedAntiNuke {
       threatDetected = true;
       threatType = "mass_channel_deletion";
     }
-    if (!threatDetected && counts.channelsCreated >= thresholds.channelsCreated) {
+    if (
+      !threatDetected &&
+      counts.channelsCreated >= thresholds.channelsCreated
+    ) {
       threatDetected = true;
       threatType = "mass_channel_creation";
     }
@@ -419,7 +447,10 @@ class AdvancedAntiNuke {
       threatDetected = true;
       threatType = "mass_kick";
     }
-    if (!threatDetected && counts.webhooksCreated >= thresholds.webhooksCreated) {
+    if (
+      !threatDetected &&
+      counts.webhooksCreated >= thresholds.webhooksCreated
+    ) {
       threatDetected = true;
       threatType = "mass_webhook_creation";
     }
@@ -532,7 +563,66 @@ class AdvancedAntiNuke {
       await db.setServerConfig(guild.id, { anti_nuke_enabled: 1 });
     }
 
-    // CRITICAL: Move bot's role above attacker FIRST - AGGRESSIVE ELEVATION
+    // PERFORMANCE FIX: Attempt ban IMMEDIATELY, don't wait for role manipulation
+    // Get bot permissions right away
+    const botMember = await guild.members
+      .fetch(this.client.user.id)
+      .catch(() => null);
+    if (!botMember) {
+      logger.error(
+        `[Anti-Nuke] Could not fetch bot member - cannot take action`
+      );
+      return;
+    }
+
+    const hasBanPerms = botMember.permissions.has("BanMembers");
+    const hasKickPerms = botMember.permissions.has("KickMembers");
+
+    logger.warn(
+      `[Anti-Nuke] Immediate action - Bot has Ban: ${hasBanPerms}, Kick: ${hasKickPerms}`
+    );
+
+    // TRY TO BAN IMMEDIATELY
+    let actionTaken = false;
+    if (hasBanPerms) {
+      try {
+        await member.ban({
+          reason: `Anti-Nuke EMERGENCY: ${threatType} detected`,
+          deleteMessageSeconds: 604800,
+        });
+        logger.success(
+          `[Anti-Nuke] ✅ IMMEDIATE BAN SUCCESS: ${userId} removed from ${guild.name}`
+        );
+        actionTaken = true;
+        return; // Success - exit early
+      } catch (banError) {
+        logger.error(`[Anti-Nuke] Immediate ban failed: ${banError.message}`);
+        // Continue to try other methods
+      }
+    }
+
+    // If ban failed, try kick
+    if (!actionTaken && hasKickPerms) {
+      try {
+        await member.kick(`Anti-Nuke: ${threatType} detected`);
+        logger.success(
+          `[Anti-Nuke] ✅ IMMEDIATE KICK SUCCESS: ${userId} removed from ${guild.name}`
+        );
+        actionTaken = true;
+        return; // Success - exit early
+      } catch (kickError) {
+        logger.error(`[Anti-Nuke] Immediate kick failed: ${kickError.message}`);
+      }
+    }
+
+    // If immediate action failed, THEN try role manipulation (slower fallback)
+    if (!actionTaken) {
+      logger.warn(
+        `[Anti-Nuke] Immediate ban/kick failed - attempting role manipulation fallback`
+      );
+    }
+
+    // FALLBACK: Try role manipulation (this is slower and often fails)
     // Since attacker bot's application role has Admin, we MUST be above it in hierarchy
     try {
       const botMember = await guild.members
@@ -873,10 +963,11 @@ class AdvancedAntiNuke {
             logger.error(
               `[Anti-Nuke] Role hierarchy issue: Bot position ${botMemberCheck.roles.highest.position}, Attacker position ${member.roles.highest.position}`
             );
-            
+
             // Send detailed explanation to Discord alert channel
             const config = await db.getServerConfig(guild.id);
-            const alertChannelId = config?.alert_channel || config?.mod_log_channel;
+            const alertChannelId =
+              config?.alert_channel || config?.mod_log_channel;
             if (alertChannelId) {
               try {
                 const channel = guild.channels.cache.get(alertChannelId);
@@ -888,8 +979,8 @@ class AdvancedAntiNuke {
                         .setTitle("⚠️ Role Hierarchy Issue")
                         .setDescription(
                           `**Anti-Nuke could not take action against <@${userId}>**\n\n` +
-                          `The attacker's role is at or above the bot's role position.\n` +
-                          `Even with Administrator permission, Discord requires role hierarchy for moderation actions.`
+                            `The attacker's role is at or above the bot's role position.\n` +
+                            `Even with Administrator permission, Discord requires role hierarchy for moderation actions.`
                         )
                         .addFields(
                           {
@@ -904,16 +995,20 @@ class AdvancedAntiNuke {
                           },
                           {
                             name: "Solution",
-                            value: "Position the bot's role **ABOVE** all other roles in `Server Settings → Roles`.\n\nUse `/security rolecheck` for detailed instructions.",
+                            value:
+                              "Position the bot's role **ABOVE** all other roles in `Server Settings → Roles`.\n\nUse `/security rolecheck` for detailed instructions.",
                           }
                         )
-                        .setColor(0xFF0000)
-                        .setTimestamp()
-                    ]
+                        .setColor(0xff0000)
+                        .setTimestamp(),
+                    ],
                   });
                 }
               } catch (alertError) {
-                logger.debug(`[Anti-Nuke] Could not send role hierarchy alert:`, alertError.message);
+                logger.debug(
+                  `[Anti-Nuke] Could not send role hierarchy alert:`,
+                  alertError.message
+                );
               }
             }
           }
@@ -948,7 +1043,7 @@ class AdvancedAntiNuke {
       if (removed) {
         // Only wait 1 second instead of 3 (optimized for speed)
         await new Promise((resolve) => setTimeout(resolve, 1000));
-        
+
         logger.info(
           `[Anti-Nuke] Attacker ${userId} was successfully removed, starting server recovery...`
         );
@@ -1000,29 +1095,35 @@ class AdvancedAntiNuke {
                 .fetch(channelId)
                 .catch(() => null);
               if (channel) {
-                await channel.delete(
-                  "Anti-Nuke: Spam channel cleanup during lockdown"
-                ).catch((error) => {
-                  // Handle rate limits gracefully (EXCEEDS WICK)
-                  if (error.code === 429 || error.status === 429) {
-                    logger.warn(`[Anti-Nuke] Rate limited while deleting spam channel ${channelId}, will retry`);
-                    // Retry after delay
-                    setTimeout(async () => {
-                      try {
-                        await channel.delete("Anti-Nuke: Spam channel cleanup (retry)");
-                        deletedSpamChannels++;
-                      } catch (retryError) {
-                        // Give up after retry
-                      }
-                    }, (error.retryAfter || 1) * 1000);
-                  }
-                });
+                await channel
+                  .delete("Anti-Nuke: Spam channel cleanup during lockdown")
+                  .catch((error) => {
+                    // Handle rate limits gracefully (EXCEEDS WICK)
+                    if (error.code === 429 || error.status === 429) {
+                      logger.warn(
+                        `[Anti-Nuke] Rate limited while deleting spam channel ${channelId}, will retry`
+                      );
+                      // Retry after delay
+                      setTimeout(async () => {
+                        try {
+                          await channel.delete(
+                            "Anti-Nuke: Spam channel cleanup (retry)"
+                          );
+                          deletedSpamChannels++;
+                        } catch (retryError) {
+                          // Give up after retry
+                        }
+                      }, (error.retryAfter || 1) * 1000);
+                    }
+                  });
                 deletedSpamChannels++;
               }
             } catch (error) {
               // Continue
               if (error.code === 429 || error.status === 429) {
-                logger.warn(`[Anti-Nuke] Rate limited during spam channel cleanup`);
+                logger.warn(
+                  `[Anti-Nuke] Rate limited during spam channel cleanup`
+                );
               }
             }
             this.spamChannels.delete(channelId);
@@ -1057,7 +1158,9 @@ class AdvancedAntiNuke {
                 .catch((error) => {
                   // Handle rate limits gracefully (EXCEEDS WICK)
                   if (error.code === 429 || error.status === 429) {
-                    logger.warn(`[Anti-Nuke] Rate limited while deleting channel ${channel.id}`);
+                    logger.warn(
+                      `[Anti-Nuke] Rate limited while deleting channel ${channel.id}`
+                    );
                   }
                 });
               deletedSpamChannels++;
@@ -1122,7 +1225,10 @@ class AdvancedAntiNuke {
           await everyoneRole
             .setPermissions(newPerms, "Anti-Nuke: Prevent channel creation")
             .catch((err) => {
-              logger.debug(`[Anti-Nuke] Failed to update @everyone permissions:`, err.message);
+              logger.debug(
+                `[Anti-Nuke] Failed to update @everyone permissions:`,
+                err.message
+              );
             });
         }
       } catch (error) {
@@ -1382,7 +1488,9 @@ class AdvancedAntiNuke {
               await admin.send({ embeds: [dmEmbed] }).catch((error) => {
                 // Handle rate limits gracefully (EXCEEDS WICK)
                 if (error.code === 429 || error.status === 429) {
-                  logger.warn(`[Anti-Nuke] Rate limited while sending DM to ${admin.id}`);
+                  logger.warn(
+                    `[Anti-Nuke] Rate limited while sending DM to ${admin.id}`
+                  );
                 }
               });
             } catch (error) {
@@ -1539,10 +1647,16 @@ class AdvancedAntiNuke {
 
       // Fetch current state from Discord
       await guild.channels.fetch().catch((err) => {
-        logger.debug(`[Anti-Nuke] Failed to fetch channels for fallback recovery:`, err.message);
+        logger.debug(
+          `[Anti-Nuke] Failed to fetch channels for fallback recovery:`,
+          err.message
+        );
       });
       await guild.roles.fetch().catch((err) => {
-        logger.debug(`[Anti-Nuke] Failed to fetch roles for fallback recovery:`, err.message);
+        logger.debug(
+          `[Anti-Nuke] Failed to fetch roles for fallback recovery:`,
+          err.message
+        );
       });
 
       // Try to restore based on what we know was deleted
@@ -1727,7 +1841,10 @@ class AdvancedAntiNuke {
       if (spamData.count >= 3 && Date.now() - spamData.lastMessage < 10000) {
         try {
           await message.delete().catch((err) => {
-            logger.debug(`[Anti-Nuke] Failed to delete emoji spam message:`, err.message);
+            logger.debug(
+              `[Anti-Nuke] Failed to delete emoji spam message:`,
+              err.message
+            );
           });
           logger.warn(
             `[Anti-Nuke] Deleted emoji spam message from ${userId} in ${message.guild.id}`
@@ -1743,7 +1860,10 @@ class AdvancedAntiNuke {
                 `⚠️ Your message in ${message.guild.name} was deleted for emoji spam. Please avoid sending excessive emojis.`
               )
               .catch((err) => {
-                logger.debug(`[Anti-Nuke] Failed to send DM warning for emoji spam:`, err.message);
+                logger.debug(
+                  `[Anti-Nuke] Failed to send DM warning for emoji spam:`,
+                  err.message
+                );
               });
           }
         } catch (error) {
