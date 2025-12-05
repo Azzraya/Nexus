@@ -1356,20 +1356,23 @@ class DashboardServer {
     };
 
     // ========== V2 API ENDPOINTS (NEW) ==========
-    
+
     // GET /api/v2/commands - Get all available commands (v2)
     this.app.get("/api/v2/commands", async (req, res) => {
       try {
-        const commands = Array.from(this.client.commands.values()).map((cmd) => ({
-          name: cmd.data.name,
-          description: cmd.data.description,
-          options: cmd.data.options?.map((opt) => ({
-            name: opt.name,
-            description: opt.description,
-            type: opt.type,
-            required: opt.required || false,
-          })) || [],
-        }));
+        const commands = Array.from(this.client.commands.values()).map(
+          (cmd) => ({
+            name: cmd.data.name,
+            description: cmd.data.description,
+            options:
+              cmd.data.options?.map((opt) => ({
+                name: opt.name,
+                description: opt.description,
+                type: opt.type,
+                required: opt.required || false,
+              })) || [],
+          })
+        );
 
         res.json({
           success: true,
@@ -1814,11 +1817,17 @@ class DashboardServer {
             features: {
               antiNuke: {
                 enabled: antiNukeCount,
-                percentage: totalServers > 0 ? Math.round((antiNukeCount / totalServers) * 100) : 0,
+                percentage:
+                  totalServers > 0
+                    ? Math.round((antiNukeCount / totalServers) * 100)
+                    : 0,
               },
               antiRaid: {
                 enabled: antiRaidCount,
-                percentage: totalServers > 0 ? Math.round((antiRaidCount / totalServers) * 100) : 0,
+                percentage:
+                  totalServers > 0
+                    ? Math.round((antiRaidCount / totalServers) * 100)
+                    : 0,
               },
             },
             recentThreats: {
