@@ -46,34 +46,35 @@ module.exports = {
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles),
 
   async execute(interaction) {
-    const subcommand = interaction.options.getSubcommand();
+    try {
+      const subcommand = interaction.options.getSubcommand();
 
-    if (subcommand === "add") {
-      const role = interaction.options.getRole("role");
-      const type = interaction.options.getString("type");
+      if (subcommand === "add") {
+        const role = interaction.options.getRole("role");
+        const type = interaction.options.getString("type");
 
-      await new Promise((resolve, reject) => {
-        db.db.run(
-          "INSERT OR REPLACE INTO auto_roles (guild_id, role_id, type) VALUES (?, ?, ?)",
-          [interaction.guild.id, role.id, type],
-          (err) => {
-            if (err) reject(err);
-            else resolve();
-          }
-        );
-      });
+        await new Promise((resolve, reject) => {
+          db.db.run(
+            "INSERT OR REPLACE INTO auto_roles (guild_id, role_id, type) VALUES (?, ?, ?)",
+            [interaction.guild.id, role.id, type],
+            (err) => {
+              if (err) reject(err);
+              else resolve();
+            }
+          );
+        });
 
-      await interaction.reply({
-        embeds: [
-          {
-            title: "✅ Auto-Role Added",
-            description: `${role} will be assigned ${
-              type === "join" ? "when users join" : ""
-            }`,
-            color: 0x00ff00,
-          },
-        ],
-      });
+        await interaction.reply({
+          embeds: [
+            {
+              title: "✅ Auto-Role Added",
+              description: `${role} will be assigned ${
+                type === "join" ? "when users join" : ""
+              }`,
+              color: 0x00ff00,
+            },
+          ],
+        });
     } else if (subcommand === "remove") {
       const role = interaction.options.getRole("role");
 
@@ -125,6 +126,20 @@ module.exports = {
         .setTimestamp();
 
       await interaction.reply({ embeds: [embed] });
+      }
+    } catch (error) {
+      logger.error("Error in autorole command:", error);
+      
+      const reply = {
+        content: `❌ Error: ${error.message}`,
+        flags: MessageFlags.Ephemeral,
+      };
+
+      if (interaction.replied || interaction.deferred) {
+        await interaction.editReply(reply).catch(() => {});
+      } else {
+        await interaction.reply(reply).catch(() => {});
+      }
     }
   },
 };

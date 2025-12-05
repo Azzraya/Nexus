@@ -4291,11 +4291,15 @@ class Database {
   updateVoiceSession(guildId, userId, channelId, duration) {
     return new Promise((resolve, reject) => {
       // Update the most recent join log with session duration
+      // SQLite doesn't support ORDER BY in UPDATE, so we use a subquery
       this.db.run(
         `UPDATE voice_activity_logs SET session_duration = ? 
-         WHERE guild_id = ? AND user_id = ? AND channel_id = ? AND action = 'join' 
-         AND session_duration IS NULL
-         ORDER BY timestamp DESC LIMIT 1`,
+         WHERE id = (
+           SELECT id FROM voice_activity_logs 
+           WHERE guild_id = ? AND user_id = ? AND channel_id = ? AND action = 'join' 
+           AND session_duration IS NULL
+           ORDER BY timestamp DESC LIMIT 1
+         )`,
         [duration, guildId, userId, channelId],
         (err) => {
           if (err) reject(err);
