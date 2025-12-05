@@ -24,7 +24,7 @@ const manager = new ClusterManager(path.join(__dirname, "shard.js"), {
 manager.on("clusterCreate", (cluster) => {
   console.log(`✅ Launched Cluster ${cluster.id}`);
 
-  cluster.on("ready", () => {
+  cluster.on("clientReady", () => {
     console.log(`🟢 Cluster ${cluster.id} is ready!`);
   });
 

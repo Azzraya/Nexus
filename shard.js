@@ -76,7 +76,7 @@ if (process.env.DISCORDBOTLIST_TOKEN) {
 
   // Wait for manager to be ready, then start posting stats
   manager.once("shardCreate", async (shard) => {
-    shard.once("ready", async () => {
+    shard.once("clientReady", async () => {
       if (!botId) {
         try {
           // Get bot ID from the first ready shard
@@ -289,7 +289,7 @@ if (process.env.VOIDBOTS_TOKEN) {
 
   // Initialize only once when first shard is ready
   manager.once("shardCreate", async (shard) => {
-    shard.once("ready", async () => {
+    shard.once("clientReady", async () => {
       if (voidbotsInitialized) {
         return;
       }
@@ -338,7 +338,7 @@ if (process.env.DISCORDBOTS_TOKEN) {
   let botId = null;
 
   manager.once("shardCreate", async (shard) => {
-    shard.once("ready", async () => {
+    shard.once("clientReady", async () => {
       if (!botId) {
         try {
           const clientValues = await manager.fetchClientValues("user.id");
@@ -396,7 +396,7 @@ if (process.env.BOTSONDICORD_TOKEN) {
   let botId = null;
 
   manager.once("shardCreate", async (shard) => {
-    shard.once("ready", async () => {
+    shard.once("clientReady", async () => {
       if (!botId) {
         try {
           const clientValues = await manager.fetchClientValues("user.id");
@@ -459,7 +459,7 @@ if (process.env.BOTSONDICORD_TOKEN) {
 manager.on("shardCreate", (shard) => {
   console.log(`✅ Launched shard ${shard.id}`);
 
-  shard.on("ready", () => {
+  shard.on("clientReady", () => {
     console.log(`🟢 Shard ${shard.id} is ready!`);
   });
 

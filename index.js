@@ -71,7 +71,7 @@ client.autoBackup = new AutoBackup(client);
 const SmartStatus = require("./utils/smartStatus");
 const smartStatus = new SmartStatus(client);
 
-client.once("ready", () => {
+client.once("clientReady", () => {
   // Start smart status after bot is ready
   setTimeout(() => {
     smartStatus.start(2); // Rotate every 2 minutes
