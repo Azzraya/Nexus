@@ -84,8 +84,24 @@
 
       <div class="content-section">
         <div class="changelog-entry">
-          <h2>Version 3.19.1 - December 5, 2025</h2>
+          <h2>Version 3.19.3 - December 5, 2025</h2>
           <span class="version-badge">Latest</span>
+          <h3>🐛 Command Fixes & Discord.js v15 Compatibility</h3>
+          <ul>
+            <li>✅ Fixed <code>/antinuke</code> undefined client parameter error</li>
+            <li>✅ Changed to use <code>interaction.client</code> throughout</li>
+            <li>
+              ✅ Fixed deprecation: <code>ready</code> event →
+              <code>clientReady</code>
+            </li>
+            <li>✅ Updated in shard.js, index.js, cluster.js (7 instances)</li>
+            <li>✅ Discord.js v15 ready</li>
+            <li>✅ No more deprecation warnings on startup</li>
+          </ul>
+        </div>
+
+        <div class="changelog-entry">
+          <h2>Version 3.19.1 - December 5, 2025</h2>
           <h3>🐛 Bug Fixes</h3>
           <ul>
             <li>
