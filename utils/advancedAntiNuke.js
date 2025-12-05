@@ -1364,21 +1364,34 @@ class AdvancedAntiNuke {
         `[Anti-Nuke] Starting recovery process for ${guild.id} after ${threatType}`
       );
 
-      // STEP 1: Delete all channels created by the attacker
+      // STEP 1: Delete all channels created by the attacker ONLY
+      // IMPORTANT: This ONLY deletes channels created by the detected threat user
+      // Channels created by server owner, mods, or other members are NOT touched
       if (attackerUserId) {
         const key = `${attackerUserId}-${guild.id}`;
         const attackerChannels = this.attackerCreatedChannels.get(key);
         
         if (attackerChannels && attackerChannels.size > 0) {
           logger.info(
-            `[Anti-Nuke] Cleaning up ${attackerChannels.size} spam channels created by attacker ${attackerUserId}`
+            `[Anti-Nuke] Cleaning up ${attackerChannels.size} spam channels created ONLY by detected threat ${attackerUserId}`
           );
 
           let deletedCount = 0;
+          const attackWindow = Date.now() - 300000; // Only delete channels created in last 5 minutes
+
           for (const channelId of attackerChannels) {
             try {
               const channel = await guild.channels.fetch(channelId).catch(() => null);
               if (channel) {
+                // Extra safety: Only delete if channel is very recent (created during attack window)
+                const channelAge = Date.now() - channel.createdTimestamp;
+                if (channelAge > 300000) {
+                  logger.debug(
+                    `[Anti-Nuke] Skipping channel ${channel.name} - too old (${Math.floor(channelAge / 1000)}s), likely legitimate`
+                  );
+                  continue;
+                }
+
                 await channel.delete("Anti-Nuke: Cleaning up spam channel created during attack");
                 deletedCount++;
                 logger.debug(`[Anti-Nuke] Deleted spam channel: ${channel.name} (${channelId})`);
@@ -1389,7 +1402,7 @@ class AdvancedAntiNuke {
           }
 
           logger.success(
-            `[Anti-Nuke] ✅ Cleaned up ${deletedCount}/${attackerChannels.size} spam channels`
+            `[Anti-Nuke] ✅ Cleaned up ${deletedCount}/${attackerChannels.size} spam channels (only attacker's channels)`
           );
 
           // Clear the tracking

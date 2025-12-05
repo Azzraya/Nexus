@@ -84,8 +84,19 @@
 
       <div class="content-section">
         <div class="changelog-entry">
-          <h2>Version 3.17.1 - December 5, 2025</h2>
+          <h2>Version 3.17.2 - December 5, 2025</h2>
           <span class="version-badge">Latest</span>
+          <h3>🛡️ Enhanced Safety: Channel Cleanup</h3>
+          <ul>
+            <li>✅ Added age check: Only deletes channels created in last 5 minutes</li>
+            <li>✅ Skips older channels that might be legitimate</li>
+            <li>✅ Added explicit comments confirming only attacker's channels are deleted</li>
+            <li>✅ Server owner and mod channels are never touched</li>
+          </ul>
+        </div>
+
+        <div class="changelog-entry">
+          <h2>Version 3.17.1 - December 5, 2025</h2>
           <h3>🐛 Bug Fixes</h3>
           <ul>
             <li>✅ Fixed "Unknown interaction" error when commands timeout</li>
