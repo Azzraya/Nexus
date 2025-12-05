@@ -105,8 +105,8 @@ function updateStats() {
     days > 0
       ? `${days}d ${hours}h`
       : hours > 0
-      ? `${hours}h ${minutes}m`
-      : `${minutes}m`;
+        ? `${hours}h ${minutes}m`
+        : `${minutes}m`;
 
   // Growth metrics
   document.getElementById("raids-stopped").textContent =

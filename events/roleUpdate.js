@@ -12,20 +12,24 @@ module.exports = {
         limit: 1,
       });
       const roleUpdate = auditLogs.entries.first();
-      
+
       if (roleUpdate && roleUpdate.target.id === newRole.id) {
         const executor = roleUpdate.executor;
-        
+
         // Check if this is a permission change
         const oldPerms = oldRole.permissions;
         const newPerms = newRole.permissions;
         const addedPerms = newPerms.toArray().filter((p) => !oldPerms.has(p));
-        const hasAdminChange = addedPerms.includes("Administrator") ||
-                              addedPerms.includes("ManageGuild") ||
-                              addedPerms.includes("ManageRoles") ||
-                              addedPerms.includes("ManageChannels");
-        
-        if (client.advancedAntiNuke && (addedPerms.length > 0 || hasAdminChange)) {
+        const hasAdminChange =
+          addedPerms.includes("Administrator") ||
+          addedPerms.includes("ManageGuild") ||
+          addedPerms.includes("ManageRoles") ||
+          addedPerms.includes("ManageChannels");
+
+        if (
+          client.advancedAntiNuke &&
+          (addedPerms.length > 0 || hasAdminChange)
+        ) {
           await client.advancedAntiNuke.monitorAction(
             newRole.guild,
             "role_update",

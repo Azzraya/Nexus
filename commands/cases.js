@@ -133,10 +133,10 @@ module.exports = {
             caseData.action === "ban"
               ? 0xff0000
               : caseData.action === "kick"
-              ? 0xff8800
-              : caseData.action === "warn"
-              ? 0xffff00
-              : 0x0099ff
+                ? 0xff8800
+                : caseData.action === "warn"
+                  ? 0xffff00
+                  : 0x0099ff
           )
           .setTimestamp(new Date(caseData.timestamp));
 

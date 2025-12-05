@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -321,8 +321,18 @@
                   <li><strong>Permission testing detection</strong></li>
                   <li><strong>Auto-recovery with snapshots</strong></li>
                   <li><strong>Parallel restoration (10x faster)</strong></li>
-                  <li><strong>🆕 Smart cleanup: Auto-deletes spam channels, roles, and webhooks created by attacker before restoring</strong></li>
-                  <li><strong>Safety checks: Only deletes items created in last 5 minutes by detected threat</strong></li>
+                  <li>
+                    <strong
+                      >🆕 Smart cleanup: Auto-deletes spam channels, roles, and
+                      webhooks created by attacker before restoring</strong
+                    >
+                  </li>
+                  <li>
+                    <strong
+                      >Safety checks: Only deletes items created in last 5
+                      minutes by detected threat</strong
+                    >
+                  </li>
                 </ul>
               </div>
             </div>
@@ -630,19 +640,40 @@
                 <div>
                   <h4>Nexus Response (with proper role hierarchy):</h4>
                   <ol>
-                    <li><strong>Detects on 3rd deletion</strong> (configurable threshold)</li>
+                    <li>
+                      <strong>Detects on 3rd deletion</strong> (configurable
+                      threshold)
+                    </li>
                     <li><strong>Attempts ban + permission removal</strong></li>
-                    <li><strong>⚠️ Success if bot role > attacker role</strong></li>
-                    <li><strong>Auto-recovery starts if ban succeeds</strong></li>
-                    <li><strong>🆕 Smart cleanup: Deletes all spam channels/roles/webhooks created by attacker</strong></li>
+                    <li>
+                      <strong>⚠️ Success if bot role > attacker role</strong>
+                    </li>
+                    <li>
+                      <strong>Auto-recovery starts if ban succeeds</strong>
+                    </li>
+                    <li>
+                      <strong
+                        >🆕 Smart cleanup: Deletes all spam
+                        channels/roles/webhooks created by attacker</strong
+                      >
+                    </li>
                     <li><strong>Channels restored from snapshot</strong></li>
-                    <li><strong>Server restoration in seconds - clean and complete</strong></li>
+                    <li>
+                      <strong
+                        >Server restoration in seconds - clean and
+                        complete</strong
+                      >
+                    </li>
                   </ol>
                   <p style="color: #ffa500; margin-top: 10px">
-                    <strong>Result:</strong> Some damage possible, but fast recovery (depends on role positioning)
+                    <strong>Result:</strong> Some damage possible, but fast
+                    recovery (depends on role positioning)
                   </p>
-                  <p style="color: #ff6b6b; margin-top: 10px; font-size: 0.9rem;">
-                    <strong>⚠️ Without proper role hierarchy:</strong> Detection works, action fails - alerts sent but damage occurs
+                  <p
+                    style="color: #ff6b6b; margin-top: 10px; font-size: 0.9rem"
+                  >
+                    <strong>⚠️ Without proper role hierarchy:</strong> Detection
+                    works, action fails - alerts sent but damage occurs
                   </p>
                 </div>
               </div>
@@ -685,10 +716,13 @@
                     </li>
                     <li><strong>Threat intel checks known raiders</strong></li>
                     <li><strong>Auto-quarantine activated</strong></li>
-                    <li><strong>Raiders detected and action attempted</strong></li>
+                    <li>
+                      <strong>Raiders detected and action attempted</strong>
+                    </li>
                   </ul>
                   <p style="color: #00ff00; margin-top: 10px">
-                    <strong>Result:</strong> Superior detection, fast response (effectiveness depends on configuration)
+                    <strong>Result:</strong> Superior detection, fast response
+                    (effectiveness depends on configuration)
                   </p>
                 </div>
               </div>
@@ -729,11 +763,16 @@
                       <strong>Detects 3+ permission changes in 10s</strong>
                     </li>
                     <li><strong>60%+ confidence = action attempted</strong></li>
-                    <li><strong>Attempts to remove dangerous permissions</strong></li>
-                    <li><strong>⚠️ Success depends on role hierarchy</strong></li>
+                    <li>
+                      <strong>Attempts to remove dangerous permissions</strong>
+                    </li>
+                    <li>
+                      <strong>⚠️ Success depends on role hierarchy</strong>
+                    </li>
                   </ul>
                   <p style="color: #ffa500; margin-top: 10px">
-                    <strong>Result:</strong> Fast detection, action attempted (requires proper setup)
+                    <strong>Result:</strong> Fast detection, action attempted
+                    (requires proper setup)
                   </p>
                 </div>
               </div>
@@ -828,17 +867,23 @@
                   <td class="check">✓</td>
                 </tr>
                 <tr>
-                  <td style="padding-left: 30px; font-size: 0.9rem;">Auto-delete attacker's channels</td>
+                  <td style="padding-left: 30px; font-size: 0.9rem">
+                    Auto-delete attacker's channels
+                  </td>
                   <td class="cross">✗</td>
                   <td class="check">✓</td>
                 </tr>
                 <tr>
-                  <td style="padding-left: 30px; font-size: 0.9rem;">Auto-delete attacker's roles</td>
+                  <td style="padding-left: 30px; font-size: 0.9rem">
+                    Auto-delete attacker's roles
+                  </td>
                   <td class="cross">✗</td>
                   <td class="check">✓</td>
                 </tr>
                 <tr>
-                  <td style="padding-left: 30px; font-size: 0.9rem;">Auto-delete attacker's webhooks</td>
+                  <td style="padding-left: 30px; font-size: 0.9rem">
+                    Auto-delete attacker's webhooks
+                  </td>
                   <td class="cross">✗</td>
                   <td class="check">✓</td>
                 </tr>
@@ -1032,11 +1077,21 @@
         <div class="feature-category">
           <h2>🔄 Migrating from Wick to Nexus</h2>
 
-          <div style="background: rgba(255,165,0,0.2); padding: 20px; border-radius: 10px; border-left: 4px solid #ffa500; margin-bottom: 30px;">
-            <strong style="color: #ffa500;">⚠️ IMPORTANT:</strong>
-            <p style="margin: 10px 0 0 0;">
-              Running multiple security bots simultaneously has NOT been extensively tested and may cause conflicts.
-              We recommend <strong>removing Wick before adding Nexus</strong> or using a test server first.
+          <div
+            style="
+              background: rgba(255, 165, 0, 0.2);
+              padding: 20px;
+              border-radius: 10px;
+              border-left: 4px solid #ffa500;
+              margin-bottom: 30px;
+            "
+          >
+            <strong style="color: #ffa500">⚠️ IMPORTANT:</strong>
+            <p style="margin: 10px 0 0 0">
+              Running multiple security bots simultaneously has NOT been
+              extensively tested and may cause conflicts. We recommend
+              <strong>removing Wick before adding Nexus</strong> or using a test
+              server first.
             </p>
           </div>
 
@@ -1044,7 +1099,8 @@
             <div class="setup-step">
               <h3>Recommended: Test Server First</h3>
               <p>
-                Add Nexus to a test/staging server to familiarize yourself with features before production deployment
+                Add Nexus to a test/staging server to familiarize yourself with
+                features before production deployment
               </p>
             </div>
             <div class="setup-step">
@@ -1056,34 +1112,40 @@
             <div class="setup-step">
               <h3>⚠️ CRITICAL: Position Bot Role at TOP</h3>
               <p>
-                Server Settings → Roles → Drag Nexus role to highest position. Use <code>/security rolecheck</code> to verify.
-                <strong style="color: #ff6b6b;">This is NOT optional.</strong>
+                Server Settings → Roles → Drag Nexus role to highest position.
+                Use <code>/security rolecheck</code> to verify.
+                <strong style="color: #ff6b6b">This is NOT optional.</strong>
               </p>
             </div>
             <div class="setup-step">
               <h3>Run Quick Setup</h3>
               <p>
-                Use <code>/quicksetup</code> for guided configuration or <code>/setup preset</code> for instant setup
+                Use <code>/quicksetup</code> for guided configuration or
+                <code>/setup preset</code> for instant setup
               </p>
             </div>
             <div class="setup-step">
               <h3>Configure Protection</h3>
               <p>
-                Enable anti-raid, anti-nuke, and automod. Test with <code>/security test</code> if available.
+                Enable anti-raid, anti-nuke, and automod. Test with
+                <code>/security test</code> if available.
               </p>
             </div>
             <div class="setup-step">
               <h3>Remove Wick (Optional)</h3>
               <p>
-                Once Nexus is configured and verified working, you can remove Wick. Or keep both if you prefer redundancy.
+                Once Nexus is configured and verified working, you can remove
+                Wick. Or keep both if you prefer redundancy.
               </p>
             </div>
           </div>
 
           <div class="info-box">
             <p>
-              <strong>Note:</strong> Cases and warnings don't auto-transfer (different databases).
-              Nexus starts fresh moderation history. Use <code>/migrate</code> command to attempt data migration (experimental).
+              <strong>Note:</strong> Cases and warnings don't auto-transfer
+              (different databases). Nexus starts fresh moderation history. Use
+              <code>/migrate</code> command to attempt data migration
+              (experimental).
             </p>
           </div>
         </div>

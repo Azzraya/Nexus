@@ -204,10 +204,7 @@ class ErrorHandler {
 
     // If same error 10+ times in 5 minutes, it's critical
     const fiveMinutes = 5 * 60 * 1000;
-    if (
-      data.count >= 10 &&
-      Date.now() - data.firstSeen < fiveMinutes
-    ) {
+    if (data.count >= 10 && Date.now() - data.firstSeen < fiveMinutes) {
       return true;
     }
 

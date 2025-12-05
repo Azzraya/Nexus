@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -272,18 +272,18 @@ We've upgraded our security with Nexus!</textarea
           <input type="text" placeholder="Name" value="${
             f.name
           }" onchange="updateField(${
-              f.id
-            }, 'name', this.value)" style="margin-bottom: 5px;">
+            f.id
+          }, 'name', this.value)" style="margin-bottom: 5px;">
           <input type="text" placeholder="Value" value="${
             f.value
           }" onchange="updateField(${
-              f.id
-            }, 'value', this.value)" style="margin-bottom: 5px;">
+            f.id
+          }, 'value', this.value)" style="margin-bottom: 5px;">
           <label><input type="checkbox" ${
             f.inline ? "checked" : ""
           } onchange="updateField(${
-              f.id
-            }, 'inline', this.checked)"> Inline</label>
+            f.id
+          }, 'inline', this.checked)"> Inline</label>
           <button onclick="removeField(${
             f.id
           })" style="background: #ff4444; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; float: right;">❌</button>
@@ -352,17 +352,17 @@ const embed = new EmbedBuilder()
   .setTitle('${title}')
   .setDescription('${description}')
   .setColor(${color})${thumbnail ? `\n  .setThumbnail('${thumbnail}')` : ""}${
-          fields.length > 0
-            ? "\n  .addFields(\n" +
-              fields
-                .map(
-                  (f) =>
-                    `    { name: '${f.name}', value: '${f.value}', inline: ${f.inline} }`
-                )
-                .join(",\n") +
-              "\n  )"
-            : ""
-        }${footer ? `\n  .setFooter({ text: '${footer}' })` : ""}
+    fields.length > 0
+      ? "\n  .addFields(\n" +
+        fields
+          .map(
+            (f) =>
+              `    { name: '${f.name}', value: '${f.value}', inline: ${f.inline} }`
+          )
+          .join(",\n") +
+        "\n  )"
+      : ""
+  }${footer ? `\n  .setFooter({ text: '${footer}' })` : ""}
   .setTimestamp();
 
 // Send embed

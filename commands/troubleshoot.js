@@ -224,8 +224,8 @@ module.exports = {
       diagnostics.issues.length === 0
         ? "✅ All systems operational"
         : diagnostics.issues.length <= 2
-        ? "⚠️ Minor issues detected"
-        : "❌ Multiple issues detected";
+          ? "⚠️ Minor issues detected"
+          : "❌ Multiple issues detected";
 
     embed.setFooter({ text: status });
 

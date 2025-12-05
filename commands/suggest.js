@@ -41,7 +41,9 @@ module.exports = {
       .setCustomId("suggestion_usecase")
       .setLabel("Use Case (Optional)")
       .setStyle(TextInputStyle.Paragraph)
-      .setPlaceholder("How would this feature be used? What problem does it solve?")
+      .setPlaceholder(
+        "How would this feature be used? What problem does it solve?"
+      )
       .setRequired(false)
       .setMaxLength(500);
 
@@ -54,17 +56,23 @@ module.exports = {
     await interaction.showModal(modal);
 
     // Handle modal submission
-    const filter = (i) => i.customId === "suggestion_modal" && i.user.id === interaction.user.id;
-    
+    const filter = (i) =>
+      i.customId === "suggestion_modal" && i.user.id === interaction.user.id;
+
     try {
       const modalInteraction = await interaction.awaitModalSubmit({
         filter,
         time: 300000, // 5 minutes
       });
 
-      const title = modalInteraction.fields.getTextInputValue("suggestion_title");
-      const description = modalInteraction.fields.getTextInputValue("suggestion_description");
-      const useCase = modalInteraction.fields.getTextInputValue("suggestion_usecase") || "Not provided";
+      const title =
+        modalInteraction.fields.getTextInputValue("suggestion_title");
+      const description = modalInteraction.fields.getTextInputValue(
+        "suggestion_description"
+      );
+      const useCase =
+        modalInteraction.fields.getTextInputValue("suggestion_usecase") ||
+        "Not provided";
 
       // Save suggestion to database
       await new Promise((resolve, reject) => {

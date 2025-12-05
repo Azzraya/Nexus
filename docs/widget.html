@@ -1,233 +1,247 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Server Widget Generator - Nexus Bot</title>
-  <link rel="icon" type="image/webp" href="https://cdn.discordapp.com/avatars/1444739230679957646/32f2d77d44c2f3989fecd858be53f396.webp?size=256">
-  <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="pages.css">
-  <style>
-    .widget-builder {
-      max-width: 1200px;
-      margin: 40px auto;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 40px;
-    }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Server Widget Generator - Nexus Bot</title>
+    <link
+      rel="icon"
+      type="image/webp"
+      href="https://cdn.discordapp.com/avatars/1444739230679957646/32f2d77d44c2f3989fecd858be53f396.webp?size=256"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="pages.css" />
+    <style>
+      .widget-builder {
+        max-width: 1200px;
+        margin: 40px auto;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
+      }
 
-    .widget-controls {
-      background: rgba(255, 255, 255, 0.05);
-      padding: 30px;
-      border-radius: 15px;
-    }
+      .widget-controls {
+        background: rgba(255, 255, 255, 0.05);
+        padding: 30px;
+        border-radius: 15px;
+      }
 
-    .widget-preview {
-      background: rgba(255, 255, 255, 0.05);
-      padding: 30px;
-      border-radius: 15px;
-      position: sticky;
-      top: 100px;
-    }
+      .widget-preview {
+        background: rgba(255, 255, 255, 0.05);
+        padding: 30px;
+        border-radius: 15px;
+        position: sticky;
+        top: 100px;
+      }
 
-    .control-group {
-      margin-bottom: 25px;
-    }
+      .control-group {
+        margin-bottom: 25px;
+      }
 
-    .control-group label {
-      display: block;
-      margin-bottom: 10px;
-      font-weight: 600;
-      color: #fff;
-    }
+      .control-group label {
+        display: block;
+        margin-bottom: 10px;
+        font-weight: 600;
+        color: #fff;
+      }
 
-    .control-group input,
-    .control-group select {
-      width: 100%;
-      padding: 12px;
-      background: rgba(0, 0, 0, 0.3);
-      border: 2px solid rgba(255, 255, 255, 0.2);
-      border-radius: 8px;
-      color: #fff;
-      font-size: 1rem;
-    }
+      .control-group input,
+      .control-group select {
+        width: 100%;
+        padding: 12px;
+        background: rgba(0, 0, 0, 0.3);
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        border-radius: 8px;
+        color: #fff;
+        font-size: 1rem;
+      }
 
-    .widget-preview-box {
-      background: #1a1a1a;
-      padding: 20px;
-      border-radius: 10px;
-      margin: 20px 0;
-    }
+      .widget-preview-box {
+        background: #1a1a1a;
+        padding: 20px;
+        border-radius: 10px;
+        margin: 20px 0;
+      }
 
-    .code-output {
-      background: rgba(0, 0, 0, 0.5);
-      padding: 20px;
-      border-radius: 10px;
-      font-family: 'Courier New', monospace;
-      font-size: 0.9rem;
-      overflow-x: auto;
-      margin-top: 20px;
-    }
+      .code-output {
+        background: rgba(0, 0, 0, 0.5);
+        padding: 20px;
+        border-radius: 10px;
+        font-family: "Courier New", monospace;
+        font-size: 0.9rem;
+        overflow-x: auto;
+        margin-top: 20px;
+      }
 
-    .copy-btn {
-      background: #667eea;
-      color: white;
-      padding: 12px 24px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: 600;
-      margin-top: 15px;
-      width: 100%;
-    }
+      .copy-btn {
+        background: #667eea;
+        color: white;
+        padding: 12px 24px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        margin-top: 15px;
+        width: 100%;
+      }
 
-    .copy-btn:hover {
-      background: #5568d3;
-    }
-  </style>
-</head>
-<body>
-  <nav class="navbar">
-    <div class="container">
-      <a href="index.html" class="nav-brand">NEXUS</a>
-      <div class="nav-right">
-        <div class="dropdown">
-          <button class="dropdown-toggle">Menu ▼</button>
-          <div class="dropdown-menu">
-            <a href="features.html">Features</a>
-            <a href="commands.html">Commands</a>
-            <a href="setup.html">Setup</a>
-            <a href="tutorial.html">Tutorial</a>
-            <a href="docs.html">Documentation</a>
-            <a href="comparison.html">vs Wick</a>
-            <a href="live-comparison.html">Live Comparison</a>
-            <a href="api.html">API</a>
-            <a href="developers.html">For Developers</a>
-            <a href="stats.html">Stats</a>
-            <a href="growth.html">Growth</a>
-            <a href="status.html">Status</a>
-            <a href="showcase.html">Showcase</a>
-            <a href="testimonials.html">Testimonials</a>
-            <a href="vote-features.html">Vote Features</a>
-            <a href="changelog.html">Changelog</a>
-            <a href="faq.html">FAQ</a>
+      .copy-btn:hover {
+        background: #5568d3;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="container">
+        <a href="index.html" class="nav-brand">NEXUS</a>
+        <div class="nav-right">
+          <div class="dropdown">
+            <button class="dropdown-toggle">Menu ▼</button>
+            <div class="dropdown-menu">
+              <a href="features.html">Features</a>
+              <a href="commands.html">Commands</a>
+              <a href="setup.html">Setup</a>
+              <a href="tutorial.html">Tutorial</a>
+              <a href="docs.html">Documentation</a>
+              <a href="comparison.html">vs Wick</a>
+              <a href="live-comparison.html">Live Comparison</a>
+              <a href="api.html">API</a>
+              <a href="developers.html">For Developers</a>
+              <a href="stats.html">Stats</a>
+              <a href="growth.html">Growth</a>
+              <a href="status.html">Status</a>
+              <a href="showcase.html">Showcase</a>
+              <a href="testimonials.html">Testimonials</a>
+              <a href="vote-features.html">Vote Features</a>
+              <a href="changelog.html">Changelog</a>
+              <a href="faq.html">FAQ</a>
+            </div>
+          </div>
+          <a
+            href="https://discord.com/oauth2/authorize?client_id=1444739230679957646&permissions=1644905917686&integration_type=0&scope=bot+applications.commands"
+            class="btn-nav btn-dashboard"
+            target="_blank"
+            >Dashboard</a
+          >
+          <a
+            href="https://discord.com/oauth2/authorize?client_id=1444739230679957646&permissions=1644905917686&integration_type=0&scope=bot+applications.commands"
+            class="btn-primary"
+            target="_blank"
+            >Get Started</a
+          >
+        </div>
+      </div>
+    </nav>
+
+    <div class="page-header">
+      <div class="container">
+        <h1>🎨 Widget Generator</h1>
+        <p>Create embeddable widgets for your website</p>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <div class="widget-builder">
+        <div class="widget-controls">
+          <h2>⚙️ Customize Your Widget</h2>
+
+          <div class="control-group">
+            <label>Widget Type</label>
+            <select id="widgetType">
+              <option value="stats">Server Stats</option>
+              <option value="status">Bot Status</option>
+              <option value="invite">Invite Button</option>
+            </select>
+          </div>
+
+          <div class="control-group">
+            <label>Theme</label>
+            <select id="widgetTheme">
+              <option value="dark">Dark</option>
+              <option value="light">Light</option>
+              <option value="gradient">Gradient</option>
+            </select>
+          </div>
+
+          <div class="control-group">
+            <label>Width (px)</label>
+            <input
+              type="number"
+              id="widgetWidth"
+              value="350"
+              min="200"
+              max="600"
+            />
+          </div>
+
+          <div class="control-group" id="guildIdGroup" style="display: none">
+            <label>Your Server ID</label>
+            <input type="text" id="guildId" placeholder="1234567890123456789" />
+          </div>
+
+          <div class="control-group">
+            <label>Show Server Name</label>
+            <input type="checkbox" id="showName" checked />
+          </div>
+
+          <div class="control-group">
+            <label>Show Member Count</label>
+            <input type="checkbox" id="showMembers" checked />
+          </div>
+
+          <button class="copy-btn" onclick="copyCode()">📋 Copy Code</button>
+        </div>
+
+        <div class="widget-preview">
+          <h2>👁️ Preview</h2>
+          <div class="widget-preview-box" id="widgetPreview">
+            <!-- Widget preview will be rendered here -->
+          </div>
+
+          <h3 style="margin-top: 30px">📝 Embed Code</h3>
+          <div class="code-output" id="codeOutput">
+            <!-- Generated code will appear here -->
           </div>
         </div>
-        <a
-          href="https://discord.com/oauth2/authorize?client_id=1444739230679957646&permissions=1644905917686&integration_type=0&scope=bot+applications.commands"
-          class="btn-nav btn-dashboard"
-          target="_blank"
-          >Dashboard</a
-        >
-        <a
-          href="https://discord.com/oauth2/authorize?client_id=1444739230679957646&permissions=1644905917686&integration_type=0&scope=bot+applications.commands"
-          class="btn-primary"
-          target="_blank"
-          >Get Started</a
-        >
       </div>
     </div>
-  </nav>
 
-  <div class="page-header">
-    <div class="container">
-      <h1>🎨 Widget Generator</h1>
-      <p>Create embeddable widgets for your website</p>
-    </div>
-  </div>
+    <script>
+      function updateWidget() {
+        const type = document.getElementById("widgetType").value;
+        const theme = document.getElementById("widgetTheme").value;
+        const width = document.getElementById("widgetWidth").value;
+        const showName = document.getElementById("showName").checked;
+        const showMembers = document.getElementById("showMembers").checked;
+        const guildId = document.getElementById("guildId").value;
 
-  <div class="content-section">
-    <div class="widget-builder">
-      <div class="widget-controls">
-        <h2>⚙️ Customize Your Widget</h2>
+        // Show/hide guild ID input
+        document.getElementById("guildIdGroup").style.display =
+          type === "stats" ? "block" : "none";
 
-        <div class="control-group">
-          <label>Widget Type</label>
-          <select id="widgetType">
-            <option value="stats">Server Stats</option>
-            <option value="status">Bot Status</option>
-            <option value="invite">Invite Button</option>
-          </select>
-        </div>
+        const colors = {
+          dark: { bg: "#1a1a1a", text: "#fff", accent: "#667eea" },
+          light: { bg: "#ffffff", text: "#1a1a1a", accent: "#667eea" },
+          gradient: {
+            bg: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+            text: "#fff",
+            accent: "#00ff88",
+          },
+        };
 
-        <div class="control-group">
-          <label>Theme</label>
-          <select id="widgetTheme">
-            <option value="dark">Dark</option>
-            <option value="light">Light</option>
-            <option value="gradient">Gradient</option>
-          </select>
-        </div>
+        const themeColors = colors[theme];
 
-        <div class="control-group">
-          <label>Width (px)</label>
-          <input type="number" id="widgetWidth" value="350" min="200" max="600">
-        </div>
-
-        <div class="control-group" id="guildIdGroup" style="display:none;">
-          <label>Your Server ID</label>
-          <input type="text" id="guildId" placeholder="1234567890123456789">
-        </div>
-
-        <div class="control-group">
-          <label>Show Server Name</label>
-          <input type="checkbox" id="showName" checked>
-        </div>
-
-        <div class="control-group">
-          <label>Show Member Count</label>
-          <input type="checkbox" id="showMembers" checked>
-        </div>
-
-        <button class="copy-btn" onclick="copyCode()">📋 Copy Code</button>
-      </div>
-
-      <div class="widget-preview">
-        <h2>👁️ Preview</h2>
-        <div class="widget-preview-box" id="widgetPreview">
-          <!-- Widget preview will be rendered here -->
-        </div>
-
-        <h3 style="margin-top: 30px;">📝 Embed Code</h3>
-        <div class="code-output" id="codeOutput">
-          <!-- Generated code will appear here -->
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    function updateWidget() {
-      const type = document.getElementById('widgetType').value;
-      const theme = document.getElementById('widgetTheme').value;
-      const width = document.getElementById('widgetWidth').value;
-      const showName = document.getElementById('showName').checked;
-      const showMembers = document.getElementById('showMembers').checked;
-      const guildId = document.getElementById('guildId').value;
-
-      // Show/hide guild ID input
-      document.getElementById('guildIdGroup').style.display = 
-        type === 'stats' ? 'block' : 'none';
-
-      const colors = {
-        dark: { bg: '#1a1a1a', text: '#fff', accent: '#667eea' },
-        light: { bg: '#ffffff', text: '#1a1a1a', accent: '#667eea' },
-        gradient: { bg: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', text: '#fff', accent: '#00ff88' }
-      };
-
-      const themeColors = colors[theme];
-
-      // Generate preview
-      let preview = '';
-      if (type === 'stats') {
-        preview = `
+        // Generate preview
+        let preview = "";
+        if (type === "stats") {
+          preview = `
           <div style="background: ${themeColors.bg}; padding: 20px; border-radius: 12px; color: ${themeColors.text}; width: ${width}px;">
             <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
               <img src="https://cdn.discordapp.com/avatars/1444739230679957646/32f2d77d44c2f3989fecd858be53f396.webp?size=64" style="width: 40px; height: 40px; border-radius: 50%;">
-              ${showName ? '<div style="font-weight: 700; font-size: 1.2rem;">Your Server</div>' : ''}
+              ${showName ? '<div style="font-weight: 700; font-size: 1.2rem;">Your Server</div>' : ""}
             </div>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; font-size: 0.9rem;">
-              ${showMembers ? '<div><div style="opacity: 0.7;">Members</div><div style="font-size: 1.5rem; font-weight: 700; color: ' + themeColors.accent + ';">123</div></div>' : ''}
+              ${showMembers ? '<div><div style="opacity: 0.7;">Members</div><div style="font-size: 1.5rem; font-weight: 700; color: ' + themeColors.accent + ';">123</div></div>' : ""}
               <div><div style="opacity: 0.7;">Security</div><div style="font-size: 1.5rem; font-weight: 700; color: ' + themeColors.accent + ';">98/100</div></div>
               <div><div style="opacity: 0.7;">Uptime</div><div style="font-size: 1.5rem; font-weight: 700; color: ' + themeColors.accent + ';">99.9%</div></div>
               <div><div style="opacity: 0.7;">Protected</div><div style="font-size: 1.5rem; font-weight: 700; color: ' + themeColors.accent + ';">24/7</div></div>
@@ -235,8 +249,8 @@
             <div style="text-align: center; margin-top: 15px; font-size: 0.8rem; opacity: 0.6;">Powered by Nexus</div>
           </div>
         `;
-      } else if (type === 'status') {
-        preview = `
+        } else if (type === "status") {
+          preview = `
           <div style="background: ${themeColors.bg}; padding: 15px 20px; border-radius: 12px; color: ${themeColors.text}; width: ${width}px; display: flex; align-items: center; justify-content: space-between;">
             <div style="display: flex; align-items: center; gap: 10px;">
               <div style="width: 10px; height: 10px; background: #00ff00; border-radius: 50%; box-shadow: 0 0 10px #00ff00;"></div>
@@ -248,8 +262,8 @@
             </div>
           </div>
         `;
-      } else if (type === 'invite') {
-        preview = `
+        } else if (type === "invite") {
+          preview = `
           <div style="background: ${themeColors.bg}; padding: 20px; border-radius: 12px; color: ${themeColors.text}; width: ${width}px; text-align: center;">
             <img src="https://cdn.discordapp.com/avatars/1444739230679957646/32f2d77d44c2f3989fecd858be53f396.webp?size=128" style="width: 64px; height: 64px; border-radius: 50%; margin-bottom: 15px;">
             <h3 style="margin: 10px 0; color: ${themeColors.text};">Add Nexus to Your Server</h3>
@@ -257,45 +271,56 @@
             <a href="https://azzraya.github.io/Nexus/invite.html" style="display: inline-block; background: ${themeColors.accent}; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; margin-top: 10px;">Invite Now</a>
           </div>
         `;
-      }
+        }
 
-      document.getElementById('widgetPreview').innerHTML = preview;
+        document.getElementById("widgetPreview").innerHTML = preview;
 
-      // Generate embed code
-      const code = `<!-- Nexus Bot Widget -->
+        // Generate embed code
+        const code = `<!-- Nexus Bot Widget -->
 <iframe 
-  src="https://azzraya.github.io/Nexus/widget-embed.html?type=${type}&theme=${theme}&width=${width}&name=${showName}&members=${showMembers}${type === 'stats' && guildId ? '&guild=' + guildId : ''}"
+  src="https://azzraya.github.io/Nexus/widget-embed.html?type=${type}&theme=${theme}&width=${width}&name=${showName}&members=${showMembers}${type === "stats" && guildId ? "&guild=" + guildId : ""}"
   width="${width}"
-  height="${type === 'invite' ? '250' : type === 'status' ? '80' : '220'}"
+  height="${type === "invite" ? "250" : type === "status" ? "80" : "220"}"
   frameborder="0"
   style="border-radius: 12px;"
 ></iframe>`;
 
-      document.getElementById('codeOutput').textContent = code;
-    }
+        document.getElementById("codeOutput").textContent = code;
+      }
 
-    function copyCode() {
-      const code = document.getElementById('codeOutput').textContent;
-      navigator.clipboard.writeText(code).then(() => {
-        const btn = document.querySelector('.copy-btn');
-        btn.textContent = '✅ Copied!';
-        setTimeout(() => {
-          btn.textContent = '📋 Copy Code';
-        }, 2000);
-      });
-    }
+      function copyCode() {
+        const code = document.getElementById("codeOutput").textContent;
+        navigator.clipboard.writeText(code).then(() => {
+          const btn = document.querySelector(".copy-btn");
+          btn.textContent = "✅ Copied!";
+          setTimeout(() => {
+            btn.textContent = "📋 Copy Code";
+          }, 2000);
+        });
+      }
 
-    // Event listeners
-    document.getElementById('widgetType').addEventListener('change', updateWidget);
-    document.getElementById('widgetTheme').addEventListener('change', updateWidget);
-    document.getElementById('widgetWidth').addEventListener('input', updateWidget);
-    document.getElementById('showName').addEventListener('change', updateWidget);
-    document.getElementById('showMembers').addEventListener('change', updateWidget);
-    document.getElementById('guildId').addEventListener('input', updateWidget);
+      // Event listeners
+      document
+        .getElementById("widgetType")
+        .addEventListener("change", updateWidget);
+      document
+        .getElementById("widgetTheme")
+        .addEventListener("change", updateWidget);
+      document
+        .getElementById("widgetWidth")
+        .addEventListener("input", updateWidget);
+      document
+        .getElementById("showName")
+        .addEventListener("change", updateWidget);
+      document
+        .getElementById("showMembers")
+        .addEventListener("change", updateWidget);
+      document
+        .getElementById("guildId")
+        .addEventListener("input", updateWidget);
 
-    // Initial render
-    updateWidget();
-  </script>
-</body>
+      // Initial render
+      updateWidget();
+    </script>
+  </body>
 </html>
-

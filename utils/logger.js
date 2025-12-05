@@ -55,7 +55,7 @@ class Logger {
   // Convenience methods
   error(category, message, error = null) {
     // Handle old format: logger.info("[Category] Message")
-    if (message === undefined && category.includes('[')) {
+    if (message === undefined && category.includes("[")) {
       const match = category.match(/\[([^\]]+)\]\s*(.*)/);
       if (match) {
         return this.log("ERROR", match[1], match[2], error?.stack || error);
@@ -65,7 +65,7 @@ class Logger {
   }
 
   warn(category, message, data = null) {
-    if (message === undefined && category.includes('[')) {
+    if (message === undefined && category.includes("[")) {
       const match = category.match(/\[([^\]]+)\]\s*(.*)/);
       if (match) {
         return this.log("WARN", match[1], match[2], data);
@@ -76,7 +76,7 @@ class Logger {
 
   info(category, message, data = null) {
     // Handle old format: logger.info("[Category] Message")
-    if (message === undefined && category.includes('[')) {
+    if (message === undefined && category.includes("[")) {
       const match = category.match(/\[([^\]]+)\]\s*(.*)/);
       if (match) {
         return this.log("INFO", match[1], match[2], data);
@@ -86,7 +86,7 @@ class Logger {
   }
 
   success(category, message, data = null) {
-    if (message === undefined && category.includes('[')) {
+    if (message === undefined && category.includes("[")) {
       const match = category.match(/\[([^\]]+)\]\s*(.*)/);
       if (match) {
         return this.log("SUCCESS", match[1], match[2], data);
@@ -97,7 +97,7 @@ class Logger {
 
   debug(category, message, data = null) {
     if (process.env.NODE_ENV === "development") {
-      if (message === undefined && category.includes('[')) {
+      if (message === undefined && category.includes("[")) {
         const match = category.match(/\[([^\]]+)\]\s*(.*)/);
         if (match) {
           return this.log("DEBUG", match[1], match[2], data);

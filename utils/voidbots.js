@@ -91,7 +91,9 @@ class VoidBots {
    */
   initialize() {
     if (this.initialized) {
-      logger.warn("[Void Bots] Already initialized, skipping duplicate initialization");
+      logger.warn(
+        "[Void Bots] Already initialized, skipping duplicate initialization"
+      );
       return;
     }
 
@@ -109,9 +111,12 @@ class VoidBots {
     }, this.minPostInterval);
 
     // Post every 30 minutes (well above the 3-minute minimum)
-    this.postInterval = setInterval(() => {
-      this.postStats();
-    }, 30 * 60 * 1000);
+    this.postInterval = setInterval(
+      () => {
+        this.postStats();
+      },
+      30 * 60 * 1000
+    );
 
     logger.info(
       "[Void Bots] Stats posting initialized (first post in 3 minutes)"

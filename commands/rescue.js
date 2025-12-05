@@ -237,7 +237,9 @@ module.exports = {
       );
 
       if (!result.valid) {
-        return interaction.editReply(ErrorMessages.commandFailed(result.message));
+        return interaction.editReply(
+          ErrorMessages.commandFailed(result.message)
+        );
       }
 
       const embed = new EmbedBuilder()

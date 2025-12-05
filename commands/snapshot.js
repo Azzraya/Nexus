@@ -53,20 +53,24 @@ module.exports = {
 
       await interaction.deferReply({ ephemeral: true });
 
-      const snapshots = await interaction.client.snapshotScheduler.getAvailableSnapshots(
-        interaction.guild.id,
-        24
-      );
+      const snapshots =
+        await interaction.client.snapshotScheduler.getAvailableSnapshots(
+          interaction.guild.id,
+          24
+        );
 
       if (snapshots.length === 0) {
         return interaction.editReply({
-          content: "No snapshots available for this server yet. Wait for the hourly snapshot or create one manually with `/snapshot create`.",
+          content:
+            "No snapshots available for this server yet. Wait for the hourly snapshot or create one manually with `/snapshot create`.",
         });
       }
 
       const embed = new EmbedBuilder()
         .setTitle("📸 Available Snapshots")
-        .setDescription(`Point-in-time recovery snapshots for **${interaction.guild.name}**`)
+        .setDescription(
+          `Point-in-time recovery snapshots for **${interaction.guild.name}**`
+        )
         .setColor(0x5865f2)
         .setTimestamp();
 
@@ -79,7 +83,8 @@ module.exports = {
         .join("\n\n");
 
       embed.setDescription(
-        embed.data.description + `\n\n${snapshotList}\n\n💡 Use \`/snapshot restore snapshot_id:<id>\` to restore`
+        embed.data.description +
+          `\n\n${snapshotList}\n\n💡 Use \`/snapshot restore snapshot_id:<id>\` to restore`
       );
 
       embed.setFooter({
@@ -90,13 +95,14 @@ module.exports = {
     }
 
     if (subcommand === "create") {
-      const reason = interaction.options.getString("reason") || "Manual snapshot";
+      const reason =
+        interaction.options.getString("reason") || "Manual snapshot";
 
       await interaction.deferReply({ ephemeral: true });
 
       try {
         const AutoRecovery = require("../utils/autoRecovery");
-const ErrorMessages = require("../utils/errorMessages");
+        const ErrorMessages = require("../utils/errorMessages");
         await AutoRecovery.createSnapshot(interaction.guild, "full", reason);
 
         const embed = new EmbedBuilder()
@@ -122,7 +128,9 @@ const ErrorMessages = require("../utils/errorMessages");
 
         return interaction.editReply({ embeds: [embed] });
       } catch (error) {
-        return interaction.editReply(ErrorMessages.commandFailed(error.message));
+        return interaction.editReply(
+          ErrorMessages.commandFailed(error.message)
+        );
       }
     }
 
@@ -138,10 +146,11 @@ const ErrorMessages = require("../utils/errorMessages");
       }
 
       try {
-        const result = await interaction.client.snapshotScheduler.restoreToSnapshot(
-          interaction.guild,
-          snapshotId
-        );
+        const result =
+          await interaction.client.snapshotScheduler.restoreToSnapshot(
+            interaction.guild,
+            snapshotId
+          );
 
         const embed = new EmbedBuilder()
           .setTitle("✅ Server Restored")
@@ -166,14 +175,18 @@ const ErrorMessages = require("../utils/errorMessages");
 
           embed.addFields({
             name: "Recovered Items",
-            value: recoveredList + (result.recovered.length > 10 ? "\n...and more" : ""),
+            value:
+              recoveredList +
+              (result.recovered.length > 10 ? "\n...and more" : ""),
             inline: false,
           });
         }
 
         return interaction.editReply({ embeds: [embed] });
       } catch (error) {
-        return interaction.editReply(ErrorMessages.commandFailed(error.message));
+        return interaction.editReply(
+          ErrorMessages.commandFailed(error.message)
+        );
       }
     }
 
@@ -188,10 +201,11 @@ const ErrorMessages = require("../utils/errorMessages");
       await interaction.deferReply({ ephemeral: true });
 
       const stats = await interaction.client.snapshotScheduler.getStats();
-      const guildSnapshots = await interaction.client.snapshotScheduler.getAvailableSnapshots(
-        interaction.guild.id,
-        1000
-      );
+      const guildSnapshots =
+        await interaction.client.snapshotScheduler.getAvailableSnapshots(
+          interaction.guild.id,
+          1000
+        );
 
       const embed = new EmbedBuilder()
         .setTitle("📊 Snapshot Statistics")
@@ -230,4 +244,3 @@ const ErrorMessages = require("../utils/errorMessages");
     }
   },
 };
-

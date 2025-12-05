@@ -17,7 +17,9 @@ module.exports = {
       subcommand.setName("live").setDescription("View live threat monitoring")
     )
     .addSubcommand((subcommand) =>
-      subcommand.setName("history").setDescription("View threat history")
+      subcommand
+        .setName("history")
+        .setDescription("View threat history")
         .addIntegerOption((option) =>
           option
             .setName("hours")
@@ -50,7 +52,8 @@ module.exports = {
       if (antiNuke) {
         const monitoring = antiNuke.monitoring.get(guild.id) || {};
         const lockedDown = antiNuke.lockedGuilds.has(guild.id);
-        const whitelistCache = antiNuke.whitelistCache.get(guild.id) || new Set();
+        const whitelistCache =
+          antiNuke.whitelistCache.get(guild.id) || new Set();
 
         embed.addFields({
           name: "🛡️ Anti-Nuke Status",
@@ -96,8 +99,8 @@ module.exports = {
 
       // Threat intelligence
       const ThreatIntelligence = require("../utils/threatIntelligence");
-const ErrorMessages = require("../utils/errorMessages");
-      
+      const ErrorMessages = require("../utils/errorMessages");
+
       // Get recent threats from this server
       const recentThreats = await new Promise((resolve, reject) => {
         db.db.all(
@@ -214,7 +217,9 @@ const ErrorMessages = require("../utils/errorMessages");
 
         embed.addFields({
           name: "🔝 Top Threat Types",
-          value: topThreats.map(([type, count]) => `• ${type}: ${count}`).join("\n"),
+          value: topThreats
+            .map(([type, count]) => `• ${type}: ${count}`)
+            .join("\n"),
           inline: true,
         });
       } else {
@@ -300,7 +305,9 @@ const ErrorMessages = require("../utils/errorMessages");
 
       const embed = new EmbedBuilder()
         .setTitle("📈 Security Statistics")
-        .setDescription(`All-time security stats for **${interaction.guild.name}**`)
+        .setDescription(
+          `All-time security stats for **${interaction.guild.name}**`
+        )
         .setColor(0x5865f2)
         .setTimestamp();
 
@@ -340,7 +347,9 @@ const ErrorMessages = require("../utils/errorMessages");
       if (topThreats.length > 0) {
         embed.addFields({
           name: "🔝 Most Common Threats",
-          value: topThreats.map(([type, count]) => `• ${type}: ${count}`).join("\n"),
+          value: topThreats
+            .map(([type, count]) => `• ${type}: ${count}`)
+            .join("\n"),
           inline: true,
         });
       }
@@ -359,8 +368,8 @@ const ErrorMessages = require("../utils/errorMessages");
           securityScore >= 80
             ? "Excellent security"
             : securityScore >= 60
-            ? "Good security, room for improvement"
-            : "Needs attention"
+              ? "Good security, room for improvement"
+              : "Needs attention"
         }`,
         inline: false,
       });
@@ -369,4 +378,3 @@ const ErrorMessages = require("../utils/errorMessages");
     }
   },
 };
-

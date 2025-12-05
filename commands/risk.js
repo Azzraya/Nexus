@@ -88,10 +88,10 @@ module.exports = {
               risk.score >= 70
                 ? "🚨 **HIGH RISK** - Immediate attention"
                 : risk.score >= 50
-                ? "⚠️ **MEDIUM RISK** - Monitor closely"
-                : risk.score >= 30
-                ? "🟡 **LOW RISK** - Normal monitoring"
-                : "✅ **MINIMAL RISK** - Trusted member",
+                  ? "⚠️ **MEDIUM RISK** - Monitor closely"
+                  : risk.score >= 30
+                    ? "🟡 **LOW RISK** - Normal monitoring"
+                    : "✅ **MINIMAL RISK** - Trusted member",
             inline: false,
           }
         )

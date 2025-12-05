@@ -71,9 +71,7 @@ module.exports = {
 
     const inviteButton = new ButtonBuilder()
       .setLabel("Invite Bot")
-      .setURL(
-        `https://azzraya.github.io/Nexus/invite.html?source=discord-bot`
-      )
+      .setURL(`https://azzraya.github.io/Nexus/invite.html?source=discord-bot`)
       .setStyle(ButtonStyle.Link);
 
     const dashboardButton = new ButtonBuilder()

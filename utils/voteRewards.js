@@ -845,9 +845,12 @@ class VoteRewards {
     }, this.checkInterval);
 
     // Remove expired roles every hour
-    setInterval(() => {
-      this.removeExpiredRoles(guild);
-    }, 60 * 60 * 1000);
+    setInterval(
+      () => {
+        this.removeExpiredRoles(guild);
+      },
+      60 * 60 * 1000
+    );
 
     logger.info(
       `[Vote Rewards] Started auto-checking for ${guild.name} (checks every 5 minutes)`

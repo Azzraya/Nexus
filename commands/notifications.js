@@ -40,10 +40,7 @@ module.exports = {
         .setName("delete")
         .setDescription("Delete a webhook")
         .addIntegerOption((option) =>
-          option
-            .setName("id")
-            .setDescription("Webhook ID")
-            .setRequired(true)
+          option.setName("id").setDescription("Webhook ID").setRequired(true)
         )
     )
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
@@ -61,7 +58,7 @@ module.exports = {
       }
     } catch (error) {
       logger.error("Notifications Command Error:", error);
-      
+
       if (!interaction.replied && !interaction.deferred) {
         await interaction.reply(ErrorMessages.genericError());
       } else if (interaction.deferred) {
@@ -74,7 +71,9 @@ module.exports = {
     await interaction.deferReply({ ephemeral: true });
 
     const webhookUrl = interaction.options.getString("webhook_url");
-    const events = interaction.options.getString("events") || "raid_blocked,nuke_attempt,member_banned";
+    const events =
+      interaction.options.getString("events") ||
+      "raid_blocked,nuke_attempt,member_banned";
 
     // Validate webhook URL
     try {
@@ -126,7 +125,10 @@ module.exports = {
         },
         {
           name: "📋 Events",
-          value: events.split(",").map(e => `• ${e}`).join("\n"),
+          value: events
+            .split(",")
+            .map((e) => `• ${e}`)
+            .join("\n"),
           inline: false,
         },
         {
@@ -163,7 +165,8 @@ module.exports = {
 
     if (webhooks.length === 0) {
       return interaction.editReply({
-        content: "📋 No webhooks configured. Use `/notifications setup` to add one!",
+        content:
+          "📋 No webhooks configured. Use `/notifications setup` to add one!",
       });
     }
 
@@ -227,9 +230,9 @@ module.exports = {
         if (events.includes(eventType)) {
           // Send to webhook
           const https = require("https");
-const ErrorMessages = require("../utils/errorMessages");
+          const ErrorMessages = require("../utils/errorMessages");
           const url = new URL(webhook.webhook_url);
-          
+
           const payload = {
             event: eventType,
             timestamp: Date.now(),
@@ -261,4 +264,3 @@ const ErrorMessages = require("../utils/errorMessages");
     }
   },
 };
-

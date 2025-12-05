@@ -469,13 +469,16 @@ class AdvancedAntiNuke {
       if (channelDeletions.length >= 2) {
         // Check if any 2 deletions happened within 1 second
         for (let i = 0; i < channelDeletions.length - 1; i++) {
-          const timeDiff = channelDeletions[i + 1].timestamp - channelDeletions[i].timestamp;
+          const timeDiff =
+            channelDeletions[i + 1].timestamp - channelDeletions[i].timestamp;
           if (timeDiff < 1000) {
             // 2 channels deleted within 1 second = DEFINITE NUKE
             threatDetected = true;
             threatType = "rapid_channel_deletion";
             // Only log once per threat (not on every subsequent channel)
-            if (!this.processedThreats.has(`${guild.id}-${userId}-rapid_nuke`)) {
+            if (
+              !this.processedThreats.has(`${guild.id}-${userId}-rapid_nuke`)
+            ) {
               logger.warn(
                 `[Anti-Nuke] 🚨 RAPID NUKE: 2 channels ${timeDiff}ms apart - Banning ${userId}`
               );
@@ -487,7 +490,10 @@ class AdvancedAntiNuke {
     }
 
     // PERFORMANCE: Check thresholds with early return (faster than else-if chain)
-    if (!threatDetected && counts.channelsDeleted >= thresholds.channelsDeleted) {
+    if (
+      !threatDetected &&
+      counts.channelsDeleted >= thresholds.channelsDeleted
+    ) {
       threatDetected = true;
       threatType = "mass_channel_deletion";
     }
@@ -657,25 +663,31 @@ class AdvancedAntiNuke {
           `[Anti-Nuke] ✅ BANNED ${userId} | ${threatType} | Waiting for removal...`
         );
         actionTaken = true;
-        
+
         // Wait 3 seconds for Discord to actually remove the attacker from the server
         // This prevents trying to recover while attack is still in progress
-        await new Promise(resolve => setTimeout(resolve, 3000));
-        
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+
         // Verify attacker is actually gone before starting recovery
-        const stillPresent = await guild.members.fetch(userId).catch(() => null);
+        const stillPresent = await guild.members
+          .fetch(userId)
+          .catch(() => null);
         if (stillPresent) {
-          logger.warn(`[Anti-Nuke] Attacker still in server after ban - waiting longer...`);
-          await new Promise(resolve => setTimeout(resolve, 2000));
+          logger.warn(
+            `[Anti-Nuke] Attacker still in server after ban - waiting longer...`
+          );
+          await new Promise((resolve) => setTimeout(resolve, 2000));
         }
-        
+
         logger.info(`[Anti-Nuke] Starting recovery...`);
-        
+
         // Trigger auto-recovery after attacker is removed
-        this.attemptRecovery(guild, threatType, counts, userId).catch((error) => {
-          logger.error(`[Anti-Nuke] Recovery failed:`, error);
-        });
-        
+        this.attemptRecovery(guild, threatType, counts, userId).catch(
+          (error) => {
+            logger.error(`[Anti-Nuke] Recovery failed:`, error);
+          }
+        );
+
         return; // Success - exit early
       } catch (banError) {
         logger.error(`[Anti-Nuke] Immediate ban failed: ${banError.message}`);
@@ -691,24 +703,30 @@ class AdvancedAntiNuke {
           `[Anti-Nuke] ✅ KICKED ${userId} | ${threatType} | Waiting for removal...`
         );
         actionTaken = true;
-        
+
         // Wait 2 seconds for Discord to actually remove the attacker from the server
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+
         // Verify attacker is actually gone before starting recovery
-        const stillPresent = await guild.members.fetch(userId).catch(() => null);
+        const stillPresent = await guild.members
+          .fetch(userId)
+          .catch(() => null);
         if (stillPresent) {
-          logger.warn(`[Anti-Nuke] Attacker still in server after kick - waiting longer...`);
-          await new Promise(resolve => setTimeout(resolve, 2000));
+          logger.warn(
+            `[Anti-Nuke] Attacker still in server after kick - waiting longer...`
+          );
+          await new Promise((resolve) => setTimeout(resolve, 2000));
         }
-        
+
         logger.info(`[Anti-Nuke] Starting recovery...`);
-        
+
         // Trigger auto-recovery after attacker is removed
-        this.attemptRecovery(guild, threatType, counts, userId).catch((error) => {
-          logger.error(`[Anti-Nuke] Recovery failed:`, error);
-        });
-        
+        this.attemptRecovery(guild, threatType, counts, userId).catch(
+          (error) => {
+            logger.error(`[Anti-Nuke] Recovery failed:`, error);
+          }
+        );
+
         return; // Success - exit early
       } catch (kickError) {
         logger.error(`[Anti-Nuke] Immediate kick failed: ${kickError.message}`);
@@ -1148,9 +1166,11 @@ class AdvancedAntiNuke {
           `[Anti-Nuke] Attacker ${userId} was successfully removed, starting server recovery...`
         );
         // Start recovery immediately (don't wait for full cleanup)
-        this.attemptRecovery(guild, threatType, counts, userId).catch((error) => {
-          logger.error(`[Anti-Nuke] Recovery failed:`, error);
-        });
+        this.attemptRecovery(guild, threatType, counts, userId).catch(
+          (error) => {
+            logger.error(`[Anti-Nuke] Recovery failed:`, error);
+          }
+        );
       } else {
         logger.warn(
           `[Anti-Nuke] Attacker ${userId} was not removed - skipping recovery to prevent interference`
@@ -1204,16 +1224,19 @@ class AdvancedAntiNuke {
                         `[Anti-Nuke] Rate limited while deleting spam channel ${channelId}, will retry`
                       );
                       // Retry after delay
-                      setTimeout(async () => {
-                        try {
-                          await channel.delete(
-                            "Anti-Nuke: Spam channel cleanup (retry)"
-                          );
-                          deletedSpamChannels++;
-                        } catch (retryError) {
-                          // Give up after retry
-                        }
-                      }, (error.retryAfter || 1) * 1000);
+                      setTimeout(
+                        async () => {
+                          try {
+                            await channel.delete(
+                              "Anti-Nuke: Spam channel cleanup (retry)"
+                            );
+                            deletedSpamChannels++;
+                          } catch (retryError) {
+                            // Give up after retry
+                          }
+                        },
+                        (error.retryAfter || 1) * 1000
+                      );
                     }
                   });
                 deletedSpamChannels++;
@@ -1340,10 +1363,13 @@ class AdvancedAntiNuke {
       );
 
       // Auto-unlock after 5 minutes
-      setTimeout(() => {
-        this.lockedGuilds.delete(guild.id);
-        logger.info(`[Anti-Nuke] Lockdown auto-released for ${guild.id}`);
-      }, 5 * 60 * 1000);
+      setTimeout(
+        () => {
+          this.lockedGuilds.delete(guild.id);
+          logger.info(`[Anti-Nuke] Lockdown auto-released for ${guild.id}`);
+        },
+        5 * 60 * 1000
+      );
     } catch (error) {
       logger.error(`[Anti-Nuke] Error during lockdown:`, error);
     }
@@ -1410,7 +1436,7 @@ class AdvancedAntiNuke {
       if (attackerUserId) {
         const key = `${attackerUserId}-${guild.id}`;
         const attackerChannels = this.attackerCreatedChannels.get(key);
-        
+
         if (attackerChannels && attackerChannels.size > 0) {
           logger.info(
             `[Anti-Nuke] Cleaning up ${attackerChannels.size} spam channels created ONLY by detected threat ${attackerUserId}`
@@ -1421,7 +1447,9 @@ class AdvancedAntiNuke {
 
           for (const channelId of attackerChannels) {
             try {
-              const channel = await guild.channels.fetch(channelId).catch(() => null);
+              const channel = await guild.channels
+                .fetch(channelId)
+                .catch(() => null);
               if (channel) {
                 // Extra safety: Only delete if channel is very recent (created during attack window)
                 const channelAge = Date.now() - channel.createdTimestamp;
@@ -1432,12 +1460,19 @@ class AdvancedAntiNuke {
                   continue;
                 }
 
-                await channel.delete("Anti-Nuke: Cleaning up spam channel created during attack");
+                await channel.delete(
+                  "Anti-Nuke: Cleaning up spam channel created during attack"
+                );
                 deletedCount++;
-                logger.debug(`[Anti-Nuke] Deleted spam channel: ${channel.name} (${channelId})`);
+                logger.debug(
+                  `[Anti-Nuke] Deleted spam channel: ${channel.name} (${channelId})`
+                );
               }
             } catch (error) {
-              logger.debug(`[Anti-Nuke] Failed to delete spam channel ${channelId}:`, error.message);
+              logger.debug(
+                `[Anti-Nuke] Failed to delete spam channel ${channelId}:`,
+                error.message
+              );
             }
           }
 
@@ -1475,12 +1510,19 @@ class AdvancedAntiNuke {
                   continue;
                 }
 
-                await role.delete("Anti-Nuke: Cleaning up spam role created during attack");
+                await role.delete(
+                  "Anti-Nuke: Cleaning up spam role created during attack"
+                );
                 deletedRoles++;
-                logger.debug(`[Anti-Nuke] Deleted spam role: ${role.name} (${roleId})`);
+                logger.debug(
+                  `[Anti-Nuke] Deleted spam role: ${role.name} (${roleId})`
+                );
               }
             } catch (error) {
-              logger.debug(`[Anti-Nuke] Failed to delete spam role ${roleId}:`, error.message);
+              logger.debug(
+                `[Anti-Nuke] Failed to delete spam role ${roleId}:`,
+                error.message
+              );
             }
           }
 
@@ -1509,9 +1551,13 @@ class AdvancedAntiNuke {
                     const webhooks = await channel.fetchWebhooks();
                     const webhook = webhooks.get(webhookId);
                     if (webhook) {
-                      await webhook.delete("Anti-Nuke: Cleaning up spam webhook created during attack");
+                      await webhook.delete(
+                        "Anti-Nuke: Cleaning up spam webhook created during attack"
+                      );
                       deletedWebhooks++;
-                      logger.debug(`[Anti-Nuke] Deleted spam webhook: ${webhook.name} (${webhookId})`);
+                      logger.debug(
+                        `[Anti-Nuke] Deleted spam webhook: ${webhook.name} (${webhookId})`
+                      );
                       break;
                     }
                   } catch (err) {
@@ -1521,7 +1567,10 @@ class AdvancedAntiNuke {
                 }
               }
             } catch (error) {
-              logger.debug(`[Anti-Nuke] Failed to delete spam webhook ${webhookId}:`, error.message);
+              logger.debug(
+                `[Anti-Nuke] Failed to delete spam webhook ${webhookId}:`,
+                error.message
+              );
             }
           }
 

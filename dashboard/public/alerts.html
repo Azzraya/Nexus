@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -184,7 +184,7 @@
         <h1>🚨 Real-Time Security Alerts</h1>
         <div>
           <button
-            onclick="window.location.href='dashboard.html'"
+            onclick="window.location.href = 'dashboard.html'"
             style="
               padding: 10px 20px;
               background: rgba(255, 255, 255, 0.1);
@@ -305,8 +305,8 @@
                 <span>${alert.title}</span>
               </div>
               <span class="severity-badge badge-${alert.severity}">${
-              alert.severity
-            }</span>
+                alert.severity
+              }</span>
             </div>
             <div class="alert-server">📍 ${alert.server}</div>
             <div class="alert-description">${alert.description}</div>

@@ -64,7 +64,14 @@ class SmartStatus {
         activities: [
           {
             name: status.name,
-            type: status.type === "WATCHING" ? 3 : status.type === "PLAYING" ? 0 : status.type === "STREAMING" ? 1 : 0,
+            type:
+              status.type === "WATCHING"
+                ? 3
+                : status.type === "PLAYING"
+                  ? 0
+                  : status.type === "STREAMING"
+                    ? 1
+                    : 0,
             url: status.url || undefined,
           },
         ],
@@ -87,9 +94,12 @@ class SmartStatus {
     this.updateStatus();
 
     // Then update every interval
-    this.updateInterval = setInterval(() => {
-      this.updateStatus();
-    }, intervalMinutes * 60 * 1000);
+    this.updateInterval = setInterval(
+      () => {
+        this.updateStatus();
+      },
+      intervalMinutes * 60 * 1000
+    );
 
     logger.info(
       `[Smart Status] Auto-rotating status started (every ${intervalMinutes} minutes)`
@@ -115,7 +125,14 @@ class SmartStatus {
         activities: [
           {
             name: message,
-            type: type === "WATCHING" ? 3 : type === "PLAYING" ? 0 : type === "STREAMING" ? 1 : 0,
+            type:
+              type === "WATCHING"
+                ? 3
+                : type === "PLAYING"
+                  ? 0
+                  : type === "STREAMING"
+                    ? 1
+                    : 0,
             url: url || undefined,
           },
         ],
@@ -130,4 +147,3 @@ class SmartStatus {
 }
 
 module.exports = SmartStatus;
-

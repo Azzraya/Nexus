@@ -9,7 +9,7 @@ module.exports = {
   async execute(interaction) {
     const interactionTime = interaction.createdTimestamp;
     await interaction.deferReply();
-    
+
     // Calculate roundtrip from interaction creation to now
     const roundtrip = Date.now() - interactionTime;
     const wsPing = interaction.client.ws.ping;

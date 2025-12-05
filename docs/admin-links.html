@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -362,7 +362,10 @@
       let adminPassword = null;
 
       // Check authentication - use token if available
-      if (!authToken || sessionStorage.getItem("adminAuthenticated") !== "true") {
+      if (
+        !authToken ||
+        sessionStorage.getItem("adminAuthenticated") !== "true"
+      ) {
         // Fallback to password-based auth for this page (uses different API)
         adminPassword = localStorage.getItem("nexus_admin_password");
         if (!adminPassword) {
@@ -548,16 +551,20 @@
                                            0.3
                                            ? "#10b981"
                                            : link.total_joins /
-                                               link.total_clicks >=
-                                             0.1
-                                           ? "#f59e0b"
-                                           : "#ef4444"
+                                                 link.total_clicks >=
+                                               0.1
+                                             ? "#f59e0b"
+                                             : "#ef4444"
                                          : "#999"
                                      }">${
-              link.total_clicks > 0
-                ? Math.round((link.total_joins / link.total_clicks) * 100)
-                : 0
-            }%</div>
+                                       link.total_clicks > 0
+                                         ? Math.round(
+                                             (link.total_joins /
+                                               link.total_clicks) *
+                                               100
+                                           )
+                                         : 0
+                                     }%</div>
                                      <div class="stat-label">Conv Rate</div>
                                  </div>
                                  <div class="stat">
@@ -565,13 +572,13 @@
                                        link.avg_retention_days >= 30
                                          ? "#10b981"
                                          : link.avg_retention_days >= 7
-                                         ? "#f59e0b"
-                                         : link.avg_retention_days > 0
-                                         ? "#ef4444"
-                                         : "#999"
+                                           ? "#f59e0b"
+                                           : link.avg_retention_days > 0
+                                             ? "#ef4444"
+                                             : "#999"
                                      }">${Math.round(
-              link.avg_retention_days || 0
-            )}d</div>
+                                       link.avg_retention_days || 0
+                                     )}d</div>
                                      <div class="stat-label">Retention</div>
                                  </div>
                              </div>

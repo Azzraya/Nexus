@@ -77,7 +77,7 @@ module.exports = {
       if (i.customId === "setup_security") {
         // Defer reply to prevent timeout
         await i.deferReply({ ephemeral: true });
-        
+
         // Enable security features
         await db.setServerConfig(guild.id, {
           anti_raid_enabled: 1,
@@ -206,7 +206,7 @@ module.exports = {
       } else if (i.customId === "setup_automod") {
         // Defer reply to prevent timeout
         await i.deferReply({ ephemeral: true });
-        
+
         // Enable automod
         await new Promise((resolve, reject) => {
           db.db.run(

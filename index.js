@@ -119,37 +119,40 @@ const MultiServerManagement = require("./utils/multiServer");
 client.multiServer = new MultiServerManagement(client);
 
 // Optimized cleanup - run all cleanups in parallel (EXCEEDS WICK - better performance)
-setInterval(async () => {
-  const cleanupTasks = [];
+setInterval(
+  async () => {
+    const cleanupTasks = [];
 
-  if (client.advancedAntiNuke) {
-    cleanupTasks.push(
-      Promise.resolve(client.advancedAntiNuke.cleanup()).catch((err) =>
-        logger.error("AdvancedAntiNuke cleanup error:", err)
-      )
-    );
-  }
-  if (client.heatSystem && typeof client.heatSystem.cleanup === "function") {
-    cleanupTasks.push(
-      Promise.resolve(client.heatSystem.cleanup()).catch((err) =>
-        logger.error("HeatSystem cleanup error:", err)
-      )
-    );
-  }
-  if (
-    client.verificationSystem &&
-    typeof client.verificationSystem.cleanup === "function"
-  ) {
-    cleanupTasks.push(
-      Promise.resolve(client.verificationSystem.cleanup()).catch((err) =>
-        logger.error("VerificationSystem cleanup error:", err)
-      )
-    );
-  }
+    if (client.advancedAntiNuke) {
+      cleanupTasks.push(
+        Promise.resolve(client.advancedAntiNuke.cleanup()).catch((err) =>
+          logger.error("AdvancedAntiNuke cleanup error:", err)
+        )
+      );
+    }
+    if (client.heatSystem && typeof client.heatSystem.cleanup === "function") {
+      cleanupTasks.push(
+        Promise.resolve(client.heatSystem.cleanup()).catch((err) =>
+          logger.error("HeatSystem cleanup error:", err)
+        )
+      );
+    }
+    if (
+      client.verificationSystem &&
+      typeof client.verificationSystem.cleanup === "function"
+    ) {
+      cleanupTasks.push(
+        Promise.resolve(client.verificationSystem.cleanup()).catch((err) =>
+          logger.error("VerificationSystem cleanup error:", err)
+        )
+      );
+    }
 
-  // Run all cleanups in parallel for better performance
-  await Promise.all(cleanupTasks);
-}, 5 * 60 * 1000);
+    // Run all cleanups in parallel for better performance
+    await Promise.all(cleanupTasks);
+  },
+  5 * 60 * 1000
+);
 
 // Load commands
 const commandsPath = path.join(__dirname, "commands");
@@ -366,8 +369,11 @@ if (!process.env.USING_SHARDING && process.env.TOPGG_TOKEN) {
 
 // Initialize Redis cache (optional - falls back to in-memory if unavailable)
 const redisCache = require("./utils/redisCache");
-redisCache.connect().catch(err => {
-  logger.warn("[Redis] Initialization failed, using in-memory cache:", err.message);
+redisCache.connect().catch((err) => {
+  logger.warn(
+    "[Redis] Initialization failed, using in-memory cache:",
+    err.message
+  );
 });
 
 // Login with shard support

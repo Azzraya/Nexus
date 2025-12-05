@@ -81,12 +81,12 @@ module.exports = {
     // Check for custom commands (OPTIMIZED: Cache custom commands in Redis)
     if (message.content.startsWith("!")) {
       const commandName = message.content.slice(1).split(" ")[0].toLowerCase();
-      
+
       // Try cache first
       const redisCache = require("../utils/redisCache");
       const cacheKey = `custom_cmd_${message.guild.id}_${commandName}`;
       let customCommand = await redisCache.get(cacheKey).catch(() => null);
-      
+
       if (!customCommand) {
         // Fetch from database
         customCommand = await new Promise((resolve, reject) => {
@@ -99,7 +99,7 @@ module.exports = {
             }
           );
         });
-        
+
         // Cache for 10 minutes
         if (customCommand) {
           await redisCache.set(cacheKey, customCommand, 600).catch(() => {});
@@ -331,7 +331,7 @@ module.exports = {
       try {
         await client.xpSystem.awardMessageXP(message);
       } catch (error) {
-        console.error('[XP] Failed to award XP:', error);
+        console.error("[XP] Failed to award XP:", error);
       }
     }
   },

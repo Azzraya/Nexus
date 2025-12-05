@@ -50,7 +50,7 @@ module.exports = {
     if (stats.totalRaidDetections > 0 || stats.totalBans > 0) {
       const nexusTotal =
         (stats.avgRaidResponse || 0.15) + (stats.avgBanResponse || 80);
-      
+
       embed.addFields({
         name: "🚀 Total Response Time",
         value:
@@ -73,7 +73,7 @@ module.exports = {
 
     embed.addFields({
       name: "📐 Measurement Method",
-      value: 
+      value:
         `Uses \`process.hrtime.bigint()\` for nanosecond-precision timing.\n` +
         `All metrics are independently verifiable.`,
       inline: false,

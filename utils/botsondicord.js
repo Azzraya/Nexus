@@ -35,10 +35,7 @@ class BotsOnDiscord {
       logger.info(`[Bots on Discord] Posted stats: ${guildCount} guilds`);
       return true;
     } catch (error) {
-      logger.error(
-        "[Bots on Discord] Error posting stats:",
-        error.message
-      );
+      logger.error("[Bots on Discord] Error posting stats:", error.message);
       return false;
     }
   }
@@ -48,9 +45,7 @@ class BotsOnDiscord {
    */
   initialize() {
     if (!this.token) {
-      logger.warn(
-        "[Bots on Discord] No token provided, skipping integration"
-      );
+      logger.warn("[Bots on Discord] No token provided, skipping integration");
       return;
     }
 
@@ -58,9 +53,12 @@ class BotsOnDiscord {
     this.postStats();
 
     // Post every 30 minutes
-    setInterval(() => {
-      this.postStats();
-    }, 30 * 60 * 1000);
+    setInterval(
+      () => {
+        this.postStats();
+      },
+      30 * 60 * 1000
+    );
 
     logger.info("[Bots on Discord] Stats posting initialized");
   }
@@ -118,14 +116,10 @@ class BotsOnDiscord {
 
       return response.data;
     } catch (error) {
-      logger.error(
-        "[Bots on Discord] Error fetching bot info:",
-        error.message
-      );
+      logger.error("[Bots on Discord] Error fetching bot info:", error.message);
       throw error;
     }
   }
 }
 
 module.exports = BotsOnDiscord;
-

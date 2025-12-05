@@ -1,67 +1,75 @@
-const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require('discord.js');
-const backupManager = require('../utils/backupManager');
+const {
+  SlashCommandBuilder,
+  EmbedBuilder,
+  PermissionFlagsBits,
+} = require("discord.js");
+const backupManager = require("../utils/backupManager");
 const ErrorMessages = require("../utils/errorMessages");
 
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName('backup')
-    .setDescription('Backup and restore server configurations')
+    .setName("backup")
+    .setDescription("Backup and restore server configurations")
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
-    .addSubcommand(subcommand =>
+    .addSubcommand((subcommand) =>
       subcommand
-        .setName('create')
-        .setDescription('Create a backup of your server configuration')
+        .setName("create")
+        .setDescription("Create a backup of your server configuration")
     )
-    .addSubcommand(subcommand =>
+    .addSubcommand((subcommand) =>
       subcommand
-        .setName('list')
-        .setDescription('List all available backups for this server')
+        .setName("list")
+        .setDescription("List all available backups for this server")
     )
-    .addSubcommand(subcommand =>
+    .addSubcommand((subcommand) =>
       subcommand
-        .setName('restore')
-        .setDescription('Restore a backup')
-        .addStringOption(option =>
+        .setName("restore")
+        .setDescription("Restore a backup")
+        .addStringOption((option) =>
           option
-            .setName('backup-id')
-            .setDescription('Backup ID to restore')
+            .setName("backup-id")
+            .setDescription("Backup ID to restore")
             .setRequired(true)
         )
-        .addBooleanOption(option =>
+        .addBooleanOption((option) =>
           option
-            .setName('config')
-            .setDescription('Restore bot configuration (default: true)')
+            .setName("config")
+            .setDescription("Restore bot configuration (default: true)")
         )
-        .addBooleanOption(option =>
+        .addBooleanOption((option) =>
           option
-            .setName('roles')
-            .setDescription('Restore roles (CAREFUL: only creates missing roles)')
+            .setName("roles")
+            .setDescription(
+              "Restore roles (CAREFUL: only creates missing roles)"
+            )
         )
-        .addBooleanOption(option =>
+        .addBooleanOption((option) =>
           option
-            .setName('channels')
-            .setDescription('Restore channels (CAREFUL: only creates missing channels)')
+            .setName("channels")
+            .setDescription(
+              "Restore channels (CAREFUL: only creates missing channels)"
+            )
         )
     )
-    .addSubcommand(subcommand =>
+    .addSubcommand((subcommand) =>
       subcommand
-        .setName('delete')
-        .setDescription('Delete a backup')
-        .addStringOption(option =>
+        .setName("delete")
+        .setDescription("Delete a backup")
+        .addStringOption((option) =>
           option
-            .setName('backup-id')
-            .setDescription('Backup ID to delete')
+            .setName("backup-id")
+            .setDescription("Backup ID to delete")
             .setRequired(true)
         )
     )
-    .addSubcommand(subcommand =>
+    .addSubcommand((subcommand) =>
       subcommand
-        .setName('info')
-        .setDescription('View detailed information about a backup')
-        .addStringOption(option =>
+        .setName("info")
+        .setDescription("View detailed information about a backup")
+        .addStringOption((option) =>
           option
-            .setName('backup-id')
-            .setDescription('Backup ID to view')
+            .setName("backup-id")
+            .setDescription("Backup ID to view")
             .setRequired(true)
         )
     ),
@@ -69,64 +77,67 @@ module.exports = {
   async execute(interaction) {
     const subcommand = interaction.options.getSubcommand();
 
-    if (subcommand === 'create') {
+    if (subcommand === "create") {
       await interaction.deferReply({ ephemeral: true });
 
       const result = await backupManager.createBackup(interaction.guild);
 
       if (result.success) {
         const embed = new EmbedBuilder()
-          .setTitle('✅ Backup Created Successfully')
-          .setColor('#48bb78')
+          .setTitle("✅ Backup Created Successfully")
+          .setColor("#48bb78")
           .addFields(
             {
-              name: '🆔 Backup ID',
+              name: "🆔 Backup ID",
               value: `\`${result.backupId}\``,
-              inline: false
+              inline: false,
             },
             {
-              name: '📦 Size',
+              name: "📦 Size",
               value: `${(result.size / 1024).toFixed(2)} KB`,
-              inline: true
+              inline: true,
             },
             {
-              name: '📅 Created',
+              name: "📅 Created",
               value: `<t:${Math.floor(result.timestamp / 1000)}:R>`,
-              inline: true
+              inline: true,
             }
           )
           .setDescription(
-            '**What was backed up:**\n' +
-            '• All bot configurations\n' +
-            '• Role structure\n' +
-            '• Channel layout\n' +
-            '• Guild settings\n\n' +
-            '**To restore:** `/backup restore backup-id:' + result.backupId + '`'
+            "**What was backed up:**\n" +
+              "• All bot configurations\n" +
+              "• Role structure\n" +
+              "• Channel layout\n" +
+              "• Guild settings\n\n" +
+              "**To restore:** `/backup restore backup-id:" +
+              result.backupId +
+              "`"
           )
-          .setFooter({ text: 'Keep this backup ID safe!' })
+          .setFooter({ text: "Keep this backup ID safe!" })
           .setTimestamp();
 
         await interaction.editReply({ embeds: [embed] });
       } else {
         await interaction.editReply({
-          content: `❌ ${result.error}`
+          content: `❌ ${result.error}`,
         });
       }
-    } else if (subcommand === 'list') {
+    } else if (subcommand === "list") {
       await interaction.deferReply({ ephemeral: true });
 
       const backups = await backupManager.listBackups(interaction.guild.id);
 
       if (backups.length === 0) {
         return await interaction.editReply({
-          content: '📦 No backups found for this server. Use `/backup create` to create one!'
+          content:
+            "📦 No backups found for this server. Use `/backup create` to create one!",
         });
       }
 
       const embed = new EmbedBuilder()
         .setTitle(`📦 Backups for ${interaction.guild.name}`)
         .setDescription(`Found **${backups.length}** backup(s)`)
-        .setColor('#667eea')
+        .setColor("#667eea")
         .setTimestamp();
 
       backups.slice(0, 10).forEach((backup, index) => {
@@ -135,9 +146,9 @@ module.exports = {
           value: [
             `**ID:** \`${backup.id}\``,
             `**Created:** <t:${Math.floor(backup.timestamp / 1000)}:R>`,
-            `**Size:** ${(backup.size / 1024).toFixed(2)} KB`
-          ].join('\n'),
-          inline: false
+            `**Size:** ${(backup.size / 1024).toFixed(2)} KB`,
+          ].join("\n"),
+          inline: false,
         });
       });
 
@@ -146,28 +157,33 @@ module.exports = {
       }
 
       await interaction.editReply({ embeds: [embed] });
-    } else if (subcommand === 'restore') {
+    } else if (subcommand === "restore") {
       await interaction.deferReply({ ephemeral: true });
 
-      const backupId = interaction.options.getString('backup-id');
-      const restoreConfig = interaction.options.getBoolean('config') ?? true;
-      const restoreRoles = interaction.options.getBoolean('roles') ?? false;
-      const restoreChannels = interaction.options.getBoolean('channels') ?? false;
+      const backupId = interaction.options.getString("backup-id");
+      const restoreConfig = interaction.options.getBoolean("config") ?? true;
+      const restoreRoles = interaction.options.getBoolean("roles") ?? false;
+      const restoreChannels =
+        interaction.options.getBoolean("channels") ?? false;
 
       // Confirmation check
       const embed = new EmbedBuilder()
-        .setTitle('⚠️ Confirm Restore')
+        .setTitle("⚠️ Confirm Restore")
         .setDescription(
-          '**You are about to restore a backup!**\n\n' +
-          'This will:\n' +
-          (restoreConfig ? '✅ Restore bot configuration\n' : '❌ Skip bot configuration\n') +
-          (restoreRoles ? '✅ Create missing roles\n' : '❌ Skip roles\n') +
-          (restoreChannels ? '✅ Create missing channels\n' : '❌ Skip channels\n') +
-          '\n**This action cannot be undone!**\n\n' +
-          `Backup ID: \`${backupId}\``
+          "**You are about to restore a backup!**\n\n" +
+            "This will:\n" +
+            (restoreConfig
+              ? "✅ Restore bot configuration\n"
+              : "❌ Skip bot configuration\n") +
+            (restoreRoles ? "✅ Create missing roles\n" : "❌ Skip roles\n") +
+            (restoreChannels
+              ? "✅ Create missing channels\n"
+              : "❌ Skip channels\n") +
+            "\n**This action cannot be undone!**\n\n" +
+            `Backup ID: \`${backupId}\``
         )
-        .setColor('#ed8936')
-        .setFooter({ text: 'React with ✅ to confirm within 30 seconds' });
+        .setColor("#ed8936")
+        .setFooter({ text: "React with ✅ to confirm within 30 seconds" });
 
       await interaction.editReply({ embeds: [embed] });
 
@@ -180,87 +196,89 @@ module.exports = {
 
       if (result.success) {
         const successEmbed = new EmbedBuilder()
-          .setTitle('✅ Backup Restored Successfully')
-          .setColor('#48bb78')
+          .setTitle("✅ Backup Restored Successfully")
+          .setColor("#48bb78")
           .addFields(
             {
-              name: '📋 What was restored',
+              name: "📋 What was restored",
               value: [
-                result.restored.config ? '✅ Bot Configuration' : '➖ Bot Configuration (skipped)',
-                `${result.restored.roles > 0 ? '✅' : '➖'} Roles (${result.restored.roles} created)`,
-                `${result.restored.channels > 0 ? '✅' : '➖'} Channels (${result.restored.channels} created)`
-              ].join('\n'),
-              inline: false
+                result.restored.config
+                  ? "✅ Bot Configuration"
+                  : "➖ Bot Configuration (skipped)",
+                `${result.restored.roles > 0 ? "✅" : "➖"} Roles (${result.restored.roles} created)`,
+                `${result.restored.channels > 0 ? "✅" : "➖"} Channels (${result.restored.channels} created)`,
+              ].join("\n"),
+              inline: false,
             },
             {
-              name: '📅 Backup Date',
+              name: "📅 Backup Date",
               value: `<t:${Math.floor(result.timestamp / 1000)}:F>`,
-              inline: false
+              inline: false,
             }
           )
-          .setFooter({ text: 'Server configuration has been restored' })
+          .setFooter({ text: "Server configuration has been restored" })
           .setTimestamp();
 
         await interaction.editReply({ embeds: [successEmbed] });
       } else {
         await interaction.editReply({
-          content: `❌ ${result.error}`
+          content: `❌ ${result.error}`,
         });
       }
-    } else if (subcommand === 'delete') {
+    } else if (subcommand === "delete") {
       await interaction.deferReply({ ephemeral: true });
 
-      const backupId = interaction.options.getString('backup-id');
+      const backupId = interaction.options.getString("backup-id");
       const result = await backupManager.deleteBackup(backupId);
 
       if (result.success) {
         await interaction.editReply({
-          content: `✅ Backup \`${backupId}\` deleted successfully.`
+          content: `✅ Backup \`${backupId}\` deleted successfully.`,
         });
       } else {
         await interaction.editReply({
-          content: `❌ ${result.error}`
+          content: `❌ ${result.error}`,
         });
       }
-    } else if (subcommand === 'info') {
+    } else if (subcommand === "info") {
       await interaction.deferReply({ ephemeral: true });
 
-      const backupId = interaction.options.getString('backup-id');
+      const backupId = interaction.options.getString("backup-id");
       const backup = await backupManager.loadBackup(backupId);
 
       if (!backup) {
         return await interaction.editReply({
-          content: `❌ Backup not found: \`${backupId}\``
+          content: `❌ Backup not found: \`${backupId}\``,
         });
       }
 
       const embed = new EmbedBuilder()
-        .setTitle('📦 Backup Information')
-        .setColor('#667eea')
+        .setTitle("📦 Backup Information")
+        .setColor("#667eea")
         .addFields(
           {
-            name: '🆔 Backup ID',
+            name: "🆔 Backup ID",
             value: `\`${backup.id}\``,
-            inline: false
+            inline: false,
           },
           {
-            name: '🖥️ Server',
+            name: "🖥️ Server",
             value: backup.guildName,
-            inline: true
+            inline: true,
           },
           {
-            name: '📅 Created',
+            name: "📅 Created",
             value: `<t:${Math.floor(backup.timestamp / 1000)}:F>`,
-            inline: true
+            inline: true,
           },
           {
-            name: '📊 Contains',
+            name: "📊 Contains",
             value: [
               `Roles: **${backup.data.roles?.length || 0}**`,
               `Channels: **${backup.data.channels?.length || 0}**`,
-              `Config: **${backup.data.config ? 'Yes' : 'No'}**`
-            ].join('\n'),
-            inline: false
+              `Config: **${backup.data.config ? "Yes" : "No"}**`,
+            ].join("\n"),
+            inline: false,
           }
         )
         .setTimestamp();

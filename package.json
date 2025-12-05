@@ -7,6 +7,8 @@
     "start": "node shard.js",
     "dev": "node index.js",
     "shard": "node shard.js",
+    "format": "prettier --write \"**/*.{js,json,html,css,md}\" --ignore-path .prettierignore",
+    "format:check": "prettier --check \"**/*.{js,json,html,css,md}\" --ignore-path .prettierignore",
     "git:pull": "scripts\\pull.bat",
     "git:push": "scripts\\push.bat",
     "git:sync": "scripts\\sync.bat"
@@ -45,5 +47,8 @@
   },
   "optionalDependencies": {
     "redis": "^4.7.1"
+  },
+  "devDependencies": {
+    "prettier": "^3.7.4"
   }
 }

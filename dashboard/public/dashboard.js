@@ -10,9 +10,8 @@ async function loadUser() {
     userData = await response.json();
 
     document.getElementById("userName").textContent = userData.username;
-    document.getElementById(
-      "userAvatar"
-    ).src = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png`;
+    document.getElementById("userAvatar").src =
+      `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png`;
   } catch (error) {
     console.error("Failed to load user:", error);
   }
@@ -505,7 +504,7 @@ function loadPage(page) {
 // Template Library (EXCEEDS WICK!)
 async function loadTemplates() {
   const contentArea = document.getElementById("contentArea");
-  
+
   contentArea.innerHTML = `
     <div class="content-header">
       <h1>📋 Configuration Templates</h1>
@@ -629,32 +628,32 @@ const templates = {
     anti_nuke_enabled: 1,
     anti_raid_enabled: 1,
     auto_mod_enabled: 1,
-    auto_recovery_enabled: 1
+    auto_recovery_enabled: 1,
   },
   community: {
     anti_nuke_enabled: 1,
     anti_raid_enabled: 1,
     auto_mod_enabled: 1,
-    auto_recovery_enabled: 0
+    auto_recovery_enabled: 0,
   },
   rp: {
     anti_nuke_enabled: 1,
     anti_raid_enabled: 0,
     auto_mod_enabled: 1,
-    auto_recovery_enabled: 0
+    auto_recovery_enabled: 0,
   },
   maxsec: {
     anti_nuke_enabled: 1,
     anti_raid_enabled: 1,
     auto_mod_enabled: 1,
-    auto_recovery_enabled: 1
+    auto_recovery_enabled: 1,
   },
   minimal: {
     anti_nuke_enabled: 1,
     anti_raid_enabled: 0,
     auto_mod_enabled: 0,
-    auto_recovery_enabled: 0
-  }
+    auto_recovery_enabled: 0,
+  },
 };
 
 async function applyTemplate(templateName) {
@@ -666,7 +665,11 @@ async function applyTemplate(templateName) {
   const template = templates[templateName];
   if (!template) return;
 
-  if (!confirm(`Apply "${templateName}" template to current server? This will override current settings.`)) {
+  if (
+    !confirm(
+      `Apply "${templateName}" template to current server? This will override current settings.`
+    )
+  ) {
     return;
   }
 
@@ -674,7 +677,7 @@ async function applyTemplate(templateName) {
     const response = await fetch(`/api/server/${currentServer}/config`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(template)
+      body: JSON.stringify(template),
     });
 
     if (response.ok) {
@@ -685,7 +688,7 @@ async function applyTemplate(templateName) {
         <h3 style="color: #00d1b2; margin-bottom: 10px;">✅ Template Applied!</h3>
         <p>Configuration updated successfully. Refresh the page to see changes.</p>
       `;
-      setTimeout(() => resultEl.style.display = "none", 5000);
+      setTimeout(() => (resultEl.style.display = "none"), 5000);
     } else {
       alert("Failed to apply template");
     }
@@ -702,7 +705,7 @@ async function saveTemplate() {
 // Bulk Operations Page (EXCEEDS WICK!)
 async function loadBulkOperations() {
   const contentArea = document.getElementById("contentArea");
-  
+
   contentArea.innerHTML = `
     <div class="content-header">
       <h1>⚡ Bulk Operations</h1>
@@ -792,21 +795,23 @@ async function loadBulkOperations() {
   try {
     const response = await fetch("/api/servers");
     const servers = await response.json();
-    const serversWithBot = servers.filter(s => s.hasBot);
-    
+    const serversWithBot = servers.filter((s) => s.hasBot);
+
     const listEl = document.getElementById("bulk-server-list");
     if (serversWithBot.length === 0) {
       listEl.innerHTML = '<p style="opacity: 0.7;">No servers available</p>';
       return;
     }
 
-    listEl.innerHTML = serversWithBot.map(server => `
+    listEl.innerHTML = serversWithBot
+      .map(
+        (server) => `
       <label style="display: flex; align-items: center; padding: 15px; background: rgba(255, 255, 255, 0.05); border-radius: 10px; margin-bottom: 10px; cursor: pointer; transition: all 0.3s;" 
              onmouseover="this.style.background='rgba(255, 255, 255, 0.1)'" 
              onmouseout="this.style.background='rgba(255, 255, 255, 0.05)'">
         <input type="checkbox" class="server-checkbox" value="${server.id}" data-name="${server.name}" 
                style="margin-right: 15px; width: 20px; height: 20px; cursor: pointer;">
-        <img src="${server.icon || 'https://cdn.discordapp.com/embed/avatars/0.png'}" 
+        <img src="${server.icon || "https://cdn.discordapp.com/embed/avatars/0.png"}" 
              alt="${server.name}" 
              style="width: 40px; height: 40px; border-radius: 50%; margin-right: 15px;">
         <div style="flex: 1;">
@@ -814,31 +819,42 @@ async function loadBulkOperations() {
           <div style="font-size: 0.85rem; opacity: 0.7;">${server.memberCount} members</div>
         </div>
       </label>
-    `).join("");
+    `
+      )
+      .join("");
   } catch (error) {
     console.error("Failed to load servers for bulk:", error);
   }
 }
 
 function selectAllServers() {
-  document.querySelectorAll('.server-checkbox').forEach(cb => cb.checked = true);
+  document
+    .querySelectorAll(".server-checkbox")
+    .forEach((cb) => (cb.checked = true));
 }
 
 function deselectAllServers() {
-  document.querySelectorAll('.server-checkbox').forEach(cb => cb.checked = false);
+  document
+    .querySelectorAll(".server-checkbox")
+    .forEach((cb) => (cb.checked = false));
 }
 
 async function bulkToggle(setting, value) {
-  const selectedServers = Array.from(document.querySelectorAll('.server-checkbox:checked'))
-    .map(cb => ({ id: cb.value, name: cb.dataset.name }));
+  const selectedServers = Array.from(
+    document.querySelectorAll(".server-checkbox:checked")
+  ).map((cb) => ({ id: cb.value, name: cb.dataset.name }));
 
   if (selectedServers.length === 0) {
     alert("Please select at least one server!");
     return;
   }
 
-  const settingName = setting.replace(/_enabled/g, '').replace(/_/g, ' ');
-  if (!confirm(`${value ? 'Enable' : 'Disable'} ${settingName} on ${selectedServers.length} server(s)?`)) {
+  const settingName = setting.replace(/_enabled/g, "").replace(/_/g, " ");
+  if (
+    !confirm(
+      `${value ? "Enable" : "Disable"} ${settingName} on ${selectedServers.length} server(s)?`
+    )
+  ) {
     return;
   }
 
@@ -856,7 +872,7 @@ async function bulkToggle(setting, value) {
       const response = await fetch(`/api/server/${server.id}/config`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ [setting]: value ? 1 : 0 })
+        body: JSON.stringify({ [setting]: value ? 1 : 0 }),
       });
 
       if (response.ok) {
@@ -875,15 +891,19 @@ async function bulkToggle(setting, value) {
   statusEl.innerHTML = `
     <h3 style="color: #00d1b2; margin-bottom: 10px;">✅ Bulk Operation Complete!</h3>
     <p style="font-size: 1.1rem; margin: 5px 0;">✅ Successfully updated: <strong>${succeeded}</strong> servers</p>
-    ${failed > 0 ? `
+    ${
+      failed > 0
+        ? `
       <p style="color: #ff4444; margin: 5px 0;">❌ Failed: <strong>${failed}</strong> servers</p>
       <details style="margin-top: 10px;">
         <summary style="cursor: pointer; opacity: 0.8;">Show failed servers</summary>
         <ul style="margin-top: 10px; opacity: 0.8;">
-          ${failedServers.map(name => `<li>${name}</li>`).join('')}
+          ${failedServers.map((name) => `<li>${name}</li>`).join("")}
         </ul>
       </details>
-    ` : ''}
+    `
+        : ""
+    }
   `;
 
   setTimeout(() => {
@@ -1323,11 +1343,14 @@ async function loadModLogs() {
   `;
 
   try {
-    const response = await fetch(`/api/server/${currentServer}/modlogs?limit=100`);
+    const response = await fetch(
+      `/api/server/${currentServer}/modlogs?limit=100`
+    );
     window.allModLogs = await response.json();
 
     if (window.allModLogs.length === 0) {
-      document.getElementById("modLogsContainer").innerHTML = '<p style="opacity:0.7;">No logs yet.</p>';
+      document.getElementById("modLogsContainer").innerHTML =
+        '<p style="opacity:0.7;">No logs yet.</p>';
       return;
     }
 
@@ -1339,7 +1362,7 @@ async function loadModLogs() {
 }
 
 function createModChart(logs) {
-  const ctx = document.getElementById('modLogsChart');
+  const ctx = document.getElementById("modLogsChart");
   if (!ctx) return;
 
   const last7Days = [];
@@ -1350,41 +1373,54 @@ function createModChart(logs) {
     last7Days.push(date.getTime());
   }
 
-  const counts = last7Days.map(day => {
+  const counts = last7Days.map((day) => {
     const dayEnd = day + 86400000;
-    return logs.filter(l => l.timestamp >= day && l.timestamp < dayEnd).length;
+    return logs.filter((l) => l.timestamp >= day && l.timestamp < dayEnd)
+      .length;
   });
 
-  const labels = last7Days.map(d => new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+  const labels = last7Days.map((d) =>
+    new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric" })
+  );
 
   new Chart(ctx, {
-    type: 'line',
+    type: "line",
     data: {
       labels,
-      datasets: [{
-        label: 'Actions',
-        data: counts,
-        borderColor: '#667eea',
-        backgroundColor: 'rgba(102, 126, 234, 0.2)',
-        tension: 0.4,
-        fill: true
-      }]
+      datasets: [
+        {
+          label: "Actions",
+          data: counts,
+          borderColor: "#667eea",
+          backgroundColor: "rgba(102, 126, 234, 0.2)",
+          tension: 0.4,
+          fill: true,
+        },
+      ],
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      plugins: { legend: { labels: { color: '#fff' } } },
+      plugins: { legend: { labels: { color: "#fff" } } },
       scales: {
-        y: { beginAtZero: true, ticks: { color: '#fff' }, grid: { color: 'rgba(255,255,255,0.1)' } },
-        x: { ticks: { color: '#fff' }, grid: { color: 'rgba(255,255,255,0.1)' } }
-      }
-    }
+        y: {
+          beginAtZero: true,
+          ticks: { color: "#fff" },
+          grid: { color: "rgba(255,255,255,0.1)" },
+        },
+        x: {
+          ticks: { color: "#fff" },
+          grid: { color: "rgba(255,255,255,0.1)" },
+        },
+      },
+    },
   });
 }
 
 function displayFilteredModLogs(logs) {
   const container = document.getElementById("modLogsContainer");
-  document.getElementById("filter-count").textContent = `Showing ${logs.length} log(s)`;
+  document.getElementById("filter-count").textContent =
+    `Showing ${logs.length} log(s)`;
 
   container.innerHTML = `
     <div class="logs-table">
@@ -1395,7 +1431,9 @@ function displayFilteredModLogs(logs) {
         <div>Moderator</div>
         <div>Reason</div>
       </div>
-      ${logs.map(log => `
+      ${logs
+        .map(
+          (log) => `
         <div class="log-row">
           <div>${new Date(log.timestamp).toLocaleString()}</div>
           <div><span class="action-badge action-${log.action}">${log.action.toUpperCase()}</span></div>
@@ -1403,7 +1441,9 @@ function displayFilteredModLogs(logs) {
           <div><code>${log.moderator_id}</code></div>
           <div>${log.reason || "None"}</div>
         </div>
-      `).join("")}
+      `
+        )
+        .join("")}
     </div>
   `;
 }
@@ -1416,12 +1456,12 @@ function filterModLogs() {
   const user = document.getElementById("filter-user").value.toLowerCase();
   const date = document.getElementById("filter-date").value;
 
-  const filtered = window.allModLogs.filter(log => {
+  const filtered = window.allModLogs.filter((log) => {
     if (action && log.action !== action) return false;
     if (mod && !log.moderator_id.toLowerCase().includes(mod)) return false;
     if (user && !log.user_id.toLowerCase().includes(user)) return false;
     if (date) {
-      const logDate = new Date(log.timestamp).toISOString().split('T')[0];
+      const logDate = new Date(log.timestamp).toISOString().split("T")[0];
       if (logDate !== date) return false;
     }
     return true;
@@ -1444,7 +1484,10 @@ function exportModLogs() {
   const filtered = window.allModLogs; // Or get currently filtered logs
   const csv = [
     "Timestamp,Action,User ID,Moderator ID,Reason",
-    ...filtered.map(l => `"${new Date(l.timestamp).toISOString()}","${l.action}","${l.user_id}","${l.moderator_id}","${l.reason || 'None'}"`)
+    ...filtered.map(
+      (l) =>
+        `"${new Date(l.timestamp).toISOString()}","${l.action}","${l.user_id}","${l.moderator_id}","${l.reason || "None"}"`
+    ),
   ].join("\n");
 
   const blob = new Blob([csv], { type: "text/csv" });
@@ -1502,8 +1545,8 @@ async function loadSecurityLogs() {
               log.threat_score >= 70
                 ? "high"
                 : log.threat_score >= 40
-                ? "medium"
-                : "low"
+                  ? "medium"
+                  : "low"
             }">${log.threat_score || 0}</span></div>
             <div>${log.details || "No details"}</div>
           </div>

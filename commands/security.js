@@ -86,10 +86,10 @@ module.exports = {
           threat.score >= 80
             ? 0xff0000
             : threat.score >= 60
-            ? 0xff8800
-            : threat.score >= 40
-            ? 0xffff00
-            : 0x00ff00
+              ? 0xff8800
+              : threat.score >= 40
+                ? 0xffff00
+                : 0x00ff00
         )
         .setThumbnail(user.displayAvatarURL({ dynamic: true }))
         .setTimestamp();
@@ -154,8 +154,8 @@ module.exports = {
 
       if (action === "add") {
         if (!user) {
-            return interaction.reply({
-              content: "❌ Please specify a user!",
+          return interaction.reply({
+            content: "❌ Please specify a user!",
             flags: MessageFlags.Ephemeral,
           });
         }
@@ -182,8 +182,8 @@ module.exports = {
         });
       } else if (action === "remove") {
         if (!user) {
-            return interaction.reply({
-              content: "❌ Please specify a user!",
+          return interaction.reply({
+            content: "❌ Please specify a user!",
             flags: MessageFlags.Ephemeral,
           });
         }
@@ -284,8 +284,8 @@ module.exports = {
                 botRoleIndex === 0
                   ? "✅ **OPTIMAL**\nBot role is at highest position"
                   : botRoleIndex <= 2
-                  ? "⚠️ **GOOD**\nBot role is in top 3 positions"
-                  : "❌ **RISK**\nBot role is too low - may not be able to moderate admin bots",
+                    ? "⚠️ **GOOD**\nBot role is in top 3 positions"
+                    : "❌ **RISK**\nBot role is too low - may not be able to moderate admin bots",
               inline: true,
             },
             {
@@ -305,8 +305,8 @@ module.exports = {
             botRoleIndex === 0
               ? 0x00ff00
               : botRoleIndex <= 2
-              ? 0xffff00
-              : 0xff0000
+                ? 0xffff00
+                : 0xff0000
           )
           .setTimestamp();
 
@@ -335,7 +335,7 @@ module.exports = {
         await interaction.editReply({ embeds: [embed] });
       } catch (error) {
         const logger = require("../utils/logger");
-const ErrorMessages = require("../utils/errorMessages");
+        const ErrorMessages = require("../utils/errorMessages");
         logger.error("Error in rolecheck:", error);
         await interaction.editReply(ErrorMessages.genericError());
       }

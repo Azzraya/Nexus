@@ -129,7 +129,11 @@ class Moderation {
       .addFields(
         { name: "User", value: `${user.tag} (${user.id})`, inline: true },
         { name: "Moderator", value: `${moderator.tag}`, inline: true },
-        { name: "Reason", value: reason || "No reason provided", inline: false }
+        {
+          name: "Reason",
+          value: reason || "No reason provided",
+          inline: false,
+        }
       )
       .setColor(this.getActionColor(action))
       .setTimestamp();

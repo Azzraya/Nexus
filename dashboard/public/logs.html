@@ -1,398 +1,447 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Advanced Log Search - Nexus Dashboard</title>
-  <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="mobile.css">
-  <style>
-    .search-container {
-      background: white;
-      border-radius: 10px;
-      padding: 25px;
-      margin-bottom: 30px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-
-    .search-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 15px;
-      margin-bottom: 20px;
-    }
-
-    .search-input {
-      width: 100%;
-      padding: 12px;
-      border: 2px solid #e2e8f0;
-      border-radius: 8px;
-      font-size: 1rem;
-    }
-
-    .search-input:focus {
-      border-color: #667eea;
-      outline: none;
-    }
-
-    .btn-search {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      border: none;
-      padding: 12px 30px;
-      border-radius: 8px;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-
-    .btn-search:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-    }
-
-    .btn-export {
-      background: #48bb78;
-      color: white;
-      border: none;
-      padding: 12px 25px;
-      border-radius: 8px;
-      cursor: pointer;
-      margin-left: 10px;
-    }
-
-    .log-table {
-      width: 100%;
-      background: white;
-      border-radius: 10px;
-      overflow: hidden;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-
-    .log-table table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    .log-table th {
-      background: #667eea;
-      color: white;
-      padding: 15px;
-      text-align: left;
-      font-weight: 600;
-    }
-
-    .log-table td {
-      padding: 12px 15px;
-      border-bottom: 1px solid #eee;
-    }
-
-    .log-table tr:hover {
-      background: #f8f9ff;
-    }
-
-    .log-type {
-      display: inline-block;
-      padding: 4px 12px;
-      border-radius: 15px;
-      font-size: 0.85rem;
-      font-weight: 600;
-    }
-
-    .log-type.ban { background: #f56565; color: white; }
-    .log-type.kick { background: #ed8936; color: white; }
-    .log-type.warn { background: #ecc94b; color: #333; }
-    .log-type.mute { background: #667eea; color: white; }
-    .log-type.raid { background: #c53030; color: white; }
-    .log-type.security { background: #e53e3e; color: white; }
-
-    .pagination {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      margin-top: 20px;
-    }
-
-    .pagination button {
-      padding: 8px 16px;
-      border: 2px solid #667eea;
-      background: white;
-      color: #667eea;
-      border-radius: 5px;
-      cursor: pointer;
-      font-weight: 600;
-    }
-
-    .pagination button:hover {
-      background: #667eea;
-      color: white;
-    }
-
-    .pagination button.active {
-      background: #667eea;
-      color: white;
-    }
-
-    .stats-bar {
-      display: flex;
-      gap: 20px;
-      margin-bottom: 30px;
-    }
-
-    .stat-box {
-      flex: 1;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 20px;
-      border-radius: 10px;
-      text-align: center;
-    }
-
-    .stat-box h3 {
-      margin: 0;
-      font-size: 2rem;
-    }
-
-    .stat-box p {
-      margin: 5px 0 0 0;
-      opacity: 0.9;
-    }
-  </style>
-</head>
-<body>
-  <div class="dashboard-container">
-    <nav class="sidebar">
-      <div class="logo">
-        <h2>⚡ Nexus</h2>
-      </div>
-      <ul class="nav-links">
-        <li><a href="index.html">📊 Overview</a></li>
-        <li><a href="servers.html">🖥️ Servers</a></li>
-        <li><a href="security.html">🔒 Security</a></li>
-        <li><a href="command-analytics.html">📈 Commands</a></li>
-        <li><a href="logs.html" class="active">🔍 Log Search</a></li>
-        <li><a href="admin-links.html">🔗 Invite Tracking</a></li>
-      </ul>
-    </nav>
-
-    <main class="main-content">
-      <header class="content-header">
-        <h1>🔍 Advanced Log Search</h1>
-        <p>Search and filter through all server logs</p>
-      </header>
-
-      <!-- Stats Bar -->
-      <div class="stats-bar">
-        <div class="stat-box">
-          <h3 id="totalLogs">0</h3>
-          <p>Total Logs</p>
-        </div>
-        <div class="stat-box">
-          <h3 id="filteredLogs">0</h3>
-          <p>Filtered Results</p>
-        </div>
-        <div class="stat-box">
-          <h3 id="timeRange">7d</h3>
-          <p>Time Range</p>
-        </div>
-      </div>
-
-      <!-- Search Form -->
-      <div class="search-container">
-        <h3>🔎 Search Filters</h3>
-        <div class="search-grid">
-          <input type="text" class="search-input" id="searchUser" placeholder="User ID or Username...">
-          <select class="search-input" id="searchAction">
-            <option value="">All Actions</option>
-            <option value="ban">Ban</option>
-            <option value="kick">Kick</option>
-            <option value="warn">Warn</option>
-            <option value="mute">Mute</option>
-            <option value="unmute">Unmute</option>
-            <option value="timeout">Timeout</option>
-          </select>
-          <select class="search-input" id="searchType">
-            <option value="all">All Log Types</option>
-            <option value="moderation">Moderation</option>
-            <option value="security">Security</option>
-            <option value="raid">Anti-Raid</option>
-          </select>
-          <select class="search-input" id="searchTime">
-            <option value="24h">Last 24 Hours</option>
-            <option value="7d" selected>Last 7 Days</option>
-            <option value="30d">Last 30 Days</option>
-            <option value="all">All Time</option>
-          </select>
-        </div>
-        <div style="display: flex; gap: 10px;">
-          <button class="btn-search" onclick="searchLogs()">🔍 Search</button>
-          <button class="btn-export" onclick="exportLogs()">📥 Export CSV</button>
-          <button class="btn-export" style="background: #667eea;" onclick="exportJSON()">📥 Export JSON</button>
-        </div>
-      </div>
-
-      <!-- Results Table -->
-      <div class="log-table">
-        <table>
-          <thead>
-            <tr>
-              <th>Time</th>
-              <th>Type</th>
-              <th>Action</th>
-              <th>User</th>
-              <th>Moderator</th>
-              <th>Reason</th>
-            </tr>
-          </thead>
-          <tbody id="logResults">
-            <tr>
-              <td colspan="6" style="text-align: center; padding: 40px; color: #999;">
-                Use filters above to search logs
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Pagination -->
-      <div class="pagination" id="pagination"></div>
-    </main>
-  </div>
-
-  <script>
-    const API_BASE = 'https://regular-puma-clearly.ngrok-free.app';
-    let currentPage = 1;
-    let currentResults = [];
-
-    async function searchLogs() {
-      const user = document.getElementById('searchUser').value;
-      const action = document.getElementById('searchAction').value;
-      const type = document.getElementById('searchType').value;
-      const time = document.getElementById('searchTime').value;
-
-      const params = new URLSearchParams();
-      if (user) params.append('user', user);
-      if (action) params.append('action', action);
-      if (type !== 'all') params.append('type', type);
-      params.append('range', time);
-      params.append('page', currentPage);
-
-      try {
-        const response = await fetch(`${API_BASE}/api/admin/logs/search?${params}`, {
-          headers: { 'ngrok-skip-browser-warning': 'true' }
-        });
-
-        const data = await response.json();
-        currentResults = data.logs || [];
-        
-        document.getElementById('totalLogs').textContent = data.total || 0;
-        document.getElementById('filteredLogs').textContent = currentResults.length;
-        document.getElementById('timeRange').textContent = time;
-
-        renderLogs(currentResults);
-        renderPagination(data.totalPages || 1);
-      } catch (error) {
-        console.error('Search error:', error);
-        document.getElementById('logResults').innerHTML = 
-          '<tr><td colspan="6" style="text-align: center; padding: 40px; color: #f56565;">Failed to load logs</td></tr>';
-      }
-    }
-
-    function renderLogs(logs) {
-      const tbody = document.getElementById('logResults');
-      
-      if (logs.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 40px; color: #999;">No logs found</td></tr>';
-        return;
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Advanced Log Search - Nexus Dashboard</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="mobile.css" />
+    <style>
+      .search-container {
+        background: white;
+        border-radius: 10px;
+        padding: 25px;
+        margin-bottom: 30px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
       }
 
-      tbody.innerHTML = logs.map(log => `
+      .search-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-bottom: 20px;
+      }
+
+      .search-input {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 1rem;
+      }
+
+      .search-input:focus {
+        border-color: #667eea;
+        outline: none;
+      }
+
+      .btn-search {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+      }
+
+      .btn-search:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+      }
+
+      .btn-export {
+        background: #48bb78;
+        color: white;
+        border: none;
+        padding: 12px 25px;
+        border-radius: 8px;
+        cursor: pointer;
+        margin-left: 10px;
+      }
+
+      .log-table {
+        width: 100%;
+        background: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .log-table table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      .log-table th {
+        background: #667eea;
+        color: white;
+        padding: 15px;
+        text-align: left;
+        font-weight: 600;
+      }
+
+      .log-table td {
+        padding: 12px 15px;
+        border-bottom: 1px solid #eee;
+      }
+
+      .log-table tr:hover {
+        background: #f8f9ff;
+      }
+
+      .log-type {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 15px;
+        font-size: 0.85rem;
+        font-weight: 600;
+      }
+
+      .log-type.ban {
+        background: #f56565;
+        color: white;
+      }
+      .log-type.kick {
+        background: #ed8936;
+        color: white;
+      }
+      .log-type.warn {
+        background: #ecc94b;
+        color: #333;
+      }
+      .log-type.mute {
+        background: #667eea;
+        color: white;
+      }
+      .log-type.raid {
+        background: #c53030;
+        color: white;
+      }
+      .log-type.security {
+        background: #e53e3e;
+        color: white;
+      }
+
+      .pagination {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 20px;
+      }
+
+      .pagination button {
+        padding: 8px 16px;
+        border: 2px solid #667eea;
+        background: white;
+        color: #667eea;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: 600;
+      }
+
+      .pagination button:hover {
+        background: #667eea;
+        color: white;
+      }
+
+      .pagination button.active {
+        background: #667eea;
+        color: white;
+      }
+
+      .stats-bar {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 30px;
+      }
+
+      .stat-box {
+        flex: 1;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+      }
+
+      .stat-box h3 {
+        margin: 0;
+        font-size: 2rem;
+      }
+
+      .stat-box p {
+        margin: 5px 0 0 0;
+        opacity: 0.9;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="dashboard-container">
+      <nav class="sidebar">
+        <div class="logo">
+          <h2>⚡ Nexus</h2>
+        </div>
+        <ul class="nav-links">
+          <li><a href="index.html">📊 Overview</a></li>
+          <li><a href="servers.html">🖥️ Servers</a></li>
+          <li><a href="security.html">🔒 Security</a></li>
+          <li><a href="command-analytics.html">📈 Commands</a></li>
+          <li><a href="logs.html" class="active">🔍 Log Search</a></li>
+          <li><a href="admin-links.html">🔗 Invite Tracking</a></li>
+        </ul>
+      </nav>
+
+      <main class="main-content">
+        <header class="content-header">
+          <h1>🔍 Advanced Log Search</h1>
+          <p>Search and filter through all server logs</p>
+        </header>
+
+        <!-- Stats Bar -->
+        <div class="stats-bar">
+          <div class="stat-box">
+            <h3 id="totalLogs">0</h3>
+            <p>Total Logs</p>
+          </div>
+          <div class="stat-box">
+            <h3 id="filteredLogs">0</h3>
+            <p>Filtered Results</p>
+          </div>
+          <div class="stat-box">
+            <h3 id="timeRange">7d</h3>
+            <p>Time Range</p>
+          </div>
+        </div>
+
+        <!-- Search Form -->
+        <div class="search-container">
+          <h3>🔎 Search Filters</h3>
+          <div class="search-grid">
+            <input
+              type="text"
+              class="search-input"
+              id="searchUser"
+              placeholder="User ID or Username..."
+            />
+            <select class="search-input" id="searchAction">
+              <option value="">All Actions</option>
+              <option value="ban">Ban</option>
+              <option value="kick">Kick</option>
+              <option value="warn">Warn</option>
+              <option value="mute">Mute</option>
+              <option value="unmute">Unmute</option>
+              <option value="timeout">Timeout</option>
+            </select>
+            <select class="search-input" id="searchType">
+              <option value="all">All Log Types</option>
+              <option value="moderation">Moderation</option>
+              <option value="security">Security</option>
+              <option value="raid">Anti-Raid</option>
+            </select>
+            <select class="search-input" id="searchTime">
+              <option value="24h">Last 24 Hours</option>
+              <option value="7d" selected>Last 7 Days</option>
+              <option value="30d">Last 30 Days</option>
+              <option value="all">All Time</option>
+            </select>
+          </div>
+          <div style="display: flex; gap: 10px">
+            <button class="btn-search" onclick="searchLogs()">🔍 Search</button>
+            <button class="btn-export" onclick="exportLogs()">
+              📥 Export CSV
+            </button>
+            <button
+              class="btn-export"
+              style="background: #667eea"
+              onclick="exportJSON()"
+            >
+              📥 Export JSON
+            </button>
+          </div>
+        </div>
+
+        <!-- Results Table -->
+        <div class="log-table">
+          <table>
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Type</th>
+                <th>Action</th>
+                <th>User</th>
+                <th>Moderator</th>
+                <th>Reason</th>
+              </tr>
+            </thead>
+            <tbody id="logResults">
+              <tr>
+                <td
+                  colspan="6"
+                  style="text-align: center; padding: 40px; color: #999"
+                >
+                  Use filters above to search logs
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination" id="pagination"></div>
+      </main>
+    </div>
+
+    <script>
+      const API_BASE = "https://regular-puma-clearly.ngrok-free.app";
+      let currentPage = 1;
+      let currentResults = [];
+
+      async function searchLogs() {
+        const user = document.getElementById("searchUser").value;
+        const action = document.getElementById("searchAction").value;
+        const type = document.getElementById("searchType").value;
+        const time = document.getElementById("searchTime").value;
+
+        const params = new URLSearchParams();
+        if (user) params.append("user", user);
+        if (action) params.append("action", action);
+        if (type !== "all") params.append("type", type);
+        params.append("range", time);
+        params.append("page", currentPage);
+
+        try {
+          const response = await fetch(
+            `${API_BASE}/api/admin/logs/search?${params}`,
+            {
+              headers: { "ngrok-skip-browser-warning": "true" },
+            }
+          );
+
+          const data = await response.json();
+          currentResults = data.logs || [];
+
+          document.getElementById("totalLogs").textContent = data.total || 0;
+          document.getElementById("filteredLogs").textContent =
+            currentResults.length;
+          document.getElementById("timeRange").textContent = time;
+
+          renderLogs(currentResults);
+          renderPagination(data.totalPages || 1);
+        } catch (error) {
+          console.error("Search error:", error);
+          document.getElementById("logResults").innerHTML =
+            '<tr><td colspan="6" style="text-align: center; padding: 40px; color: #f56565;">Failed to load logs</td></tr>';
+        }
+      }
+
+      function renderLogs(logs) {
+        const tbody = document.getElementById("logResults");
+
+        if (logs.length === 0) {
+          tbody.innerHTML =
+            '<tr><td colspan="6" style="text-align: center; padding: 40px; color: #999;">No logs found</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = logs
+          .map(
+            (log) => `
         <tr>
           <td>${new Date(log.timestamp).toLocaleString()}</td>
-          <td><span class="log-type ${log.action}">${log.log_type || 'moderation'}</span></td>
+          <td><span class="log-type ${log.action}">${log.log_type || "moderation"}</span></td>
           <td><strong>${log.action.toUpperCase()}</strong></td>
           <td>${log.user_tag || log.user_id}</td>
-          <td>${log.moderator_tag || log.moderator_id || 'System'}</td>
-          <td>${log.reason || 'No reason provided'}</td>
+          <td>${log.moderator_tag || log.moderator_id || "System"}</td>
+          <td>${log.reason || "No reason provided"}</td>
         </tr>
-      `).join('');
-    }
-
-    function renderPagination(totalPages) {
-      const pagination = document.getElementById('pagination');
-      if (totalPages <= 1) {
-        pagination.innerHTML = '';
-        return;
+      `
+          )
+          .join("");
       }
 
-      let html = '';
-      if (currentPage > 1) {
-        html += `<button onclick="changePage(${currentPage - 1})">← Previous</button>`;
+      function renderPagination(totalPages) {
+        const pagination = document.getElementById("pagination");
+        if (totalPages <= 1) {
+          pagination.innerHTML = "";
+          return;
+        }
+
+        let html = "";
+        if (currentPage > 1) {
+          html += `<button onclick="changePage(${currentPage - 1})">← Previous</button>`;
+        }
+
+        for (let i = 1; i <= Math.min(totalPages, 5); i++) {
+          html += `<button class="${i === currentPage ? "active" : ""}" onclick="changePage(${i})">${i}</button>`;
+        }
+
+        if (currentPage < totalPages) {
+          html += `<button onclick="changePage(${currentPage + 1})">Next →</button>`;
+        }
+
+        pagination.innerHTML = html;
       }
 
-      for (let i = 1; i <= Math.min(totalPages, 5); i++) {
-        html += `<button class="${i === currentPage ? 'active' : ''}" onclick="changePage(${i})">${i}</button>`;
+      function changePage(page) {
+        currentPage = page;
+        searchLogs();
       }
 
-      if (currentPage < totalPages) {
-        html += `<button onclick="changePage(${currentPage + 1})">Next →</button>`;
+      function exportLogs() {
+        if (currentResults.length === 0) {
+          alert("No logs to export!");
+          return;
+        }
+
+        // Create CSV
+        const headers = [
+          "Time",
+          "Type",
+          "Action",
+          "User",
+          "Moderator",
+          "Reason",
+        ];
+        const rows = currentResults.map((log) => [
+          new Date(log.timestamp).toISOString(),
+          log.log_type || "moderation",
+          log.action,
+          log.user_tag || log.user_id,
+          log.moderator_tag || log.moderator_id || "System",
+          (log.reason || "No reason").replace(/,/g, ";"), // Escape commas
+        ]);
+
+        const csv = [headers, ...rows].map((row) => row.join(",")).join("\n");
+
+        // Download
+        const blob = new Blob([csv], { type: "text/csv" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `nexus-logs-${Date.now()}.csv`;
+        a.click();
       }
 
-      pagination.innerHTML = html;
-    }
+      function exportJSON() {
+        if (currentResults.length === 0) {
+          alert("No logs to export!");
+          return;
+        }
 
-    function changePage(page) {
-      currentPage = page;
-      searchLogs();
-    }
-
-    function exportLogs() {
-      if (currentResults.length === 0) {
-        alert('No logs to export!');
-        return;
+        const json = JSON.stringify(currentResults, null, 2);
+        const blob = new Blob([json], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `nexus-logs-${Date.now()}.json`;
+        a.click();
       }
 
-      // Create CSV
-      const headers = ['Time', 'Type', 'Action', 'User', 'Moderator', 'Reason'];
-      const rows = currentResults.map(log => [
-        new Date(log.timestamp).toISOString(),
-        log.log_type || 'moderation',
-        log.action,
-        log.user_tag || log.user_id,
-        log.moderator_tag || log.moderator_id || 'System',
-        (log.reason || 'No reason').replace(/,/g, ';') // Escape commas
-      ]);
-
-      const csv = [headers, ...rows].map(row => row.join(',')).join('\n');
-      
-      // Download
-      const blob = new Blob([csv], { type: 'text/csv' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `nexus-logs-${Date.now()}.csv`;
-      a.click();
-    }
-
-    function exportJSON() {
-      if (currentResults.length === 0) {
-        alert('No logs to export!');
-        return;
-      }
-
-      const json = JSON.stringify(currentResults, null, 2);
-      const blob = new Blob([json], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `nexus-logs-${Date.now()}.json`;
-      a.click();
-    }
-
-    // Auto-search on page load
-    window.addEventListener('load', () => searchLogs());
-  </script>
-</body>
+      // Auto-search on page load
+      window.addEventListener("load", () => searchLogs());
+    </script>
+  </body>
 </html>
-

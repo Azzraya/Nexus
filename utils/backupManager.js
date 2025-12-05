@@ -1,13 +1,13 @@
 // Server Configuration Backup & Restore System
 // Save and restore server configs to protect against nukes
 
-const fs = require('fs').promises;
-const path = require('path');
-const db = require('./database');
+const fs = require("fs").promises;
+const path = require("path");
+const db = require("./database");
 
 class BackupManager {
   constructor() {
-    this.backupDir = path.join(__dirname, '../backups');
+    this.backupDir = path.join(__dirname, "../backups");
     this.ensureBackupDir();
   }
 
@@ -15,7 +15,10 @@ class BackupManager {
     try {
       await fs.mkdir(this.backupDir, { recursive: true });
     } catch (error) {
-      console.error('[Backup Manager] Failed to create backup directory:', error);
+      console.error(
+        "[Backup Manager] Failed to create backup directory:",
+        error
+      );
     }
   }
 
@@ -31,11 +34,12 @@ class BackupManager {
 
       // Gather all config data
       const config = await db.getServerConfig(guild.id);
-      
+
       // Get role configurations
       const roles = [];
       for (const [roleId, role] of guild.roles.cache) {
-        if (roleId !== guild.id) { // Skip @everyone
+        if (roleId !== guild.id) {
+          // Skip @everyone
           roles.push({
             id: roleId,
             name: role.name,
@@ -43,7 +47,7 @@ class BackupManager {
             position: role.position,
             permissions: role.permissions.bitfield.toString(),
             hoist: role.hoist,
-            mentionable: role.mentionable
+            mentionable: role.mentionable,
           });
         }
       }
@@ -59,7 +63,7 @@ class BackupManager {
           parentId: channel.parentId,
           topic: channel.topic || null,
           nsfw: channel.nsfw || false,
-          rateLimitPerUser: channel.rateLimitPerUser || 0
+          rateLimitPerUser: channel.rateLimitPerUser || 0,
         });
       }
 
@@ -69,7 +73,7 @@ class BackupManager {
         guildId: guild.id,
         guildName: guild.name,
         timestamp,
-        version: '1.0',
+        version: "1.0",
         data: {
           config,
           roles,
@@ -80,9 +84,9 @@ class BackupManager {
             defaultMessageNotifications: guild.defaultMessageNotifications,
             explicitContentFilter: guild.explicitContentFilter,
             afkTimeout: guild.afkTimeout,
-            afkChannelId: guild.afkChannelId
-          }
-        }
+            afkChannelId: guild.afkChannelId,
+          },
+        },
       };
 
       // Save to file
@@ -99,13 +103,13 @@ class BackupManager {
         filename,
         size: JSON.stringify(backupData).length,
         timestamp,
-        message: 'Backup created successfully'
+        message: "Backup created successfully",
       };
     } catch (error) {
-      console.error('[Backup Manager] Create backup error:', error);
+      console.error("[Backup Manager] Create backup error:", error);
       return {
         success: false,
-        error: error.message
+        error: error.message,
       };
     }
   }
@@ -121,31 +125,31 @@ class BackupManager {
     const {
       restoreConfig = true,
       restoreRoles = false,
-      restoreChannels = false
+      restoreChannels = false,
     } = options;
 
     try {
       // Load backup data
       const backupData = await this.loadBackup(backupId);
-      
+
       if (!backupData) {
         return {
           success: false,
-          error: 'Backup not found'
+          error: "Backup not found",
         };
       }
 
       if (backupData.guildId !== guild.id) {
         return {
           success: false,
-          error: 'Backup is from a different server'
+          error: "Backup is from a different server",
         };
       }
 
       const restored = {
         config: false,
         roles: 0,
-        channels: 0
+        channels: 0,
       };
 
       // Restore bot configuration
@@ -161,7 +165,10 @@ class BackupManager {
 
       // Restore channels (careful with this!)
       if (restoreChannels && backupData.data.channels) {
-        restored.channels = await this.restoreChannels(guild, backupData.data.channels);
+        restored.channels = await this.restoreChannels(
+          guild,
+          backupData.data.channels
+        );
       }
 
       return {
@@ -169,13 +176,13 @@ class BackupManager {
         restored,
         backupId,
         timestamp: backupData.timestamp,
-        message: 'Backup restored successfully'
+        message: "Backup restored successfully",
       };
     } catch (error) {
-      console.error('[Backup Manager] Restore backup error:', error);
+      console.error("[Backup Manager] Restore backup error:", error);
       return {
         success: false,
-        error: error.message
+        error: error.message,
       };
     }
   }
@@ -187,10 +194,10 @@ class BackupManager {
     try {
       const filename = `${backupId}.json`;
       const filepath = path.join(this.backupDir, filename);
-      const data = await fs.readFile(filepath, 'utf8');
+      const data = await fs.readFile(filepath, "utf8");
       return JSON.parse(data);
     } catch (error) {
-      console.error('[Backup Manager] Load backup error:', error);
+      console.error("[Backup Manager] Load backup error:", error);
       return null;
     }
   }
@@ -202,7 +209,7 @@ class BackupManager {
     try {
       // Update all config fields
       for (const [key, value] of Object.entries(config)) {
-        if (key !== 'guild_id') {
+        if (key !== "guild_id") {
           await new Promise((resolve, reject) => {
             db.db.run(
               `UPDATE server_config SET ${key} = ? WHERE guild_id = ?`,
@@ -217,7 +224,7 @@ class BackupManager {
       }
       return true;
     } catch (error) {
-      console.error('[Backup Manager] Restore config error:', error);
+      console.error("[Backup Manager] Restore config error:", error);
       return false;
     }
   }
@@ -227,11 +234,13 @@ class BackupManager {
    */
   async restoreRoles(guild, backupRoles) {
     let restored = 0;
-    
+
     try {
       for (const roleData of backupRoles) {
         // Check if role already exists by name
-        const existing = guild.roles.cache.find(r => r.name === roleData.name);
+        const existing = guild.roles.cache.find(
+          (r) => r.name === roleData.name
+        );
         if (existing) continue;
 
         // Create the role
@@ -242,15 +251,18 @@ class BackupManager {
             permissions: BigInt(roleData.permissions),
             hoist: roleData.hoist,
             mentionable: roleData.mentionable,
-            reason: 'Restored from backup'
+            reason: "Restored from backup",
           });
           restored++;
         } catch (err) {
-          console.error(`[Backup Manager] Failed to restore role ${roleData.name}:`, err);
+          console.error(
+            `[Backup Manager] Failed to restore role ${roleData.name}:`,
+            err
+          );
         }
       }
     } catch (error) {
-      console.error('[Backup Manager] Restore roles error:', error);
+      console.error("[Backup Manager] Restore roles error:", error);
     }
 
     return restored;
@@ -261,14 +273,16 @@ class BackupManager {
    */
   async restoreChannels(guild, backupChannels) {
     let restored = 0;
-    
+
     try {
       // Sort channels by position
       backupChannels.sort((a, b) => a.position - b.position);
 
       for (const channelData of backupChannels) {
         // Check if channel already exists by name
-        const existing = guild.channels.cache.find(c => c.name === channelData.name);
+        const existing = guild.channels.cache.find(
+          (c) => c.name === channelData.name
+        );
         if (existing) continue;
 
         // Create the channel
@@ -280,15 +294,18 @@ class BackupManager {
             topic: channelData.topic,
             nsfw: channelData.nsfw,
             rateLimitPerUser: channelData.rateLimitPerUser,
-            reason: 'Restored from backup'
+            reason: "Restored from backup",
           });
           restored++;
         } catch (err) {
-          console.error(`[Backup Manager] Failed to restore channel ${channelData.name}:`, err);
+          console.error(
+            `[Backup Manager] Failed to restore channel ${channelData.name}:`,
+            err
+          );
         }
       }
     } catch (error) {
-      console.error('[Backup Manager] Restore channels error:', error);
+      console.error("[Backup Manager] Restore channels error:", error);
     }
 
     return restored;
@@ -309,7 +326,7 @@ class BackupManager {
             backupData.guildName,
             backupData.timestamp,
             JSON.stringify(backupData).length,
-            backupData.version
+            backupData.version,
           ],
           (err) => {
             if (err) reject(err);
@@ -319,7 +336,7 @@ class BackupManager {
       });
     } catch (error) {
       // Table might not exist yet
-      console.error('[Backup Manager] Save metadata error:', error);
+      console.error("[Backup Manager] Save metadata error:", error);
     }
   }
 
@@ -332,16 +349,16 @@ class BackupManager {
       const backups = [];
 
       for (const file of files) {
-        if (file.startsWith(guildId) && file.endsWith('.json')) {
+        if (file.startsWith(guildId) && file.endsWith(".json")) {
           const filepath = path.join(this.backupDir, file);
-          const data = await fs.readFile(filepath, 'utf8');
+          const data = await fs.readFile(filepath, "utf8");
           const backup = JSON.parse(data);
-          
+
           backups.push({
             id: backup.id,
             timestamp: backup.timestamp,
             guildName: backup.guildName,
-            size: JSON.stringify(backup).length
+            size: JSON.stringify(backup).length,
           });
         }
       }
@@ -351,7 +368,7 @@ class BackupManager {
 
       return backups;
     } catch (error) {
-      console.error('[Backup Manager] List backups error:', error);
+      console.error("[Backup Manager] List backups error:", error);
       return [];
     }
   }
@@ -366,7 +383,7 @@ class BackupManager {
       await fs.unlink(filepath);
       return { success: true };
     } catch (error) {
-      console.error('[Backup Manager] Delete backup error:', error);
+      console.error("[Backup Manager] Delete backup error:", error);
       return { success: false, error: error.message };
     }
   }
@@ -374,7 +391,7 @@ class BackupManager {
   /**
    * Create automatic scheduled backup
    */
-  async scheduleAutoBackup(guild, interval = 'daily') {
+  async scheduleAutoBackup(guild, interval = "daily") {
     // This would integrate with node-cron
     // For now, just create a backup
     return await this.createBackup(guild);
@@ -395,4 +412,3 @@ db.db.run(`
 `);
 
 module.exports = new BackupManager();
-

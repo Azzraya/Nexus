@@ -35,7 +35,7 @@ module.exports = {
       interaction.options.getString("reason") || "No reason provided";
 
     const constants = require("../utils/constants");
-const ErrorMessages = require("../utils/errorMessages");
+    const ErrorMessages = require("../utils/errorMessages");
     const duration = ms(durationStr);
     if (
       !duration ||
@@ -83,7 +83,7 @@ const ErrorMessages = require("../utils/errorMessages");
       !isOwner &&
       member.roles.highest.position >= interaction.member.roles.highest.position
     ) {
-        return interaction.reply(ErrorMessages.targetHigherRole("mute"));
+      return interaction.reply(ErrorMessages.targetHigherRole("mute"));
     }
 
     const result = await Moderation.mute(
@@ -114,7 +114,7 @@ const ErrorMessages = require("../utils/errorMessages");
         }
       }
     } else {
-        await interaction.reply(ErrorMessages.commandFailed(result.message));
+      await interaction.reply(ErrorMessages.commandFailed(result.message));
     }
   },
 };

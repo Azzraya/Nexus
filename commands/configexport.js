@@ -103,7 +103,7 @@ module.exports = {
       });
 
       const packageJson = require("../package.json");
-const ErrorMessages = require("../utils/errorMessages");
+      const ErrorMessages = require("../utils/errorMessages");
       const exportData = {
         version: packageJson.version || "1.6.0",
         exportDate: new Date().toISOString(),
@@ -184,15 +184,18 @@ const ErrorMessages = require("../utils/errorMessages");
       });
 
       // Clean up after 5 minutes
-      setTimeout(() => {
-        try {
-          if (fs.existsSync(filePath)) {
-            fs.unlinkSync(filePath);
+      setTimeout(
+        () => {
+          try {
+            if (fs.existsSync(filePath)) {
+              fs.unlinkSync(filePath);
+            }
+          } catch (error) {
+            logger.error("Error cleaning up export file:", error);
           }
-        } catch (error) {
-          logger.error("Error cleaning up export file:", error);
-        }
-      }, 5 * 60 * 1000);
+        },
+        5 * 60 * 1000
+      );
     } catch (error) {
       logger.error("Error exporting config:", error);
       await interaction.editReply(ErrorMessages.genericError());

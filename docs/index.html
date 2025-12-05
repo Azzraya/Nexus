@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -131,10 +131,10 @@
                 banner.text
               }</span>
               <a href="${banner.buttonLink}" style="background: white; color: ${
-            banner.gradient.from
-          }; padding: 6px 20px; border-radius: 20px; text-decoration: none; font-weight: bold; font-size: 13px; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">${
-            banner.buttonText
-          } →</a>
+                banner.gradient.from
+              }; padding: 6px 20px; border-radius: 20px; text-decoration: none; font-weight: bold; font-size: 13px; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">${
+                banner.buttonText
+              } →</a>
               ${
                 banner.dismissible
                   ? `<button onclick="localStorage.setItem('bannerDismissed', 'true'); document.getElementById('updateBanner').style.display='none';" style="background: rgba(255, 255, 255, 0.2); border: none; color: white; padding: 4px 12px; border-radius: 15px; cursor: pointer; font-size: 12px;">Dismiss</button>`
@@ -271,7 +271,7 @@
             src="https://cdn.discordapp.com/avatars/1444739230679957646/logo.png"
             alt="Nexus Logo"
             class="logo"
-            onerror="this.style.display='none'"
+            onerror="this.style.display = 'none'"
           />
           <h1>NEXUS</h1>
           <p class="tagline" id="typing-tagline">
@@ -907,8 +907,8 @@
                 box-shadow: 0 4px 20px rgba(0, 255, 136, 0.4);
                 transition: transform 0.2s;
               "
-              onmouseover="this.style.transform='translateY(-3px)'"
-              onmouseout="this.style.transform='translateY(0)'"
+              onmouseover="this.style.transform = 'translateY(-3px)'"
+              onmouseout="this.style.transform = 'translateY(0)'"
             >
               📂 View Source Code on GitHub →
             </a>
@@ -954,8 +954,8 @@
               transition: transform 0.2s;
               box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
             "
-            onmouseover="this.style.transform='translateY(-3px)'"
-            onmouseout="this.style.transform='translateY(0)'"
+            onmouseover="this.style.transform = 'translateY(-3px)'"
+            onmouseout="this.style.transform = 'translateY(0)'"
           >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
               <path
@@ -980,8 +980,8 @@
               transition: transform 0.2s;
               box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
             "
-            onmouseover="this.style.transform='translateY(-3px)'"
-            onmouseout="this.style.transform='translateY(0)'"
+            onmouseover="this.style.transform = 'translateY(-3px)'"
+            onmouseout="this.style.transform = 'translateY(0)'"
           >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
               <path
@@ -1006,8 +1006,8 @@
               transition: transform 0.2s;
               box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
             "
-            onmouseover="this.style.transform='translateY(-3px)'"
-            onmouseout="this.style.transform='translateY(0)'"
+            onmouseover="this.style.transform = 'translateY(-3px)'"
+            onmouseout="this.style.transform = 'translateY(0)'"
           >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
               <path
@@ -1523,9 +1523,14 @@
           <div class="badge-content">
             <strong>Rigorously Tested Detection</strong>
             <p>
-              Extensively tested in controlled environments simulating threats. Detection algorithms identify patterns accurately.
-              <strong style="color: #ffa500;">Prevention effectiveness depends on proper role hierarchy setup.</strong>
-              All 4 algorithms detect threats reliably - action success requires correct configuration.
+              Extensively tested in controlled environments simulating threats.
+              Detection algorithms identify patterns accurately.
+              <strong style="color: #ffa500"
+                >Prevention effectiveness depends on proper role hierarchy
+                setup.</strong
+              >
+              All 4 algorithms detect threats reliably - action success requires
+              correct configuration.
             </p>
           </div>
         </div>
@@ -1591,8 +1596,8 @@
               transition: all 0.3s;
               cursor: pointer;
             "
-            onmouseover="this.style.transform='scale(1.05)'"
-            onmouseout="this.style.transform=''"
+            onmouseover="this.style.transform = 'scale(1.05)'"
+            onmouseout="this.style.transform = ''"
           >
             <div
               style="
@@ -1623,8 +1628,8 @@
               transition: all 0.3s;
               cursor: pointer;
             "
-            onmouseover="this.style.transform='scale(1.05)'"
-            onmouseout="this.style.transform=''"
+            onmouseover="this.style.transform = 'scale(1.05)'"
+            onmouseout="this.style.transform = ''"
           >
             <div
               style="
@@ -1655,8 +1660,8 @@
               transition: all 0.3s;
               cursor: pointer;
             "
-            onmouseover="this.style.transform='scale(1.05)'"
-            onmouseout="this.style.transform=''"
+            onmouseover="this.style.transform = 'scale(1.05)'"
+            onmouseout="this.style.transform = ''"
           >
             <div
               style="

@@ -226,8 +226,8 @@ class VoiceMonitoring {
           action === "joined"
             ? 0x00ff00
             : action === "left"
-            ? 0xff0000
-            : 0x0099ff
+              ? 0xff0000
+              : 0x0099ff
         )
         .addFields(
           {

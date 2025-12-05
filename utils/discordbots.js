@@ -59,9 +59,12 @@ class DiscordBots {
     this.postStats();
 
     // Post every 30 minutes
-    setInterval(() => {
-      this.postStats();
-    }, 30 * 60 * 1000);
+    setInterval(
+      () => {
+        this.postStats();
+      },
+      30 * 60 * 1000
+    );
 
     logger.info("[Discord Bots] Stats posting initialized");
   }
@@ -132,4 +135,3 @@ class DiscordBots {
 }
 
 module.exports = DiscordBots;
-

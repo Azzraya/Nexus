@@ -64,7 +64,9 @@ module.exports = {
         .addStringOption((option) =>
           option
             .setName("name")
-            .setDescription("Name of the botlist (e.g., Top.gg, Discord Bot List)")
+            .setDescription(
+              "Name of the botlist (e.g., Top.gg, Discord Bot List)"
+            )
             .setRequired(true)
         )
         .addStringOption((option) =>
@@ -139,20 +141,24 @@ module.exports = {
       // Create buttons for each botlist (max 5 buttons per row, Discord limit)
       const rows = [];
       const maxButtons = 5;
-      
+
       for (let i = 0; i < botlists.length; i += maxButtons) {
         const row = new ActionRowBuilder();
         const batch = botlists.slice(i, i + maxButtons);
-        
+
         batch.forEach((botlist) => {
           row.addComponents(
             new ButtonBuilder()
-              .setLabel(botlist.name.length > 20 ? botlist.name.substring(0, 17) + "..." : botlist.name)
+              .setLabel(
+                botlist.name.length > 20
+                  ? botlist.name.substring(0, 17) + "..."
+                  : botlist.name
+              )
               .setURL(botlist.url)
               .setStyle(ButtonStyle.Link)
           );
         });
-        
+
         rows.push(row);
       }
 
@@ -162,18 +168,27 @@ module.exports = {
         try {
           const Topgg = require("@top-gg/sdk");
           const api = new Topgg.Api(process.env.TOPGG_TOKEN);
-          const hasVoted = await api.hasVoted(interaction.user.id, interaction.client.user.id);
+          const hasVoted = await api.hasVoted(
+            interaction.user.id,
+            interaction.client.user.id
+          );
           if (hasVoted) voteChecks.push("Top.gg");
         } catch (error) {
           // Silently fail - Top.gg check is optional
         }
       }
-      
+
       if (process.env.DISCORDBOTLIST_TOKEN && interaction.client.user.id) {
         try {
           const DiscordBotList = require("../utils/discordbotlist");
-          const dbl = new DiscordBotList(interaction.client, process.env.DISCORDBOTLIST_TOKEN);
-          const vote = await dbl.hasVoted(interaction.user.id, interaction.client.user.id);
+          const dbl = new DiscordBotList(
+            interaction.client,
+            process.env.DISCORDBOTLIST_TOKEN
+          );
+          const vote = await dbl.hasVoted(
+            interaction.user.id,
+            interaction.client.user.id
+          );
           if (vote) voteChecks.push("Discord Bot List");
         } catch (error) {
           // Silently fail - Discord Bot List check is optional
@@ -183,7 +198,9 @@ module.exports = {
       if (process.env.VOIDBOTS_TOKEN && interaction.client.user.id) {
         try {
           const VoidBots = require("../utils/voidbots");
-          const voidbots = interaction.client.voidbots || new VoidBots(interaction.client, process.env.VOIDBOTS_TOKEN);
+          const voidbots =
+            interaction.client.voidbots ||
+            new VoidBots(interaction.client, process.env.VOIDBOTS_TOKEN);
           const hasVoted = await voidbots.hasVoted(interaction.user.id);
           if (hasVoted) voteChecks.push("VoidBots");
         } catch (error) {
@@ -193,31 +210,34 @@ module.exports = {
 
       if (voteChecks.length > 0) {
         embed.setDescription(
-          embed.data.description + `\n\n✅ **You have voted on ${voteChecks.join(" and ")}!** Thank you!`
+          embed.data.description +
+            `\n\n✅ **You have voted on ${voteChecks.join(" and ")}!** Thank you!`
         );
       } else if (botlists.length > 0) {
-        const topggLink = botlists.find(b => 
-          b.name.toLowerCase().includes("top.gg") || 
-          b.url.includes("top.gg")
+        const topggLink = botlists.find(
+          (b) =>
+            b.name.toLowerCase().includes("top.gg") || b.url.includes("top.gg")
         );
-        const dblLink = botlists.find(b => 
-          b.name.toLowerCase().includes("discord bot list") || 
-          b.url.includes("discordbotlist.com")
+        const dblLink = botlists.find(
+          (b) =>
+            b.name.toLowerCase().includes("discord bot list") ||
+            b.url.includes("discordbotlist.com")
         );
-        const voidbotsLink = botlists.find(b => 
-          b.name.toLowerCase().includes("voidbots") || 
-          b.url.includes("voidbots.net")
+        const voidbotsLink = botlists.find(
+          (b) =>
+            b.name.toLowerCase().includes("voidbots") ||
+            b.url.includes("voidbots.net")
         );
-        
+
         const links = [];
         if (topggLink) links.push(`[Top.gg](${topggLink.url})`);
         if (dblLink) links.push(`[Discord Bot List](${dblLink.url})`);
         if (voidbotsLink) links.push(`[VoidBots](${voidbotsLink.url})`);
-        
+
         if (links.length > 0) {
           embed.setDescription(
-            embed.data.description + 
-            `\n\n💡 **Tip:** Vote on ${links.join(" or ")} to support the bot!`
+            embed.data.description +
+              `\n\n💡 **Tip:** Vote on ${links.join(" or ")} to support the bot!`
           );
         }
       }
@@ -229,10 +249,15 @@ module.exports = {
     }
 
     if (subcommand === "check") {
-      const targetUser = interaction.options.getUser("user") || interaction.user;
+      const targetUser =
+        interaction.options.getUser("user") || interaction.user;
       const isSelf = targetUser.id === interaction.user.id;
 
-      if (!process.env.TOPGG_TOKEN && !process.env.DISCORDBOTLIST_TOKEN && !process.env.VOIDBOTS_TOKEN) {
+      if (
+        !process.env.TOPGG_TOKEN &&
+        !process.env.DISCORDBOTLIST_TOKEN &&
+        !process.env.VOIDBOTS_TOKEN
+      ) {
         return interaction.reply({
           content: "❌ No bot list integrations are configured.",
           flags: MessageFlags.Ephemeral,
@@ -303,10 +328,12 @@ module.exports = {
         if (process.env.DISCORDBOTS_TOKEN) {
           try {
             const DiscordBots = require("../utils/discordbots");
-            const discordBots = interaction.client.discordBots || new DiscordBots(
-              interaction.client,
-              process.env.DISCORDBOTS_TOKEN
-            );
+            const discordBots =
+              interaction.client.discordBots ||
+              new DiscordBots(
+                interaction.client,
+                process.env.DISCORDBOTS_TOKEN
+              );
             voteStatus.discordbots = await discordBots.hasVoted(targetUser.id);
           } catch (error) {
             logger.debug("Error checking Discord Bots vote:", error);
@@ -317,18 +344,27 @@ module.exports = {
         if (process.env.BOTSONDICORD_TOKEN) {
           try {
             const BotsOnDiscord = require("../utils/botsondicord");
-const ErrorMessages = require("../utils/errorMessages");
-            const botsOnDiscord = interaction.client.botsOnDiscord || new BotsOnDiscord(
-              interaction.client,
-              process.env.BOTSONDICORD_TOKEN
+            const ErrorMessages = require("../utils/errorMessages");
+            const botsOnDiscord =
+              interaction.client.botsOnDiscord ||
+              new BotsOnDiscord(
+                interaction.client,
+                process.env.BOTSONDICORD_TOKEN
+              );
+            voteStatus.botsondicord = await botsOnDiscord.hasVoted(
+              targetUser.id
             );
-            voteStatus.botsondicord = await botsOnDiscord.hasVoted(targetUser.id);
           } catch (error) {
             logger.debug("Error checking Bots on Discord vote:", error);
           }
         }
 
-        const hasVotedAny = voteStatus.topgg || voteStatus.discordbotlist || voteStatus.voidbots || voteStatus.discordbots || voteStatus.botsondicord;
+        const hasVotedAny =
+          voteStatus.topgg ||
+          voteStatus.discordbotlist ||
+          voteStatus.voidbots ||
+          voteStatus.discordbots ||
+          voteStatus.botsondicord;
 
         const embed = new EmbedBuilder()
           .setTitle("📊 Vote Status Check")
@@ -382,10 +418,14 @@ const ErrorMessages = require("../utils/errorMessages");
 
         // Get voting links
         const botlists = await new Promise((resolve, reject) => {
-          db.db.all("SELECT * FROM botlist_links ORDER BY name ASC", [], (err, rows) => {
-            if (err) reject(err);
-            else resolve(rows || []);
-          });
+          db.db.all(
+            "SELECT * FROM botlist_links ORDER BY name ASC",
+            [],
+            (err, rows) => {
+              if (err) reject(err);
+              else resolve(rows || []);
+            }
+          );
         });
 
         if (!hasVotedAny && botlists.length > 0) {
@@ -442,7 +482,8 @@ const ErrorMessages = require("../utils/errorMessages");
         new URL(url);
       } catch (error) {
         return interaction.reply({
-          content: "❌ Invalid URL format. Please provide a valid URL (e.g., https://top.gg/bot/.../vote)",
+          content:
+            "❌ Invalid URL format. Please provide a valid URL (e.g., https://top.gg/bot/.../vote)",
           flags: MessageFlags.Ephemeral,
         });
       }
@@ -488,7 +529,10 @@ const ErrorMessages = require("../utils/errorMessages");
         .setColor(0x00ff00)
         .setTimestamp();
 
-      return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
+      return interaction.reply({
+        embeds: [embed],
+        flags: MessageFlags.Ephemeral,
+      });
     }
 
     if (subcommand === "remove") {
@@ -532,15 +576,21 @@ const ErrorMessages = require("../utils/errorMessages");
 
       const embed = new EmbedBuilder()
         .setTitle("✅ Botlist Removed")
-        .setDescription(`Successfully removed **${name}** from the voting list.`)
+        .setDescription(
+          `Successfully removed **${name}** from the voting list.`
+        )
         .setColor(0xff0000)
         .setTimestamp();
 
-      return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
+      return interaction.reply({
+        embeds: [embed],
+        flags: MessageFlags.Ephemeral,
+      });
     }
 
     if (subcommand === "rewards") {
-      const targetUser = interaction.options.getUser("user") || interaction.user;
+      const targetUser =
+        interaction.options.getUser("user") || interaction.user;
       const isSelf = targetUser.id === interaction.user.id;
 
       const voteRewards = new VoteRewards(interaction.client);
@@ -562,10 +612,10 @@ const ErrorMessages = require("../utils/errorMessages");
         stats.current_streak >= 30
           ? "💎"
           : stats.current_streak >= 14
-          ? "⚡"
-          : stats.current_streak >= 7
-          ? "🔥"
-          : "📅";
+            ? "⚡"
+            : stats.current_streak >= 7
+              ? "🔥"
+              : "📅";
 
       embed.addFields({
         name: `${streakEmoji} Current Streak`,
@@ -629,7 +679,10 @@ const ErrorMessages = require("../utils/errorMessages");
         });
       }
 
-      return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
+      return interaction.reply({
+        embeds: [embed],
+        flags: MessageFlags.Ephemeral,
+      });
     }
 
     if (subcommand === "leaderboard") {
@@ -705,4 +758,3 @@ const ErrorMessages = require("../utils/errorMessages");
     }
   },
 };
-

@@ -168,7 +168,7 @@ class VerificationSystem {
         ? this.generateTextCaptcha()
         : this.generateMathCaptcha();
       this.captchaCodes.set(verificationId, captcha.answer);
-      
+
       // Store the question in verification data for modal display
       const verification = this.pendingVerifications.get(verificationId);
       if (verification) {
@@ -230,7 +230,7 @@ class VerificationSystem {
     }
   }
 
-// Send instant verification (button click)
+  // Send instant verification (button click)
   async sendInstantVerification(member, verificationId, config) {
     try {
       const {
@@ -301,13 +301,19 @@ class VerificationSystem {
     if (verification.mode === "captcha" && answer) {
       const correctAnswer = this.captchaCodes.get(verificationId);
       if (!correctAnswer) {
-        return { success: false, reason: "Captcha expired. Please start a new verification." };
+        return {
+          success: false,
+          reason: "Captcha expired. Please start a new verification.",
+        };
       }
-      
+
       // Normalize both answers for comparison (trim, lowercase, handle numbers)
       const normalizedUserAnswer = answer.trim().toLowerCase();
-      const normalizedCorrectAnswer = correctAnswer.toString().trim().toLowerCase();
-      
+      const normalizedCorrectAnswer = correctAnswer
+        .toString()
+        .trim()
+        .toLowerCase();
+
       if (normalizedUserAnswer !== normalizedCorrectAnswer) {
         return { success: false, reason: "Incorrect answer" };
       }

@@ -125,18 +125,22 @@ async function getTotalStats() {
 }
 
 // Log total stats every 30 minutes
-setInterval(async () => {
-  const stats = await getTotalStats();
-  if (stats) {
-    console.log(
-      `\n📊 [Total Stats] ${stats.guilds} guilds, ${stats.users} users, ${stats.channels} channels across ${manager.totalClusters} clusters\n`
-    );
-  }
-}, 30 * 60 * 1000);
+setInterval(
+  async () => {
+    const stats = await getTotalStats();
+    if (stats) {
+      console.log(
+        `\n📊 [Total Stats] ${stats.guilds} guilds, ${stats.users} users, ${stats.channels} channels across ${manager.totalClusters} clusters\n`
+      );
+    }
+  },
+  30 * 60 * 1000
+);
 
 console.log(`\n🚀 Cluster Manager Started`);
-console.log(`📊 Clusters: ${totalClusters === "auto" ? "Auto" : totalClusters}`);
+console.log(
+  `📊 Clusters: ${totalClusters === "auto" ? "Auto" : totalClusters}`
+);
 console.log(`⚙️  Shards per cluster: ${shardsPerCluster}`);
 console.log(`🔄 Mode: process`);
 console.log(`\n`);
-

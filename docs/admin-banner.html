@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -13,8 +13,8 @@
       }
 
       body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          sans-serif;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         min-height: 100vh;
         color: #fff;
@@ -555,9 +555,8 @@
         document.getElementById("previewText").textContent = text;
         document.getElementById("previewButton").textContent =
           buttonText + " →";
-        document.getElementById(
-          "previewBanner"
-        ).style.background = `linear-gradient(135deg, ${gradientFrom} 0%, ${gradientTo} 100%)`;
+        document.getElementById("previewBanner").style.background =
+          `linear-gradient(135deg, ${gradientFrom} 0%, ${gradientTo} 100%)`;
         document.getElementById("previewDismiss").style.display = dismissible
           ? "block"
           : "none";

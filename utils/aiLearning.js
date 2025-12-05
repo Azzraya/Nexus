@@ -270,8 +270,8 @@ class AILearning {
         riskScore >= 70
           ? "high_risk"
           : riskScore >= 40
-          ? "moderate_risk"
-          : "low_risk",
+            ? "moderate_risk"
+            : "low_risk",
       factors,
     };
   }

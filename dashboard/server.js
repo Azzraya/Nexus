@@ -319,8 +319,8 @@ class DashboardServer {
                 log.threat_score >= 80
                   ? "critical"
                   : log.threat_score >= 70
-                  ? "warning"
-                  : "info",
+                    ? "warning"
+                    : "info",
               title: "Threat Detected",
               server: guild.name,
               description: `High threat score: ${log.threat_score}% - ${log.event_type}`,
@@ -387,8 +387,8 @@ class DashboardServer {
                 log.action === "ban"
                   ? "critical"
                   : log.action === "kick"
-                  ? "warning"
-                  : "info",
+                    ? "warning"
+                    : "info",
               title: "Member Screening Action",
               server: guild.name,
               description: `${log.action.toUpperCase()}: ${log.reason} (Risk: ${
@@ -932,15 +932,12 @@ class DashboardServer {
           protectedServers: await db.getProtectedServersCount(),
           averageSecurityScore: await db.getAverageSecurityScore(),
           activeThreats: await db.getActiveThreatsCount(),
-          serversWithAntiNuke: await db.getServersWithFeatureCount(
-            "anti_nuke_enabled"
-          ),
-          serversWithAntiRaid: await db.getServersWithFeatureCount(
-            "anti_raid_enabled"
-          ),
-          serversWithAutoMod: await db.getServersWithFeatureCount(
-            "auto_mod_enabled"
-          ),
+          serversWithAntiNuke:
+            await db.getServersWithFeatureCount("anti_nuke_enabled"),
+          serversWithAntiRaid:
+            await db.getServersWithFeatureCount("anti_raid_enabled"),
+          serversWithAutoMod:
+            await db.getServersWithFeatureCount("auto_mod_enabled"),
         };
         res.json(health);
       } catch (error) {
@@ -1665,7 +1662,8 @@ class DashboardServer {
             "SELECT COUNT(*) as count FROM guild_join_log",
             [],
             (err, row) => {
-              if (err) resolve(serverCount); // Fallback to current count
+              if (err)
+                resolve(serverCount); // Fallback to current count
               else resolve(row?.count || serverCount);
             }
           );
@@ -3626,7 +3624,8 @@ class DashboardServer {
              LIMIT 10`,
             [Date.now() - 24 * 60 * 60 * 1000],
             (err, rows) => {
-              if (err) resolve([]); // Return empty if table doesn't exist
+              if (err)
+                resolve([]); // Return empty if table doesn't exist
               else resolve(rows || []);
             }
           );

@@ -9,11 +9,11 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName("seasonal")
     .setDescription("Manage seasonal events and themes")
-    .addSubcommand(subcommand =>
+    .addSubcommand((subcommand) =>
       subcommand
         .setName("activate")
         .setDescription("Activate a seasonal theme")
-        .addStringOption(option =>
+        .addStringOption((option) =>
           option
             .setName("event")
             .setDescription("Seasonal event to activate")
@@ -29,7 +29,7 @@ module.exports = {
             )
         )
     )
-    .addSubcommand(subcommand =>
+    .addSubcommand((subcommand) =>
       subcommand
         .setName("current")
         .setDescription("View current seasonal theme")
@@ -64,7 +64,7 @@ module.exports = {
 
       return interaction.reply({
         content: "✅ Seasonal themes disabled!",
-        ephemeral: true
+        ephemeral: true,
       });
     }
 
@@ -72,58 +72,58 @@ module.exports = {
       christmas: {
         name: "Christmas",
         emoji: "🎄",
-        color: 0xFF0000,
-        embedColor: 0x00FF00,
-        message: "Ho ho ho! Christmas theme activated! 🎅"
+        color: 0xff0000,
+        embedColor: 0x00ff00,
+        message: "Ho ho ho! Christmas theme activated! 🎅",
       },
       halloween: {
         name: "Halloween",
         emoji: "🎃",
-        color: 0xFF6600,
+        color: 0xff6600,
         embedColor: 0x000000,
-        message: "Spooky season activated! 👻"
+        message: "Spooky season activated! 👻",
       },
       newyear: {
         name: "New Year",
         emoji: "🎆",
-        color: 0xFFD700,
-        embedColor: 0x0099FF,
-        message: "Happy New Year! 🎉"
+        color: 0xffd700,
+        embedColor: 0x0099ff,
+        message: "Happy New Year! 🎉",
       },
       valentine: {
         name: "Valentine's Day",
         emoji: "💝",
-        color: 0xFF69B4,
-        embedColor: 0xFF1493,
-        message: "Love is in the air! 💕"
+        color: 0xff69b4,
+        embedColor: 0xff1493,
+        message: "Love is in the air! 💕",
       },
       thanksgiving: {
         name: "Thanksgiving",
         emoji: "🦃",
-        color: 0xD2691E,
-        embedColor: 0xFF8C00,
-        message: "Happy Thanksgiving! 🍂"
+        color: 0xd2691e,
+        embedColor: 0xff8c00,
+        message: "Happy Thanksgiving! 🍂",
       },
       easter: {
         name: "Easter",
         emoji: "🎉",
-        color: 0xFFB6C1,
-        embedColor: 0x98FB98,
-        message: "Happy Easter! 🐰"
-      }
+        color: 0xffb6c1,
+        embedColor: 0x98fb98,
+        message: "Happy Easter! 🐰",
+      },
     };
 
     const theme = themes[eventType];
     if (!theme) {
       return interaction.reply({
         content: "❌ Invalid seasonal event!",
-        ephemeral: true
+        ephemeral: true,
       });
     }
 
     // Store theme in server config
     await db.setServerConfig(interaction.guild.id, {
-      seasonal_theme: eventType
+      seasonal_theme: eventType,
     });
 
     const embed = new EmbedBuilder()
@@ -134,7 +134,9 @@ module.exports = {
         { name: "Theme", value: theme.name, inline: true },
         { name: "Emoji", value: theme.emoji, inline: true }
       )
-      .setFooter({ text: "Seasonal theme will apply to bot embeds and messages" })
+      .setFooter({
+        text: "Seasonal theme will apply to bot embeds and messages",
+      })
       .setTimestamp();
 
     await interaction.reply({ embeds: [embed] });
@@ -146,18 +148,19 @@ module.exports = {
 
     if (!currentTheme) {
       return interaction.reply({
-        content: "No seasonal theme is currently active. Use `/seasonal activate` to set one!",
-        ephemeral: true
+        content:
+          "No seasonal theme is currently active. Use `/seasonal activate` to set one!",
+        ephemeral: true,
       });
     }
 
     const themes = {
-      christmas: { name: "Christmas", emoji: "🎄", color: 0x00FF00 },
-      halloween: { name: "Halloween", emoji: "🎃", color: 0xFF6600 },
-      newyear: { name: "New Year", emoji: "🎆", color: 0xFFD700 },
-      valentine: { name: "Valentine's Day", emoji: "💝", color: 0xFF69B4 },
-      thanksgiving: { name: "Thanksgiving", emoji: "🦃", color: 0xD2691E },
-      easter: { name: "Easter", emoji: "🎉", color: 0xFFB6C1 }
+      christmas: { name: "Christmas", emoji: "🎄", color: 0x00ff00 },
+      halloween: { name: "Halloween", emoji: "🎃", color: 0xff6600 },
+      newyear: { name: "New Year", emoji: "🎆", color: 0xffd700 },
+      valentine: { name: "Valentine's Day", emoji: "💝", color: 0xff69b4 },
+      thanksgiving: { name: "Thanksgiving", emoji: "🦃", color: 0xd2691e },
+      easter: { name: "Easter", emoji: "🎉", color: 0xffb6c1 },
     };
 
     const theme = themes[currentTheme];
@@ -180,14 +183,13 @@ module.exports = {
   // Helper function to get theme color
   getThemeColor(themeName) {
     const colors = {
-      christmas: 0x00FF00,
-      halloween: 0xFF6600,
-      newyear: 0xFFD700,
-      valentine: 0xFF69B4,
-      thanksgiving: 0xD2691E,
-      easter: 0xFFB6C1
+      christmas: 0x00ff00,
+      halloween: 0xff6600,
+      newyear: 0xffd700,
+      valentine: 0xff69b4,
+      thanksgiving: 0xd2691e,
+      easter: 0xffb6c1,
     };
     return colors[themeName] || 0x667eea;
-  }
+  },
 };
-

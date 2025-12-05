@@ -137,7 +137,10 @@ module.exports = {
 
       // Check if this is a button interaction (update) or command (reply)
       if (interaction.deferred || interaction.replied) {
-        await interaction.editReply({ embeds: [embed], components: [row1, row2] });
+        await interaction.editReply({
+          embeds: [embed],
+          components: [row1, row2],
+        });
       } else {
         await interaction.reply({ embeds: [embed], components: [row1, row2] });
       }

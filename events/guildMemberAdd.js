@@ -100,10 +100,11 @@ module.exports = {
       // Execute action based on join gate
       if (joinGateCheck.action === "ban") {
         await ErrorHandler.safeExecute(
-          () => member.ban({
-            reason: `Join Gate: ${joinGateCheck.reason}`,
-            deleteMessageDays: 1,
-          }),
+          () =>
+            member.ban({
+              reason: `Join Gate: ${joinGateCheck.reason}`,
+              deleteMessageDays: 1,
+            }),
           `guildMemberAdd [${member.guild.id}]`
         );
         return;
@@ -116,10 +117,11 @@ module.exports = {
       } else if (joinGateCheck.action === "timeout") {
         const constants = require("../utils/constants");
         await ErrorHandler.safeExecute(
-          () => member.timeout(
-            constants.JOIN_GATE.DEFAULT_TIMEOUT_DURATION,
-            `Join Gate: ${joinGateCheck.reason}`
-          ),
+          () =>
+            member.timeout(
+              constants.JOIN_GATE.DEFAULT_TIMEOUT_DURATION,
+              `Join Gate: ${joinGateCheck.reason}`
+            ),
           `guildMemberAdd [${member.guild.id}]`
         );
       }
@@ -291,8 +293,8 @@ module.exports = {
                       threat.score >= 80
                         ? 0xff0000
                         : threat.score >= 60
-                        ? 0xff8800
-                        : 0xffff00,
+                          ? 0xff8800
+                          : 0xffff00,
                     timestamp: new Date().toISOString(),
                   },
                 ],
@@ -317,10 +319,11 @@ module.exports = {
         });
 
         await ErrorHandler.safeExecute(
-          () => member.ban({
-            reason: `Security threat detected (Score: ${threat.score})`,
-            deleteMessageDays: 1,
-          }),
+          () =>
+            member.ban({
+              reason: `Security threat detected (Score: ${threat.score})`,
+              deleteMessageDays: 1,
+            }),
           `guildMemberAdd [${member.guild.id}]`
         );
 
@@ -344,7 +347,8 @@ module.exports = {
         });
 
         await ErrorHandler.safeExecute(
-          () => member.kick(`Security threat detected (Score: ${threat.score})`),
+          () =>
+            member.kick(`Security threat detected (Score: ${threat.score})`),
           `guildMemberAdd [${member.guild.id}]`
         );
 

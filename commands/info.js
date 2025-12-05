@@ -141,7 +141,7 @@ module.exports = {
       await interaction.reply({ embeds: [embed] });
     } else if (subcommand === "bot") {
       const packageJson = require("../package.json");
-const ErrorMessages = require("../utils/errorMessages");
+      const ErrorMessages = require("../utils/errorMessages");
       const bot = interaction.client.user;
       const uptime = process.uptime();
       const uptimeHours = Math.floor(uptime / 3600);

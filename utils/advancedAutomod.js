@@ -54,14 +54,16 @@ class AdvancedAutomod {
     // PERFORMANCE: Cache parsed JSON to avoid parsing on every message
     const cacheKey = `${message.guild.id}_ignored`;
     let cached = this.configCache.get(cacheKey);
-    
+
     if (!cached) {
       cached = {
-        channels: config.ignored_channels ? JSON.parse(config.ignored_channels) : [],
-        roles: config.ignored_roles ? JSON.parse(config.ignored_roles) : []
+        channels: config.ignored_channels
+          ? JSON.parse(config.ignored_channels)
+          : [],
+        roles: config.ignored_roles ? JSON.parse(config.ignored_roles) : [],
       };
       this.configCache.set(cacheKey, cached);
-      
+
       // Clear cache after 5 minutes
       setTimeout(() => this.configCache.delete(cacheKey), 300000);
     }
@@ -71,7 +73,11 @@ class AdvancedAutomod {
 
     // Check ignored roles (fast)
     if (message.member && cached.roles.length > 0) {
-      if (message.member.roles.cache.some(role => cached.roles.includes(role.id))) {
+      if (
+        message.member.roles.cache.some((role) =>
+          cached.roles.includes(role.id)
+        )
+      ) {
         return true;
       }
     }

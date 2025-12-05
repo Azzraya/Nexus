@@ -94,10 +94,10 @@ class AdvancedAntiRaid {
 
   // Calculate server-size-aware thresholds
   static getServerSizeMultiplier(memberCount) {
-    if (memberCount < 100) return 1.0;        // Small: 5 joins/10s (STRICT)
-    if (memberCount < 500) return 1.6;        // Medium: 8 joins/10s (BALANCED)
-    if (memberCount < 2000) return 3.0;       // Large: 15 joins/10s (RELAXED)
-    return 5.0;                                // Huge: 25 joins/10s (VERY RELAXED)
+    if (memberCount < 100) return 1.0; // Small: 5 joins/10s (STRICT)
+    if (memberCount < 500) return 1.6; // Medium: 8 joins/10s (BALANCED)
+    if (memberCount < 2000) return 3.0; // Large: 15 joins/10s (RELAXED)
+    return 5.0; // Huge: 25 joins/10s (VERY RELAXED)
   }
 
   static getServerSizeTier(memberCount) {
@@ -154,12 +154,14 @@ class AdvancedAntiRaid {
     joinData.joins.push(memberData);
 
     // Run all detection algorithms with server-size-aware thresholds
-    const scaledMaxJoins = Math.ceil((config.anti_raid_max_joins || 5) * finalMultiplier);
+    const scaledMaxJoins = Math.ceil(
+      (config.anti_raid_max_joins || 5) * finalMultiplier
+    );
     const results = {
       rateBased: this.detectionAlgorithms.rateBased(
         joinData.joins,
         config.anti_raid_time_window || 10000,
-        scaledMaxJoins  // Scale threshold by server size + sensitivity
+        scaledMaxJoins // Scale threshold by server size + sensitivity
       ),
       patternBased: this.detectionAlgorithms.patternBased(joinData.joins),
       behavioral: this.detectionAlgorithms.behavioral(joinData.joins),
@@ -169,9 +171,7 @@ class AdvancedAntiRaid {
     // Calculate threat score (0-100) - adjusted by server size + sensitivity
     // Adjust minimum joins based on combined multiplier
     const baseMinJoins = 5;
-    const minJoinsForThreatScore = Math.ceil(
-      baseMinJoins * finalMultiplier
-    );
+    const minJoinsForThreatScore = Math.ceil(baseMinJoins * finalMultiplier);
 
     let threatScore = 0;
     if (joinData.joins.length >= minJoinsForThreatScore) {
@@ -228,7 +228,13 @@ class AdvancedAntiRaid {
 
       // Only handle raid if we have recent suspicious joins
       if (recentJoins.length > 0) {
-        await this.handleRaid(guild, recentJoins, threatScore, results, finalMultiplier);
+        await this.handleRaid(
+          guild,
+          recentJoins,
+          threatScore,
+          results,
+          finalMultiplier
+        );
         return true;
       }
     }
@@ -417,8 +423,8 @@ class AdvancedAntiRaid {
               action === "ban"
                 ? "banned"
                 : action === "kick"
-                ? "kicked"
-                : action + "ed"
+                  ? "kicked"
+                  : action + "ed"
             }:** ${successCount}`,
             fields: [
               {

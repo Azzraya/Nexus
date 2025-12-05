@@ -1,259 +1,269 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Live Activity - Nexus Bot</title>
-  <link rel="icon" type="image/webp" href="https://cdn.discordapp.com/avatars/1444739230679957646/32f2d77d44c2f3989fecd858be53f396.webp?size=256">
-  <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="pages.css">
-  <style>
-    .activity-feed {
-      max-width: 800px;
-      margin: 40px auto;
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 15px;
-      padding: 30px;
-    }
-
-    .activity-item {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      padding: 15px;
-      margin: 10px 0;
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 10px;
-      border-left: 4px solid #667eea;
-      animation: slideIn 0.3s ease-out;
-    }
-
-    @keyframes slideIn {
-      from {
-        opacity: 0;
-        transform: translateX(-20px);
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Live Activity - Nexus Bot</title>
+    <link
+      rel="icon"
+      type="image/webp"
+      href="https://cdn.discordapp.com/avatars/1444739230679957646/32f2d77d44c2f3989fecd858be53f396.webp?size=256"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="pages.css" />
+    <style>
+      .activity-feed {
+        max-width: 800px;
+        margin: 40px auto;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 15px;
+        padding: 30px;
       }
-      to {
-        opacity: 1;
-        transform: translateX(0);
+
+      .activity-item {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 15px;
+        margin: 10px 0;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 10px;
+        border-left: 4px solid #667eea;
+        animation: slideIn 0.3s ease-out;
       }
-    }
 
-    .activity-icon {
-      font-size: 2rem;
-      min-width: 40px;
-      text-align: center;
-    }
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateX(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
 
-    .activity-content {
-      flex: 1;
-    }
+      .activity-icon {
+        font-size: 2rem;
+        min-width: 40px;
+        text-align: center;
+      }
 
-    .activity-title {
-      font-weight: 600;
-      color: #fff;
-      margin-bottom: 5px;
-    }
+      .activity-content {
+        flex: 1;
+      }
 
-    .activity-time {
-      font-size: 0.85rem;
-      opacity: 0.6;
-    }
+      .activity-title {
+        font-weight: 600;
+        color: #fff;
+        margin-bottom: 5px;
+      }
 
-    .stats-bar {
-      display: flex;
-      justify-content: space-around;
-      margin: 30px 0;
-      padding: 20px;
-      background: rgba(102, 126, 234, 0.1);
-      border-radius: 10px;
-    }
+      .activity-time {
+        font-size: 0.85rem;
+        opacity: 0.6;
+      }
 
-    .stat-item {
-      text-align: center;
-    }
+      .stats-bar {
+        display: flex;
+        justify-content: space-around;
+        margin: 30px 0;
+        padding: 20px;
+        background: rgba(102, 126, 234, 0.1);
+        border-radius: 10px;
+      }
 
-    .stat-value {
-      font-size: 2rem;
-      font-weight: 900;
-      color: #667eea;
-    }
+      .stat-item {
+        text-align: center;
+      }
 
-    .stat-label {
-      opacity: 0.8;
-      font-size: 0.9rem;
-    }
-  </style>
-</head>
-<body>
-  <nav class="navbar">
-    <div class="container">
-      <a href="index.html" class="nav-brand">NEXUS</a>
-      <div class="nav-right">
-        <div class="dropdown">
-          <button class="dropdown-toggle">Menu ▼</button>
-          <div class="dropdown-menu">
-            <a href="features.html">Features</a>
-            <a href="commands.html">Commands</a>
-            <a href="setup.html">Setup</a>
-            <a href="tutorial.html">Tutorial</a>
-            <a href="docs.html">Documentation</a>
-            <a href="comparison.html">vs Wick</a>
-            <a href="live-comparison.html">Live Comparison</a>
-            <a href="api.html">API</a>
-            <a href="developers.html">For Developers</a>
-            <a href="stats.html">Stats</a>
-            <a href="growth.html">Growth</a>
-            <a href="status.html">Status</a>
-            <a href="showcase.html">Showcase</a>
-            <a href="testimonials.html">Testimonials</a>
-            <a href="vote-features.html">Vote Features</a>
-            <a href="changelog.html">Changelog</a>
-            <a href="faq.html">FAQ</a>
+      .stat-value {
+        font-size: 2rem;
+        font-weight: 900;
+        color: #667eea;
+      }
+
+      .stat-label {
+        opacity: 0.8;
+        font-size: 0.9rem;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="container">
+        <a href="index.html" class="nav-brand">NEXUS</a>
+        <div class="nav-right">
+          <div class="dropdown">
+            <button class="dropdown-toggle">Menu ▼</button>
+            <div class="dropdown-menu">
+              <a href="features.html">Features</a>
+              <a href="commands.html">Commands</a>
+              <a href="setup.html">Setup</a>
+              <a href="tutorial.html">Tutorial</a>
+              <a href="docs.html">Documentation</a>
+              <a href="comparison.html">vs Wick</a>
+              <a href="live-comparison.html">Live Comparison</a>
+              <a href="api.html">API</a>
+              <a href="developers.html">For Developers</a>
+              <a href="stats.html">Stats</a>
+              <a href="growth.html">Growth</a>
+              <a href="status.html">Status</a>
+              <a href="showcase.html">Showcase</a>
+              <a href="testimonials.html">Testimonials</a>
+              <a href="vote-features.html">Vote Features</a>
+              <a href="changelog.html">Changelog</a>
+              <a href="faq.html">FAQ</a>
+            </div>
+          </div>
+          <a
+            href="https://discord.com/oauth2/authorize?client_id=1444739230679957646&permissions=1644905917686&integration_type=0&scope=bot+applications.commands"
+            class="btn-nav btn-dashboard"
+            target="_blank"
+            >Dashboard</a
+          >
+          <a
+            href="https://discord.com/oauth2/authorize?client_id=1444739230679957646&permissions=1644905917686&integration_type=0&scope=bot+applications.commands"
+            class="btn-primary"
+            target="_blank"
+            >Get Started</a
+          >
+        </div>
+      </div>
+    </nav>
+
+    <div class="page-header">
+      <div class="container">
+        <h1>📡 Live Activity</h1>
+        <p>Real-time bot activity across all servers</p>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <div class="container">
+        <div class="stats-bar">
+          <div class="stat-item">
+            <div class="stat-value" id="serverCount">--</div>
+            <div class="stat-label">Servers</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value" id="userCount">--</div>
+            <div class="stat-label">Users Protected</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value" id="uptimeDisplay">--</div>
+            <div class="stat-label">Uptime</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value" id="pingDisplay">--</div>
+            <div class="stat-label">Response Time</div>
           </div>
         </div>
-        <a
-          href="https://discord.com/oauth2/authorize?client_id=1444739230679957646&permissions=1644905917686&integration_type=0&scope=bot+applications.commands"
-          class="btn-nav btn-dashboard"
-          target="_blank"
-          >Dashboard</a
-        >
-        <a
-          href="https://discord.com/oauth2/authorize?client_id=1444739230679957646&permissions=1644905917686&integration_type=0&scope=bot+applications.commands"
-          class="btn-primary"
-          target="_blank"
-          >Get Started</a
-        >
-      </div>
-    </div>
-  </nav>
 
-  <div class="page-header">
-    <div class="container">
-      <h1>📡 Live Activity</h1>
-      <p>Real-time bot activity across all servers</p>
-    </div>
-  </div>
-
-  <div class="content-section">
-    <div class="container">
-      <div class="stats-bar">
-        <div class="stat-item">
-          <div class="stat-value" id="serverCount">--</div>
-          <div class="stat-label">Servers</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-value" id="userCount">--</div>
-          <div class="stat-label">Users Protected</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-value" id="uptimeDisplay">--</div>
-          <div class="stat-label">Uptime</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-value" id="pingDisplay">--</div>
-          <div class="stat-label">Response Time</div>
-        </div>
-      </div>
-
-      <div class="activity-feed">
-        <h2 style="margin-bottom: 20px;">🔴 Live Feed</h2>
-        <div id="activityList">
-          <div class="activity-item">
-            <div class="activity-icon">⏳</div>
-            <div class="activity-content">
-              <div class="activity-title">Loading activity...</div>
-              <div class="activity-time">Connecting to bot...</div>
+        <div class="activity-feed">
+          <h2 style="margin-bottom: 20px">🔴 Live Feed</h2>
+          <div id="activityList">
+            <div class="activity-item">
+              <div class="activity-icon">⏳</div>
+              <div class="activity-content">
+                <div class="activity-title">Loading activity...</div>
+                <div class="activity-time">Connecting to bot...</div>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <script>
-    const API_URL = 'https://regular-puma-clearly.ngrok-free.app';
+    <script>
+      const API_URL = "https://regular-puma-clearly.ngrok-free.app";
 
-    // Fetch and update stats
-    async function updateStats() {
-      try {
-        const response = await fetch(`${API_URL}/api/stats`, {
-          headers: { 'ngrok-skip-browser-warning': 'true' }
-        });
-        const data = await response.json();
+      // Fetch and update stats
+      async function updateStats() {
+        try {
+          const response = await fetch(`${API_URL}/api/stats`, {
+            headers: { "ngrok-skip-browser-warning": "true" },
+          });
+          const data = await response.json();
 
-        document.getElementById('serverCount').textContent = data.servers;
-        document.getElementById('userCount').textContent = data.users.toLocaleString();
-        document.getElementById('uptimeDisplay').textContent = formatUptime(data.uptime);
-        document.getElementById('pingDisplay').textContent = `${data.ping}ms`;
-      } catch (error) {
-        console.error('Failed to fetch stats:', error);
+          document.getElementById("serverCount").textContent = data.servers;
+          document.getElementById("userCount").textContent =
+            data.users.toLocaleString();
+          document.getElementById("uptimeDisplay").textContent = formatUptime(
+            data.uptime
+          );
+          document.getElementById("pingDisplay").textContent = `${data.ping}ms`;
+        } catch (error) {
+          console.error("Failed to fetch stats:", error);
+        }
       }
-    }
 
-    // Format uptime (minutes to human readable)
-    function formatUptime(minutes) {
-      const hours = Math.floor(minutes / 60);
-      const days = Math.floor(hours / 24);
-      
-      if (days > 0) return `${days}d ${hours % 24}h`;
-      if (hours > 0) return `${hours}h ${minutes % 60}m`;
-      return `${minutes}m`;
-    }
+      // Format uptime (minutes to human readable)
+      function formatUptime(minutes) {
+        const hours = Math.floor(minutes / 60);
+        const days = Math.floor(hours / 24);
 
-    // Simulated activity feed (since we don't have real-time WebSocket)
-    const activityTypes = [
-      { icon: '🛡️', title: 'Raid blocked in server', type: 'security' },
-      { icon: '⚔️', title: 'Threat detected and stopped', type: 'security' },
-      { icon: '📊', title: 'Server health check completed', type: 'system' },
-      { icon: '🎯', title: 'Smart recommendation generated', type: 'ai' },
-      { icon: '🔨', title: 'Moderation action taken', type: 'moderation' },
-      { icon: '💾', title: 'Auto-snapshot created', type: 'backup' },
-      { icon: '🚀', title: 'New server joined', type: 'growth' },
-      { icon: '⚡', title: 'Command executed', type: 'activity' }
-    ];
+        if (days > 0) return `${days}d ${hours % 24}h`;
+        if (hours > 0) return `${hours}h ${minutes % 60}m`;
+        return `${minutes}m`;
+      }
 
-    function addActivityItem(activity) {
-      const list = document.getElementById('activityList');
-      const item = document.createElement('div');
-      item.className = 'activity-item';
-      item.innerHTML = `
+      // Simulated activity feed (since we don't have real-time WebSocket)
+      const activityTypes = [
+        { icon: "🛡️", title: "Raid blocked in server", type: "security" },
+        { icon: "⚔️", title: "Threat detected and stopped", type: "security" },
+        { icon: "📊", title: "Server health check completed", type: "system" },
+        { icon: "🎯", title: "Smart recommendation generated", type: "ai" },
+        { icon: "🔨", title: "Moderation action taken", type: "moderation" },
+        { icon: "💾", title: "Auto-snapshot created", type: "backup" },
+        { icon: "🚀", title: "New server joined", type: "growth" },
+        { icon: "⚡", title: "Command executed", type: "activity" },
+      ];
+
+      function addActivityItem(activity) {
+        const list = document.getElementById("activityList");
+        const item = document.createElement("div");
+        item.className = "activity-item";
+        item.innerHTML = `
         <div class="activity-icon">${activity.icon}</div>
         <div class="activity-content">
           <div class="activity-title">${activity.title}</div>
           <div class="activity-time">Just now</div>
         </div>
       `;
-      
-      list.insertBefore(item, list.firstChild);
-      
-      // Keep only last 20 items
-      while (list.children.length > 20) {
-        list.removeChild(list.lastChild);
+
+        list.insertBefore(item, list.firstChild);
+
+        // Keep only last 20 items
+        while (list.children.length > 20) {
+          list.removeChild(list.lastChild);
+        }
       }
-    }
 
-    // Simulate activity (in real version, this would be WebSocket)
-    function simulateActivity() {
-      const activity = activityTypes[Math.floor(Math.random() * activityTypes.length)];
-      addActivityItem(activity);
-    }
+      // Simulate activity (in real version, this would be WebSocket)
+      function simulateActivity() {
+        const activity =
+          activityTypes[Math.floor(Math.random() * activityTypes.length)];
+        addActivityItem(activity);
+      }
 
-    // Initialize
-    updateStats();
-    setInterval(updateStats, 30000); // Update every 30 seconds
-    
-    // Clear initial loading message
-    setTimeout(() => {
-      document.getElementById('activityList').innerHTML = '';
-      simulateActivity();
-    }, 1000);
+      // Initialize
+      updateStats();
+      setInterval(updateStats, 30000); // Update every 30 seconds
 
-    // Add activity every 5-15 seconds
-    setInterval(() => {
-      simulateActivity();
-    }, Math.random() * 10000 + 5000);
-  </script>
-</body>
+      // Clear initial loading message
+      setTimeout(() => {
+        document.getElementById("activityList").innerHTML = "";
+        simulateActivity();
+      }, 1000);
+
+      // Add activity every 5-15 seconds
+      setInterval(
+        () => {
+          simulateActivity();
+        },
+        Math.random() * 10000 + 5000
+      );
+    </script>
+  </body>
 </html>
-

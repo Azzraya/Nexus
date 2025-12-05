@@ -1,72 +1,83 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>API Quick Start - Nexus Bot</title>
-  <link rel="icon" type="image/webp" href="https://cdn.discordapp.com/avatars/1444739230679957646/32f2d77d44c2f3989fecd858be53f396.webp?size=256">
-  <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="pages.css">
-</head>
-<body>
-  <nav class="navbar">
-    <div class="container">
-      <a href="index.html" class="nav-brand">NEXUS</a>
-      <div class="nav-right">
-        <div class="dropdown">
-          <button class="dropdown-toggle">Menu ▼</button>
-          <div class="dropdown-menu">
-            <a href="features.html">Features</a>
-            <a href="commands.html">Commands</a>
-            <a href="setup.html">Setup</a>
-            <a href="tutorial.html">Tutorial</a>
-            <a href="docs.html">Documentation</a>
-            <a href="comparison.html">vs Wick</a>
-            <a href="live-comparison.html">Live Comparison</a>
-            <a href="api.html">API</a>
-            <a href="developers.html">For Developers</a>
-            <a href="stats.html">Stats</a>
-            <a href="growth.html">Growth</a>
-            <a href="status.html">Status</a>
-            <a href="showcase.html">Showcase</a>
-            <a href="testimonials.html">Testimonials</a>
-            <a href="vote-features.html">Vote Features</a>
-            <a href="changelog.html">Changelog</a>
-            <a href="faq.html">FAQ</a>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>API Quick Start - Nexus Bot</title>
+    <link
+      rel="icon"
+      type="image/webp"
+      href="https://cdn.discordapp.com/avatars/1444739230679957646/32f2d77d44c2f3989fecd858be53f396.webp?size=256"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="pages.css" />
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="container">
+        <a href="index.html" class="nav-brand">NEXUS</a>
+        <div class="nav-right">
+          <div class="dropdown">
+            <button class="dropdown-toggle">Menu ▼</button>
+            <div class="dropdown-menu">
+              <a href="features.html">Features</a>
+              <a href="commands.html">Commands</a>
+              <a href="setup.html">Setup</a>
+              <a href="tutorial.html">Tutorial</a>
+              <a href="docs.html">Documentation</a>
+              <a href="comparison.html">vs Wick</a>
+              <a href="live-comparison.html">Live Comparison</a>
+              <a href="api.html">API</a>
+              <a href="developers.html">For Developers</a>
+              <a href="stats.html">Stats</a>
+              <a href="growth.html">Growth</a>
+              <a href="status.html">Status</a>
+              <a href="showcase.html">Showcase</a>
+              <a href="testimonials.html">Testimonials</a>
+              <a href="vote-features.html">Vote Features</a>
+              <a href="changelog.html">Changelog</a>
+              <a href="faq.html">FAQ</a>
+            </div>
           </div>
+          <a
+            href="https://discord.com/oauth2/authorize?client_id=1444739230679957646&permissions=1644905917686&integration_type=0&scope=bot+applications.commands"
+            class="btn-nav btn-dashboard"
+            target="_blank"
+            >Dashboard</a
+          >
+          <a
+            href="https://discord.com/oauth2/authorize?client_id=1444739230679957646&permissions=1644905917686&integration_type=0&scope=bot+applications.commands"
+            class="btn-primary"
+            target="_blank"
+            >Get Started</a
+          >
         </div>
-        <a
-          href="https://discord.com/oauth2/authorize?client_id=1444739230679957646&permissions=1644905917686&integration_type=0&scope=bot+applications.commands"
-          class="btn-nav btn-dashboard"
-          target="_blank"
-          >Dashboard</a
-        >
-        <a
-          href="https://discord.com/oauth2/authorize?client_id=1444739230679957646&permissions=1644905917686&integration_type=0&scope=bot+applications.commands"
-          class="btn-primary"
-          target="_blank"
-          >Get Started</a
-        >
+      </div>
+    </nav>
+
+    <div class="page-header">
+      <div class="container">
+        <h1>⚡ API Quick Start</h1>
+        <p>Get started with Nexus API in 5 minutes</p>
       </div>
     </div>
-  </nav>
 
-  <div class="page-header">
-    <div class="container">
-      <h1>⚡ API Quick Start</h1>
-      <p>Get started with Nexus API in 5 minutes</p>
-    </div>
-  </div>
+    <div class="content-section">
+      <div class="container">
+        <div class="feature-category">
+          <h2>🚀 5-Minute Setup</h2>
 
-  <div class="content-section">
-    <div class="container">
-      <div class="feature-category">
-        <h2>🚀 5-Minute Setup</h2>
-        
-        <div class="setup-steps">
-          <div class="setup-step">
-            <h3>1. Get Bot Stats (No Auth Required)</h3>
-            <pre style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 10px; overflow-x: auto;"><code>// JavaScript
+          <div class="setup-steps">
+            <div class="setup-step">
+              <h3>1. Get Bot Stats (No Auth Required)</h3>
+              <pre
+                style="
+                  background: rgba(0, 0, 0, 0.3);
+                  padding: 20px;
+                  border-radius: 10px;
+                  overflow-x: auto;
+                "
+              ><code>// JavaScript
 const response = await fetch('https://regular-puma-clearly.ngrok-free.app/api/v1/stats');
 const data = await response.json();
 console.log(`Nexus is protecting ${data.serverCount} servers!`);
@@ -78,11 +89,18 @@ print(f"Servers: {r.json()['serverCount']}")
 
 // curl
 curl https://regular-puma-clearly.ngrok-free.app/api/v1/stats</code></pre>
-          </div>
+            </div>
 
-          <div class="setup-step">
-            <h3>2. Check System Health</h3>
-            <pre style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 10px; overflow-x: auto;"><code>// Get real-time health status
+            <div class="setup-step">
+              <h3>2. Check System Health</h3>
+              <pre
+                style="
+                  background: rgba(0, 0, 0, 0.3);
+                  padding: 20px;
+                  border-radius: 10px;
+                  overflow-x: auto;
+                "
+              ><code>// Get real-time health status
 fetch('https://regular-puma-clearly.ngrok-free.app/api/v1/health')
   .then(r => r.json())
   .then(data => {
@@ -90,108 +108,172 @@ fetch('https://regular-puma-clearly.ngrok-free.app/api/v1/health')
     console.log(`Servers: ${data.bot.servers}`);
     console.log(`Ping: ${data.bot.ping}ms`);
   });</code></pre>
-          </div>
+            </div>
 
-          <div class="setup-step">
-            <h3>3. View Growth Analytics</h3>
-            <pre style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 10px; overflow-x: auto;"><code>// Get 30-day growth data
+            <div class="setup-step">
+              <h3>3. View Growth Analytics</h3>
+              <pre
+                style="
+                  background: rgba(0, 0, 0, 0.3);
+                  padding: 20px;
+                  border-radius: 10px;
+                  overflow-x: auto;
+                "
+              ><code>// Get 30-day growth data
 fetch('https://regular-puma-clearly.ngrok-free.app/api/v1/growth')
   .then(r => r.json())
   .then(data => {
     console.log(`Net Growth: ${data.netGrowth} servers`);
     console.log(`Joins per day:`, data.joins);
   });</code></pre>
-          </div>
+            </div>
 
-          <div class="setup-step">
-            <h3>4. Get Command Analytics</h3>
-            <pre style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 10px; overflow-x: auto;"><code>// See most popular commands
+            <div class="setup-step">
+              <h3>4. Get Command Analytics</h3>
+              <pre
+                style="
+                  background: rgba(0, 0, 0, 0.3);
+                  padding: 20px;
+                  border-radius: 10px;
+                  overflow-x: auto;
+                "
+              ><code>// See most popular commands
 fetch('https://regular-puma-clearly.ngrok-free.app/api/v1/command-analytics')
   .then(r => r.json())
   .then(data => {
     console.log('Top Commands:', data.topCommands);
   });</code></pre>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div class="feature-category">
-        <h2>📊 Public Endpoints (No Auth)</h2>
-        <div class="comparison-table">
-          <table>
-            <thead>
-              <tr>
-                <th>Endpoint</th>
-                <th>Description</th>
-                <th>Try It</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><code>/api/v1/stats</code></td>
-                <td>Bot statistics</td>
-                <td><a href="https://regular-puma-clearly.ngrok-free.app/api/v1/stats" target="_blank">→</a></td>
-              </tr>
-              <tr>
-                <td><code>/api/v1/health</code></td>
-                <td>System health</td>
-                <td><a href="https://regular-puma-clearly.ngrok-free.app/api/v1/health" target="_blank">→</a></td>
-              </tr>
-              <tr>
-                <td><code>/api/v1/growth</code></td>
-                <td>Growth analytics</td>
-                <td><a href="https://regular-puma-clearly.ngrok-free.app/api/v1/growth" target="_blank">→</a></td>
-              </tr>
-              <tr>
-                <td><code>/api/v1/performance</code></td>
-                <td>Performance metrics</td>
-                <td><a href="https://regular-puma-clearly.ngrok-free.app/api/v1/performance" target="_blank">→</a></td>
-              </tr>
-              <tr>
-                <td><code>/api/v1/command-analytics</code></td>
-                <td>Command usage stats</td>
-                <td><a href="https://regular-puma-clearly.ngrok-free.app/api/v1/command-analytics" target="_blank">→</a></td>
-              </tr>
-              <tr>
-                <td><code>/api/v1/server-leaderboard</code></td>
-                <td>Top servers</td>
-                <td><a href="https://regular-puma-clearly.ngrok-free.app/api/v1/server-leaderboard" target="_blank">→</a></td>
-              </tr>
-              <tr>
-                <td><code>/api/v1/compare-servers</code></td>
-                <td>Server benchmarks</td>
-                <td><a href="https://regular-puma-clearly.ngrok-free.app/api/v1/compare-servers" target="_blank">→</a></td>
-              </tr>
-              <tr>
-                <td><code>/api/v1/changelog</code></td>
-                <td>API changelog</td>
-                <td><a href="https://regular-puma-clearly.ngrok-free.app/api/v1/changelog" target="_blank">→</a></td>
-              </tr>
-            </tbody>
-          </table>
+        <div class="feature-category">
+          <h2>📊 Public Endpoints (No Auth)</h2>
+          <div class="comparison-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>Endpoint</th>
+                  <th>Description</th>
+                  <th>Try It</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>/api/v1/stats</code></td>
+                  <td>Bot statistics</td>
+                  <td>
+                    <a
+                      href="https://regular-puma-clearly.ngrok-free.app/api/v1/stats"
+                      target="_blank"
+                      >→</a
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>/api/v1/health</code></td>
+                  <td>System health</td>
+                  <td>
+                    <a
+                      href="https://regular-puma-clearly.ngrok-free.app/api/v1/health"
+                      target="_blank"
+                      >→</a
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>/api/v1/growth</code></td>
+                  <td>Growth analytics</td>
+                  <td>
+                    <a
+                      href="https://regular-puma-clearly.ngrok-free.app/api/v1/growth"
+                      target="_blank"
+                      >→</a
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>/api/v1/performance</code></td>
+                  <td>Performance metrics</td>
+                  <td>
+                    <a
+                      href="https://regular-puma-clearly.ngrok-free.app/api/v1/performance"
+                      target="_blank"
+                      >→</a
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>/api/v1/command-analytics</code></td>
+                  <td>Command usage stats</td>
+                  <td>
+                    <a
+                      href="https://regular-puma-clearly.ngrok-free.app/api/v1/command-analytics"
+                      target="_blank"
+                      >→</a
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>/api/v1/server-leaderboard</code></td>
+                  <td>Top servers</td>
+                  <td>
+                    <a
+                      href="https://regular-puma-clearly.ngrok-free.app/api/v1/server-leaderboard"
+                      target="_blank"
+                      >→</a
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>/api/v1/compare-servers</code></td>
+                  <td>Server benchmarks</td>
+                  <td>
+                    <a
+                      href="https://regular-puma-clearly.ngrok-free.app/api/v1/compare-servers"
+                      target="_blank"
+                      >→</a
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>/api/v1/changelog</code></td>
+                  <td>API changelog</td>
+                  <td>
+                    <a
+                      href="https://regular-puma-clearly.ngrok-free.app/api/v1/changelog"
+                      target="_blank"
+                      >→</a
+                    >
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="feature-category">
+          <h2>🔐 Protected Endpoints (API Key Required)</h2>
+          <p>
+            Request an API key at:
+            <a href="mailto:nexusbot0@proton.me">nexusbot0@proton.me</a>
+          </p>
+          <ul>
+            <li><code>/api/v1/server/:id</code> - Get server details</li>
+            <li><code>/api/v1/user/:userId/warnings</code> - User warnings</li>
+            <li><code>/api/v1/votes/leaderboard</code> - Voting leaderboard</li>
+            <li><code>/api/v1/rate-limit-status</code> - Check your quota</li>
+          </ul>
+        </div>
+
+        <div class="cta-box" style="margin-top: 50px">
+          <h2>🚀 Start Building</h2>
+          <p>Use Nexus API to build integrations, dashboards, and more!</p>
+          <a href="api.html" class="btn btn-primary">View Full Documentation</a>
         </div>
       </div>
-
-      <div class="feature-category">
-        <h2>🔐 Protected Endpoints (API Key Required)</h2>
-        <p>Request an API key at: <a href="mailto:nexusbot0@proton.me">nexusbot0@proton.me</a></p>
-        <ul>
-          <li><code>/api/v1/server/:id</code> - Get server details</li>
-          <li><code>/api/v1/user/:userId/warnings</code> - User warnings</li>
-          <li><code>/api/v1/votes/leaderboard</code> - Voting leaderboard</li>
-          <li><code>/api/v1/rate-limit-status</code> - Check your quota</li>
-        </ul>
-      </div>
-
-      <div class="cta-box" style="margin-top: 50px;">
-        <h2>🚀 Start Building</h2>
-        <p>Use Nexus API to build integrations, dashboards, and more!</p>
-        <a href="api.html" class="btn btn-primary">View Full Documentation</a>
-      </div>
     </div>
-  </div>
 
-  <script src="script.js"></script>
-</body>
+    <script src="script.js"></script>
+  </body>
 </html>
-

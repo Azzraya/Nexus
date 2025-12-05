@@ -785,9 +785,10 @@ module.exports = {
 
           if (mode === "instant") {
             // Instant verification - just complete it
-            const result = await client.verificationSystem.completeVerification(
-              verificationId
-            );
+            const result =
+              await client.verificationSystem.completeVerification(
+                verificationId
+              );
 
             if (result.success) {
               await interaction.reply({

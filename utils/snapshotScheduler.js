@@ -25,9 +25,12 @@ class SnapshotScheduler {
     );
 
     // Take initial snapshots after 5 minutes (give bot time to cache data)
-    setTimeout(() => {
-      this.takeAllSnapshots();
-    }, 5 * 60 * 1000);
+    setTimeout(
+      () => {
+        this.takeAllSnapshots();
+      },
+      5 * 60 * 1000
+    );
 
     // Schedule regular snapshots
     this.intervalId = setInterval(() => {
@@ -35,9 +38,12 @@ class SnapshotScheduler {
     }, this.snapshotInterval);
 
     // Cleanup old snapshots daily
-    this.cleanupInterval = setInterval(() => {
-      this.cleanupOldSnapshots();
-    }, 24 * 60 * 60 * 1000);
+    this.cleanupInterval = setInterval(
+      () => {
+        this.cleanupOldSnapshots();
+      },
+      24 * 60 * 60 * 1000
+    );
   }
 
   /**
@@ -243,4 +249,3 @@ class SnapshotScheduler {
 }
 
 module.exports = SnapshotScheduler;
-

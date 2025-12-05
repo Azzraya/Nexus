@@ -319,4 +319,3 @@ class SecurityAuditor {
 
 // Export singleton
 module.exports = new SecurityAuditor();
-

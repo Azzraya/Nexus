@@ -69,7 +69,7 @@ module.exports = {
       );
 
       const ErrorHandler = require("../utils/errorHandler");
-const ErrorMessages = require("../utils/errorMessages");
+      const ErrorMessages = require("../utils/errorMessages");
       setTimeout(() => {
         ErrorHandler.safeExecute(
           interaction.channel.delete(),

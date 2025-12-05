@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -88,12 +88,23 @@
           <span class="version-badge">Latest</span>
           <h3>🧹 Complete Spam Cleanup: Roles & Webhooks</h3>
           <ul>
-            <li>✅ <strong>NEW:</strong> Auto-delete spam roles created by attacker</li>
-            <li>✅ <strong>NEW:</strong> Auto-delete spam webhooks created by attacker</li>
+            <li>
+              ✅ <strong>NEW:</strong> Auto-delete spam roles created by
+              attacker
+            </li>
+            <li>
+              ✅ <strong>NEW:</strong> Auto-delete spam webhooks created by
+              attacker
+            </li>
             <li>✅ Same safety checks as channels (5-minute age limit)</li>
             <li>✅ Skips managed roles (bot roles) and @everyone</li>
-            <li>✅ Complete cleanup: channels + roles + webhooks all removed before recovery</li>
-            <li>✅ Only attacker's creations deleted - all legitimate content safe</li>
+            <li>
+              ✅ Complete cleanup: channels + roles + webhooks all removed
+              before recovery
+            </li>
+            <li>
+              ✅ Only attacker's creations deleted - all legitimate content safe
+            </li>
           </ul>
         </div>
 
@@ -101,9 +112,15 @@
           <h2>Version 3.17.2 - December 5, 2025</h2>
           <h3>🛡️ Enhanced Safety: Channel Cleanup</h3>
           <ul>
-            <li>✅ Added age check: Only deletes channels created in last 5 minutes</li>
+            <li>
+              ✅ Added age check: Only deletes channels created in last 5
+              minutes
+            </li>
             <li>✅ Skips older channels that might be legitimate</li>
-            <li>✅ Added explicit comments confirming only attacker's channels are deleted</li>
+            <li>
+              ✅ Added explicit comments confirming only attacker's channels are
+              deleted
+            </li>
             <li>✅ Server owner and mod channels are never touched</li>
           </ul>
         </div>
@@ -122,11 +139,20 @@
           <h2>Version 3.17.0 - December 5, 2025</h2>
           <h3>🧹 Smart Cleanup: Delete Attacker's Spam Channels</h3>
           <ul>
-            <li>✅ <strong>NEW:</strong> Auto-deletes ALL spam channels created by attacker before recovery</li>
+            <li>
+              ✅ <strong>NEW:</strong> Auto-deletes ALL spam channels created by
+              attacker before recovery
+            </li>
             <li>✅ Tracks every channel created by detected threats</li>
-            <li>✅ Cleans up spam first, then restores legitimate channels from snapshot</li>
+            <li>
+              ✅ Cleans up spam first, then restores legitimate channels from
+              snapshot
+            </li>
             <li>✅ No more spam channels left behind after a nuke attack</li>
-            <li>✅ Only deletes channels created by the attacker - nothing else touched</li>
+            <li>
+              ✅ Only deletes channels created by the attacker - nothing else
+              touched
+            </li>
           </ul>
         </div>
 
@@ -134,10 +160,20 @@
           <h2>Version 3.16.5 - December 5, 2025</h2>
           <h3>🛡️ Anti-Nuke Recovery Timing Fix</h3>
           <ul>
-            <li>✅ Added 3-second delay after ban/kick before starting recovery</li>
-            <li>✅ Verifies attacker is actually removed from server before recovery begins</li>
-            <li>✅ Prevents trying to recover while attack is still in progress</li>
-            <li>✅ Recovery now happens AFTER attacker is fully removed, not during the attack</li>
+            <li>
+              ✅ Added 3-second delay after ban/kick before starting recovery
+            </li>
+            <li>
+              ✅ Verifies attacker is actually removed from server before
+              recovery begins
+            </li>
+            <li>
+              ✅ Prevents trying to recover while attack is still in progress
+            </li>
+            <li>
+              ✅ Recovery now happens AFTER attacker is fully removed, not
+              during the attack
+            </li>
           </ul>
         </div>
 
@@ -146,8 +182,13 @@
           <h3>🔧 Database Schema Fix - Complete</h3>
           <ul>
             <li>✅ Added migrations for ALL missing backups table columns</li>
-            <li>✅ Added <code>guild_name</code>, <code>timestamp</code>, <code>size</code>, and <code>version</code> columns</li>
-            <li>✅ Fixed "no such column: timestamp" error in backup manager</li>
+            <li>
+              ✅ Added <code>guild_name</code>, <code>timestamp</code>,
+              <code>size</code>, and <code>version</code> columns
+            </li>
+            <li>
+              ✅ Fixed "no such column: timestamp" error in backup manager
+            </li>
             <li>✅ Backup metadata now saves completely and correctly</li>
           </ul>
         </div>
@@ -156,8 +197,13 @@
           <h2>Version 3.16.3 - December 5, 2025</h2>
           <h3>🔧 Database Schema Fix</h3>
           <ul>
-            <li>✅ Added migration for missing <code>guild_name</code> column in backups table</li>
-            <li>✅ Fixed "no such column: guild_name" error in backup manager</li>
+            <li>
+              ✅ Added migration for missing <code>guild_name</code> column in
+              backups table
+            </li>
+            <li>
+              ✅ Fixed "no such column: guild_name" error in backup manager
+            </li>
             <li>✅ Backup metadata now saves correctly</li>
           </ul>
         </div>
@@ -167,7 +213,9 @@
           <h3>🔧 Poll System - Manual Ending</h3>
           <ul>
             <li>✅ Removed problematic auto-ending via setTimeout</li>
-            <li>✅ Polls now require manual ending with <code>/poll end</code></li>
+            <li>
+              ✅ Polls now require manual ending with <code>/poll end</code>
+            </li>
             <li>✅ No more client reference errors</li>
             <li>✅ More reliable and stable</li>
           </ul>
@@ -186,7 +234,9 @@
           <h2>Version 3.11.8 - December 4, 2025</h2>
           <h3>🔧 Poll Client Reference Fix</h3>
           <ul>
-            <li>✅ Properly capture client from interaction.client for setTimeout</li>
+            <li>
+              ✅ Properly capture client from interaction.client for setTimeout
+            </li>
             <li>✅ Poll ending now has valid client reference</li>
             <li>✅ No more undefined errors</li>
           </ul>
@@ -196,7 +246,10 @@
           <h2>Version 3.11.7 - December 4, 2025</h2>
           <h3>🔧 Poll Fix - Correct Variable</h3>
           <ul>
-            <li>✅ Fixed typo: changed <code>interaction.guilds</code> to <code>client.guilds</code></li>
+            <li>
+              ✅ Fixed typo: changed <code>interaction.guilds</code> to
+              <code>client.guilds</code>
+            </li>
             <li>✅ Poll ending now works correctly</li>
           </ul>
         </div>
@@ -205,7 +258,10 @@
           <h2>Version 3.11.6 - December 4, 2025</h2>
           <h3>🐛 Poll End Fix</h3>
           <ul>
-            <li>✅ Fixed "Cannot read properties of undefined" in scheduled poll ending</li>
+            <li>
+              ✅ Fixed "Cannot read properties of undefined" in scheduled poll
+              ending
+            </li>
             <li>✅ Added proper error handling for setTimeout callback</li>
             <li>✅ Polls now end correctly after duration expires</li>
           </ul>
@@ -218,7 +274,10 @@
             <li>
               <strong>Fixed "SQLITE_ERROR: no column named duration":</strong>
               <ul>
-                <li>✅ Added migration to drop old polls table and recreate with correct schema</li>
+                <li>
+                  ✅ Added migration to drop old polls table and recreate with
+                  correct schema
+                </li>
                 <li>✅ Polls now have all required columns</li>
                 <li>✅ /poll create works perfectly</li>
               </ul>
@@ -231,12 +290,16 @@
           <h3>🐛 Poll Command Error Handling</h3>
           <ul>
             <li>
-              <strong>Added comprehensive error handling to /poll create:</strong>
+              <strong
+                >Added comprehensive error handling to /poll create:</strong
+              >
               <ul>
                 <li>✅ Wrapped entire function in try-catch</li>
                 <li>✅ Proper error messages shown to users</li>
                 <li>✅ No more silent failures or [object Object] errors</li>
-                <li>✅ Already filters empty options from trailing semicolons</li>
+                <li>
+                  ✅ Already filters empty options from trailing semicolons
+                </li>
               </ul>
             </li>
           </ul>
@@ -252,7 +315,10 @@
                 <li>✅ Fixed in interactionCreate.js (2 instances)</li>
                 <li>✅ Fixed in messageCreate.js (2 instances)</li>
                 <li>✅ Fixed in guildMemberAdd.js (3 instances)</li>
-                <li>✅ All now properly wrap functions instead of passing promises directly</li>
+                <li>
+                  ✅ All now properly wrap functions instead of passing promises
+                  directly
+                </li>
                 <li>✅ No more "fn is not a function" errors</li>
               </ul>
             </li>
@@ -264,9 +330,14 @@
           <h3>🔧 Command Limit Compliance (Again!)</h3>
           <ul>
             <li>
-              <strong>Removed 5 non-essential commands to stay under 100:</strong>
+              <strong
+                >Removed 5 non-essential commands to stay under 100:</strong
+              >
               <ul>
-                <li>❌ <code>/achievement</code> (old version, replaced by /achievements)</li>
+                <li>
+                  ❌ <code>/achievement</code> (old version, replaced by
+                  /achievements)
+                </li>
                 <li>❌ <code>/compare</code> (comparison tool)</li>
                 <li>❌ <code>/predict</code> (prediction feature)</li>
                 <li>❌ <code>/recommend</code> (recommendation system)</li>
@@ -275,7 +346,8 @@
               </ul>
             </li>
             <li>
-              <strong>Note:</strong> Discord's 100 command limit is strict. These removals allow all new features to work properly!
+              <strong>Note:</strong> Discord's 100 command limit is strict.
+              These removals allow all new features to work properly!
             </li>
           </ul>
         </div>
@@ -288,11 +360,16 @@
               <strong>Fixed "Cannot find module refer" error:</strong>
               <ul>
                 <li>✅ Removed referral tracking from guildCreate event</li>
-                <li>✅ Referral command was deprecated to stay under 100 command limit</li>
+                <li>
+                  ✅ Referral command was deprecated to stay under 100 command
+                  limit
+                </li>
               </ul>
             </li>
             <li>
-              <strong>Fixed "ErrorHandler.safeExecute is not a function":</strong>
+              <strong
+                >Fixed "ErrorHandler.safeExecute is not a function":</strong
+              >
               <ul>
                 <li>✅ Added missing safeExecute method to ErrorHandler</li>
                 <li>✅ Provides safe async execution with error handling</li>
@@ -325,7 +402,10 @@
                 <li>📚 7 comprehensive topics</li>
                 <li>🖱️ Button navigation</li>
                 <li>📖 Multi-page tutorials</li>
-                <li>Topics: Security, Setup, XP, Achievements, Automod, Moderation, Integrations</li>
+                <li>
+                  Topics: Security, Setup, XP, Achievements, Automod,
+                  Moderation, Integrations
+                </li>
               </ul>
             </li>
             <li>
@@ -353,7 +433,9 @@
                 <li>🏆 View unlocked achievements with paginated display</li>
                 <li>📋 List all available achievements</li>
                 <li>📊 Track progress towards achievements</li>
-                <li>14 pre-defined achievements (level, messages, voice, special)</li>
+                <li>
+                  14 pre-defined achievements (level, messages, voice, special)
+                </li>
                 <li>Rarity system: Common, Uncommon, Rare, Epic, Legendary</li>
                 <li>XP rewards for unlocking achievements</li>
               </ul>
@@ -387,16 +469,42 @@
           <h3>🎮 MAJOR FEATURE: XP & Leveling System</h3>
           <ul>
             <li>
-              <strong>Complete gamification system for server engagement:</strong>
+              <strong
+                >Complete gamification system for server engagement:</strong
+              >
               <ul>
-                <li>🎯 <strong>XP Tracking</strong> - Earn XP from messages and voice activity</li>
-                <li>📈 <strong>Level Progression</strong> - Smooth leveling curve with visual progress bars</li>
-                <li>🏆 <strong>Leaderboards</strong> - Server-wide rankings with medal emojis</li>
-                <li>🎁 <strong>Level Rewards</strong> - Auto-assign roles when reaching milestones</li>
-                <li>⚙️ <strong>Full Configuration</strong> - Customize XP rates, cooldowns, messages</li>
-                <li>👑 <strong>Manual Control</strong> - Add/remove/reset XP for moderation</li>
-                <li>📊 <strong>Detailed Stats</strong> - Track messages sent, voice time, rank position</li>
-                <li>🎨 <strong>Beautiful Embeds</strong> - Rich XP cards with avatars and progress</li>
+                <li>
+                  🎯 <strong>XP Tracking</strong> - Earn XP from messages and
+                  voice activity
+                </li>
+                <li>
+                  📈 <strong>Level Progression</strong> - Smooth leveling curve
+                  with visual progress bars
+                </li>
+                <li>
+                  🏆 <strong>Leaderboards</strong> - Server-wide rankings with
+                  medal emojis
+                </li>
+                <li>
+                  🎁 <strong>Level Rewards</strong> - Auto-assign roles when
+                  reaching milestones
+                </li>
+                <li>
+                  ⚙️ <strong>Full Configuration</strong> - Customize XP rates,
+                  cooldowns, messages
+                </li>
+                <li>
+                  👑 <strong>Manual Control</strong> - Add/remove/reset XP for
+                  moderation
+                </li>
+                <li>
+                  📊 <strong>Detailed Stats</strong> - Track messages sent,
+                  voice time, rank position
+                </li>
+                <li>
+                  🎨 <strong>Beautiful Embeds</strong> - Rich XP cards with
+                  avatars and progress
+                </li>
               </ul>
             </li>
             <li>
@@ -405,7 +513,9 @@
                 <li><code>/xp rank</code> - View your or someone's XP card</li>
                 <li><code>/xp leaderboard</code> - See top ranked members</li>
                 <li><code>/xp config</code> - Configure XP system settings</li>
-                <li><code>/xp reward</code> - Set up level milestone rewards</li>
+                <li>
+                  <code>/xp reward</code> - Set up level milestone rewards
+                </li>
                 <li><code>/xp rewards</code> - View all configured rewards</li>
                 <li><code>/xp add/remove</code> - Manually adjust user XP</li>
                 <li><code>/xp reset</code> - Reset a user's progression</li>
@@ -414,21 +524,42 @@
             <li>
               <strong>Database Additions:</strong>
               <ul>
-                <li>📊 <code>user_xp</code> table - Track XP, levels, messages, voice time</li>
-                <li>🎁 <code>level_rewards</code> table - Store role rewards per level</li>
-                <li>⚙️ <code>xp_config</code> table - Server-specific XP settings</li>
-                <li>🏆 <code>achievements</code> table - Achievement definitions</li>
-                <li>✅ <code>user_achievements</code> table - Track unlocked achievements</li>
-                <li>🎉 <code>seasonal_events</code> table - Holiday/special events</li>
-                <li>📅 <code>server_events</code> table - Server event calendar</li>
+                <li>
+                  📊 <code>user_xp</code> table - Track XP, levels, messages,
+                  voice time
+                </li>
+                <li>
+                  🎁 <code>level_rewards</code> table - Store role rewards per
+                  level
+                </li>
+                <li>
+                  ⚙️ <code>xp_config</code> table - Server-specific XP settings
+                </li>
+                <li>
+                  🏆 <code>achievements</code> table - Achievement definitions
+                </li>
+                <li>
+                  ✅ <code>user_achievements</code> table - Track unlocked
+                  achievements
+                </li>
+                <li>
+                  🎉 <code>seasonal_events</code> table - Holiday/special events
+                </li>
+                <li>
+                  📅 <code>server_events</code> table - Server event calendar
+                </li>
                 <li>✋ <code>event_rsvp</code> table - RSVP tracking</li>
-                <li>🔗 <code>integrations</code> table - Platform integrations</li>
+                <li>
+                  🔗 <code>integrations</code> table - Platform integrations
+                </li>
               </ul>
             </li>
             <li>
               <strong>Features:</strong>
               <ul>
-                <li>✅ Automatic XP gain from messages (configurable cooldown)</li>
+                <li>
+                  ✅ Automatic XP gain from messages (configurable cooldown)
+                </li>
                 <li>✅ Voice channel XP tracking (per minute)</li>
                 <li>✅ Level-up announcements with custom messages</li>
                 <li>✅ Stack or replace role rewards</li>
@@ -459,11 +590,23 @@
           <h3>🎨 Website Fix - Dropdown Menu (pages.css)</h3>
           <ul>
             <li>
-              <strong>Fixed dropdown menu not scrollable on pages using pages.css:</strong>
+              <strong
+                >Fixed dropdown menu not scrollable on pages using
+                pages.css:</strong
+              >
               <ul>
-                <li>✅ Updated <code>pages.css</code> to match <code>styles.css</code> dropdown styles</li>
-                <li>✅ Added proper scrolling with <code>max-height: 500px</code> and <code>overflow-y: auto</code></li>
-                <li>✅ Changed to 3-column grid layout for better organization</li>
+                <li>
+                  ✅ Updated <code>pages.css</code> to match
+                  <code>styles.css</code> dropdown styles
+                </li>
+                <li>
+                  ✅ Added proper scrolling with
+                  <code>max-height: 500px</code> and
+                  <code>overflow-y: auto</code>
+                </li>
+                <li>
+                  ✅ Changed to 3-column grid layout for better organization
+                </li>
                 <li>✅ Added custom scrollbar styling (webkit & Firefox)</li>
                 <li>✅ Fixed hover state to maintain grid layout</li>
                 <li>✅ Now works consistently across ALL website pages</li>
@@ -479,9 +622,14 @@
             <li>
               <strong>Fixed dropdown menu not scrollable on all pages:</strong>
               <ul>
-                <li>✅ Changed hover state from <code>display: block</code> to <code>display: grid</code></li>
+                <li>
+                  ✅ Changed hover state from <code>display: block</code> to
+                  <code>display: grid</code>
+                </li>
                 <li>✅ Maintains proper grid layout when menu is open</li>
-                <li>✅ Scrolling now works correctly across all website pages</li>
+                <li>
+                  ✅ Scrolling now works correctly across all website pages
+                </li>
               </ul>
             </li>
           </ul>
@@ -492,10 +640,18 @@
           <h3>🔧 Quick Fix - Automod Column Name</h3>
           <ul>
             <li>
-              <strong>Fixed "SQLITE_ERROR: no column named links_enabled":</strong>
+              <strong
+                >Fixed "SQLITE_ERROR: no column named links_enabled":</strong
+              >
               <ul>
-                <li>✅ Changed <code>links_enabled</code> to correct name <code>link_scanning_enabled</code></li>
-                <li>✅ Automod setup in <code>/quicksetup</code> now works without errors</li>
+                <li>
+                  ✅ Changed <code>links_enabled</code> to correct name
+                  <code>link_scanning_enabled</code>
+                </li>
+                <li>
+                  ✅ Automod setup in <code>/quicksetup</code> now works without
+                  errors
+                </li>
               </ul>
             </li>
           </ul>
@@ -508,16 +664,26 @@
             <li>
               <strong>Fixed "Unknown interaction" errors:</strong>
               <ul>
-                <li>✅ Added proper reply deferral before async database operations</li>
-                <li>✅ Security setup button now defers before enabling features</li>
-                <li>✅ Automod setup button now defers before database write</li>
+                <li>
+                  ✅ Added proper reply deferral before async database
+                  operations
+                </li>
+                <li>
+                  ✅ Security setup button now defers before enabling features
+                </li>
+                <li>
+                  ✅ Automod setup button now defers before database write
+                </li>
                 <li>✅ No more interaction timeouts (3 second limit)</li>
               </ul>
             </li>
             <li>
               <strong>Fixed "SQLITE_ERROR: no column named enabled":</strong>
               <ul>
-                <li>✅ Added migration for <code>automod_config.enabled</code> column</li>
+                <li>
+                  ✅ Added migration for
+                  <code>automod_config.enabled</code> column
+                </li>
                 <li>✅ Column defaults to 1 (enabled) for new configs</li>
                 <li>✅ Quicksetup automod button now works correctly</li>
               </ul>
@@ -532,11 +698,22 @@
             <li>
               <strong>Role hierarchy issues now sent to Discord:</strong>
               <ul>
-                <li>❌ <strong>Before:</strong> Long technical explanation cluttered console logs</li>
-                <li>✅ <strong>After:</strong> Clean console + detailed embed sent to alert channel</li>
+                <li>
+                  ❌ <strong>Before:</strong> Long technical explanation
+                  cluttered console logs
+                </li>
+                <li>
+                  ✅ <strong>After:</strong> Clean console + detailed embed sent
+                  to alert channel
+                </li>
                 <li>📋 Shows bot role position vs attacker role position</li>
-                <li>💡 Provides clear solution steps in Discord where admins can see it</li>
-                <li>🔗 Includes link to <code>/security rolecheck</code> command</li>
+                <li>
+                  💡 Provides clear solution steps in Discord where admins can
+                  see it
+                </li>
+                <li>
+                  🔗 Includes link to <code>/security rolecheck</code> command
+                </li>
               </ul>
             </li>
           </ul>
@@ -549,9 +726,16 @@
             <li>
               <strong>Fixed overly-sensitive anti-nuke thresholds:</strong>
               <ul>
-                <li>❌ <strong>Before:</strong> 1 channel deletion triggered anti-nuke</li>
-                <li>✅ <strong>After:</strong> 3+ channels in 5 seconds triggers anti-nuke</li>
-                <li>📊 <strong>Adjusted thresholds:</strong>
+                <li>
+                  ❌ <strong>Before:</strong> 1 channel deletion triggered
+                  anti-nuke
+                </li>
+                <li>
+                  ✅ <strong>After:</strong> 3+ channels in 5 seconds triggers
+                  anti-nuke
+                </li>
+                <li>
+                  📊 <strong>Adjusted thresholds:</strong>
                   <ul>
                     <li>Channels Deleted: 1 → 3</li>
                     <li>Channels Created: 2 → 4</li>
@@ -564,7 +748,9 @@
                     <li>Emojis Created: 5 → 6</li>
                   </ul>
                 </li>
-                <li>✅ No more false positives on legitimate moderation actions</li>
+                <li>
+                  ✅ No more false positives on legitimate moderation actions
+                </li>
                 <li>✅ Still catches actual nuke/raid attempts effectively</li>
               </ul>
             </li>
@@ -576,12 +762,25 @@
           <h3>🔧 Bug Fix - Quicksetup Channel Creation</h3>
           <ul>
             <li>
-              <strong>Fixed "No valid configuration keys provided" error:</strong>
+              <strong
+                >Fixed "No valid configuration keys provided" error:</strong
+              >
               <ul>
-                <li>✅ Changed <code>log_channel_id</code> to correct column name <code>mod_log_channel</code></li>
-                <li>✅ Channel now saves to database successfully after creation</li>
-                <li>✅ Fixed in 3 locations (channel creation, existing channel selection, status display)</li>
-                <li>✅ No more false "failed" messages when channel is created successfully</li>
+                <li>
+                  ✅ Changed <code>log_channel_id</code> to correct column name
+                  <code>mod_log_channel</code>
+                </li>
+                <li>
+                  ✅ Channel now saves to database successfully after creation
+                </li>
+                <li>
+                  ✅ Fixed in 3 locations (channel creation, existing channel
+                  selection, status display)
+                </li>
+                <li>
+                  ✅ No more false "failed" messages when channel is created
+                  successfully
+                </li>
               </ul>
             </li>
           </ul>
@@ -594,9 +793,17 @@
             <li>
               <strong>Fixed "db.run is not a function" error:</strong>
               <ul>
-                <li>✅ Fixed in <code>/quicksetup</code> command (automod setup)</li>
-                <li>✅ Fixed in <code>/suggest</code> command (suggestion submissions)</li>
-                <li>✅ Both now correctly use <code>db.db.run()</code> with proper Promise handling</li>
+                <li>
+                  ✅ Fixed in <code>/quicksetup</code> command (automod setup)
+                </li>
+                <li>
+                  ✅ Fixed in <code>/suggest</code> command (suggestion
+                  submissions)
+                </li>
+                <li>
+                  ✅ Both now correctly use <code>db.db.run()</code> with proper
+                  Promise handling
+                </li>
                 <li>✅ No more unhandled promise rejections</li>
               </ul>
             </li>
@@ -608,10 +815,16 @@
           <h3>✨ Improved Error Messages</h3>
           <ul>
             <li>
-              <strong>Better channel creation feedback:</strong> <code>/quicksetup</code> now provides specific error messages
+              <strong>Better channel creation feedback:</strong>
+              <code>/quicksetup</code> now provides specific error messages
               <ul>
-                <li>✅ Shows exact reason for failure (permissions, access, channel limit)</li>
-                <li>✅ Provides manual setup instructions with alternative command</li>
+                <li>
+                  ✅ Shows exact reason for failure (permissions, access,
+                  channel limit)
+                </li>
+                <li>
+                  ✅ Provides manual setup instructions with alternative command
+                </li>
                 <li>✅ Clearer guidance for server administrators</li>
               </ul>
             </li>
@@ -623,9 +836,13 @@
           <h3>🔧 Database Schema Fix</h3>
           <ul>
             <li>
-              <strong>Fixed missing column error:</strong> Added migration for <code>join_gate_enabled</code> column
+              <strong>Fixed missing column error:</strong> Added migration for
+              <code>join_gate_enabled</code> column
               <ul>
-                <li>✅ Fixed "SQLITE_ERROR: table server_config has no column named join_gate_enabled"</li>
+                <li>
+                  ✅ Fixed "SQLITE_ERROR: table server_config has no column
+                  named join_gate_enabled"
+                </li>
                 <li>✅ Migration automatically runs on bot startup</li>
                 <li>✅ Defaults to 0 (disabled) for existing servers</li>
               </ul>
@@ -638,7 +855,9 @@
           <h3>🐛 Bug Fix - Live Stats Widget</h3>
           <ul>
             <li>
-              <strong>Fixed "Commands Run" and "Uptime" stuck on "Loading..."</strong>
+              <strong
+                >Fixed "Commands Run" and "Uptime" stuck on "Loading..."</strong
+              >
               <ul>
                 <li>✅ Now properly fetches and displays data from API</li>
                 <li>✅ Updates every 30 seconds with real-time stats</li>
@@ -653,15 +872,26 @@
           <h3>🔧 Command Limit Compliance</h3>
           <ul>
             <li>
-              <strong>Removed 2 non-essential commands:</strong> Now under Discord's 100 command limit
+              <strong>Removed 2 non-essential commands:</strong> Now under
+              Discord's 100 command limit
               <ul>
-                <li>❌ Removed <code>/testimonial</code> - testimonials available via website/support</li>
-                <li>❌ Removed <code>/refer</code> - referral system (less critical for security)</li>
-                <li>✅ Total commands: <strong>99</strong> (safely under Discord's limit)</li>
+                <li>
+                  ❌ Removed <code>/testimonial</code> - testimonials available
+                  via website/support
+                </li>
+                <li>
+                  ❌ Removed <code>/refer</code> - referral system (less
+                  critical for security)
+                </li>
+                <li>
+                  ✅ Total commands: <strong>99</strong> (safely under Discord's
+                  limit)
+                </li>
               </ul>
             </li>
             <li>
-              <strong>Fixed command registration:</strong> No more "Maximum number of application commands reached" errors
+              <strong>Fixed command registration:</strong> No more "Maximum
+              number of application commands reached" errors
             </li>
           </ul>
         </div>
@@ -671,13 +901,16 @@
           <h3>🔧 Critical Fix - Bot Startup Error</h3>
           <ul>
             <li>
-              <strong>Fixed PermissionFlagBits typo:</strong> Changed to PermissionFlagsBits (with 's') in quicksetup.js
+              <strong>Fixed PermissionFlagBits typo:</strong> Changed to
+              PermissionFlagsBits (with 's') in quicksetup.js
             </li>
             <li>
-              <strong>Bot now starts successfully:</strong> No more "Cannot read properties of undefined" error
+              <strong>Bot now starts successfully:</strong> No more "Cannot read
+              properties of undefined" error
             </li>
             <li>
-              <strong>Fixed all instances:</strong> Import statement and 3 usage locations
+              <strong>Fixed all instances:</strong> Import statement and 3 usage
+              locations
             </li>
           </ul>
         </div>
@@ -687,10 +920,13 @@
           <h3>🔧 Fix - Commands Stat Query</h3>
           <ul>
             <li>
-              <strong>Fixed database column name:</strong> Changed SUM(commands_run) to SUM(commands_used) to match actual table schema
+              <strong>Fixed database column name:</strong> Changed
+              SUM(commands_run) to SUM(commands_used) to match actual table
+              schema
             </li>
             <li>
-              <strong>Commands Run metric now works:</strong> Pulls correct total from user_stats table
+              <strong>Commands Run metric now works:</strong> Pulls correct
+              total from user_stats table
             </li>
           </ul>
         </div>
@@ -700,25 +936,34 @@
           <h3>✨ Enhancement - Complete Stats Dashboard</h3>
           <ul>
             <li>
-              <strong>Added 2 more metrics:</strong> Commands Run (blue) and Uptime (green)
+              <strong>Added 2 more metrics:</strong> Commands Run (blue) and
+              Uptime (green)
             </li>
             <li>
-              <strong>Total of 8 live metrics now:</strong> Status, Servers, Users, Raids, Nukes, Threats, Commands, Uptime
+              <strong>Total of 8 live metrics now:</strong> Status, Servers,
+              Users, Raids, Nukes, Threats, Commands, Uptime
             </li>
             <li>
-              <strong>Commands Run stat:</strong> Pulled from user_stats table (total commands executed)
+              <strong>Commands Run stat:</strong> Pulled from user_stats table
+              (total commands executed)
             </li>
             <li>
-              <strong>Uptime display:</strong> Shows days uptime (e.g., "5d") or "24h+" as fallback
+              <strong>Uptime display:</strong> Shows days uptime (e.g., "5d") or
+              "24h+" as fallback
             </li>
             <li>
-              <strong>Balanced layout:</strong> 8 metrics fills the widget nicely - looks professional
+              <strong>Balanced layout:</strong> 8 metrics fills the widget
+              nicely - looks professional
             </li>
             <li>
-              <strong>Updated API:</strong> /api/v1/stats now includes commandsRun field
+              <strong>Updated API:</strong> /api/v1/stats now includes
+              commandsRun field
             </li>
           </ul>
-          <p><strong>Visual Impact:</strong> Homepage now shows comprehensive bot activity at a glance!</p>
+          <p>
+            <strong>Visual Impact:</strong> Homepage now shows comprehensive bot
+            activity at a glance!
+          </p>
         </div>
 
         <div class="changelog-entry">
@@ -726,19 +971,23 @@
           <h3>🎨 Fix - Navigation Dropdown Menu</h3>
           <ul>
             <li>
-              <strong>Fixed dropdown menu layout:</strong> Changed from 6 columns to 3 columns for better fit
+              <strong>Fixed dropdown menu layout:</strong> Changed from 6
+              columns to 3 columns for better fit
             </li>
             <li>
-              <strong>Reduced width:</strong> 900px → 750px (fits better on screens)
+              <strong>Reduced width:</strong> 900px → 750px (fits better on
+              screens)
             </li>
             <li>
               <strong>Fixed max height:</strong> 70vh → 500px (consistent size)
             </li>
             <li>
-              <strong>Improved scrolling:</strong> Added custom scrollbar styling (purple gradient)
+              <strong>Improved scrolling:</strong> Added custom scrollbar
+              styling (purple gradient)
             </li>
             <li>
-              <strong>Better UX:</strong> Menu now scrollable and doesn't take up half the screen
+              <strong>Better UX:</strong> Menu now scrollable and doesn't take
+              up half the screen
             </li>
           </ul>
         </div>
@@ -748,84 +997,120 @@
           <h3>✨ Enhancement - Live Stats Widget Expansion</h3>
           <ul>
             <li>
-              <strong>3 new security metrics added:</strong> Raids Stopped, Nukes Blocked, Threats Detected
+              <strong>3 new security metrics added:</strong> Raids Stopped,
+              Nukes Blocked, Threats Detected
             </li>
             <li>
-              <strong>Real-time database queries:</strong> Stats pulled from anti_raid_logs, anti_nuke_logs, and security_logs
+              <strong>Real-time database queries:</strong> Stats pulled from
+              anti_raid_logs, anti_nuke_logs, and security_logs
             </li>
             <li>
-              <strong>Color-coded display:</strong> Red (raids), Orange (nukes), Purple (threats) for visual impact
+              <strong>Color-coded display:</strong> Red (raids), Orange (nukes),
+              Purple (threats) for visual impact
             </li>
             <li>
-              <strong>Updated API endpoint:</strong> GET /api/v1/stats now includes raidsBlocked, nukesBlocked, threatsDetected
+              <strong>Updated API endpoint:</strong> GET /api/v1/stats now
+              includes raidsBlocked, nukesBlocked, threatsDetected
             </li>
             <li>
-              <strong>Homepage widget:</strong> Now shows 6 metrics total (servers, users, raids, nukes, threats, status)
+              <strong>Homepage widget:</strong> Now shows 6 metrics total
+              (servers, users, raids, nukes, threats, status)
             </li>
           </ul>
-          <p><strong>EXCEEDS WICK:</strong> Live security metrics visible to everyone - shows bot's real impact!</p>
+          <p>
+            <strong>EXCEEDS WICK:</strong> Live security metrics visible to
+            everyone - shows bot's real impact!
+          </p>
         </div>
 
         <div class="changelog-entry">
           <h2>Version 3.7.0 - December 4, 2025</h2>
           <h3>🎉 MAJOR FEATURE UPDATE: 9 New Additions</h3>
           <p>
-            This update adds significant improvements across the website, API, and bot with features focused
-            on user experience, developer tools, and better onboarding.
+            This update adds significant improvements across the website, API,
+            and bot with features focused on user experience, developer tools,
+            and better onboarding.
           </p>
 
           <h3>🌐 Website Features (3 New)</h3>
           <ul>
             <li>
-              <strong>Live Stats Widget:</strong> Real-time server count on homepage with auto-refresh every 30 seconds ✅ (was already implemented, verified working)
+              <strong>Live Stats Widget:</strong> Real-time server count on
+              homepage with auto-refresh every 30 seconds ✅ (was already
+              implemented, verified working)
             </li>
             <li>
-              <strong>Feature Comparison Table:</strong> Detailed side-by-side table (Nexus vs Wick) showing 12 features, pricing, and capabilities
+              <strong>Feature Comparison Table:</strong> Detailed side-by-side
+              table (Nexus vs Wick) showing 12 features, pricing, and
+              capabilities
             </li>
             <li>
-              <strong>Server Showcase Gallery:</strong> New showcase.html page displaying servers using Nexus with stats, badges, and submit CTA
+              <strong>Server Showcase Gallery:</strong> New showcase.html page
+              displaying servers using Nexus with stats, badges, and submit CTA
             </li>
           </ul>
 
           <h3>🔌 API Endpoints (3 New)</h3>
           <ul>
             <li>
-              <strong>GET /api/v1/stats:</strong> Public bot statistics (servers, users, commands, uptime, version, ping, features)
+              <strong>GET /api/v1/stats:</strong> Public bot statistics
+              (servers, users, commands, uptime, version, ping, features)
             </li>
             <li>
-              <strong>GET /api/v1/commands:</strong> Complete command list with descriptions, categories, and options count
+              <strong>GET /api/v1/commands:</strong> Complete command list with
+              descriptions, categories, and options count
             </li>
             <li>
-              <strong>GET /api/v1/health:</strong> Health check endpoint with uptime, memory usage, websocket status, and system metrics
+              <strong>GET /api/v1/health:</strong> Health check endpoint with
+              uptime, memory usage, websocket status, and system metrics
             </li>
           </ul>
 
           <h3>🤖 Bot Commands (3 New)</h3>
           <ul>
             <li>
-              <strong>/botinfo:</strong> Comprehensive bot information embed showing stats, performance, security features, technical details, and links
+              <strong>/botinfo:</strong> Comprehensive bot information embed
+              showing stats, performance, security features, technical details,
+              and links
             </li>
             <li>
-              <strong>/quicksetup:</strong> Interactive setup wizard with buttons to enable security, configure logging, and setup automod in minutes
+              <strong>/quicksetup:</strong> Interactive setup wizard with
+              buttons to enable security, configure logging, and setup automod
+              in minutes
             </li>
             <li>
-              <strong>/suggest:</strong> Modal-based feature suggestion system that saves to database, sends to webhook, and allows community voting
+              <strong>/suggest:</strong> Modal-based feature suggestion system
+              that saves to database, sends to webhook, and allows community
+              voting
             </li>
           </ul>
 
           <h3>💾 Database Changes</h3>
           <ul>
             <li>
-              <strong>Migration added:</strong> Suggestions table enhanced with title, description, use_case, votes, and created_at columns
+              <strong>Migration added:</strong> Suggestions table enhanced with
+              title, description, use_case, votes, and created_at columns
             </li>
           </ul>
 
           <h3>📊 Impact</h3>
           <ul>
-            <li><strong>Total new code:</strong> 3 new website features, 3 API endpoints, 3 bot commands</li>
-            <li><strong>User engagement:</strong> Better onboarding with /quicksetup, feedback system with /suggest</li>
-            <li><strong>Developer tools:</strong> Public API for stats, commands, and health monitoring</li>
-            <li><strong>Marketing value:</strong> Comparison table and server showcase for conversions</li>
+            <li>
+              <strong>Total new code:</strong> 3 new website features, 3 API
+              endpoints, 3 bot commands
+            </li>
+            <li>
+              <strong>User engagement:</strong> Better onboarding with
+              /quicksetup, feedback system with /suggest
+            </li>
+            <li>
+              <strong>Developer tools:</strong> Public API for stats, commands,
+              and health monitoring
+            </li>
+            <li>
+              <strong>Marketing value:</strong> Comparison table and server
+              showcase for conversions
+            </li>
           </ul>
         </div>
 
@@ -834,25 +1119,33 @@
           <h3>🌐 New Feature - Public Alerts Demo</h3>
           <ul>
             <li>
-              <strong>Moved alerts.html to docs/:</strong> Now accessible on GitHub Pages as a public demo
+              <strong>Moved alerts.html to docs/:</strong> Now accessible on
+              GitHub Pages as a public demo
             </li>
             <li>
-              <strong>Demo mode with sample data:</strong> Shows 8 example alerts (raids, threats, automod, screening)
+              <strong>Demo mode with sample data:</strong> Shows 8 example
+              alerts (raids, threats, automod, screening)
             </li>
             <li>
-              <strong>Added to Tools menu:</strong> Accessible from main navigation → Tools → Alerts Demo
+              <strong>Added to Tools menu:</strong> Accessible from main
+              navigation → Tools → Alerts Demo
             </li>
             <li>
-              <strong>Public URL:</strong> https://azzraya.github.io/Nexus/alerts.html
+              <strong>Public URL:</strong>
+              https://azzraya.github.io/Nexus/alerts.html
             </li>
             <li>
-              <strong>Marketing value:</strong> Users can see the alerts feature before installing
+              <strong>Marketing value:</strong> Users can see the alerts feature
+              before installing
             </li>
             <li>
               <strong>Added navigation bar:</strong> Consistent with other pages
             </li>
           </ul>
-          <p><strong>Note:</strong> For real-time alerts with your actual server data, install the dashboard locally (dashboard/server.js).</p>
+          <p>
+            <strong>Note:</strong> For real-time alerts with your actual server
+            data, install the dashboard locally (dashboard/server.js).
+          </p>
         </div>
 
         <div class="changelog-entry">
@@ -860,24 +1153,39 @@
           <h3>✨ Enhancement - Dynamic Version Display</h3>
           <ul>
             <li>
-              <strong>Single source of truth:</strong> All version displays now read from package.json dynamically
+              <strong>Single source of truth:</strong> All version displays now
+              read from package.json dynamically
             </li>
             <li>
-              <strong>No more hardcoded versions:</strong> Version automatically updates everywhere when package.json changes
+              <strong>No more hardcoded versions:</strong> Version automatically
+              updates everywhere when package.json changes
             </li>
             <li>
               <strong>Files updated:</strong>
               <ul>
-                <li>events/guildCreate.js - now uses require("../package.json").version</li>
-                <li>events/guildDelete.js - now uses require("../package.json").version</li>
-                <li>utils/smartStatus.js - now uses require("../package.json").version</li>
+                <li>
+                  events/guildCreate.js - now uses
+                  require("../package.json").version
+                </li>
+                <li>
+                  events/guildDelete.js - now uses
+                  require("../package.json").version
+                </li>
+                <li>
+                  utils/smartStatus.js - now uses
+                  require("../package.json").version
+                </li>
               </ul>
             </li>
             <li>
-              <strong>Better maintainability:</strong> Update version once, changes everywhere
+              <strong>Better maintainability:</strong> Update version once,
+              changes everywhere
             </li>
           </ul>
-          <p><strong>Developer note:</strong> This is proper software engineering - single source of truth!</p>
+          <p>
+            <strong>Developer note:</strong> This is proper software engineering
+            - single source of truth!
+          </p>
         </div>
 
         <div class="changelog-entry">
@@ -885,13 +1193,16 @@
           <h3>🔧 Fix - Version Display</h3>
           <ul>
             <li>
-              <strong>Updated hardcoded version numbers:</strong> All bot status messages now show v3.5.8
+              <strong>Updated hardcoded version numbers:</strong> All bot status
+              messages now show v3.5.8
             </li>
             <li>
-              <strong>Fixed locations:</strong> guildCreate, guildDelete, smartStatus footers
+              <strong>Fixed locations:</strong> guildCreate, guildDelete,
+              smartStatus footers
             </li>
             <li>
-              <strong>Consistent branding:</strong> Version now matches package.json across all displays
+              <strong>Consistent branding:</strong> Version now matches
+              package.json across all displays
             </li>
           </ul>
         </div>
@@ -901,25 +1212,35 @@
           <h3>✨ Enhancement - Real-Time Alerts Dashboard</h3>
           <ul>
             <li>
-              <strong>Connected to real data:</strong> Alerts dashboard now shows actual security events from your servers
+              <strong>Connected to real data:</strong> Alerts dashboard now
+              shows actual security events from your servers
             </li>
             <li>
-              <strong>New API endpoint:</strong> GET /api/alerts - pulls from security_logs, anti_raid_logs, automod_violations, member_screening_logs
+              <strong>New API endpoint:</strong> GET /api/alerts - pulls from
+              security_logs, anti_raid_logs, automod_violations,
+              member_screening_logs
             </li>
             <li>
-              <strong>Live security feed:</strong> Shows threats, raids, automod actions, and screening results from last 24 hours
+              <strong>Live security feed:</strong> Shows threats, raids, automod
+              actions, and screening results from last 24 hours
             </li>
             <li>
-              <strong>Multi-server aggregation:</strong> Combines alerts from all servers you manage
+              <strong>Multi-server aggregation:</strong> Combines alerts from
+              all servers you manage
             </li>
             <li>
-              <strong>Severity filtering:</strong> Filter by critical, warning, info, or success
+              <strong>Severity filtering:</strong> Filter by critical, warning,
+              info, or success
             </li>
             <li>
-              <strong>Auto-refresh:</strong> Dashboard updates every 5 seconds with new events
+              <strong>Auto-refresh:</strong> Dashboard updates every 5 seconds
+              with new events
             </li>
           </ul>
-          <p><strong>EXCEEDS WICK:</strong> Live security feed across all servers - Wick has nothing like this!</p>
+          <p>
+            <strong>EXCEEDS WICK:</strong> Live security feed across all servers
+            - Wick has nothing like this!
+          </p>
         </div>
 
         <div class="changelog-entry">
@@ -927,19 +1248,24 @@
           <h3>✅ Fix - Discord Command Limit</h3>
           <ul>
             <li>
-              <strong>Fixed command registration errors:</strong> Removed 3 non-essential fun commands to get under Discord's 100 command limit
+              <strong>Fixed command registration errors:</strong> Removed 3
+              non-essential fun commands to get under Discord's 100 command
+              limit
             </li>
             <li>
-              <strong>Removed commands:</strong> /coffee, /inspire, /vibe (fun commands not essential for security bot)
+              <strong>Removed commands:</strong> /coffee, /inspire, /vibe (fun
+              commands not essential for security bot)
             </li>
             <li>
               <strong>New total:</strong> 99 commands (safely under 100 limit)
             </li>
             <li>
-              <strong>All servers can now register commands:</strong> No more "Maximum number of application commands reached" errors
+              <strong>All servers can now register commands:</strong> No more
+              "Maximum number of application commands reached" errors
             </li>
             <li>
-              <strong>Focus on core features:</strong> Keeping all security, moderation, and utility commands
+              <strong>Focus on core features:</strong> Keeping all security,
+              moderation, and utility commands
             </li>
           </ul>
         </div>
@@ -949,25 +1275,31 @@
           <h3>✅ Fix - Database Error Handling</h3>
           <ul>
             <li>
-              <strong>Fixed database startup errors:</strong> getAllScheduledActions and getDueScheduledActions now gracefully handle missing tables
+              <strong>Fixed database startup errors:</strong>
+              getAllScheduledActions and getDueScheduledActions now gracefully
+              handle missing tables
             </li>
             <li>
-              <strong>No more SQL errors on startup:</strong> Returns empty arrays instead of throwing errors
+              <strong>No more SQL errors on startup:</strong> Returns empty
+              arrays instead of throwing errors
             </li>
             <li>
-              <strong>Better error handling:</strong> All database queries now have proper fallbacks
+              <strong>Better error handling:</strong> All database queries now
+              have proper fallbacks
             </li>
           </ul>
           <h3>⚠️ Known Issue - Command Limit</h3>
           <ul>
             <li>
-              <strong>Discord limit reached:</strong> Bot has 102 commands but Discord allows maximum 100 per application
+              <strong>Discord limit reached:</strong> Bot has 102 commands but
+              Discord allows maximum 100 per application
             </li>
             <li>
               <strong>Impact:</strong> Commands fail to register in some servers
             </li>
             <li>
-              <strong>Solution needed:</strong> Will consolidate commands in next update or make some optional
+              <strong>Solution needed:</strong> Will consolidate commands in
+              next update or make some optional
             </li>
           </ul>
         </div>
@@ -977,13 +1309,17 @@
           <h3>🔧 Critical Fix - Database Migration</h3>
           <ul>
             <li>
-              <strong>Fixed scheduled_actions table conflict:</strong> Database had duplicate table definitions causing "no such column: status" error
+              <strong>Fixed scheduled_actions table conflict:</strong> Database
+              had duplicate table definitions causing "no such column: status"
+              error
             </li>
             <li>
-              <strong>Added automatic migration:</strong> Bot now automatically updates old table schema to new enhanced version
+              <strong>Added automatic migration:</strong> Bot now automatically
+              updates old table schema to new enhanced version
             </li>
             <li>
-              <strong>Backward compatible:</strong> Existing scheduled messages are preserved
+              <strong>Backward compatible:</strong> Existing scheduled messages
+              are preserved
             </li>
             <li>
               <strong>Clean startup:</strong> No more SQL errors on bot start
@@ -996,22 +1332,30 @@
           <h3>✅ Enhancement - Chart Generation Alternative</h3>
           <ul>
             <li>
-              <strong>Switched to QuickChart.io API:</strong> Cloud-based chart generation that works on ALL platforms (Windows, Mac, Linux)
+              <strong>Switched to QuickChart.io API:</strong> Cloud-based chart
+              generation that works on ALL platforms (Windows, Mac, Linux)
             </li>
             <li>
-              <strong>Zero native dependencies:</strong> No C++ compilation required - works out of the box
+              <strong>Zero native dependencies:</strong> No C++ compilation
+              required - works out of the box
             </li>
             <li>
-              <strong>Free service:</strong> QuickChart.io is free and generates professional Chart.js images
+              <strong>Free service:</strong> QuickChart.io is free and generates
+              professional Chart.js images
             </li>
             <li>
-              <strong>Better reliability:</strong> No build tool issues, no GTK requirements
+              <strong>Better reliability:</strong> No build tool issues, no GTK
+              requirements
             </li>
             <li>
-              <strong>Full chart support restored:</strong> Member growth, activity heatmaps, threat distributions all work perfectly
+              <strong>Full chart support restored:</strong> Member growth,
+              activity heatmaps, threat distributions all work perfectly
             </li>
           </ul>
-          <p><strong>Technical:</strong> Uses existing axios dependency for API calls. Generates high-quality PNG charts on-demand.</p>
+          <p>
+            <strong>Technical:</strong> Uses existing axios dependency for API
+            calls. Generates high-quality PNG charts on-demand.
+          </p>
         </div>
 
         <div class="changelog-entry">
@@ -1019,19 +1363,31 @@
           <h3>🔧 Fix - Windows Compatibility</h3>
           <ul>
             <li>
-              <strong>Removed chartjs-node-canvas dependency:</strong> This package requires native C++ compilation which causes issues on Windows systems
+              <strong>Removed chartjs-node-canvas dependency:</strong> This
+              package requires native C++ compilation which causes issues on
+              Windows systems
             </li>
             <li>
-              <strong>Made chart generation optional:</strong> Chart features will work if the package is manually installed, but bot works perfectly without it
+              <strong>Made chart generation optional:</strong> Chart features
+              will work if the package is manually installed, but bot works
+              perfectly without it
             </li>
             <li>
-              <strong>No functionality lost:</strong> All analytics features still work, just provide text-based output instead of image charts
+              <strong>No functionality lost:</strong> All analytics features
+              still work, just provide text-based output instead of image charts
             </li>
             <li>
-              <strong>Easier installation:</strong> `npm install` now works on all platforms without build tools
+              <strong>Easier installation:</strong> `npm install` now works on
+              all platforms without build tools
             </li>
           </ul>
-          <p><em>Note: Chart generation is an optional enhancement. If you want image charts, you can manually install chartjs-node-canvas with GTK dependencies.</em></p>
+          <p>
+            <em
+              >Note: Chart generation is an optional enhancement. If you want
+              image charts, you can manually install chartjs-node-canvas with
+              GTK dependencies.</em
+            >
+          </p>
         </div>
 
         <div class="changelog-entry">

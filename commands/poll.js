@@ -12,57 +12,54 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName("poll")
     .setDescription("Create and manage polls")
-    .addSubcommand(subcommand =>
+    .addSubcommand((subcommand) =>
       subcommand
         .setName("create")
         .setDescription("Create a new poll")
-        .addStringOption(option =>
+        .addStringOption((option) =>
           option
             .setName("question")
             .setDescription("Poll question")
             .setRequired(true)
             .setMaxLength(256)
         )
-        .addStringOption(option =>
+        .addStringOption((option) =>
           option
             .setName("options")
             .setDescription("Poll options separated by semicolons (;)")
             .setRequired(true)
         )
-        .addIntegerOption(option =>
-          option
-            .setName("duration")
-            .setDescription("Poll duration in minutes (default: 60)")
-            .setMinValue(1)
-            .setMaxValue(10080) // 1 week
+        .addIntegerOption(
+          (option) =>
+            option
+              .setName("duration")
+              .setDescription("Poll duration in minutes (default: 60)")
+              .setMinValue(1)
+              .setMaxValue(10080) // 1 week
         )
-        .addBooleanOption(option =>
-          option
-            .setName("anonymous")
-            .setDescription("Hide who voted for what")
+        .addBooleanOption((option) =>
+          option.setName("anonymous").setDescription("Hide who voted for what")
         )
-        .addBooleanOption(option =>
-          option
-            .setName("multiple")
-            .setDescription("Allow multiple choices")
+        .addBooleanOption((option) =>
+          option.setName("multiple").setDescription("Allow multiple choices")
         )
     )
-    .addSubcommand(subcommand =>
+    .addSubcommand((subcommand) =>
       subcommand
         .setName("end")
         .setDescription("End a poll early")
-        .addStringOption(option =>
+        .addStringOption((option) =>
           option
             .setName("message_id")
             .setDescription("Poll message ID")
             .setRequired(true)
         )
     )
-    .addSubcommand(subcommand =>
+    .addSubcommand((subcommand) =>
       subcommand
         .setName("results")
         .setDescription("View poll results")
-        .addStringOption(option =>
+        .addStringOption((option) =>
           option
             .setName("message_id")
             .setDescription("Poll message ID")
@@ -89,111 +86,142 @@ module.exports = {
       const anonymous = interaction.options.getBoolean("anonymous") || false;
       const multiple = interaction.options.getBoolean("multiple") || false;
 
-      const options = optionsStr.split(";").map(o => o.trim()).filter(o => o.length > 0);
+      const options = optionsStr
+        .split(";")
+        .map((o) => o.trim())
+        .filter((o) => o.length > 0);
 
-    if (options.length < 2) {
-      return interaction.reply({
-        content: "❌ You need at least 2 options! Separate them with semicolons (;)",
-        ephemeral: true
+      if (options.length < 2) {
+        return interaction.reply({
+          content:
+            "❌ You need at least 2 options! Separate them with semicolons (;)",
+          ephemeral: true,
+        });
+      }
+
+      if (options.length > 10) {
+        return interaction.reply({
+          content: "❌ Maximum 10 options allowed!",
+          ephemeral: true,
+        });
+      }
+
+      const emojis = [
+        "1️⃣",
+        "2️⃣",
+        "3️⃣",
+        "4️⃣",
+        "5️⃣",
+        "6️⃣",
+        "7️⃣",
+        "8️⃣",
+        "9️⃣",
+        "🔟",
+      ];
+
+      const embed = new EmbedBuilder()
+        .setTitle(`📊 ${question}`)
+        .setDescription(
+          options.map((opt, i) => `${emojis[i]} ${opt}`).join("\n\n")
+        )
+        .setColor(0x667eea)
+        .addFields(
+          {
+            name: "Multiple Choices",
+            value: multiple ? "✅ Yes" : "❌ No",
+            inline: true,
+          },
+          {
+            name: "Anonymous",
+            value: anonymous ? "✅ Yes" : "❌ No",
+            inline: true,
+          }
+        )
+        .setFooter({
+          text: `Poll by ${interaction.user.username} • Use /poll end <message_id> to end poll`,
+        })
+        .setTimestamp();
+
+      const message = await interaction.reply({
+        embeds: [embed],
+        fetchReply: true,
       });
-    }
 
-    if (options.length > 10) {
-      return interaction.reply({
-        content: "❌ Maximum 10 options allowed!",
-        ephemeral: true
-      });
-    }
+      // Add reactions
+      for (let i = 0; i < options.length; i++) {
+        await message.react(emojis[i]);
+      }
 
-    const emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"];
+      // Store poll data
+      const pollData = {
+        messageId: message.id,
+        channelId: interaction.channel.id,
+        guildId: interaction.guild.id,
+        question,
+        options,
+        creatorId: interaction.user.id,
+        duration: 0,
+        anonymous,
+        multiple,
+        endTime: 0,
+        active: true,
+      };
 
-    const embed = new EmbedBuilder()
-      .setTitle(`📊 ${question}`)
-      .setDescription(
-        options.map((opt, i) => `${emojis[i]} ${opt}`).join("\n\n")
-      )
-      .setColor(0x667eea)
-      .addFields(
-        { name: "Multiple Choices", value: multiple ? "✅ Yes" : "❌ No", inline: true },
-        { name: "Anonymous", value: anonymous ? "✅ Yes" : "❌ No", inline: true }
-      )
-      .setFooter({ text: `Poll by ${interaction.user.username} • Use /poll end <message_id> to end poll` })
-      .setTimestamp();
+      await this.storePoll(pollData);
 
-    const message = await interaction.reply({
-      embeds: [embed],
-      fetchReply: true
-    });
-
-    // Add reactions
-    for (let i = 0; i < options.length; i++) {
-      await message.react(emojis[i]);
-    }
-
-    // Store poll data
-    const pollData = {
-      messageId: message.id,
-      channelId: interaction.channel.id,
-      guildId: interaction.guild.id,
-      question,
-      options,
-      creatorId: interaction.user.id,
-      duration: 0,
-      anonymous,
-      multiple,
-      endTime: 0,
-      active: true
-    };
-
-    await this.storePoll(pollData);
-
-    // Note: Polls auto-expire but need manual ending with /poll end
-    // Auto-ending removed due to client reference issues in setTimeout
+      // Note: Polls auto-expire but need manual ending with /poll end
+      // Auto-ending removed due to client reference issues in setTimeout
     } catch (error) {
-      console.error('[Poll] Error creating poll:', error);
-      
+      console.error("[Poll] Error creating poll:", error);
+
       if (!interaction.replied && !interaction.deferred) {
-        await interaction.reply({
-          content: `❌ Failed to create poll: ${error.message}`,
-          ephemeral: true
-        }).catch(() => {});
+        await interaction
+          .reply({
+            content: `❌ Failed to create poll: ${error.message}`,
+            ephemeral: true,
+          })
+          .catch(() => {});
       } else {
-        await interaction.editReply({
-          content: `❌ Failed to create poll: ${error.message}`
-        }).catch(() => {});
+        await interaction
+          .editReply({
+            content: `❌ Failed to create poll: ${error.message}`,
+          })
+          .catch(() => {});
       }
     }
   },
 
   async handleEnd(interaction) {
-    if (!interaction.member.permissions.has(PermissionFlagsBits.ManageMessages)) {
+    if (
+      !interaction.member.permissions.has(PermissionFlagsBits.ManageMessages)
+    ) {
       return interaction.reply({
         content: "❌ You need Manage Messages permission to end polls!",
-        ephemeral: true
+        ephemeral: true,
       });
     }
 
     const messageId = interaction.options.getString("message_id");
-    
+
     try {
       const message = await interaction.channel.messages.fetch(messageId);
       await this.endPoll(message, interaction.guild.id);
-      
+
       await interaction.reply({
         content: "✅ Poll ended!",
-        ephemeral: true
+        ephemeral: true,
       });
     } catch (error) {
       await interaction.reply({
         content: `❌ Error: ${error.message}`,
-        ephemeral: true
+        ephemeral: true,
       });
     }
   },
 
   async handleResults(interaction) {
     const messageId = interaction.options.getString("message_id");
-    
+
     try {
       const message = await interaction.channel.messages.fetch(messageId);
       const pollData = await this.getPoll(messageId, interaction.guild.id);
@@ -201,11 +229,22 @@ module.exports = {
       if (!pollData) {
         return interaction.reply({
           content: "❌ Poll data not found!",
-          ephemeral: true
+          ephemeral: true,
         });
       }
 
-      const emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"];
+      const emojis = [
+        "1️⃣",
+        "2️⃣",
+        "3️⃣",
+        "4️⃣",
+        "5️⃣",
+        "6️⃣",
+        "7️⃣",
+        "8️⃣",
+        "9️⃣",
+        "🔟",
+      ];
       const reactions = message.reactions.cache;
 
       const results = [];
@@ -223,11 +262,16 @@ module.exports = {
       const embed = new EmbedBuilder()
         .setTitle(`📊 Poll Results: ${pollData.question}`)
         .setDescription(
-          results.map((r, i) => {
-            const percentage = totalVotes > 0 ? Math.floor((r.votes / totalVotes) * 100) : 0;
-            const bar = "▓".repeat(Math.floor(percentage / 10)) + "░".repeat(10 - Math.floor(percentage / 10));
-            return `**${i + 1}.** ${r.option}\n${bar} ${r.votes} votes (${percentage}%)`;
-          }).join("\n\n")
+          results
+            .map((r, i) => {
+              const percentage =
+                totalVotes > 0 ? Math.floor((r.votes / totalVotes) * 100) : 0;
+              const bar =
+                "▓".repeat(Math.floor(percentage / 10)) +
+                "░".repeat(10 - Math.floor(percentage / 10));
+              return `**${i + 1}.** ${r.option}\n${bar} ${r.votes} votes (${percentage}%)`;
+            })
+            .join("\n\n")
         )
         .setColor(0x00ff88)
         .addFields(
@@ -240,7 +284,7 @@ module.exports = {
     } catch (error) {
       await interaction.reply({
         content: "❌ Could not fetch poll results!",
-        ephemeral: true
+        ephemeral: true,
       });
     }
   },
@@ -250,8 +294,18 @@ module.exports = {
     if (!pollData || !pollData.active) return;
 
     try {
-
-      const emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"];
+      const emojis = [
+        "1️⃣",
+        "2️⃣",
+        "3️⃣",
+        "4️⃣",
+        "5️⃣",
+        "6️⃣",
+        "7️⃣",
+        "8️⃣",
+        "9️⃣",
+        "🔟",
+      ];
       const reactions = message.reactions.cache;
 
       const results = [];
@@ -268,12 +322,18 @@ module.exports = {
 
       const embed = new EmbedBuilder()
         .setTitle(`📊 ${pollData.question}`)
-        .setDescription("**Poll Ended!**\n\n" +
-          results.map((r, i) => {
-            const percentage = totalVotes > 0 ? Math.floor((r.votes / totalVotes) * 100) : 0;
-            const bar = "▓".repeat(Math.floor(percentage / 10)) + "░".repeat(10 - Math.floor(percentage / 10));
-            return `${emojis[i]} ${r.option}\n${bar} ${r.votes} votes (${percentage}%)`;
-          }).join("\n\n")
+        .setDescription(
+          "**Poll Ended!**\n\n" +
+            results
+              .map((r, i) => {
+                const percentage =
+                  totalVotes > 0 ? Math.floor((r.votes / totalVotes) * 100) : 0;
+                const bar =
+                  "▓".repeat(Math.floor(percentage / 10)) +
+                  "░".repeat(10 - Math.floor(percentage / 10));
+                return `${emojis[i]} ${r.option}\n${bar} ${r.votes} votes (${percentage}%)`;
+              })
+              .join("\n\n")
         )
         .setColor(0xff0000)
         .addFields(
@@ -307,7 +367,7 @@ module.exports = {
           pollData.anonymous ? 1 : 0,
           pollData.multiple ? 1 : 0,
           pollData.endTime,
-          1
+          1,
         ],
         (err) => {
           if (err) reject(err);
@@ -346,5 +406,5 @@ module.exports = {
         }
       );
     });
-  }
+  },
 };

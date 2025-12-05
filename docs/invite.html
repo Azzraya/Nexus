@@ -1,160 +1,174 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Redirecting to Discord... | Nexus</title>
-    <link rel="icon" type="image/png" href="https://cdn.discordapp.com/avatars/1444737244947443773/1c28215e501bc8ef6e04c1fb2a8ae1ed.png">
+    <link
+      rel="icon"
+      type="image/png"
+      href="https://cdn.discordapp.com/avatars/1444737244947443773/1c28215e501bc8ef6e04c1fb2a8ae1ed.png"
+    />
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: white;
-        }
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: white;
+      }
 
-        .redirect-container {
-            text-align: center;
-            max-width: 500px;
-            padding: 40px;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            border: 2px solid rgba(255, 255, 255, 0.2);
-        }
+      .redirect-container {
+        text-align: center;
+        max-width: 500px;
+        padding: 40px;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+      }
 
-        .logo {
-            width: 100px;
-            height: 100px;
-            margin: 0 auto 30px;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 3rem;
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            animation: pulse 2s ease-in-out infinite;
-        }
+      .logo {
+        width: 100px;
+        height: 100px;
+        margin: 0 auto 30px;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        animation: pulse 2s ease-in-out infinite;
+      }
 
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
+      @keyframes pulse {
+        0%,
+        100% {
+          transform: scale(1);
         }
+        50% {
+          transform: scale(1.05);
+        }
+      }
 
-        h1 {
-            font-size: 2rem;
-            margin-bottom: 15px;
-            background: linear-gradient(135deg, #fff 0%, #b794f6 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
+      h1 {
+        font-size: 2rem;
+        margin-bottom: 15px;
+        background: linear-gradient(135deg, #fff 0%, #b794f6 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
 
-        p {
-            font-size: 1.1rem;
-            opacity: 0.9;
-            margin-bottom: 30px;
-        }
+      p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        margin-bottom: 30px;
+      }
 
-        .spinner {
-            width: 50px;
-            height: 50px;
-            margin: 0 auto;
-            border: 4px solid rgba(255, 255, 255, 0.3);
-            border-top: 4px solid white;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
+      .spinner {
+        width: 50px;
+        height: 50px;
+        margin: 0 auto;
+        border: 4px solid rgba(255, 255, 255, 0.3);
+        border-top: 4px solid white;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
         }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
 
-        .source-badge {
-            display: inline-block;
-            margin-top: 20px;
-            padding: 10px 20px;
-            background: rgba(16, 185, 129, 0.2);
-            border: 2px solid rgba(16, 185, 129, 0.5);
-            border-radius: 10px;
-            font-size: 0.9rem;
-            font-weight: 600;
-        }
+      .source-badge {
+        display: inline-block;
+        margin-top: 20px;
+        padding: 10px 20px;
+        background: rgba(16, 185, 129, 0.2);
+        border: 2px solid rgba(16, 185, 129, 0.5);
+        border-radius: 10px;
+        font-size: 0.9rem;
+        font-weight: 600;
+      }
 
-        .manual-link {
-            margin-top: 20px;
-            padding: 12px 24px;
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            display: inline-block;
-            transition: all 0.3s;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-        }
+      .manual-link {
+        margin-top: 20px;
+        padding: 12px 24px;
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        display: inline-block;
+        transition: all 0.3s;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+      }
 
-        .manual-link:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: translateY(-2px);
-        }
+      .manual-link:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: translateY(-2px);
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="redirect-container">
-        <div class="logo">🛡️</div>
-        <h1>Redirecting to Discord...</h1>
-        <p>You'll be taken to Discord to invite Nexus to your server</p>
-        <div class="spinner"></div>
-        <div id="sourceInfo"></div>
-        <p style="margin-top: 30px; font-size: 0.9rem; opacity: 0.7;">
-            If you're not redirected automatically,<br>
-            <a href="#" id="manualLink" class="manual-link">Click here to continue</a>
-        </p>
+      <div class="logo">🛡️</div>
+      <h1>Redirecting to Discord...</h1>
+      <p>You'll be taken to Discord to invite Nexus to your server</p>
+      <div class="spinner"></div>
+      <div id="sourceInfo"></div>
+      <p style="margin-top: 30px; font-size: 0.9rem; opacity: 0.7">
+        If you're not redirected automatically,<br />
+        <a href="#" id="manualLink" class="manual-link"
+          >Click here to continue</a
+        >
+      </p>
     </div>
 
     <script src="invite-tracker.js"></script>
     <script>
-        // Discord OAuth URL
-        const BOT_CLIENT_ID = '1444739230679957646';
-        const DISCORD_INVITE_URL = `https://discord.com/oauth2/authorize?client_id=${BOT_CLIENT_ID}&permissions=8&integration_type=0&scope=bot+applications.commands`;
+      // Discord OAuth URL
+      const BOT_CLIENT_ID = "1444739230679957646";
+      const DISCORD_INVITE_URL = `https://discord.com/oauth2/authorize?client_id=${BOT_CLIENT_ID}&permissions=8&integration_type=0&scope=bot+applications.commands`;
 
-        // Get source parameter
-        const urlParams = new URLSearchParams(window.location.search);
-        const source = urlParams.get('source') || 'direct';
+      // Get source parameter
+      const urlParams = new URLSearchParams(window.location.search);
+      const source = urlParams.get("source") || "direct";
 
-        // Display source info
-        if (source && source !== 'direct') {
-            document.getElementById('sourceInfo').innerHTML = `
+      // Display source info
+      if (source && source !== "direct") {
+        document.getElementById("sourceInfo").innerHTML = `
                 <div class="source-badge">
                     📊 Tracking source: <strong>${source}</strong>
                 </div>
             `;
-        }
+      }
 
-        // The invite-tracker.js script will handle storing the source
-        // Now redirect to Discord
-        const finalUrl = DISCORD_INVITE_URL;
+      // The invite-tracker.js script will handle storing the source
+      // Now redirect to Discord
+      const finalUrl = DISCORD_INVITE_URL;
 
-        // Set manual link
-        document.getElementById('manualLink').href = finalUrl;
+      // Set manual link
+      document.getElementById("manualLink").href = finalUrl;
 
-        // Auto-redirect after 2 seconds (gives time for tracking script to run)
-        setTimeout(() => {
-            window.location.href = finalUrl;
-        }, 2000);
+      // Auto-redirect after 2 seconds (gives time for tracking script to run)
+      setTimeout(() => {
+        window.location.href = finalUrl;
+      }, 2000);
     </script>
-</body>
+  </body>
 </html>
-

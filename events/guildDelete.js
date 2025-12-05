@@ -137,8 +137,8 @@ module.exports = {
                     daysActive < 1
                       ? "⚠️ Left within 24h"
                       : daysActive < 7
-                      ? "⚠️ Left within a week"
-                      : "✅ Stayed over a week"
+                        ? "⚠️ Left within a week"
+                        : "✅ Stayed over a week"
                   }`,
                   inline: true,
                 },

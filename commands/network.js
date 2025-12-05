@@ -241,9 +241,8 @@ module.exports = {
         });
       }
 
-      const stats = await interaction.client.multiServer.getNetworkStats(
-        networkId
-      );
+      const stats =
+        await interaction.client.multiServer.getNetworkStats(networkId);
 
       if (!stats) {
         return interaction.editReply({

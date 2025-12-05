@@ -172,16 +172,19 @@ module.exports = {
           });
 
           // Clean up file after 5 minutes
-          setTimeout(() => {
-            try {
-              if (fs.existsSync(filePath)) {
-                fs.unlinkSync(filePath);
-                logger.info(`Cleaned up export file: ${filename}`);
+          setTimeout(
+            () => {
+              try {
+                if (fs.existsSync(filePath)) {
+                  fs.unlinkSync(filePath);
+                  logger.info(`Cleaned up export file: ${filename}`);
+                }
+              } catch (error) {
+                logger.error("Error cleaning up export file:", error);
               }
-            } catch (error) {
-              logger.error("Error cleaning up export file:", error);
-            }
-          }, 5 * 60 * 1000);
+            },
+            5 * 60 * 1000
+          );
         } catch (error) {
           logger.error("Error exporting server data:", error);
           await interaction.editReply(ErrorMessages.genericError());
@@ -236,16 +239,19 @@ module.exports = {
           });
 
           // Clean up file after 5 minutes
-          setTimeout(() => {
-            try {
-              if (fs.existsSync(filePath)) {
-                fs.unlinkSync(filePath);
-                logger.info(`Cleaned up export file: ${filename}`);
+          setTimeout(
+            () => {
+              try {
+                if (fs.existsSync(filePath)) {
+                  fs.unlinkSync(filePath);
+                  logger.info(`Cleaned up export file: ${filename}`);
+                }
+              } catch (error) {
+                logger.error("Error cleaning up export file:", error);
               }
-            } catch (error) {
-              logger.error("Error cleaning up export file:", error);
-            }
-          }, 5 * 60 * 1000);
+            },
+            5 * 60 * 1000
+          );
         } catch (error) {
           logger.error("Error exporting user data:", error);
           await interaction.editReply(ErrorMessages.genericError());

@@ -84,7 +84,7 @@ module.exports = {
           }
         } catch (error) {
           const ErrorHandler = require("../utils/errorHandler");
-const ErrorMessages = require("../utils/errorMessages");
+          const ErrorMessages = require("../utils/errorMessages");
           ErrorHandler.logError(
             error,
             `scan [${interaction.guild.id}]`,

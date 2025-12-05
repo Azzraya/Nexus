@@ -49,7 +49,7 @@ class XPSystem {
     if (config.ignored_roles) {
       const member = message.member;
       const ignored = config.ignored_roles.split(",");
-      if (member.roles.cache.some(role => ignored.includes(role.id))) return;
+      if (member.roles.cache.some((role) => ignored.includes(role.id))) return;
     }
 
     // Calculate XP with multipliers
@@ -77,7 +77,7 @@ class XPSystem {
     const oldLevel = userData ? userData.level : 0;
 
     // Add XP
-    await db.addUserXP(guildId, userId, xpGain, 'message');
+    await db.addUserXP(guildId, userId, xpGain, "message");
     this.cooldowns.set(key, Date.now());
 
     // Check for level up
@@ -99,7 +99,7 @@ class XPSystem {
 
     // Check for level rewards
     const rewards = await db.getLevelRewards(guildId);
-    const levelReward = rewards.find(r => r.level === newLevel);
+    const levelReward = rewards.find((r) => r.level === newLevel);
 
     if (levelReward) {
       try {
@@ -113,18 +113,25 @@ class XPSystem {
     }
 
     // Send level up message
-    const levelUpMessage = (config.level_up_message || 'GG {user}, you just advanced to level {level}!')
-      .replace('{user}', `<@${userId}>`)
-      .replace('{level}', newLevel)
-      .replace('{role}', levelReward ? `<@&${levelReward.role_id}>` : 'None');
+    const levelUpMessage = (
+      config.level_up_message ||
+      "GG {user}, you just advanced to level {level}!"
+    )
+      .replace("{user}", `<@${userId}>`)
+      .replace("{level}", newLevel)
+      .replace("{role}", levelReward ? `<@&${levelReward.role_id}>` : "None");
 
     const embed = new EmbedBuilder()
-      .setTitle('🎉 Level Up!')
+      .setTitle("🎉 Level Up!")
       .setDescription(levelUpMessage)
       .setColor(0x00ff88)
       .addFields(
-        { name: 'New Level', value: `${newLevel}`, inline: true },
-        { name: 'Next Level', value: `${this.xpForLevel(newLevel)} XP`, inline: true }
+        { name: "New Level", value: `${newLevel}`, inline: true },
+        {
+          name: "Next Level",
+          value: `${this.xpForLevel(newLevel)} XP`,
+          inline: true,
+        }
       )
       .setThumbnail(message.author.displayAvatarURL())
       .setTimestamp();
@@ -183,7 +190,7 @@ class XPSystem {
         guild: member.guild,
         author: member.user,
         member: member,
-        channel: null
+        channel: null,
       };
       await this.handleLevelUp(fakeMessage, newLevel, config);
     }
@@ -200,4 +207,3 @@ class XPSystem {
 }
 
 module.exports = XPSystem;
-

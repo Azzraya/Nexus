@@ -187,17 +187,17 @@ module.exports = {
     try {
       const botMember = await guild.members.fetch(client.user.id);
       const botRole = botMember.roles.highest;
-      
+
       const allRoles = Array.from(guild.roles.cache.values())
         .filter((r) => r.id !== guild.id)
         .sort((a, b) => b.position - a.position);
-      
+
       const botRoleIndex = allRoles.findIndex((r) => r.id === botRole.id);
-      
+
       // If bot role is not at top, send warning
       if (botRoleIndex > 0) {
         const { EmbedBuilder } = require("discord.js");
-        
+
         const warningEmbed = new EmbedBuilder()
           .setTitle("⚠️ CRITICAL SETUP REQUIRED")
           .setDescription(
@@ -207,38 +207,44 @@ module.exports = {
             {
               name: "🔴 Current Status",
               value: `Bot role is at position **${botRoleIndex + 1}/${allRoles.length}**\nThis means Nexus **cannot ban/kick users** whose roles are higher.`,
-              inline: false
+              inline: false,
             },
             {
               name: "✅ Required Action",
-              value: 
+              value:
                 "**1.** Go to **Server Settings** → **Roles**\n" +
                 "**2.** Find the Nexus bot role\n" +
                 "**3.** Drag it to the **TOP** of the role list\n" +
                 "**4.** Save changes",
-              inline: false
+              inline: false,
             },
             {
               name: "🛡️ Why This Matters",
-              value: 
+              value:
                 "If a nuke bot joins and gets a role above Nexus, **Nexus cannot stop it**. " +
                 "Detection will work, but action will fail with permission errors. " +
                 "Proper role positioning is **essential** for protection.",
-              inline: false
+              inline: false,
             },
             {
               name: "📝 Verify Setup",
-              value: "After moving the role, run `/security rolecheck` to verify!",
-              inline: false
+              value:
+                "After moving the role, run `/security rolecheck` to verify!",
+              inline: false,
             }
           )
-          .setColor(0xFF0000)
-          .setFooter({ text: "This is NOT optional - it's required for Nexus to work" })
+          .setColor(0xff0000)
+          .setFooter({
+            text: "This is NOT optional - it's required for Nexus to work",
+          })
           .setTimestamp();
 
         // Try to send to system channel or owner
         const systemChannel = guild.systemChannel;
-        if (systemChannel && systemChannel.permissionsFor(botMember).has("SendMessages")) {
+        if (
+          systemChannel &&
+          systemChannel.permissionsFor(botMember).has("SendMessages")
+        ) {
           await systemChannel.send({ embeds: [warningEmbed] });
           console.log(`   ⚠️ Sent role hierarchy warning to system channel`);
         } else {
@@ -246,7 +252,9 @@ module.exports = {
           const owner = await guild.fetchOwner().catch(() => null);
           if (owner) {
             await owner.send({ embeds: [warningEmbed] }).catch(() => {
-              console.log(`   ⚠️ Could not send role hierarchy warning - no accessible channel`);
+              console.log(
+                `   ⚠️ Could not send role hierarchy warning - no accessible channel`
+              );
             });
           }
         }

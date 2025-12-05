@@ -11,23 +11,23 @@ class Security {
         threatScore >= 80
           ? "critical"
           : threatScore >= 60
-          ? "high"
-          : threatScore >= 40
-          ? "medium"
-          : threatScore >= 20
-          ? "low"
-          : "safe",
+            ? "high"
+            : threatScore >= 40
+              ? "medium"
+              : threatScore >= 20
+                ? "low"
+                : "safe",
       score: threatScore,
       action:
         threatScore >= 80
           ? "ban"
           : threatScore >= 60
-          ? "kick"
-          : threatScore >= 40
-          ? "mute"
-          : threatScore >= 20
-          ? "warn"
-          : null,
+            ? "kick"
+            : threatScore >= 40
+              ? "mute"
+              : threatScore >= 20
+                ? "warn"
+                : null,
     };
 
     // Note: Notifications will be sent from the calling code with client

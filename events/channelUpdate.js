@@ -15,17 +15,19 @@ module.exports = {
         limit: 1,
       });
       const channelUpdate = auditLogs.entries.first();
-      
+
       if (channelUpdate && channelUpdate.target.id === newChannel.id) {
         const executor = channelUpdate.executor;
-        
+
         // Check for permission overwrite changes
         const oldOverwrites = oldChannel.permissionOverwrites.cache;
         const newOverwrites = newChannel.permissionOverwrites.cache;
-        
-        if (oldOverwrites.size !== newOverwrites.size || 
-            JSON.stringify([...oldOverwrites.keys()]) !== JSON.stringify([...newOverwrites.keys()])) {
-          
+
+        if (
+          oldOverwrites.size !== newOverwrites.size ||
+          JSON.stringify([...oldOverwrites.keys()]) !==
+            JSON.stringify([...newOverwrites.keys()])
+        ) {
           if (client.advancedAntiNuke) {
             await client.advancedAntiNuke.monitorAction(
               newChannel.guild,

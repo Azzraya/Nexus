@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -12,8 +12,8 @@
       }
 
       body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          sans-serif;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         min-height: 100vh;
         color: #fff;
@@ -324,8 +324,14 @@
             <div
               class="card"
               style="cursor: pointer; transition: all 0.3s; height: 100%"
-              onmouseover="this.style.transform='translateY(-5px)'; this.style.borderColor='#ffd700';"
-              onmouseout="this.style.transform=''; this.style.borderColor='rgba(255,255,255,0.2)';"
+              onmouseover="
+                this.style.transform = 'translateY(-5px)';
+                this.style.borderColor = '#ffd700';
+              "
+              onmouseout="
+                this.style.transform = '';
+                this.style.borderColor = 'rgba(255,255,255,0.2)';
+              "
             >
               <div style="text-align: center">
                 <div style="font-size: 4rem; margin-bottom: 15px">📝</div>
@@ -345,8 +351,14 @@
             <div
               class="card"
               style="cursor: pointer; transition: all 0.3s; height: 100%"
-              onmouseover="this.style.transform='translateY(-5px)'; this.style.borderColor='#ffd700';"
-              onmouseout="this.style.transform=''; this.style.borderColor='rgba(255,255,255,0.2)';"
+              onmouseover="
+                this.style.transform = 'translateY(-5px)';
+                this.style.borderColor = '#ffd700';
+              "
+              onmouseout="
+                this.style.transform = '';
+                this.style.borderColor = 'rgba(255,255,255,0.2)';
+              "
             >
               <div style="text-align: center">
                 <div style="font-size: 4rem; margin-bottom: 15px">🌐</div>
@@ -364,8 +376,14 @@
             <div
               class="card"
               style="cursor: pointer; transition: all 0.3s; height: 100%"
-              onmouseover="this.style.transform='translateY(-5px)'; this.style.borderColor='#10b981';"
-              onmouseout="this.style.transform=''; this.style.borderColor='rgba(255,255,255,0.2)';"
+              onmouseover="
+                this.style.transform = 'translateY(-5px)';
+                this.style.borderColor = '#10b981';
+              "
+              onmouseout="
+                this.style.transform = '';
+                this.style.borderColor = 'rgba(255,255,255,0.2)';
+              "
             >
               <div style="text-align: center">
                 <div style="font-size: 4rem; margin-bottom: 15px">🔗</div>
@@ -383,8 +401,14 @@
             <div
               class="card"
               style="cursor: pointer; transition: all 0.3s; height: 100%"
-              onmouseover="this.style.transform='translateY(-5px)'; this.style.borderColor='#ff6b6b';"
-              onmouseout="this.style.transform=''; this.style.borderColor='rgba(255,255,255,0.2)';"
+              onmouseover="
+                this.style.transform = 'translateY(-5px)';
+                this.style.borderColor = '#ff6b6b';
+              "
+              onmouseout="
+                this.style.transform = '';
+                this.style.borderColor = 'rgba(255,255,255,0.2)';
+              "
             >
               <div style="text-align: center">
                 <div style="font-size: 4rem; margin-bottom: 15px">📢</div>
@@ -403,8 +427,14 @@
             <div
               class="card"
               style="cursor: pointer; transition: all 0.3s; height: 100%"
-              onmouseover="this.style.transform='translateY(-5px)'; this.style.borderColor='#ffd700';"
-              onmouseout="this.style.transform=''; this.style.borderColor='rgba(255,255,255,0.2)';"
+              onmouseover="
+                this.style.transform = 'translateY(-5px)';
+                this.style.borderColor = '#ffd700';
+              "
+              onmouseout="
+                this.style.transform = '';
+                this.style.borderColor = 'rgba(255,255,255,0.2)';
+              "
             >
               <div style="text-align: center">
                 <div style="font-size: 4rem; margin-bottom: 15px">🎛️</div>
@@ -419,8 +449,14 @@
             <div
               class="card"
               style="cursor: pointer; transition: all 0.3s; height: 100%"
-              onmouseover="this.style.transform='translateY(-5px)'; this.style.borderColor='#667eea';"
-              onmouseout="this.style.transform=''; this.style.borderColor='rgba(255,255,255,0.2)';"
+              onmouseover="
+                this.style.transform = 'translateY(-5px)';
+                this.style.borderColor = '#667eea';
+              "
+              onmouseout="
+                this.style.transform = '';
+                this.style.borderColor = 'rgba(255,255,255,0.2)';
+              "
             >
               <div style="text-align: center">
                 <div style="font-size: 4rem; margin-bottom: 15px">🏠</div>
@@ -701,8 +737,8 @@
               incident.status === "resolved"
                 ? "✅"
                 : incident.status === "investigating"
-                ? "🔍"
-                : "🔴";
+                  ? "🔍"
+                  : "🔴";
 
             return `
           <div class="incident-card ${incident.status}">

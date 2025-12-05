@@ -10,7 +10,7 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName("tutorial")
     .setDescription("Interactive tutorial to learn Nexus features")
-    .addStringOption(option =>
+    .addStringOption((option) =>
       option
         .setName("topic")
         .setDescription("Specific topic to learn about")
@@ -41,71 +41,70 @@ module.exports = {
       .setTitle("🎓 Nexus Interactive Tutorial")
       .setDescription(
         "Welcome to Nexus! Choose a topic below to learn more about the bot's features.\n\n" +
-        "**Topics:**\n" +
-        "🛡️ **Security & Protection** - Anti-raid, anti-nuke, and security features\n" +
-        "⚙️ **Basic Setup** - Get started with `/quicksetup`\n" +
-        "🎮 **XP & Leveling** - Gamification and engagement\n" +
-        "🏆 **Achievements & Events** - Community features\n" +
-        "🤖 **Automod** - Automatic moderation\n" +
-        "📊 **Moderation** - Moderation commands and tools\n" +
-        "🔗 **Integrations** - Platform integrations"
+          "**Topics:**\n" +
+          "🛡️ **Security & Protection** - Anti-raid, anti-nuke, and security features\n" +
+          "⚙️ **Basic Setup** - Get started with `/quicksetup`\n" +
+          "🎮 **XP & Leveling** - Gamification and engagement\n" +
+          "🏆 **Achievements & Events** - Community features\n" +
+          "🤖 **Automod** - Automatic moderation\n" +
+          "📊 **Moderation** - Moderation commands and tools\n" +
+          "🔗 **Integrations** - Platform integrations"
       )
       .setColor(0x667eea)
       .setFooter({ text: "Use the buttons below or /tutorial topic:<name>" });
 
-    const row1 = new ActionRowBuilder()
-      .addComponents(
-        new ButtonBuilder()
-          .setCustomId("tutorial_security")
-          .setLabel("Security")
-          .setStyle(ButtonStyle.Primary)
-          .setEmoji("🛡️"),
-        new ButtonBuilder()
-          .setCustomId("tutorial_setup")
-          .setLabel("Setup")
-          .setStyle(ButtonStyle.Success)
-          .setEmoji("⚙️"),
-        new ButtonBuilder()
-          .setCustomId("tutorial_xp")
-          .setLabel("XP & Leveling")
-          .setStyle(ButtonStyle.Primary)
-          .setEmoji("🎮")
-      );
+    const row1 = new ActionRowBuilder().addComponents(
+      new ButtonBuilder()
+        .setCustomId("tutorial_security")
+        .setLabel("Security")
+        .setStyle(ButtonStyle.Primary)
+        .setEmoji("🛡️"),
+      new ButtonBuilder()
+        .setCustomId("tutorial_setup")
+        .setLabel("Setup")
+        .setStyle(ButtonStyle.Success)
+        .setEmoji("⚙️"),
+      new ButtonBuilder()
+        .setCustomId("tutorial_xp")
+        .setLabel("XP & Leveling")
+        .setStyle(ButtonStyle.Primary)
+        .setEmoji("🎮")
+    );
 
-    const row2 = new ActionRowBuilder()
-      .addComponents(
-        new ButtonBuilder()
-          .setCustomId("tutorial_achievements")
-          .setLabel("Achievements")
-          .setStyle(ButtonStyle.Primary)
-          .setEmoji("🏆"),
-        new ButtonBuilder()
-          .setCustomId("tutorial_automod")
-          .setLabel("Automod")
-          .setStyle(ButtonStyle.Primary)
-          .setEmoji("🤖"),
-        new ButtonBuilder()
-          .setCustomId("tutorial_moderation")
-          .setLabel("Moderation")
-          .setStyle(ButtonStyle.Danger)
-          .setEmoji("📊")
-      );
+    const row2 = new ActionRowBuilder().addComponents(
+      new ButtonBuilder()
+        .setCustomId("tutorial_achievements")
+        .setLabel("Achievements")
+        .setStyle(ButtonStyle.Primary)
+        .setEmoji("🏆"),
+      new ButtonBuilder()
+        .setCustomId("tutorial_automod")
+        .setLabel("Automod")
+        .setStyle(ButtonStyle.Primary)
+        .setEmoji("🤖"),
+      new ButtonBuilder()
+        .setCustomId("tutorial_moderation")
+        .setLabel("Moderation")
+        .setStyle(ButtonStyle.Danger)
+        .setEmoji("📊")
+    );
 
     const message = await interaction.reply({
       embeds: [embed],
       components: [row1, row2],
-      fetchReply: true
+      fetchReply: true,
     });
 
     const collector = message.createMessageComponentCollector({
-      time: 300000 // 5 minutes
+      time: 300000, // 5 minutes
     });
 
-    collector.on("collect", async i => {
+    collector.on("collect", async (i) => {
       if (i.user.id !== interaction.user.id) {
         return i.reply({
-          content: "This tutorial is not for you! Run `/tutorial` to start your own.",
-          ephemeral: true
+          content:
+            "This tutorial is not for you! Run `/tutorial` to start your own.",
+          ephemeral: true,
         });
       }
 
@@ -132,7 +131,7 @@ module.exports = {
               "`/antiraid config` - Configure settings\n" +
               "`/antiraid status` - View current status\n" +
               "`/antiraid whitelist` - Manage whitelist",
-            color: 0xff0000
+            color: 0xff0000,
           },
           {
             title: "Anti-Nuke Protection",
@@ -145,9 +144,9 @@ module.exports = {
               "**Commands:**\n" +
               "`/antinuke enable` - Enable protection\n" +
               "`/security rolecheck` - Check role hierarchy",
-            color: 0xff0000
-          }
-        ]
+            color: 0xff0000,
+          },
+        ],
       },
       setup: {
         title: "⚙️ Basic Setup",
@@ -162,7 +161,7 @@ module.exports = {
               "4️⃣ Configure automod\n\n" +
               "The wizard will guide you through each step with buttons and explanations.\n\n" +
               "**Pro Tip:** You can always change settings later with specific commands!",
-            color: 0x00ff88
+            color: 0x00ff88,
           },
           {
             title: "Essential Commands",
@@ -179,9 +178,9 @@ module.exports = {
               "**Info:**\n" +
               "`/help` - List all commands\n" +
               "`/botinfo` - Bot statistics",
-            color: 0x00ff88
-          }
-        ]
+            color: 0x00ff88,
+          },
+        ],
       },
       xp: {
         title: "🎮 XP & Leveling System",
@@ -197,7 +196,7 @@ module.exports = {
               "XP needed = (level × 10)²\n\n" +
               "**Cooldown:** 60 seconds between XP gains\n" +
               "(Prevents spam)",
-            color: 0x667eea
+            color: 0x667eea,
           },
           {
             title: "Commands & Configuration",
@@ -214,9 +213,9 @@ module.exports = {
               "✅ Role rewards at milestones\n" +
               "✅ Ignored channels/roles\n" +
               "✅ XP multipliers for boosters",
-            color: 0x667eea
-          }
-        ]
+            color: 0x667eea,
+          },
+        ],
       },
       achievements: {
         title: "🏆 Achievements & Events",
@@ -233,7 +232,7 @@ module.exports = {
               "**Rarities:** Common, Uncommon, Rare, Epic, Legendary\n\n" +
               "`/achievements view` - View your achievements\n" +
               "`/achievements list` - See all achievements",
-            color: 0xffd700
+            color: 0xffd700,
           },
           {
             title: "Server Events",
@@ -249,9 +248,9 @@ module.exports = {
               "✅ Automatic countdowns\n" +
               "✅ Interactive buttons\n" +
               "✅ Event reminders",
-            color: 0xffd700
-          }
-        ]
+            color: 0xffd700,
+          },
+        ],
       },
       automod: {
         title: "🤖 Automod System",
@@ -270,7 +269,7 @@ module.exports = {
               "• Mass mentions (@everyone abuse)\n\n" +
               "**Actions:** Warn, Timeout, Kick, or Ban\n" +
               "**Configurable:** Set thresholds and actions",
-            color: 0x0099ff
+            color: 0x0099ff,
           },
           {
             title: "Configuration",
@@ -289,9 +288,9 @@ module.exports = {
               "✅ Auto-deletes violating messages\n" +
               "✅ Escalating punishments\n" +
               "✅ Logs all actions",
-            color: 0x0099ff
-          }
-        ]
+            color: 0x0099ff,
+          },
+        ],
       },
       moderation: {
         title: "📊 Moderation Tools",
@@ -311,7 +310,7 @@ module.exports = {
               "**Logs:**\n" +
               "`/warnings <user>` - View warnings\n" +
               "`/modlogs` - View mod actions",
-            color: 0xff4444
+            color: 0xff4444,
           },
           {
             title: "Advanced Tools",
@@ -328,9 +327,9 @@ module.exports = {
               "`/case <id>` - View specific case\n\n" +
               "**Audit:**\n" +
               "`/auditlog` - Search audit logs",
-            color: 0xff4444
-          }
-        ]
+            color: 0xff4444,
+          },
+        ],
       },
       integrations: {
         title: "🔗 Platform Integrations",
@@ -361,27 +360,35 @@ module.exports = {
               "• Notion integration\n" +
               "• Calendar events\n\n" +
               "These features are in development!",
-            color: 0x9b59b6
-          }
-        ]
-      }
+            color: 0x9b59b6,
+          },
+        ],
+      },
     };
 
     const tutorial = tutorials[topic];
     if (!tutorial.pages) {
-      tutorial.pages = [{ title: tutorial.title, description: tutorial.description, color: tutorial.color }];
+      tutorial.pages = [
+        {
+          title: tutorial.title,
+          description: tutorial.description,
+          color: tutorial.color,
+        },
+      ];
     }
 
     let currentPage = 0;
 
     const showPage = async (pageNum, isUpdate = false) => {
       const page = tutorial.pages[pageNum];
-      
+
       const embed = new EmbedBuilder()
         .setTitle(tutorial.title)
         .setDescription(`**${page.title}**\n\n${page.description}`)
         .setColor(page.color || tutorial.color || 0x667eea)
-        .setFooter({ text: `Page ${pageNum + 1}/${tutorial.pages.length} • Use /help for command list` });
+        .setFooter({
+          text: `Page ${pageNum + 1}/${tutorial.pages.length} • Use /help for command list`,
+        });
 
       const row = new ActionRowBuilder();
 
@@ -416,18 +423,18 @@ module.exports = {
           embeds: [embed],
           components,
           fetchReply: true,
-          ephemeral: true
+          ephemeral: true,
         });
 
         const collector = message.createMessageComponentCollector({
-          time: 300000
+          time: 300000,
         });
 
-        collector.on("collect", async i => {
+        collector.on("collect", async (i) => {
           if (i.user.id !== interaction.user.id) {
             return i.reply({
               content: "This tutorial is not for you!",
-              ephemeral: true
+              ephemeral: true,
             });
           }
 
@@ -448,6 +455,5 @@ module.exports = {
     };
 
     await showPage(0, isUpdate);
-  }
+  },
 };
-

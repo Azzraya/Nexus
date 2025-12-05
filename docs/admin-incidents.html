@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -13,8 +13,8 @@
       }
 
       body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          sans-serif;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         min-height: 100vh;
         padding: 40px 20px;
@@ -274,7 +274,7 @@
           id="adminPassword"
           placeholder="Password"
           style="margin-bottom: 20px"
-          onkeypress="if(event.key === 'Enter') authenticate()"
+          onkeypress="if (event.key === 'Enter') authenticate();"
         />
         <button class="btn btn-primary" onclick="authenticate()">Login</button>
         <div
@@ -447,7 +447,10 @@
           : "https://regular-puma-clearly.ngrok-free.app";
 
       // Check if already authenticated
-      if (authToken && sessionStorage.getItem("adminAuthenticated") === "true") {
+      if (
+        authToken &&
+        sessionStorage.getItem("adminAuthenticated") === "true"
+      ) {
         document.getElementById("authOverlay").style.display = "none";
       }
 
@@ -551,10 +554,10 @@
             <h3>${item.title}${statusBadge}</h3>
             <p style="opacity: 0.8; margin-top: 5px; font-size: 0.9rem;">
               ${new Date(item.startTime).toLocaleString()} ${
-          item.endTime
-            ? `→ ${new Date(item.endTime).toLocaleString()}`
-            : "(Ongoing)"
-        }
+                item.endTime
+                  ? `→ ${new Date(item.endTime).toLocaleString()}`
+                  : "(Ongoing)"
+              }
             </p>
           </div>
           <div class="incident-actions">

@@ -42,7 +42,7 @@ module.exports = {
       }
     } catch (error) {
       logger.error("Migrate Command Error:", error);
-      
+
       if (!interaction.replied && !interaction.deferred) {
         await interaction.reply(ErrorMessages.genericError());
       } else if (interaction.deferred) {
@@ -58,7 +58,7 @@ module.exports = {
       .setTitle("🔄 Migrating from Wick to Nexus")
       .setDescription(
         "**Good choice!** Here's your step-by-step migration plan:\n\n" +
-        "Don't worry - you can keep Wick running while testing Nexus."
+          "Don't worry - you can keep Wick running while testing Nexus."
       )
       .setColor(0x667eea)
       .addFields(
@@ -139,7 +139,9 @@ module.exports = {
       );
     }).catch(() => {});
 
-    logger.info(`[Migration] ${interaction.guild.name} starting Wick migration`);
+    logger.info(
+      `[Migration] ${interaction.guild.name} starting Wick migration`
+    );
   },
 
   async showGuide(interaction) {
@@ -181,4 +183,3 @@ module.exports = {
     await interaction.reply({ embeds: [embed], ephemeral: true });
   },
 };
-

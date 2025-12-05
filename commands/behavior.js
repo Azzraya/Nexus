@@ -71,8 +71,8 @@ module.exports = {
           summary.riskScore >= 70
             ? 0xff0000
             : summary.riskScore >= 40
-            ? 0xff8800
-            : 0x0099ff
+              ? 0xff8800
+              : 0x0099ff
         )
         .setTimestamp();
 
@@ -102,8 +102,8 @@ module.exports = {
             summary.riskScore >= 70
               ? "🔴 High"
               : summary.riskScore >= 40
-              ? "🟡 Medium"
-              : "🟢 Low"
+                ? "🟡 Medium"
+                : "🟢 Low"
           }`
         )
         .addFields({

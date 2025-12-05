@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -168,7 +168,11 @@
       .completion-banner {
         text-align: center;
         padding: 60px;
-        background: linear-gradient(135deg, rgba(0, 209, 178, 0.3) 0%, rgba(102, 126, 234, 0.3) 100%);
+        background: linear-gradient(
+          135deg,
+          rgba(0, 209, 178, 0.3) 0%,
+          rgba(102, 126, 234, 0.3) 100%
+        );
         border-radius: 20px;
         border: 3px solid #00d1b2;
       }
@@ -179,15 +183,30 @@
       }
 
       @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
       }
     </style>
   </head>
   <body>
     <div class="wizard-container">
-      <h1 style="text-align: center; font-size: 3rem; margin-bottom: 10px;">🚀 Nexus Setup Wizard</h1>
-      <p style="text-align: center; opacity: 0.9; font-size: 1.2rem; margin-bottom: 40px;">
+      <h1 style="text-align: center; font-size: 3rem; margin-bottom: 10px">
+        🚀 Nexus Setup Wizard
+      </h1>
+      <p
+        style="
+          text-align: center;
+          opacity: 0.9;
+          font-size: 1.2rem;
+          margin-bottom: 40px;
+        "
+      >
         Get fully protected in 5 minutes
       </p>
 
@@ -223,12 +242,12 @@
           Make sure you have "Manage Server" permission on your Discord server.
         </p>
 
-        <div style="text-align: center; margin: 40px 0;">
+        <div style="text-align: center; margin: 40px 0">
           <a
             href="https://discord.com/oauth2/authorize?client_id=1444739230679957646&permissions=268443574&scope=bot%20applications.commands"
             target="_blank"
             class="btn btn-primary"
-            style="font-size: 1.2rem; padding: 20px 50px;"
+            style="font-size: 1.2rem; padding: 20px 50px"
             onclick="markInvited()"
           >
             🤖 Invite Nexus Now
@@ -236,7 +255,7 @@
         </div>
 
         <div class="checklist">
-          <h3 style="margin-bottom: 15px;">✅ Required Permissions:</h3>
+          <h3 style="margin-bottom: 15px">✅ Required Permissions:</h3>
           <div class="checklist-item">
             <span>🛡️</span>
             <span>Manage Roles - For anti-nuke protection</span>
@@ -255,7 +274,7 @@
           </div>
         </div>
 
-        <div style="text-align: center; margin-top: 40px;">
+        <div style="text-align: center; margin-top: 40px">
           <button class="btn-wizard btn-next" onclick="nextStep()">
             Next Step →
           </button>
@@ -270,12 +289,10 @@
           essential channels and configure basic protection.
         </p>
 
-        <div class="code-box">
-          /setup
-        </div>
+        <div class="code-box">/setup</div>
 
         <div class="checklist">
-          <h3 style="margin-bottom: 15px;">What this does:</h3>
+          <h3 style="margin-bottom: 15px">What this does:</h3>
           <div class="checklist-item">
             <span>📝</span>
             <span>Creates mod log channel</span>
@@ -294,11 +311,20 @@
           </div>
         </div>
 
-        <div style="background: rgba(255, 215, 0, 0.2); padding: 20px; border-radius: 10px; border-left: 4px solid #ffd700; margin: 20px 0;">
-          <strong>💡 Pro Tip:</strong> You can customize everything later in the dashboard!
+        <div
+          style="
+            background: rgba(255, 215, 0, 0.2);
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #ffd700;
+            margin: 20px 0;
+          "
+        >
+          <strong>💡 Pro Tip:</strong> You can customize everything later in the
+          dashboard!
         </div>
 
-        <div style="text-align: center; margin-top: 40px;">
+        <div style="text-align: center; margin-top: 40px">
           <button class="btn-wizard btn-back" onclick="prevStep()">
             ← Back
           </button>
@@ -312,36 +338,93 @@
       <div class="step-content" id="step3">
         <h2>Step 3: Choose Your Protection Level</h2>
         <p>
-          Select a template that matches your server type, or go to the dashboard
-          for custom configuration.
+          Select a template that matches your server type, or go to the
+          dashboard for custom configuration.
         </p>
 
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin: 30px 0;">
-          <div style="background: rgba(255, 255, 255, 0.05); padding: 25px; border-radius: 15px; border: 2px solid rgba(255, 255, 255, 0.2); text-align: center; cursor: pointer; transition: all 0.3s;" onclick="selectTemplate('gaming')">
-            <div style="font-size: 3rem; margin-bottom: 10px;">🎮</div>
+        <div
+          style="
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+          "
+        >
+          <div
+            style="
+              background: rgba(255, 255, 255, 0.05);
+              padding: 25px;
+              border-radius: 15px;
+              border: 2px solid rgba(255, 255, 255, 0.2);
+              text-align: center;
+              cursor: pointer;
+              transition: all 0.3s;
+            "
+            onclick="selectTemplate('gaming')"
+          >
+            <div style="font-size: 3rem; margin-bottom: 10px">🎮</div>
             <h3>Gaming Server</h3>
-            <p style="font-size: 0.9rem; opacity: 0.8; margin: 10px 0;">Full protection recommended for gaming communities</p>
+            <p style="font-size: 0.9rem; opacity: 0.8; margin: 10px 0">
+              Full protection recommended for gaming communities
+            </p>
           </div>
 
-          <div style="background: rgba(255, 255, 255, 0.05); padding: 25px; border-radius: 15px; border: 2px solid rgba(255, 255, 255, 0.2); text-align: center; cursor: pointer; transition: all 0.3s;" onclick="selectTemplate('community')">
-            <div style="font-size: 3rem; margin-bottom: 10px;">💬</div>
+          <div
+            style="
+              background: rgba(255, 255, 255, 0.05);
+              padding: 25px;
+              border-radius: 15px;
+              border: 2px solid rgba(255, 255, 255, 0.2);
+              text-align: center;
+              cursor: pointer;
+              transition: all 0.3s;
+            "
+            onclick="selectTemplate('community')"
+          >
+            <div style="font-size: 3rem; margin-bottom: 10px">💬</div>
             <h3>Community</h3>
-            <p style="font-size: 0.9rem; opacity: 0.8; margin: 10px 0;">Balanced protection for community servers</p>
+            <p style="font-size: 0.9rem; opacity: 0.8; margin: 10px 0">
+              Balanced protection for community servers
+            </p>
           </div>
 
-          <div style="background: rgba(255, 255, 255, 0.05); padding: 25px; border-radius: 15px; border: 2px solid rgba(255, 255, 255, 0.2); text-align: center; cursor: pointer; transition: all 0.3s;" onclick="selectTemplate('custom')">
-            <div style="font-size: 3rem; margin-bottom: 10px;">⚙️</div>
+          <div
+            style="
+              background: rgba(255, 255, 255, 0.05);
+              padding: 25px;
+              border-radius: 15px;
+              border: 2px solid rgba(255, 255, 255, 0.2);
+              text-align: center;
+              cursor: pointer;
+              transition: all 0.3s;
+            "
+            onclick="selectTemplate('custom')"
+          >
+            <div style="font-size: 3rem; margin-bottom: 10px">⚙️</div>
             <h3>Custom</h3>
-            <p style="font-size: 0.9rem; opacity: 0.8; margin: 10px 0;">Configure manually in the dashboard</p>
+            <p style="font-size: 0.9rem; opacity: 0.8; margin: 10px 0">
+              Configure manually in the dashboard
+            </p>
           </div>
         </div>
 
-        <div id="template-selected" style="display: none; background: rgba(0, 209, 178, 0.2); padding: 20px; border-radius: 10px; border: 2px solid #00d1b2; margin: 20px 0; text-align: center;">
-          <h3 style="color: #00d1b2;">✅ Template Selected!</h3>
-          <p id="template-name" style="margin-top: 10px;"></p>
+        <div
+          id="template-selected"
+          style="
+            display: none;
+            background: rgba(0, 209, 178, 0.2);
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #00d1b2;
+            margin: 20px 0;
+            text-align: center;
+          "
+        >
+          <h3 style="color: #00d1b2">✅ Template Selected!</h3>
+          <p id="template-name" style="margin-top: 10px"></p>
         </div>
 
-        <div style="text-align: center; margin-top: 40px;">
+        <div style="text-align: center; margin-top: 40px">
           <button class="btn-wizard btn-back" onclick="prevStep()">
             ← Back
           </button>
@@ -359,47 +442,92 @@
         </p>
 
         <div class="checklist">
-          <h3 style="margin-bottom: 15px;">Quick Tests:</h3>
-          
+          <h3 style="margin-bottom: 15px">Quick Tests:</h3>
+
           <div class="checklist-item">
-            <input type="checkbox" id="test1" style="width: 24px; height: 24px;" onchange="updateTestProgress()">
+            <input
+              type="checkbox"
+              id="test1"
+              style="width: 24px; height: 24px"
+              onchange="updateTestProgress()"
+            />
             <div>
-              <strong>Test 1: Check Bot Status</strong><br>
-              <span style="opacity: 0.8;">Run <code>/ping</code> - Bot should respond instantly</span>
+              <strong>Test 1: Check Bot Status</strong><br />
+              <span style="opacity: 0.8"
+                >Run <code>/ping</code> - Bot should respond instantly</span
+              >
             </div>
           </div>
 
           <div class="checklist-item">
-            <input type="checkbox" id="test2" style="width: 24px; height: 24px;" onchange="updateTestProgress()">
+            <input
+              type="checkbox"
+              id="test2"
+              style="width: 24px; height: 24px"
+              onchange="updateTestProgress()"
+            />
             <div>
-              <strong>Test 2: View Configuration</strong><br>
-              <span style="opacity: 0.8;">Run <code>/config</code> - Check your settings</span>
+              <strong>Test 2: View Configuration</strong><br />
+              <span style="opacity: 0.8"
+                >Run <code>/config</code> - Check your settings</span
+              >
             </div>
           </div>
 
           <div class="checklist-item">
-            <input type="checkbox" id="test3" style="width: 24px; height: 24px;" onchange="updateTestProgress()">
+            <input
+              type="checkbox"
+              id="test3"
+              style="width: 24px; height: 24px"
+              onchange="updateTestProgress()"
+            />
             <div>
-              <strong>Test 3: Check Logs</strong><br>
-              <span style="opacity: 0.8;">Verify mod log and security log channels were created</span>
+              <strong>Test 3: Check Logs</strong><br />
+              <span style="opacity: 0.8"
+                >Verify mod log and security log channels were created</span
+              >
             </div>
           </div>
 
           <div class="checklist-item">
-            <input type="checkbox" id="test4" style="width: 24px; height: 24px;" onchange="updateTestProgress()">
+            <input
+              type="checkbox"
+              id="test4"
+              style="width: 24px; height: 24px"
+              onchange="updateTestProgress()"
+            />
             <div>
-              <strong>Test 4: Dashboard Access</strong><br>
-              <span style="opacity: 0.8;">Login to <a href="https://regular-puma-clearly.ngrok-free.app" style="color: #ffd700;">dashboard</a> and view your server</span>
+              <strong>Test 4: Dashboard Access</strong><br />
+              <span style="opacity: 0.8"
+                >Login to
+                <a
+                  href="https://regular-puma-clearly.ngrok-free.app"
+                  style="color: #ffd700"
+                  >dashboard</a
+                >
+                and view your server</span
+              >
             </div>
           </div>
         </div>
 
-        <div id="tests-complete" style="display: none; background: rgba(0, 209, 178, 0.2); padding: 20px; border-radius: 10px; border: 2px solid #00d1b2; margin: 20px 0; text-align: center;">
-          <h3 style="color: #00d1b2;">✅ All Tests Passed!</h3>
-          <p style="margin-top: 10px;">Your server is fully protected!</p>
+        <div
+          id="tests-complete"
+          style="
+            display: none;
+            background: rgba(0, 209, 178, 0.2);
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #00d1b2;
+            margin: 20px 0;
+            text-align: center;
+          "
+        >
+          <h3 style="color: #00d1b2">✅ All Tests Passed!</h3>
+          <p style="margin-top: 10px">Your server is fully protected!</p>
         </div>
 
-        <div style="text-align: center; margin-top: 40px;">
+        <div style="text-align: center; margin-top: 40px">
           <button class="btn-wizard btn-back" onclick="prevStep()">
             ← Back
           </button>
@@ -413,45 +541,109 @@
       <div class="step-content" id="step5">
         <div class="completion-banner">
           <h2>🎉 Setup Complete!</h2>
-          <p style="font-size: 1.3rem; opacity: 0.9; margin: 20px 0;">
+          <p style="font-size: 1.3rem; opacity: 0.9; margin: 20px 0">
             Your server is now protected by Nexus!
           </p>
 
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin: 40px 0; text-align: left;">
-            <div style="background: rgba(0, 0, 0, 0.3); padding: 20px; border-radius: 10px;">
-              <div style="font-size: 2rem; margin-bottom: 10px;">🛡️</div>
+          <div
+            style="
+              display: grid;
+              grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+              gap: 20px;
+              margin: 40px 0;
+              text-align: left;
+            "
+          >
+            <div
+              style="
+                background: rgba(0, 0, 0, 0.3);
+                padding: 20px;
+                border-radius: 10px;
+              "
+            >
+              <div style="font-size: 2rem; margin-bottom: 10px">🛡️</div>
               <h3>Anti-Nuke</h3>
-              <p style="opacity: 0.8; font-size: 0.9rem;">Protecting against mass deletions</p>
+              <p style="opacity: 0.8; font-size: 0.9rem">
+                Protecting against mass deletions
+              </p>
             </div>
-            <div style="background: rgba(0, 0, 0, 0.3); padding: 20px; border-radius: 10px;">
-              <div style="font-size: 2rem; margin-bottom: 10px;">⚔️</div>
+            <div
+              style="
+                background: rgba(0, 0, 0, 0.3);
+                padding: 20px;
+                border-radius: 10px;
+              "
+            >
+              <div style="font-size: 2rem; margin-bottom: 10px">⚔️</div>
               <h3>Anti-Raid</h3>
-              <p style="opacity: 0.8; font-size: 0.9rem;">Blocking coordinated attacks</p>
+              <p style="opacity: 0.8; font-size: 0.9rem">
+                Blocking coordinated attacks
+              </p>
             </div>
-            <div style="background: rgba(0, 0, 0, 0.3); padding: 20px; border-radius: 10px;">
-              <div style="font-size: 2rem; margin-bottom: 10px;">📸</div>
+            <div
+              style="
+                background: rgba(0, 0, 0, 0.3);
+                padding: 20px;
+                border-radius: 10px;
+              "
+            >
+              <div style="font-size: 2rem; margin-bottom: 10px">📸</div>
               <h3>Auto-Snapshots</h3>
-              <p style="opacity: 0.8; font-size: 0.9rem;">Hourly backups running</p>
+              <p style="opacity: 0.8; font-size: 0.9rem">
+                Hourly backups running
+              </p>
             </div>
           </div>
 
-          <h3 style="margin: 30px 0 20px;">What's Next?</h3>
-          <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
-            <a href="https://regular-puma-clearly.ngrok-free.app" target="_blank" class="btn btn-primary" style="padding: 15px 30px;">
+          <h3 style="margin: 30px 0 20px">What's Next?</h3>
+          <div
+            style="
+              display: flex;
+              gap: 15px;
+              justify-content: center;
+              flex-wrap: wrap;
+            "
+          >
+            <a
+              href="https://regular-puma-clearly.ngrok-free.app"
+              target="_blank"
+              class="btn btn-primary"
+              style="padding: 15px 30px"
+            >
               🎛️ Open Dashboard
             </a>
-            <a href="commands.html" class="btn btn-secondary" style="padding: 15px 30px;">
+            <a
+              href="commands.html"
+              class="btn btn-secondary"
+              style="padding: 15px 30px"
+            >
               📖 Browse Commands
             </a>
-            <a href="https://discord.gg/EvFMz4VQPx" target="_blank" class="btn btn-secondary" style="padding: 15px 30px;">
+            <a
+              href="https://discord.gg/EvFMz4VQPx"
+              target="_blank"
+              class="btn btn-secondary"
+              style="padding: 15px 30px"
+            >
               💬 Join Support
             </a>
           </div>
 
-          <div style="margin-top: 40px; padding: 20px; background: rgba(255, 215, 0, 0.2); border-radius: 10px; border: 2px solid #ffd700;">
-            <h4 style="color: #ffd700; margin-bottom: 10px;">⚡ Pro Tips:</h4>
-            <ul style="text-align: left; margin: 15px 0; padding-left: 40px;">
-              <li>Use <code>/recommend</code> to get AI-powered security suggestions</li>
+          <div
+            style="
+              margin-top: 40px;
+              padding: 20px;
+              background: rgba(255, 215, 0, 0.2);
+              border-radius: 10px;
+              border: 2px solid #ffd700;
+            "
+          >
+            <h4 style="color: #ffd700; margin-bottom: 10px">⚡ Pro Tips:</h4>
+            <ul style="text-align: left; margin: 15px 0; padding-left: 40px">
+              <li>
+                Use <code>/recommend</code> to get AI-powered security
+                suggestions
+              </li>
               <li>Set up logging channels for full audit trails</li>
               <li>Enable vote rewards to encourage community voting</li>
               <li>Join our Discord for tips and support</li>
@@ -467,7 +659,7 @@
       let selectedTemplate = null;
 
       // Load saved progress
-      const savedStep = localStorage.getItem('nexus-setup-step');
+      const savedStep = localStorage.getItem("nexus-setup-step");
       if (savedStep) {
         currentStep = parseInt(savedStep);
         showStep(currentStep);
@@ -491,28 +683,30 @@
 
       function showStep(step) {
         // Hide all steps
-        document.querySelectorAll('.step-content').forEach(s => s.classList.remove('active'));
-        
+        document
+          .querySelectorAll(".step-content")
+          .forEach((s) => s.classList.remove("active"));
+
         // Show current step
-        document.getElementById(`step${step}`).classList.add('active');
+        document.getElementById(`step${step}`).classList.add("active");
 
         // Update progress bar
         const progress = (step / totalSteps) * 100;
-        document.getElementById('progressBar').style.width = progress + '%';
+        document.getElementById("progressBar").style.width = progress + "%";
 
         // Update step indicators
-        document.querySelectorAll('.progress-step').forEach((el, i) => {
-          el.classList.remove('active', 'completed');
+        document.querySelectorAll(".progress-step").forEach((el, i) => {
+          el.classList.remove("active", "completed");
           if (i + 1 < step) {
-            el.classList.add('completed');
+            el.classList.add("completed");
           } else if (i + 1 === step) {
-            el.classList.add('active');
+            el.classList.add("active");
           }
         });
       }
 
       function saveProgress() {
-        localStorage.setItem('nexus-setup-step', currentStep);
+        localStorage.setItem("nexus-setup-step", currentStep);
       }
 
       function markInvited() {
@@ -523,46 +717,47 @@
 
       function selectTemplate(template) {
         selectedTemplate = template;
-        document.getElementById('template-selected').style.display = 'block';
-        
+        document.getElementById("template-selected").style.display = "block";
+
         const names = {
-          gaming: '🎮 Gaming Server Template',
-          community: '💬 Community Server Template',
-          custom: '⚙️ Custom Configuration (use dashboard)'
+          gaming: "🎮 Gaming Server Template",
+          community: "💬 Community Server Template",
+          custom: "⚙️ Custom Configuration (use dashboard)",
         };
-        
-        document.getElementById('template-name').textContent = names[template];
+
+        document.getElementById("template-name").textContent = names[template];
       }
 
       function updateTestProgress() {
         const tests = [
-          document.getElementById('test1').checked,
-          document.getElementById('test2').checked,
-          document.getElementById('test3').checked,
-          document.getElementById('test4').checked
+          document.getElementById("test1").checked,
+          document.getElementById("test2").checked,
+          document.getElementById("test3").checked,
+          document.getElementById("test4").checked,
         ];
 
-        const allComplete = tests.every(t => t);
-        
+        const allComplete = tests.every((t) => t);
+
         if (allComplete) {
-          document.getElementById('tests-complete').style.display = 'block';
-          
+          document.getElementById("tests-complete").style.display = "block";
+
           // Mark checklist items as completed
           tests.forEach((checked, i) => {
             if (checked) {
-              document.querySelectorAll('.checklist-item')[i].classList.add('completed');
+              document
+                .querySelectorAll(".checklist-item")
+                [i].classList.add("completed");
             }
           });
         } else {
-          document.getElementById('tests-complete').style.display = 'none';
+          document.getElementById("tests-complete").style.display = "none";
         }
       }
 
       // Clear progress on completion
       if (currentStep === totalSteps) {
-        localStorage.removeItem('nexus-setup-step');
+        localStorage.removeItem("nexus-setup-step");
       }
     </script>
   </body>
 </html>
-

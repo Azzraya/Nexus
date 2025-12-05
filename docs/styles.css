@@ -5,8 +5,9 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, sans-serif;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: #fff;
   line-height: 1.6;
@@ -414,7 +415,10 @@ footer p {
   opacity: 0;
   visibility: hidden;
   display: grid;
-  grid-template-columns: repeat(3, 1fr); /* 3 columns instead of 6 for better fit */
+  grid-template-columns: repeat(
+    3,
+    1fr
+  ); /* 3 columns instead of 6 for better fit */
   gap: 15px;
   padding: 20px;
   transform: translateY(-10px);

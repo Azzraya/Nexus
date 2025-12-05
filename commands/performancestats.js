@@ -1,4 +1,9 @@
-const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, MessageFlags } = require("discord.js");
+const {
+  SlashCommandBuilder,
+  EmbedBuilder,
+  PermissionFlagsBits,
+  MessageFlags,
+} = require("discord.js");
 const performanceMonitor = require("../utils/performanceMonitor");
 const cache = require("../utils/cache");
 const ErrorMessages = require("../utils/errorMessages");
@@ -31,16 +36,25 @@ module.exports = {
         },
         {
           name: "🐌 Slowest Commands (Avg)",
-          value: slowest.length > 0 
-            ? slowest.map(s => `\`/${s.command}\` - ${s.avgDuration}ms (${s.executions}x)`).join("\n")
-            : "No data yet",
+          value:
+            slowest.length > 0
+              ? slowest
+                  .map(
+                    (s) =>
+                      `\`/${s.command}\` - ${s.avgDuration}ms (${s.executions}x)`
+                  )
+                  .join("\n")
+              : "No data yet",
           inline: true,
         },
         {
           name: "🔥 Most Used Commands",
-          value: mostUsed.length > 0
-            ? mostUsed.map(s => `\`/${s.command}\` - ${s.executions}x`).join("\n")
-            : "No data yet",
+          value:
+            mostUsed.length > 0
+              ? mostUsed
+                  .map((s) => `\`/${s.command}\` - ${s.executions}x`)
+                  .join("\n")
+              : "No data yet",
           inline: true,
         },
         {
@@ -59,4 +73,3 @@ module.exports = {
     await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
   },
 };
-

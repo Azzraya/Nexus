@@ -71,7 +71,9 @@ module.exports = {
         duration < constants.MUTE.MIN_DURATION ||
         duration > constants.MUTE.MAX_DURATION
       ) {
-        return interaction.reply(ErrorMessages.invalidInput("duration", "1h, 30m, 1d (max 28 days)"));
+        return interaction.reply(
+          ErrorMessages.invalidInput("duration", "1h, 30m, 1d (max 28 days)")
+        );
       }
 
       const result = await Moderation.mute(

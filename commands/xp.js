@@ -9,89 +9,82 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName("xp")
     .setDescription("Manage the XP and leveling system")
-    .addSubcommand(subcommand =>
+    .addSubcommand((subcommand) =>
       subcommand
         .setName("rank")
         .setDescription("Check your or someone else's XP and level")
-        .addUserOption(option =>
+        .addUserOption((option) =>
           option
             .setName("user")
             .setDescription("User to check (leave empty for yourself)")
         )
     )
-    .addSubcommand(subcommand =>
+    .addSubcommand((subcommand) =>
       subcommand
         .setName("leaderboard")
         .setDescription("View the server XP leaderboard")
-        .addIntegerOption(option =>
-          option
-            .setName("page")
-            .setDescription("Page number")
-            .setMinValue(1)
+        .addIntegerOption((option) =>
+          option.setName("page").setDescription("Page number").setMinValue(1)
         )
     )
-    .addSubcommand(subcommand =>
+    .addSubcommand((subcommand) =>
       subcommand
         .setName("config")
         .setDescription("Configure XP settings")
-        .addBooleanOption(option =>
-          option
-            .setName("enabled")
-            .setDescription("Enable/disable XP system")
+        .addBooleanOption((option) =>
+          option.setName("enabled").setDescription("Enable/disable XP system")
         )
-        .addIntegerOption(option =>
+        .addIntegerOption((option) =>
           option
             .setName("xp_per_message")
             .setDescription("XP gained per message")
             .setMinValue(1)
             .setMaxValue(100)
         )
-        .addIntegerOption(option =>
+        .addIntegerOption((option) =>
           option
             .setName("cooldown")
             .setDescription("Cooldown between XP gains (seconds)")
             .setMinValue(10)
             .setMaxValue(300)
         )
-        .addChannelOption(option =>
+        .addChannelOption((option) =>
           option
             .setName("levelup_channel")
             .setDescription("Channel for level up announcements")
         )
     )
-    .addSubcommand(subcommand =>
+    .addSubcommand((subcommand) =>
       subcommand
         .setName("reward")
         .setDescription("Add/remove level rewards")
-        .addIntegerOption(option =>
+        .addIntegerOption((option) =>
           option
             .setName("level")
             .setDescription("Level for the reward")
             .setRequired(true)
             .setMinValue(1)
         )
-        .addRoleOption(option =>
+        .addRoleOption((option) =>
           option
             .setName("role")
             .setDescription("Role to award (leave empty to remove)")
         )
     )
-    .addSubcommand(subcommand =>
-      subcommand
-        .setName("rewards")
-        .setDescription("List all level rewards")
+    .addSubcommand((subcommand) =>
+      subcommand.setName("rewards").setDescription("List all level rewards")
     )
-    .addSubcommand(subcommand =>
+    .addSubcommand((subcommand) =>
       subcommand
         .setName("add")
         .setDescription("Manually add XP to a user")
-        .addUserOption(option =>
+        .addUserOption((option) =>
           option
             .setName("user")
             .setDescription("User to award XP to")
             .setRequired(true)
         )
-        .addIntegerOption(option =>
+        .addIntegerOption((option) =>
           option
             .setName("amount")
             .setDescription("Amount of XP to add")
@@ -99,17 +92,17 @@ module.exports = {
             .setMinValue(1)
         )
     )
-    .addSubcommand(subcommand =>
+    .addSubcommand((subcommand) =>
       subcommand
         .setName("remove")
         .setDescription("Manually remove XP from a user")
-        .addUserOption(option =>
+        .addUserOption((option) =>
           option
             .setName("user")
             .setDescription("User to remove XP from")
             .setRequired(true)
         )
-        .addIntegerOption(option =>
+        .addIntegerOption((option) =>
           option
             .setName("amount")
             .setDescription("Amount of XP to remove")
@@ -117,11 +110,11 @@ module.exports = {
             .setMinValue(1)
         )
     )
-    .addSubcommand(subcommand =>
+    .addSubcommand((subcommand) =>
       subcommand
         .setName("reset")
         .setDescription("Reset a user's XP and level")
-        .addUserOption(option =>
+        .addUserOption((option) =>
           option
             .setName("user")
             .setDescription("User to reset")
@@ -158,7 +151,7 @@ module.exports = {
     if (!userData) {
       return interaction.reply({
         content: `${user.tag} hasn't earned any XP yet!`,
-        ephemeral: true
+        ephemeral: true,
       });
     }
 
@@ -168,7 +161,7 @@ module.exports = {
 
     // Get rank position
     const leaderboard = await db.getXPLeaderboard(interaction.guild.id, 1000);
-    const rank = leaderboard.findIndex(u => u.user_id === user.id) + 1;
+    const rank = leaderboard.findIndex((u) => u.user_id === user.id) + 1;
 
     const embed = new EmbedBuilder()
       .setTitle(`${user.username}'s XP Card`)
@@ -176,11 +169,27 @@ module.exports = {
       .setColor(0x667eea)
       .addFields(
         { name: "Level", value: `${level}`, inline: true },
-        { name: "XP", value: `${userData.xp.toLocaleString()} / ${nextLevelXP.toLocaleString()}`, inline: true },
+        {
+          name: "XP",
+          value: `${userData.xp.toLocaleString()} / ${nextLevelXP.toLocaleString()}`,
+          inline: true,
+        },
         { name: "Rank", value: `#${rank}`, inline: true },
-        { name: "Messages", value: `${userData.messages_sent.toLocaleString()}`, inline: true },
-        { name: "Voice Minutes", value: `${userData.voice_minutes.toLocaleString()}`, inline: true },
-        { name: "Progress", value: `${'▓'.repeat(Math.floor(progress / 10))}${'░'.repeat(10 - Math.floor(progress / 10))} ${progress}%`, inline: false }
+        {
+          name: "Messages",
+          value: `${userData.messages_sent.toLocaleString()}`,
+          inline: true,
+        },
+        {
+          name: "Voice Minutes",
+          value: `${userData.voice_minutes.toLocaleString()}`,
+          inline: true,
+        },
+        {
+          name: "Progress",
+          value: `${"▓".repeat(Math.floor(progress / 10))}${"░".repeat(10 - Math.floor(progress / 10))} ${progress}%`,
+          inline: false,
+        }
       )
       .setTimestamp();
 
@@ -200,7 +209,7 @@ module.exports = {
     if (pageUsers.length === 0) {
       return interaction.editReply({
         content: "No users found on this page!",
-        ephemeral: true
+        ephemeral: true,
       });
     }
 
@@ -208,12 +217,21 @@ module.exports = {
       .setTitle(`🏆 XP Leaderboard - Page ${page}`)
       .setColor(0xffd700)
       .setDescription(
-        pageUsers.map((user, index) => {
-          const rank = offset + index + 1;
-          const medal = rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : `#${rank}`;
-          const level = client.xpSystem.calculateLevel(user.xp);
-          return `${medal} <@${user.user_id}> - Level **${level}** (${user.xp.toLocaleString()} XP)`;
-        }).join("\n")
+        pageUsers
+          .map((user, index) => {
+            const rank = offset + index + 1;
+            const medal =
+              rank === 1
+                ? "🥇"
+                : rank === 2
+                  ? "🥈"
+                  : rank === 3
+                    ? "🥉"
+                    : `#${rank}`;
+            const level = client.xpSystem.calculateLevel(user.xp);
+            return `${medal} <@${user.user_id}> - Level **${level}** (${user.xp.toLocaleString()} XP)`;
+          })
+          .join("\n")
       )
       .setFooter({ text: `Total users: ${allUsers.length}` })
       .setTimestamp();
@@ -222,10 +240,12 @@ module.exports = {
   },
 
   async handleConfig(interaction, client) {
-    if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) {
+    if (
+      !interaction.member.permissions.has(PermissionFlagsBits.Administrator)
+    ) {
       return interaction.reply({
         content: "You need Administrator permission to configure XP settings!",
-        ephemeral: true
+        ephemeral: true,
       });
     }
 
@@ -248,10 +268,28 @@ module.exports = {
         .setTitle("⚙️ XP Configuration")
         .setColor(0x667eea)
         .addFields(
-          { name: "Enabled", value: currentConfig.enabled ? "✅ Yes" : "❌ No", inline: true },
-          { name: "XP per Message", value: `${currentConfig.xp_per_message}`, inline: true },
-          { name: "Cooldown", value: `${currentConfig.xp_cooldown / 1000}s`, inline: true },
-          { name: "Level Up Channel", value: currentConfig.level_up_channel ? `<#${currentConfig.level_up_channel}>` : "Current channel", inline: false }
+          {
+            name: "Enabled",
+            value: currentConfig.enabled ? "✅ Yes" : "❌ No",
+            inline: true,
+          },
+          {
+            name: "XP per Message",
+            value: `${currentConfig.xp_per_message}`,
+            inline: true,
+          },
+          {
+            name: "Cooldown",
+            value: `${currentConfig.xp_cooldown / 1000}s`,
+            inline: true,
+          },
+          {
+            name: "Level Up Channel",
+            value: currentConfig.level_up_channel
+              ? `<#${currentConfig.level_up_channel}>`
+              : "Current channel",
+            inline: false,
+          }
         );
 
       return interaction.editReply({ embeds: [embed] });
@@ -260,7 +298,7 @@ module.exports = {
     await db.updateXPConfig(interaction.guild.id, config);
 
     await interaction.editReply({
-      content: "✅ XP configuration updated successfully!"
+      content: "✅ XP configuration updated successfully!",
     });
   },
 
@@ -268,7 +306,7 @@ module.exports = {
     if (!interaction.member.permissions.has(PermissionFlagsBits.ManageRoles)) {
       return interaction.reply({
         content: "You need Manage Roles permission to configure level rewards!",
-        ephemeral: true
+        ephemeral: true,
       });
     }
 
@@ -280,7 +318,7 @@ module.exports = {
       await db.removeLevelReward(interaction.guild.id, level);
       return interaction.reply({
         content: `✅ Removed level reward for level ${level}`,
-        ephemeral: true
+        ephemeral: true,
       });
     }
 
@@ -288,7 +326,7 @@ module.exports = {
     await db.addLevelReward(interaction.guild.id, level, role.id);
     await interaction.reply({
       content: `✅ Set ${role} as the reward for reaching level ${level}!`,
-      ephemeral: true
+      ephemeral: true,
     });
   },
 
@@ -298,7 +336,7 @@ module.exports = {
     if (rewards.length === 0) {
       return interaction.reply({
         content: "No level rewards configured yet!",
-        ephemeral: true
+        ephemeral: true,
       });
     }
 
@@ -306,24 +344,26 @@ module.exports = {
       .setTitle("🎁 Level Rewards")
       .setColor(0x667eea)
       .setDescription(
-        rewards.map(r => `Level **${r.level}**: <@&${r.role_id}>`).join("\n")
+        rewards.map((r) => `Level **${r.level}**: <@&${r.role_id}>`).join("\n")
       );
 
     await interaction.reply({ embeds: [embed] });
   },
 
   async handleAdd(interaction, client) {
-    if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) {
+    if (
+      !interaction.member.permissions.has(PermissionFlagsBits.Administrator)
+    ) {
       return interaction.reply({
         content: "You need Administrator permission to manually add XP!",
-        ephemeral: true
+        ephemeral: true,
       });
     }
 
     const user = interaction.options.getUser("user");
     const amount = interaction.options.getInteger("amount");
 
-    await db.addUserXP(interaction.guild.id, user.id, amount, 'manual');
+    await db.addUserXP(interaction.guild.id, user.id, amount, "manual");
 
     const userData = await db.getUserXP(interaction.guild.id, user.id);
     const newLevel = client.xpSystem.calculateLevel(userData.xp);
@@ -331,22 +371,24 @@ module.exports = {
 
     await interaction.reply({
       content: `✅ Added ${amount} XP to ${user}! They now have ${userData.xp} XP (Level ${newLevel})`,
-      ephemeral: true
+      ephemeral: true,
     });
   },
 
   async handleRemove(interaction, client) {
-    if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) {
+    if (
+      !interaction.member.permissions.has(PermissionFlagsBits.Administrator)
+    ) {
       return interaction.reply({
         content: "You need Administrator permission to manually remove XP!",
-        ephemeral: true
+        ephemeral: true,
       });
     }
 
     const user = interaction.options.getUser("user");
     const amount = interaction.options.getInteger("amount");
 
-    await db.addUserXP(interaction.guild.id, user.id, -amount, 'manual');
+    await db.addUserXP(interaction.guild.id, user.id, -amount, "manual");
 
     const userData = await db.getUserXP(interaction.guild.id, user.id);
     const newLevel = client.xpSystem.calculateLevel(userData.xp);
@@ -354,15 +396,17 @@ module.exports = {
 
     await interaction.reply({
       content: `✅ Removed ${amount} XP from ${user}! They now have ${userData.xp} XP (Level ${newLevel})`,
-      ephemeral: true
+      ephemeral: true,
     });
   },
 
   async handleReset(interaction, client) {
-    if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) {
+    if (
+      !interaction.member.permissions.has(PermissionFlagsBits.Administrator)
+    ) {
       return interaction.reply({
         content: "You need Administrator permission to reset XP!",
-        ephemeral: true
+        ephemeral: true,
       });
     }
 
@@ -381,8 +425,7 @@ module.exports = {
 
     await interaction.reply({
       content: `✅ Reset ${user}'s XP and level!`,
-      ephemeral: true
+      ephemeral: true,
     });
-  }
+  },
 };
-
