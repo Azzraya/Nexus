@@ -125,21 +125,26 @@ module.exports = {
           guildId: interaction.guild?.id,
         });
 
-        // Try to reply, but don't crash if that fails too
-        if (interaction.replied || interaction.deferred) {
-          await ErrorHandler.safeExecute(
-            () => interaction.editReply({ embeds: [embed] }),
-            "interactionCreate",
-            null
-          );
-        } else {
-          await ErrorHandler.safeExecute(
-            () => interaction.reply({
-              embeds: [embed],
-              flags: MessageFlags.Ephemeral,
-            }),
-            "interactionCreate",
-            `Reply with error for ${interaction.commandName}`
+        // Try to reply, but silently fail if interaction expired
+        try {
+          if (interaction.replied || interaction.deferred) {
+            await interaction.editReply({ embeds: [embed] }).catch(() => {
+              // Interaction expired or already handled - silently ignore
+            });
+          } else {
+            await interaction
+              .reply({
+                embeds: [embed],
+                flags: MessageFlags.Ephemeral,
+              })
+              .catch(() => {
+                // Interaction expired - silently ignore
+              });
+          }
+        } catch (replyError) {
+          // Interaction expired or invalid - just log it
+          logger.debug(
+            `[interactionCreate] Could not send error reply (interaction expired): ${interaction.commandName}`
           );
         }
       }
