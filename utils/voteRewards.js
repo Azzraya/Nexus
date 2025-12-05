@@ -834,7 +834,6 @@ class VoteRewards {
     await this.createRewardRoles(guild);
 
     // Run initial check immediately (don't wait 5 minutes)
-    logger.info(`[Vote Rewards] Running initial vote check for ${guild.name}`);
     setTimeout(() => {
       this.checkForNewVotes(guild);
     }, 10000); // Wait 10 seconds for bot to be fully ready
@@ -850,10 +849,6 @@ class VoteRewards {
         this.removeExpiredRoles(guild);
       },
       60 * 60 * 1000
-    );
-
-    logger.info(
-      `[Vote Rewards] Started auto-checking for ${guild.name} (checks every 5 minutes)`
     );
   }
 }

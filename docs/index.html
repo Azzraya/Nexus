@@ -1935,9 +1935,9 @@
       const ACTIVITY_API =
         "https://regular-puma-clearly.ngrok-free.app/api/v2/recent-activity";
       const ACHIEVEMENTS_API =
-        "https://regular-puma-clearly.ngrok-free.app/api/v1/achievements"; // v2 not yet available
+        "https://regular-puma-clearly.ngrok-free.app/api/v2/achievements";
       const INVITES_API =
-        "https://regular-puma-clearly.ngrok-free.app/api/v1/invite-stats"; // v2 not yet available
+        "https://regular-puma-clearly.ngrok-free.app/api/v2/invite-stats";
       const STATS_API =
         "https://regular-puma-clearly.ngrok-free.app/api/v2/stats";
 
@@ -1991,7 +1991,11 @@
             headers: { "ngrok-skip-browser-warning": "true" },
           });
           if (response.ok) {
-            const data = await response.json();
+            const responseData = await response.json();
+            // Handle v2 response format
+            const data = responseData.success
+              ? responseData.data
+              : responseData;
             animateCounter("total-invites", data.totalInvites || 0);
             animateCounter("active-servers", data.currentServers || 0);
             document.getElementById("retention-rate").textContent =
@@ -2081,7 +2085,11 @@
             headers: { "ngrok-skip-browser-warning": "true" },
           });
           if (response.ok) {
-            const achievements = await response.json();
+            const responseData = await response.json();
+            // Handle v2 response format
+            const achievements = responseData.success
+              ? responseData.data?.achievements || []
+              : responseData;
             const gridEl = document.getElementById("achievements-grid");
 
             // Only show first 6 achievements

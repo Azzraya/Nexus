@@ -2,6 +2,7 @@
 // Analyze patterns across all servers to predict raids before they happen
 
 const db = require("./database");
+const logger = require("./logger");
 
 class ThreatPredictor {
   constructor() {
@@ -137,7 +138,7 @@ class ThreatPredictor {
         recentJoins: recentJoins.size,
       };
     } catch (error) {
-      console.error("[Threat Predictor] Error:", error);
+      logger.error("Threat Predictor", "Error analyzing threat", error);
       return {
         score: 0,
         level: "Unknown",
@@ -260,7 +261,7 @@ class ThreatPredictor {
         );
       });
     } catch (error) {
-      console.error("[Threat Predictor] Save prediction error:", error);
+      logger.error("Threat Predictor", "Save prediction error", error);
     }
   }
 

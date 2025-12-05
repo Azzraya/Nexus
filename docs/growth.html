@@ -288,7 +288,8 @@
     </style>
 
     <script>
-      const API_URL = "https://regular-puma-clearly.ngrok-free.app/api/stats";
+      const API_URL =
+        "https://regular-puma-clearly.ngrok-free.app/api/v2/stats";
       const INVITE_STATS_API =
         "https://regular-puma-clearly.ngrok-free.app/api/admin/invite-stats";
 
@@ -303,13 +304,17 @@
           });
 
           if (response.ok) {
-            const data = await response.json();
-            currentServers = data.servers || 0;
+            const responseData = await response.json();
+            // Handle v2 response format
+            const data = responseData.success
+              ? responseData.data
+              : responseData;
+            currentServers = data.serverCount || data.servers || 0;
+            const userCount = data.userCount || data.users || 0;
 
             document.getElementById("current-servers").textContent =
               currentServers;
-            document.getElementById("total-users").textContent =
-              data.users || 0;
+            document.getElementById("total-users").textContent = userCount;
 
             // Update milestone progress
             const progress = (currentServers / 20) * 100;

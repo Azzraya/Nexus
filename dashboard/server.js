@@ -2150,7 +2150,177 @@ class DashboardServer {
       }
     });
 
-    // GET /api/v1/achievements - Get unlocked achievements
+    // GET /api/v2/achievements - Get unlocked achievements (v2)
+    this.app.get("/api/v2/achievements", async (req, res) => {
+      try {
+        addRateLimitHeaders(req, res);
+        const serverCount = this.client.guilds.cache.size;
+        const userCount = this.client.guilds.cache.reduce(
+          (acc, guild) => acc + guild.memberCount,
+          0
+        );
+
+        // Get total votes
+        const totalVotes = await new Promise((resolve) => {
+          db.db.get(
+            "SELECT SUM(total_votes) as total FROM vote_streaks",
+            [],
+            (err, row) => {
+              if (err) resolve(0);
+              else resolve(row?.total || 0);
+            }
+          );
+        });
+
+        // Get total invites (sum of all server joins)
+        const totalInvites = await new Promise((resolve) => {
+          db.db.get(
+            "SELECT COUNT(*) as count FROM guild_join_log",
+            [],
+            (err, row) => {
+              if (err)
+                resolve(serverCount); // Fallback to current count
+              else resolve(row?.count || serverCount);
+            }
+          );
+        });
+
+        // Define achievements
+        const achievements = [
+          {
+            id: "servers_5",
+            name: "First 5 Servers",
+            icon: "🌟",
+            requirement: 5,
+            current: serverCount,
+            unlocked: serverCount >= 5,
+          },
+          {
+            id: "servers_10",
+            name: "10 Server Milestone",
+            icon: "⭐",
+            requirement: 10,
+            current: serverCount,
+            unlocked: serverCount >= 10,
+          },
+          {
+            id: "servers_20",
+            name: "20 Servers Strong",
+            icon: "💫",
+            requirement: 20,
+            current: serverCount,
+            unlocked: serverCount >= 20,
+          },
+          {
+            id: "servers_50",
+            name: "50 Server Club",
+            icon: "🌠",
+            requirement: 50,
+            current: serverCount,
+            unlocked: serverCount >= 50,
+          },
+          {
+            id: "servers_100",
+            name: "100 Servers!",
+            icon: "🏆",
+            requirement: 100,
+            current: serverCount,
+            unlocked: serverCount >= 100,
+          },
+          {
+            id: "users_100",
+            name: "100 Users Protected",
+            icon: "🛡️",
+            requirement: 100,
+            current: userCount,
+            unlocked: userCount >= 100,
+          },
+          {
+            id: "users_500",
+            name: "500 Users Protected",
+            icon: "🔰",
+            requirement: 500,
+            current: userCount,
+            unlocked: userCount >= 500,
+          },
+          {
+            id: "users_1000",
+            name: "1K Users Protected",
+            icon: "💎",
+            requirement: 1000,
+            current: userCount,
+            unlocked: userCount >= 1000,
+          },
+          {
+            id: "votes_10",
+            name: "First 10 Votes",
+            icon: "🗳️",
+            requirement: 10,
+            current: totalVotes,
+            unlocked: totalVotes >= 10,
+          },
+          {
+            id: "votes_50",
+            name: "50 Votes",
+            icon: "🎖️",
+            requirement: 50,
+            current: totalVotes,
+            unlocked: totalVotes >= 50,
+          },
+          {
+            id: "votes_100",
+            name: "100 Votes",
+            icon: "🏅",
+            requirement: 100,
+            current: totalVotes,
+            unlocked: totalVotes >= 100,
+          },
+          {
+            id: "invites_25",
+            name: "25 Total Invites",
+            icon: "📈",
+            requirement: 25,
+            current: totalInvites,
+            unlocked: totalInvites >= 25,
+          },
+          {
+            id: "invites_50",
+            name: "50 Total Invites",
+            icon: "📊",
+            requirement: 50,
+            current: totalInvites,
+            unlocked: totalInvites >= 50,
+          },
+          {
+            id: "invites_100",
+            name: "100 Total Invites",
+            icon: "💯",
+            requirement: 100,
+            current: totalInvites,
+            unlocked: totalInvites >= 100,
+          },
+        ];
+
+        res.json({
+          success: true,
+          data: {
+            achievements,
+            total: achievements.length,
+            unlocked: achievements.filter((a) => a.unlocked).length,
+          },
+          apiVersion: "2.0.0",
+        });
+      } catch (error) {
+        logger.error("API", "V2 achievements error", error);
+        res.status(500).json({
+          success: false,
+          error: "Internal server error",
+          apiVersion: "2.0.0",
+        });
+      }
+    });
+
+    // GET /api/v1/achievements - Get unlocked achievements - DEPRECATED
     this.app.get("/api/v1/achievements", async (req, res) => {
       try {
         const serverCount = this.client.guilds.cache.size;
@@ -2307,7 +2477,52 @@ class DashboardServer {
       }
     });
 
-    // GET /api/v1/invite-stats - Get invite statistics
+    // GET /api/v2/invite-stats - Get invite statistics (v2)
+    this.app.get("/api/v2/invite-stats", async (req, res) => {
+      try {
+        addRateLimitHeaders(req, res);
+        const currentServers = this.client.guilds.cache.size;
+
+        // Try to get total invites from database
+        const totalInvites = await new Promise((resolve) => {
+          db.db.get(
+            "SELECT COUNT(*) as count FROM guild_join_log",
+            [],
+            (err, row) => {
+              if (err) resolve(currentServers);
+              else resolve(row?.count || currentServers);
+            }
+          );
+        });
+
+        // Calculate retention rate
+        const retentionRate =
+          currentServers > 0
+            ? Math.round((currentServers / totalInvites) * 100)
+            : 100;
+
+        res.json({
+          success: true,
+          data: {
+            totalInvites,
+            currentServers,
+            serversLeft: totalInvites - currentServers,
+            retentionRate,
+          },
+          apiVersion: "2.0.0",
+        });
+      } catch (error) {
+        logger.error("API", "V2 invite stats error", error);
+        const currentServers = this.client.guilds.cache.size;
+        res.status(500).json({
+          success: false,
+          error: "Internal server error",
+          apiVersion: "2.0.0",
+        });
+      }
+    });
+
+    // GET /api/v1/invite-stats - Get invite statistics - DEPRECATED
     this.app.get("/api/v1/invite-stats", async (req, res) => {
       try {
         const currentServers = this.client.guilds.cache.size;
@@ -4415,7 +4630,7 @@ class DashboardServer {
         };
 
         await fs.writeFile(bannerPath, JSON.stringify(bannerData, null, 2));
-        console.log("✅ [Banner] Updated successfully");
+        logger.info("Banner", "Updated successfully");
         res.json({ success: true, banner: bannerData });
       } catch (error) {
         console.error("❌ [Banner] Error updating banner:", error.message);
@@ -4440,11 +4655,7 @@ class DashboardServer {
       }
     });
 
-    console.log("[API] Public API v1 endpoints registered");
-    console.log("[API] 🔥 POWERFUL API v2 - 47 endpoints active!"); // Updated count
-    console.log("[Referral] Referral tracking system active");
-    console.log("[IP Logging] IP tracking active");
-    console.log("[Banner] Banner management system active");
+    logger.info("API", "🔥 API v2 active (v1 deprecated)");
   }
 
   // Analytics system removed - causing errors

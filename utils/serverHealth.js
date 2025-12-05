@@ -2,6 +2,7 @@
 // Calculates a 0-100 health score for each server based on multiple factors
 
 const db = require("./database");
+const logger = require("./logger");
 
 class ServerHealth {
   constructor() {
@@ -45,7 +46,7 @@ class ServerHealth {
         recommendations: await this.getRecommendations(guildId, scores),
       };
     } catch (error) {
-      console.error("[Server Health] Error calculating health:", error);
+      logger.error("Server Health", "Error calculating health", error);
       return {
         overall: 0,
         grade: "F",

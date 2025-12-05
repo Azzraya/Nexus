@@ -1,5 +1,5 @@
 // Live stats from bot API
-const API_URL = "https://regular-puma-clearly.ngrok-free.app/api/stats";
+const API_URL = "https://regular-puma-clearly.ngrok-free.app/api/v2/stats";
 
 let statsCache = {
   servers: 0,
@@ -34,12 +34,16 @@ async function fetchLiveStats() {
     console.log("📡 Response status:", response.status);
 
     if (response.ok) {
-      const data = await response.json();
+      const responseData = await response.json();
+      // Handle v2 response format
+      const data = responseData.success ? responseData.data : responseData;
       console.log("📊 Received data:", data);
 
       // Update cache with real data
-      if (data.servers !== undefined) statsCache.servers = data.servers;
-      if (data.users !== undefined) statsCache.users = data.users;
+      if (data.serverCount !== undefined) statsCache.servers = data.serverCount;
+      else if (data.servers !== undefined) statsCache.servers = data.servers;
+      if (data.userCount !== undefined) statsCache.users = data.userCount;
+      else if (data.users !== undefined) statsCache.users = data.users;
       if (data.uptime !== undefined) statsCache.uptime = data.uptime;
       if (data.ping !== undefined) statsCache.ping = data.ping;
       if (data.memory !== undefined) statsCache.memoryUsage = data.memory;

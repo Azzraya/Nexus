@@ -1,6 +1,7 @@
 const { ActivityType } = require("discord.js");
 const ShardManager = require("../utils/shardManager");
 const { registerCommands } = require("../utils/registerCommands");
+const logger = require("../utils/logger");
 
 module.exports = {
   name: "clientReady",
@@ -39,39 +40,43 @@ module.exports = {
 
           if (commands.length > 0) {
             await dbl.postCommands(commands);
-            console.log(
-              `✅ Posted ${commands.length} commands to Discord Bot List`
+            logger.info(
+              "Ready",
+              `Posted ${commands.length} commands to Discord Bot List`
             );
           }
         } catch (error) {
-          console.error(
-            "⚠️ Failed to post commands to Discord Bot List:",
-            error.message
+          logger.error(
+            "Ready",
+            "Failed to post commands to Discord Bot List",
+            error
           );
         }
       }
     }
 
     if (shardInfo.isSharded) {
-      console.log(
+      logger.info(
+        "Ready",
         `✅ Shard ${shardInfo.shardId}/${shardInfo.shardCount - 1} is online!`
       );
       const shardUserCount = client.guilds.cache.reduce(
         (acc, guild) => acc + guild.memberCount,
         0
       );
-      console.log(
+      logger.info(
+        "Ready",
         `📊 Serving ${client.guilds.cache.size} servers on this shard`
       );
-      console.log(`👥 Watching ${shardUserCount} users on this shard`);
+      logger.info("Ready", `👥 Watching ${shardUserCount} users on this shard`);
     } else {
       const totalUserCount = client.guilds.cache.reduce(
         (acc, guild) => acc + guild.memberCount,
         0
       );
-      console.log(`✅ ${client.user.tag} is online!`);
-      console.log(`📊 Serving ${client.guilds.cache.size} servers`);
-      console.log(`👥 Watching ${totalUserCount} users`);
+      logger.info("Ready", `✅ ${client.user.tag} is online!`);
+      logger.info("Ready", `📊 Serving ${client.guilds.cache.size} servers`);
+      logger.info("Ready", `👥 Watching ${totalUserCount} users`);
     }
 
     // List all guilds
@@ -121,7 +126,7 @@ module.exports = {
       for (const guild of client.guilds.cache.values()) {
         await client.workflows.loadWorkflows(guild.id);
       }
-      console.log(`⚙️ Workflows loaded`);
+      logger.info("Ready", "⚙️ Workflows loaded");
     }
 
     // Start automatic snapshot scheduler (EXCEEDS WICK - point-in-time recovery)
@@ -130,7 +135,10 @@ module.exports = {
       (!shardInfo.isSharded || shardInfo.shardId === 0)
     ) {
       client.snapshotScheduler.start();
-      console.log(`📸 Snapshot scheduler started (hourly backups enabled)`);
+      logger.info(
+        "Ready",
+        "📸 Snapshot scheduler started (hourly backups enabled)"
+      );
     }
 
     // Start automatic vote checking for all guilds (EXCEEDS WICK - auto vote rewards)
@@ -138,7 +146,8 @@ module.exports = {
       for (const guild of client.guilds.cache.values()) {
         client.voteRewards.startAutoChecking(guild);
       }
-      console.log(
+      logger.info(
+        "Ready",
         `🎁 Vote rewards auto-checking started for ${client.guilds.cache.size} guilds`
       );
     }
@@ -149,8 +158,9 @@ module.exports = {
       (!shardInfo.isSharded || shardInfo.shardId === 0)
     ) {
       client.dashboardServer.start(3000);
-      console.log(`🌐 Dashboard server started on port 3000`);
-      console.log(
+      logger.info("Ready", "🌐 Dashboard server started on port 3000");
+      logger.info(
+        "Ready",
         `🔗 Access at: ${process.env.DASHBOARD_URL || "http://localhost:3000"}`
       );
     }
@@ -161,7 +171,7 @@ module.exports = {
       (!shardInfo.isSharded || shardInfo.shardId === 0)
     ) {
       await client.scheduledActions.start();
-      console.log(`⏰ Scheduled Actions system started`);
+      logger.info("Ready", "⏰ Scheduled Actions system started");
     }
 
     // Generate initial recommendations for all guilds
@@ -170,13 +180,14 @@ module.exports = {
       try {
         await SmartRecommendations.analyzeServer(guild.id, guild);
       } catch (error) {
-        console.error(
-          `Failed to generate recommendations for ${guild.name}:`,
+        logger.error(
+          "Ready",
+          `Failed to generate recommendations for ${guild.name}`,
           error
         );
       }
     }
-    console.log(`🤖 Smart recommendations generated`);
+    logger.info("Ready", "🤖 Smart recommendations generated");
 
     // Initialize default configs for all servers
     client.guilds.cache.forEach((guild) => {

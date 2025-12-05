@@ -3,6 +3,7 @@
 
 const axios = require("axios");
 const db = require("./database");
+const logger = require("./logger");
 
 class WebhookHub {
   constructor() {
@@ -75,18 +76,20 @@ class WebhookHub {
           // Update trigger count
           await this.updateTriggerCount(webhook.id);
 
-          console.log(
-            `[Webhook Hub] Triggered: ${webhook.name} for ${eventType}`
+          logger.info(
+            "Webhook Hub",
+            `Triggered: ${webhook.name} for ${eventType}`
           );
         } catch (error) {
-          console.error(
-            `[Webhook Hub] Failed to send to ${webhook.name}:`,
-            error.message
+          logger.error(
+            "Webhook Hub",
+            `Failed to send to ${webhook.name}`,
+            error
           );
         }
       }
     } catch (error) {
-      console.error("[Webhook Hub] Error triggering event:", error);
+      logger.error("Webhook Hub", "Error triggering event", error);
     }
   }
 

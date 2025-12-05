@@ -1637,7 +1637,11 @@ class Database {
       `ALTER TABLE server_config ADD COLUMN join_lock_enabled INTEGER DEFAULT 0`,
       (err) => {
         if (err && !err.message.includes("duplicate column")) {
-          console.error("Error adding join_lock_enabled column:", err);
+          logger.error(
+            "Database",
+            "Error adding join_lock_enabled column",
+            err
+          );
         }
       }
     );
@@ -1685,7 +1689,11 @@ class Database {
       `ALTER TABLE server_config ADD COLUMN join_gate_enabled INTEGER DEFAULT 0`,
       (err) => {
         if (err && !err.message.includes("duplicate column")) {
-          console.error("Error adding join_gate_enabled column:", err);
+          logger.error(
+            "Database",
+            "Error adding join_gate_enabled column",
+            err
+          );
         }
       }
     );
@@ -1695,7 +1703,11 @@ class Database {
       `ALTER TABLE automod_config ADD COLUMN enabled INTEGER DEFAULT 1`,
       (err) => {
         if (err && !err.message.includes("duplicate column")) {
-          console.error("Error adding automod_config enabled column:", err);
+          logger.error(
+            "Database",
+            "Error adding automod_config enabled column",
+            err
+          );
         }
       }
     );
@@ -1705,7 +1717,7 @@ class Database {
       `ALTER TABLE server_config ADD COLUMN seasonal_theme TEXT`,
       (err) => {
         if (err && !err.message.includes("duplicate column")) {
-          console.error("Error adding seasonal_theme column:", err);
+          logger.error("Database", "Error adding seasonal_theme column", err);
         }
       }
     );
@@ -1713,7 +1725,7 @@ class Database {
     // Migration: Fix polls table schema (drop old, recreate with new schema)
     this.db.run(`DROP TABLE IF EXISTS polls`, (err) => {
       if (err) {
-        console.error("Error dropping old polls table:", err);
+        logger.error("Database", "Error dropping old polls table", err);
       } else {
         // Recreate with correct schema
         this.db.run(`
@@ -3944,8 +3956,9 @@ class Database {
             (err2) => {
               // Don't fail if source doesn't exist yet
               if (err2)
-                console.log(
-                  `[Invite Tracking] Note: Source '${source}' not found in invite_sources table`
+                logger.info(
+                  "Database",
+                  `Note: Source '${source}' not found in invite_sources table`
                 );
               resolve();
             }

@@ -181,18 +181,25 @@
       // Fetch and update stats
       async function updateStats() {
         try {
-          const response = await fetch(`${API_URL}/api/stats`, {
+          const response = await fetch(`${API_URL}/api/v2/stats`, {
             headers: { "ngrok-skip-browser-warning": "true" },
           });
-          const data = await response.json();
+          const responseData = await response.json();
+          // Handle v2 response format
+          const data = responseData.success ? responseData.data : responseData;
 
-          document.getElementById("serverCount").textContent = data.servers;
-          document.getElementById("userCount").textContent =
-            data.users.toLocaleString();
+          document.getElementById("serverCount").textContent =
+            data.serverCount || data.servers || 0;
+          document.getElementById("userCount").textContent = (
+            data.userCount ||
+            data.users ||
+            0
+          ).toLocaleString();
           document.getElementById("uptimeDisplay").textContent = formatUptime(
-            data.uptime
+            data.uptime || 0
           );
-          document.getElementById("pingDisplay").textContent = `${data.ping}ms`;
+          document.getElementById("pingDisplay").textContent =
+            `${data.ping || 0}ms`;
         } catch (error) {
           console.error("Failed to fetch stats:", error);
         }

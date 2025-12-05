@@ -40,7 +40,7 @@ module.exports = {
         );
       }
     } catch (error) {
-      console.error("Failed to get tracking info:", error.message);
+      logger.error("Guild Delete", "Failed to get tracking info", error);
     }
 
     // Log server leave
@@ -81,11 +81,11 @@ module.exports = {
         );
       });
 
-      console.log(`   Source: ${inviteSource}`);
-      console.log(`   Active for: ${daysActive} days`);
-      console.log(`   Members: ${guild.memberCount || 0}`);
+      logger.info("Guild Delete", `   Source: ${inviteSource}`);
+      logger.info("Guild Delete", `   Active for: ${daysActive} days`);
+      logger.info("Guild Delete", `   Members: ${guild.memberCount || 0}`);
     } catch (error) {
-      console.error("Failed to log guild leave:", error.message);
+      logger.error("Guild Delete", "Failed to log guild leave", error);
     }
 
     // Send webhook notification to admin
@@ -161,9 +161,13 @@ module.exports = {
         req.write(postData);
         req.end();
 
-        console.log(`   📬 Admin leave notification sent`);
+        logger.info("Guild Delete", "📬 Admin leave notification sent");
       } catch (webhookError) {
-        console.error("Failed to send leave webhook:", webhookError.message);
+        logger.error(
+          "Guild Delete",
+          "Failed to send leave webhook",
+          webhookError
+        );
       }
     }
   },

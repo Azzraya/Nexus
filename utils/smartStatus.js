@@ -78,8 +78,7 @@ class SmartStatus {
         status: "online",
       });
 
-      logger.info(`[Smart Status] Updated to: ${status.name}`);
-      console.log(`🎭 Status: ${status.type} ${status.name}`);
+      // Status updated silently - no need to log every 2 minutes
 
       // Move to next message
       this.currentIndex = (this.currentIndex + 1) % messages.length;
@@ -102,10 +101,8 @@ class SmartStatus {
     );
 
     logger.info(
-      `[Smart Status] Auto-rotating status started (every ${intervalMinutes} minutes)`
-    );
-    console.log(
-      `🎭 Smart status started - rotating every ${intervalMinutes} minutes`
+      "Smart Status",
+      `Auto-rotating status started (every ${intervalMinutes} minutes)`
     );
   }
 
