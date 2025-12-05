@@ -33,6 +33,7 @@ class AdvancedAntiNuke {
     this.whitelistCache = new Map(); // Cache whitelisted users (guildId -> Set<userId>)
     this.predictiveThreats = new Map(); // Track predictive threat patterns (guildId -> Map<userId, {pattern, confidence, timestamp}>)
     this.permissionChanges = new Map(); // Track permission changes per user (userId-guildId -> {changes: [], firstChange, count})
+    this.attackerCreatedChannels = new Map(); // Track channels created by attackers (userId-guildId -> Set<channelId>)
   }
 
   // Get server-size-aware adaptive thresholds
@@ -390,6 +391,25 @@ class AdvancedAntiNuke {
       details,
     });
 
+    // Track channels created by this user (for cleanup during recovery)
+    if (actionType === "channelCreate" && details.channelId) {
+      if (!this.attackerCreatedChannels.has(key)) {
+        this.attackerCreatedChannels.set(key, new Set());
+      }
+      this.attackerCreatedChannels.get(key).add(details.channelId);
+
+      // Auto-cleanup tracking after 5 minutes if no threat detected
+      setTimeout(() => {
+        const channels = this.attackerCreatedChannels.get(key);
+        if (channels) {
+          channels.delete(details.channelId);
+          if (channels.size === 0) {
+            this.attackerCreatedChannels.delete(key);
+          }
+        }
+      }, 300000); // 5 minutes
+    }
+
     // Clean old actions (older than 5 seconds - FASTER detection window)
     userHistory.actions = userHistory.actions.filter(
       (a) => now - a.timestamp < 5000
@@ -612,7 +632,7 @@ class AdvancedAntiNuke {
         logger.info(`[Anti-Nuke] Starting recovery...`);
         
         // Trigger auto-recovery after attacker is removed
-        this.attemptRecovery(guild, threatType, counts).catch((error) => {
+        this.attemptRecovery(guild, threatType, counts, userId).catch((error) => {
           logger.error(`[Anti-Nuke] Recovery failed:`, error);
         });
         
@@ -645,7 +665,7 @@ class AdvancedAntiNuke {
         logger.info(`[Anti-Nuke] Starting recovery...`);
         
         // Trigger auto-recovery after attacker is removed
-        this.attemptRecovery(guild, threatType, counts).catch((error) => {
+        this.attemptRecovery(guild, threatType, counts, userId).catch((error) => {
           logger.error(`[Anti-Nuke] Recovery failed:`, error);
         });
         
@@ -1088,7 +1108,7 @@ class AdvancedAntiNuke {
           `[Anti-Nuke] Attacker ${userId} was successfully removed, starting server recovery...`
         );
         // Start recovery immediately (don't wait for full cleanup)
-        this.attemptRecovery(guild, threatType, counts).catch((error) => {
+        this.attemptRecovery(guild, threatType, counts, userId).catch((error) => {
           logger.error(`[Anti-Nuke] Recovery failed:`, error);
         });
       } else {
@@ -1338,12 +1358,46 @@ class AdvancedAntiNuke {
     }
   }
 
-  async attemptRecovery(guild, threatType, counts) {
+  async attemptRecovery(guild, threatType, counts, attackerUserId) {
     try {
       logger.info(
         `[Anti-Nuke] Starting recovery process for ${guild.id} after ${threatType}`
       );
 
+      // STEP 1: Delete all channels created by the attacker
+      if (attackerUserId) {
+        const key = `${attackerUserId}-${guild.id}`;
+        const attackerChannels = this.attackerCreatedChannels.get(key);
+        
+        if (attackerChannels && attackerChannels.size > 0) {
+          logger.info(
+            `[Anti-Nuke] Cleaning up ${attackerChannels.size} spam channels created by attacker ${attackerUserId}`
+          );
+
+          let deletedCount = 0;
+          for (const channelId of attackerChannels) {
+            try {
+              const channel = await guild.channels.fetch(channelId).catch(() => null);
+              if (channel) {
+                await channel.delete("Anti-Nuke: Cleaning up spam channel created during attack");
+                deletedCount++;
+                logger.debug(`[Anti-Nuke] Deleted spam channel: ${channel.name} (${channelId})`);
+              }
+            } catch (error) {
+              logger.debug(`[Anti-Nuke] Failed to delete spam channel ${channelId}:`, error.message);
+            }
+          }
+
+          logger.success(
+            `[Anti-Nuke] ✅ Cleaned up ${deletedCount}/${attackerChannels.size} spam channels`
+          );
+
+          // Clear the tracking
+          this.attackerCreatedChannels.delete(key);
+        }
+      }
+
+      // STEP 2: Restore legitimate channels from snapshot
       // Get the attack start time (when threat was first detected)
       // We need snapshots created BEFORE the attack started
       const attackStartTime = Date.now() - (this.windowMs || 10000); // Approximate attack start (10 seconds before now)
