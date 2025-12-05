@@ -56,14 +56,22 @@ module.exports = {
       console.log(
         `✅ Shard ${shardInfo.shardId}/${shardInfo.shardCount - 1} is online!`
       );
+      const shardUserCount = client.guilds.cache.reduce(
+        (acc, guild) => acc + guild.memberCount,
+        0
+      );
       console.log(
         `📊 Serving ${client.guilds.cache.size} servers on this shard`
       );
-      console.log(`👥 Watching ${client.users.cache.size} users on this shard`);
+      console.log(`👥 Watching ${shardUserCount} users on this shard`);
     } else {
+      const totalUserCount = client.guilds.cache.reduce(
+        (acc, guild) => acc + guild.memberCount,
+        0
+      );
       console.log(`✅ ${client.user.tag} is online!`);
       console.log(`📊 Serving ${client.guilds.cache.size} servers`);
-      console.log(`👥 Watching ${client.users.cache.size} users`);
+      console.log(`👥 Watching ${totalUserCount} users`);
     }
 
     // List all guilds
