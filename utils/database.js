@@ -7,14 +7,6 @@ const redisCache = require("./redisCache");
 
 class Database {
   constructor() {
-    this.db = null;
-    this._initialized = false;
-  }
-
-  _initialize() {
-    if (this._initialized) return;
-    this._initialized = true;
-
     const dbPath = path.join(__dirname, "..", "data", "nexus.db");
     const dataDir = path.dirname(dbPath);
 
@@ -42,22 +34,15 @@ class Database {
           this.db.run("PRAGMA mmap_size = 268435456;"); // 256MB memory-mapped I/O
 
           // Initialize tables - serialize ensures they're created in order
-          this.initTables(true); // Skip check since we're already initializing
+          this.initTables();
           // Run migrations after tables are created
-          this.runMigrations(true); // Skip check since we're already initializing
+          this.runMigrations();
         });
       }
     });
   }
 
-  _ensureInitialized() {
-    if (!this._initialized) {
-      this._initialize();
-    }
-  }
-
-  initTables(skipCheck = false) {
-    if (!skipCheck) this._ensureInitialized();
+  initTables() {
     // Server configurations
     this.db.run(`
             CREATE TABLE IF NOT EXISTS server_config (
@@ -4882,9 +4867,4 @@ class Database {
   }
 }
 
-const dbInstance = new Database();
-// Initialize on next tick to ensure all modules are loaded
-process.nextTick(() => {
-  dbInstance._initialize();
-});
-module.exports = dbInstance;
+module.exports = new Database();
