@@ -300,8 +300,11 @@
             </div>
           `;
 
-          // Hourly chart
-          new Chart(document.getElementById("hourlyChart"), {
+          // Hourly chart - destroy old one first
+          if (hourlyChart) {
+            hourlyChart.destroy();
+          }
+          hourlyChart = new Chart(document.getElementById("hourlyChart"), {
             type: "bar",
             data: {
               labels: data.hourlyData.map((d) => `${d.hour}:00`),
@@ -346,8 +349,11 @@
             },
           });
 
-          // Daily chart
-          new Chart(document.getElementById("dailyChart"), {
+          // Daily chart - destroy old one first
+          if (dailyChart) {
+            dailyChart.destroy();
+          }
+          dailyChart = new Chart(document.getElementById("dailyChart"), {
             type: "bar",
             data: {
               labels: data.dailyData.map((d) => d.day),
