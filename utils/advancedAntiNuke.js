@@ -324,7 +324,7 @@ class AdvancedAntiNuke {
               });
             }
 
-            return; // Stop further monitoring, threat neutralized
+            // Don't return - still call trackAction to trigger full threat response
           } catch (error) {
             logger.error(
               "[Anti-Nuke] Failed to handle permission testing:",
@@ -485,7 +485,10 @@ class AdvancedAntiNuke {
     }
 
     if (threatDetected) {
+      logger.warn(`[Anti-Nuke] 🔥 THREAT DETECTED - Calling handleThreat for ${userId} - Type: ${threatType}`);
       await this.handleThreat(guild, userId, threatType, counts);
+    } else {
+      logger.debug(`[Anti-Nuke] No threat detected yet for ${userId} - Counts: ${JSON.stringify(counts)}`);
     }
 
     // Update threat score
