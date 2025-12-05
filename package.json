@@ -38,6 +38,7 @@
     "passport": "^0.7.0",
     "passport-discord": "^0.1.4",
     "qrcode": "^1.5.4",
+    "redis": "^5.10.0",
     "sqlite3": "^5.1.6",
     "topgg-autoposter": "^2.0.2",
     "voidbots": "^2.6.3",
