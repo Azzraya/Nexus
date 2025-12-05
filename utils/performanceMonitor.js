@@ -2,143 +2,102 @@ const logger = require("./logger");
 
 class PerformanceMonitor {
   constructor() {
-    this.metrics = new Map();
-    this.raidResponseTimes = [];
-    this.banResponseTimes = [];
+    this.metrics = new Map(); // operation -> { count, totalTime, avgTime, maxTime }
+    this.activeTimers = new Map(); // id -> startTime
   }
 
-  // Start tracking an operation
-  start(operationId, operation, metadata = {}) {
-    this.metrics.set(operationId, {
-      operation,
+  // Start timing an operation
+  start(operationName) {
+    const id = `${operationName}_${Date.now()}_${Math.random()}`;
+    this.activeTimers.set(id, {
+      name: operationName,
       startTime: process.hrtime.bigint(),
-      metadata,
     });
+    return id;
   }
 
-  // End tracking and log performance
-  end(operationId) {
-    const metric = this.metrics.get(operationId);
-    if (!metric) return null;
+  // End timing and record
+  end(id) {
+    const timer = this.activeTimers.get(id);
+    if (!timer) return null;
 
     const endTime = process.hrtime.bigint();
-    const durationNs = endTime - metric.startTime;
-    const durationMs = Number(durationNs) / 1_000_000;
+    const duration = Number(endTime - timer.startTime) / 1_000_000; // Convert to milliseconds
 
-    this.metrics.delete(operationId);
+    this.activeTimers.delete(id);
 
-    const result = {
-      operation: metric.operation,
-      duration: durationMs,
-      metadata: metric.metadata,
-      timestamp: Date.now(),
+    // Update metrics
+    const existing = this.metrics.get(timer.name) || {
+      count: 0,
+      totalTime: 0,
+      avgTime: 0,
+      maxTime: 0,
+      minTime: Infinity,
     };
 
-    // Track raid-specific metrics
-    if (metric.operation.includes("raid")) {
-      this.raidResponseTimes.push(durationMs);
-      if (this.raidResponseTimes.length > 100) {
-        this.raidResponseTimes.shift(); // Keep last 100
-      }
+    existing.count++;
+    existing.totalTime += duration;
+    existing.avgTime = existing.totalTime / existing.count;
+    existing.maxTime = Math.max(existing.maxTime, duration);
+    existing.minTime = Math.min(existing.minTime, duration);
+    existing.lastDuration = duration;
+
+    this.metrics.set(timer.name, existing);
+
+    return {
+      operation: timer.name,
+      duration: duration,
+      average: existing.avgTime,
+    };
+  }
+
+  // Get metrics for an operation
+  getMetrics(operationName) {
+    return this.metrics.get(operationName) || null;
+  }
+
+  // Get all metrics
+  getAllMetrics() {
+    const results = [];
+    for (const [name, data] of this.metrics.entries()) {
+      results.push({
+        operation: name,
+        ...data,
+      });
+    }
+    return results.sort((a, b) => b.avgTime - a.avgTime);
+  }
+
+  // Get slowest operations
+  getSlowest(limit = 10) {
+    return this.getAllMetrics().slice(0, limit);
+  }
+
+  // Reset metrics
+  reset() {
+    this.metrics.clear();
+    this.activeTimers.clear();
+    logger.info("[Performance] Metrics reset");
+  }
+
+  // Log performance summary
+  logSummary() {
+    const metrics = this.getAllMetrics();
+    if (metrics.length === 0) {
+      logger.info("[Performance] No metrics recorded yet");
+      return;
     }
 
-    // Track ban response times
-    if (metric.operation.includes("ban") || metric.operation.includes("kick")) {
-      this.banResponseTimes.push(durationMs);
-      if (this.banResponseTimes.length > 100) {
-        this.banResponseTimes.shift();
-      }
-    }
-
-    // Log slow operations (>100ms for security, >500ms for others)
-    const threshold =
-      metric.operation.includes("security") || metric.operation.includes("raid")
-        ? 100
-        : 500;
-    if (durationMs > threshold) {
-      logger.warn(
-        `⚠️ Slow Operation: ${metric.operation} took ${durationMs.toFixed(2)}ms`
+    logger.info("[Performance] === Performance Summary ===");
+    metrics.slice(0, 10).forEach((m, i) => {
+      logger.info(
+        `[Performance] ${i + 1}. ${m.operation}: ` +
+          `avg ${m.avgTime.toFixed(2)}ms, ` +
+          `max ${m.maxTime.toFixed(2)}ms, ` +
+          `count ${m.count}`
       );
-    }
-
-    return result;
-  }
-
-  // Get average response times
-  getAverages() {
-    const avg = (arr) =>
-      arr.length > 0 ? arr.reduce((a, b) => a + b, 0) / arr.length : 0;
-
-    return {
-      avgRaidResponse: avg(this.raidResponseTimes),
-      avgBanResponse: avg(this.banResponseTimes),
-      p95RaidResponse: this.percentile(this.raidResponseTimes, 95),
-      p95BanResponse: this.percentile(this.banResponseTimes, 95),
-      totalRaidDetections: this.raidResponseTimes.length,
-      totalBans: this.banResponseTimes.length,
-    };
-  }
-
-  percentile(arr, p) {
-    if (arr.length === 0) return 0;
-    const sorted = [...arr].sort((a, b) => a - b);
-    const index = Math.ceil((p / 100) * sorted.length) - 1;
-    return sorted[index] || 0;
-  }
-
-  // Benchmark a specific function
-  async benchmark(name, fn, iterations = 1) {
-    const times = [];
-
-    for (let i = 0; i < iterations; i++) {
-      const start = process.hrtime.bigint();
-      await fn();
-      const end = process.hrtime.bigint();
-      const duration = Number(end - start) / 1_000_000;
-      times.push(duration);
-    }
-
-    const avg = times.reduce((a, b) => a + b, 0) / times.length;
-    const min = Math.min(...times);
-    const max = Math.max(...times);
-    const p95 = this.percentile(times, 95);
-
-    logger.info(`📊 Benchmark: ${name}`);
-    logger.info(`   Avg: ${avg.toFixed(2)}ms`);
-    logger.info(`   Min: ${min.toFixed(2)}ms`);
-    logger.info(`   Max: ${max.toFixed(2)}ms`);
-    logger.info(`   P95: ${p95.toFixed(2)}ms`);
-
-    return { avg, min, max, p95, times };
-  }
-
-  // Get performance summary
-  getSummary() {
-    const nexus = this.getAverages();
-    const totalResponse = nexus.avgRaidResponse + nexus.avgBanResponse;
-
-    return {
-      detection_ms: nexus.avgRaidResponse || 0.15,
-      action_ms: nexus.avgBanResponse || 80,
-      total_ms: totalResponse || 80.15,
-      is_production: nexus.totalRaidDetections > 0 || nexus.totalBans > 0,
-      samples: {
-        raids: nexus.totalRaidDetections,
-        bans: nexus.totalBans,
-      },
-    };
-  }
-
-  // Get real-time stats for API
-  getStats() {
-    return {
-      activeOperations: this.metrics.size,
-      ...this.getAverages(),
-    };
+    });
   }
 }
 
-// Singleton instance
-const performanceMonitor = new PerformanceMonitor();
-
-module.exports = performanceMonitor;
+module.exports = new PerformanceMonitor();

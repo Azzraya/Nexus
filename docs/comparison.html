@@ -31,34 +31,34 @@
                 <a href="setup.html">Setup</a>
                 <a href="tutorial.html">Tutorial</a>
               </div>
-              
+
               <div class="dropdown-category">
                 <div class="dropdown-category-header">✨ Features</div>
                 <a href="features.html">Features</a>
                 <a href="commands.html">Commands</a>
                 <a href="adaptive-protection.html">Adaptive Protection</a>
               </div>
-              
+
               <div class="dropdown-category">
                 <div class="dropdown-category-header">⚔️ Compare</div>
                 <a href="comparison.html">vs Wick</a>
                 <a href="live-comparison.html">Live Comparison</a>
               </div>
-              
+
               <div class="dropdown-category">
                 <div class="dropdown-category-header">📊 Metrics</div>
                 <a href="stats.html">Stats</a>
                 <a href="growth.html">Growth</a>
                 <a href="status.html">Status</a>
               </div>
-              
+
               <div class="dropdown-category">
                 <div class="dropdown-category-header">📚 Documentation</div>
                 <a href="docs.html">Docs</a>
                 <a href="api.html">API</a>
                 <a href="faq.html">FAQ</a>
               </div>
-              
+
               <div class="dropdown-category">
                 <div class="dropdown-category-header">👥 Community</div>
                 <a href="showcase.html">Showcase</a>
@@ -185,8 +185,20 @@
                 </tr>
                 <tr>
                   <td><strong>Open Source</strong></td>
-                  <td class="cross">✗</td>
-                  <td class="check">✓</td>
+                  <td class="cross">✗ Closed Source</td>
+                  <td class="check">✓ Fully Open Source</td>
+                  <td>🏆 Nexus</td>
+                </tr>
+                <tr style="background: rgba(255, 215, 0, 0.1)">
+                  <td><strong>🔒 Privacy & Trust</strong></td>
+                  <td class="cross">✗ Unknown data practices - can't verify</td>
+                  <td class="check">✓ Transparent - every line auditable</td>
+                  <td>🏆 Nexus</td>
+                </tr>
+                <tr>
+                  <td><strong>Data Collection</strong></td>
+                  <td class="cross">⚠️ Unknown (closed source)</td>
+                  <td class="check">✓ Minimal - code is public</td>
                   <td>🏆 Nexus</td>
                 </tr>
                 <tr>
@@ -203,9 +215,9 @@
                 </tr>
                 <tr>
                   <td><strong>Anti-Nuke</strong></td>
-                  <td>Basic protection</td>
-                  <td>Advanced + predictive</td>
-                  <td>🏆 Nexus</td>
+                  <td>Basic protection (requires role hierarchy)</td>
+                  <td>Advanced + predictive (requires role hierarchy)</td>
+                  <td>🏆 Nexus (more features)</td>
                 </tr>
                 <tr>
                   <td><strong>Recovery</strong></td>
@@ -312,11 +324,28 @@
                 </ul>
               </div>
             </div>
+            <div
+              style="
+                background: rgba(255, 165, 0, 0.2);
+                padding: 20px;
+                border-radius: 10px;
+                border-left: 4px solid #ffa500;
+                margin-top: 20px;
+              "
+            >
+              <strong style="color: #ffa500">⚠️ CRITICAL REQUIREMENT:</strong>
+              <p style="margin: 10px 0 0 0; font-size: 1rem">
+                Both bots require their role to be positioned
+                <strong>ABOVE all other roles</strong> to function. Without
+                proper role hierarchy, detection works but action fails
+                (permission errors). Use <code>/security rolecheck</code> after
+                adding Nexus to verify setup.
+              </p>
+            </div>
             <div class="success-box" style="margin-top: 20px">
-              <strong>Winner: Nexus</strong> - Prevents more attack types and
-              recovers instantly. <strong>NEW:</strong> Large servers (1K+) can
-              perform bulk role cleanups and channel reorganizations without
-              false nuke alerts!
+              <strong>Winner: Nexus</strong> - More detection algorithms and
+              faster recovery.
+              <strong>Both require proper role positioning to work.</strong>
             </div>
           </div>
         </div>
@@ -365,6 +394,173 @@
           </div>
           <div class="success-box">
             <strong>Winner: Nexus</strong> - Wick has zero AI features
+          </div>
+        </div>
+
+        <!-- Privacy & Trust Comparison -->
+        <div
+          class="feature-category"
+          style="
+            background: linear-gradient(
+              135deg,
+              rgba(255, 215, 0, 0.1) 0%,
+              rgba(255, 165, 0, 0.1) 100%
+            );
+            padding: 40px;
+            border-radius: 15px;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+          "
+        >
+          <h2>🔒 Privacy & Trust - THE Critical Difference</h2>
+
+          <div
+            style="
+              background: rgba(255, 0, 0, 0.1);
+              padding: 20px;
+              border-radius: 10px;
+              border-left: 4px solid #ff0000;
+              margin-bottom: 30px;
+            "
+          >
+            <h3 style="color: #ff6b6b; margin-top: 0">
+              ⚠️ The Wick Problem: Closed Source = Unknown Risks
+            </h3>
+            <p style="font-size: 1.1rem; margin-bottom: 15px">
+              <strong>Wick is closed source.</strong> This means
+              <strong>you cannot verify</strong> what it's actually doing on
+              your server.
+            </p>
+            <ul style="font-size: 1rem">
+              <li>
+                <strong>❌ Could be logging all your messages</strong> - You
+                wouldn't know
+              </li>
+              <li>
+                <strong>❌ Could be collecting user data</strong> - You can't
+                verify
+              </li>
+              <li>
+                <strong>❌ Could have security vulnerabilities</strong> - No
+                community audit
+              </li>
+              <li>
+                <strong>❌ Could be selling your data</strong> - No way to check
+              </li>
+              <li>
+                <strong>❌ Could have backdoors</strong> - Zero transparency
+              </li>
+            </ul>
+          </div>
+
+          <div
+            style="
+              background: rgba(0, 255, 136, 0.1);
+              padding: 20px;
+              border-radius: 10px;
+              border-left: 4px solid #00ff88;
+              margin-bottom: 30px;
+            "
+          >
+            <h3 style="color: #00ff88; margin-top: 0">
+              ✅ The Nexus Advantage: Open Source = Complete Trust
+            </h3>
+            <p style="font-size: 1.1rem; margin-bottom: 15px">
+              <strong>Nexus is 100% open source.</strong> Every single line of
+              code is public and auditable.
+            </p>
+            <ul style="font-size: 1rem">
+              <li>
+                <strong>✅ Verify every feature yourself</strong> - Code is on
+                GitHub
+              </li>
+              <li>
+                <strong>✅ No hidden data collection</strong> - Transparent
+                logging
+              </li>
+              <li>
+                <strong>✅ Community-audited security</strong> - Anyone can
+                review
+              </li>
+              <li>
+                <strong>✅ Privacy-focused</strong> - Minimal data storage
+              </li>
+              <li>
+                <strong>✅ No backdoors possible</strong> - Code is public
+              </li>
+              <li>
+                <strong>✅ Self-hostable</strong> - Run your own instance if
+                desired
+              </li>
+            </ul>
+          </div>
+
+          <div class="comparison-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>Privacy Aspect</th>
+                  <th>Wick (Closed Source)</th>
+                  <th>Nexus (Open Source)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Code Visibility</strong></td>
+                  <td class="cross">Hidden - cannot review</td>
+                  <td class="check">Public on GitHub</td>
+                </tr>
+                <tr>
+                  <td><strong>Data Practices</strong></td>
+                  <td class="cross">Unknown - must trust blindly</td>
+                  <td class="check">Verifiable in code</td>
+                </tr>
+                <tr>
+                  <td><strong>Security Audit</strong></td>
+                  <td class="cross">Impossible - no access</td>
+                  <td class="check">Anyone can audit</td>
+                </tr>
+                <tr>
+                  <td><strong>Backdoor Risk</strong></td>
+                  <td class="cross">⚠️ Possible - can't verify</td>
+                  <td class="check">✓ Impossible - code is public</td>
+                </tr>
+                <tr>
+                  <td><strong>Privacy Guarantee</strong></td>
+                  <td class="cross">Trust-based only</td>
+                  <td class="check">Code-verified</td>
+                </tr>
+                <tr>
+                  <td><strong>Community Trust</strong></td>
+                  <td>⚠️ Must trust the developers</td>
+                  <td>✓ Don't trust - verify!</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div
+            style="
+              background: rgba(102, 126, 234, 0.2);
+              padding: 25px;
+              border-radius: 10px;
+              margin-top: 30px;
+              text-align: center;
+            "
+          >
+            <h3 style="color: #00ff88; font-size: 1.5rem; margin-bottom: 15px">
+              💡 The Bottom Line
+            </h3>
+            <p style="font-size: 1.2rem; line-height: 1.6">
+              <strong
+                >Would you trust a closed-source security bot with admin
+                permissions on your server?</strong
+              ><br />
+              Wick asks you to trust them blindly. Nexus lets you verify
+              everything.<br />
+              <span style="color: #00ff88; font-weight: 700"
+                >Trust through transparency, not promises.</span
+              >
+            </p>
           </div>
         </div>
 
@@ -430,17 +626,20 @@
                   </p>
                 </div>
                 <div>
-                  <h4>Nexus Response:</h4>
+                  <h4>Nexus Response (with proper role hierarchy):</h4>
                   <ol>
-                    <li><strong>Detects on FIRST deletion</strong></li>
-                    <li><strong>Instant ban + permission removal</strong></li>
-                    <li><strong>Auto-recovery starts immediately</strong></li>
+                    <li><strong>Detects on 3rd deletion</strong> (configurable threshold)</li>
+                    <li><strong>Attempts ban + permission removal</strong></li>
+                    <li><strong>⚠️ Success if bot role > attacker role</strong></li>
+                    <li><strong>Auto-recovery starts if ban succeeds</strong></li>
                     <li><strong>Channels restored from snapshot</strong></li>
-                    <li><strong>Permissions restored</strong></li>
-                    <li><strong>Server fully restored in seconds</strong></li>
+                    <li><strong>Server restoration in seconds</strong></li>
                   </ol>
-                  <p style="color: #00ff00; margin-top: 10px">
-                    <strong>Result:</strong> Zero damage, instant recovery
+                  <p style="color: #ffa500; margin-top: 10px">
+                    <strong>Result:</strong> Some damage possible, but fast recovery (depends on role positioning)
+                  </p>
+                  <p style="color: #ff6b6b; margin-top: 10px; font-size: 0.9rem;">
+                    <strong>⚠️ Without proper role hierarchy:</strong> Detection works, action fails - alerts sent but damage occurs
                   </p>
                 </div>
               </div>
@@ -483,10 +682,10 @@
                     </li>
                     <li><strong>Threat intel checks known raiders</strong></li>
                     <li><strong>Auto-quarantine activated</strong></li>
-                    <li><strong>All raiders caught and banned</strong></li>
+                    <li><strong>Raiders detected and action attempted</strong></li>
                   </ul>
                   <p style="color: #00ff00; margin-top: 10px">
-                    <strong>Result:</strong> Complete protection
+                    <strong>Result:</strong> Superior detection, fast response (effectiveness depends on configuration)
                   </p>
                 </div>
               </div>
@@ -526,12 +725,12 @@
                     <li>
                       <strong>Detects 3+ permission changes in 10s</strong>
                     </li>
-                    <li><strong>60%+ confidence = instant action</strong></li>
-                    <li><strong>Removes dangerous permissions</strong></li>
-                    <li><strong>Attack prevented before it starts</strong></li>
+                    <li><strong>60%+ confidence = action attempted</strong></li>
+                    <li><strong>Attempts to remove dangerous permissions</strong></li>
+                    <li><strong>⚠️ Success depends on role hierarchy</strong></li>
                   </ul>
-                  <p style="color: #00ff00; margin-top: 10px">
-                    <strong>Result:</strong> Attack stopped before damage
+                  <p style="color: #ffa500; margin-top: 10px">
+                    <strong>Result:</strong> Fast detection, action attempted (requires proper setup)
                   </p>
                 </div>
               </div>
@@ -810,12 +1009,19 @@
         <div class="feature-category">
           <h2>🔄 Migrating from Wick to Nexus</h2>
 
+          <div style="background: rgba(255,165,0,0.2); padding: 20px; border-radius: 10px; border-left: 4px solid #ffa500; margin-bottom: 30px;">
+            <strong style="color: #ffa500;">⚠️ IMPORTANT:</strong>
+            <p style="margin: 10px 0 0 0;">
+              Running multiple security bots simultaneously has NOT been extensively tested and may cause conflicts.
+              We recommend <strong>removing Wick before adding Nexus</strong> or using a test server first.
+            </p>
+          </div>
+
           <div class="setup-steps">
             <div class="setup-step">
-              <h3>Keep Wick Running</h3>
+              <h3>Recommended: Test Server First</h3>
               <p>
-                Don't remove Wick yet - run both bots side-by-side during
-                migration
+                Add Nexus to a test/staging server to familiarize yourself with features before production deployment
               </p>
             </div>
             <div class="setup-step">
@@ -825,47 +1031,36 @@
               </p>
             </div>
             <div class="setup-step">
-              <h3>Run Quick Setup</h3>
+              <h3>⚠️ CRITICAL: Position Bot Role at TOP</h3>
               <p>
-                Use <code>/setup preset</code> for instant configuration based
-                on your server type
+                Server Settings → Roles → Drag Nexus role to highest position. Use <code>/security rolecheck</code> to verify.
+                <strong style="color: #ff6b6b;">This is NOT optional.</strong>
               </p>
             </div>
             <div class="setup-step">
-              <h3>Get AI Recommendations</h3>
+              <h3>Run Quick Setup</h3>
               <p>
-                Run <code>/recommend analyze</code> for AI-powered security
-                suggestions
+                Use <code>/quicksetup</code> for guided configuration or <code>/setup preset</code> for instant setup
               </p>
             </div>
             <div class="setup-step">
               <h3>Configure Protection</h3>
               <p>
-                Enable anti-raid, anti-nuke, and join gate to match your Wick
-                setup
+                Enable anti-raid, anti-nuke, and automod. Test with <code>/security test</code> if available.
               </p>
             </div>
             <div class="setup-step">
-              <h3>Test Nexus</h3>
+              <h3>Remove Wick (Optional)</h3>
               <p>
-                Use both bots for 1-2 weeks. Compare performance, features, and
-                reliability
-              </p>
-            </div>
-            <div class="setup-step">
-              <h3>Remove Wick</h3>
-              <p>
-                Once confident in Nexus, remove Wick and enjoy all features for
-                free
+                Once Nexus is configured and verified working, you can remove Wick. Or keep both if you prefer redundancy.
               </p>
             </div>
           </div>
 
           <div class="info-box">
             <p>
-              <strong>Note:</strong> Cases and warnings don't auto-transfer
-              (different databases). Nexus creates new moderation history going
-              forward. Roles, channels, and server structure are preserved.
+              <strong>Note:</strong> Cases and warnings don't auto-transfer (different databases).
+              Nexus starts fresh moderation history. Use <code>/migrate</code> command to attempt data migration (experimental).
             </p>
           </div>
         </div>

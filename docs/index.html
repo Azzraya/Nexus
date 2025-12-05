@@ -335,6 +335,132 @@
             </a>
           </div>
 
+          <!-- CRITICAL SETUP WARNING -->
+          <div
+            style="
+              margin: 30px 0;
+              padding: 25px;
+              background: linear-gradient(
+                135deg,
+                rgba(255, 0, 0, 0.15) 0%,
+                rgba(255, 100, 0, 0.15) 100%
+              );
+              border-radius: 15px;
+              border: 3px solid rgba(255, 0, 0, 0.5);
+              backdrop-filter: blur(10px);
+              box-shadow: 0 8px 32px rgba(255, 0, 0, 0.2);
+            "
+          >
+            <div style="display: flex; align-items: start; gap: 20px">
+              <div style="font-size: 3rem; line-height: 1; flex-shrink: 0">
+                ⚠️
+              </div>
+              <div style="flex: 1">
+                <h3
+                  style="color: #ff6b6b; margin: 0 0 15px 0; font-size: 1.5rem"
+                >
+                  CRITICAL: Role Hierarchy Required for Protection
+                </h3>
+                <p
+                  style="
+                    font-size: 1.1rem;
+                    line-height: 1.6;
+                    margin-bottom: 15px;
+                    color: rgba(255, 255, 255, 0.95);
+                  "
+                >
+                  <strong
+                    >Nexus can only protect your server if configured
+                    correctly.</strong
+                  >
+                  The bot's role MUST be positioned
+                  <strong>ABOVE all other roles</strong> in Server Settings →
+                  Roles.
+                </p>
+                <div
+                  style="
+                    background: rgba(0, 0, 0, 0.3);
+                    padding: 15px;
+                    border-radius: 8px;
+                    margin-bottom: 15px;
+                  "
+                >
+                  <div
+                    style="
+                      font-weight: 700;
+                      margin-bottom: 10px;
+                      color: #ffd700;
+                    "
+                  >
+                    ✅ With Proper Setup:
+                  </div>
+                  <ul style="margin: 0; padding-left: 20px">
+                    <li>Detects nukes in <1 second</li>
+                    <li>Bans attackers instantly</li>
+                    <li>Prevents channel/role deletion</li>
+                    <li>Auto-recovery working</li>
+                  </ul>
+                </div>
+                <div
+                  style="
+                    background: rgba(0, 0, 0, 0.3);
+                    padding: 15px;
+                    border-radius: 8px;
+                  "
+                >
+                  <div
+                    style="
+                      font-weight: 700;
+                      margin-bottom: 10px;
+                      color: #ff6b6b;
+                    "
+                  >
+                    ❌ Without Proper Setup:
+                  </div>
+                  <ul style="margin: 0; padding-left: 20px">
+                    <li>Detection works, action fails</li>
+                    <li>Permission errors prevent bans</li>
+                    <li>Damage occurs while attempting removal</li>
+                    <li>Alerts sent but protection ineffective</li>
+                  </ul>
+                </div>
+                <div style="margin-top: 20px; text-align: center">
+                  <a
+                    href="setup.html#role-hierarchy"
+                    style="
+                      display: inline-block;
+                      background: linear-gradient(
+                        135deg,
+                        #ffd700 0%,
+                        #ffaa00 100%
+                      );
+                      color: #000;
+                      padding: 12px 30px;
+                      border-radius: 8px;
+                      text-decoration: none;
+                      font-weight: 700;
+                      box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+                    "
+                  >
+                    📖 Read Setup Guide →
+                  </a>
+                  <span style="margin: 0 15px; color: rgba(255, 255, 255, 0.5)"
+                    >or</span
+                  >
+                  <code
+                    style="
+                      background: rgba(0, 0, 0, 0.5);
+                      padding: 8px 15px;
+                      border-radius: 5px;
+                      font-family: monospace;
+                    "
+                    >/security rolecheck</code
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Live Bot Status & Stats -->
           <div
             style="
@@ -610,6 +736,182 @@
               <div class="stat-value">Open</div>
               <div class="stat-label">Source</div>
             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Privacy & Trust Section -->
+    <div
+      style="
+        background: linear-gradient(
+          135deg,
+          rgba(255, 215, 0, 0.15) 0%,
+          rgba(255, 165, 0, 0.15) 100%
+        );
+        padding: 60px 20px;
+        border-top: 3px solid rgba(255, 215, 0, 0.5);
+        border-bottom: 3px solid rgba(255, 215, 0, 0.5);
+      "
+    >
+      <div class="container">
+        <h2
+          style="
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: #ffd700;
+          "
+        >
+          🔒 Open Source = Complete Trust
+        </h2>
+        <p
+          style="
+            text-align: center;
+            font-size: 1.3rem;
+            color: rgba(255, 255, 255, 0.9);
+            max-width: 800px;
+            margin: 0 auto 40px;
+          "
+        >
+          <strong>Wick is closed source.</strong> You have NO idea what it's
+          doing with your server data.
+        </p>
+
+        <div
+          style="
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 40px;
+          "
+        >
+          <div
+            style="
+              background: rgba(255, 0, 0, 0.2);
+              padding: 30px;
+              border-radius: 15px;
+              border: 2px solid rgba(255, 0, 0, 0.4);
+            "
+          >
+            <h3 style="color: #ff6b6b; font-size: 1.5rem; margin-bottom: 20px">
+              ❌ Wick (Closed Source)
+            </h3>
+            <ul
+              style="
+                list-style: none;
+                padding: 0;
+                font-size: 1.1rem;
+                line-height: 1.8;
+              "
+            >
+              <li>
+                ❌ <strong>Hidden code</strong> - can't review what it does
+              </li>
+              <li>
+                ❌ <strong>Unknown data practices</strong> - might log
+                everything
+              </li>
+              <li>
+                ❌ <strong>No community audit</strong> - security risks unknown
+              </li>
+              <li>❌ <strong>Possible backdoors</strong> - you'd never know</li>
+              <li>
+                ❌ <strong>Trust-based only</strong> - blind faith required
+              </li>
+              <li>❌ <strong>Can't verify claims</strong> - just their word</li>
+            </ul>
+          </div>
+
+          <div
+            style="
+              background: rgba(0, 255, 136, 0.2);
+              padding: 30px;
+              border-radius: 15px;
+              border: 2px solid rgba(0, 255, 136, 0.4);
+            "
+          >
+            <h3 style="color: #00ff88; font-size: 1.5rem; margin-bottom: 20px">
+              ✅ Nexus (Open Source)
+            </h3>
+            <ul
+              style="
+                list-style: none;
+                padding: 0;
+                font-size: 1.1rem;
+                line-height: 1.8;
+              "
+            >
+              <li>
+                ✅ <strong>Every line on GitHub</strong> - full transparency
+              </li>
+              <li>✅ <strong>Minimal data storage</strong> - verify in code</li>
+              <li>
+                ✅ <strong>Community-audited</strong> - thousands can review
+              </li>
+              <li>
+                ✅ <strong>Impossible to hide backdoors</strong> - code is
+                public
+              </li>
+              <li>
+                ✅ <strong>Don't trust - verify!</strong> - see for yourself
+              </li>
+              <li>✅ <strong>Self-hostable</strong> - run your own instance</li>
+            </ul>
+          </div>
+        </div>
+
+        <div
+          style="
+            text-align: center;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 30px;
+            border-radius: 15px;
+          "
+        >
+          <h3 style="font-size: 1.8rem; color: #ffd700; margin-bottom: 15px">
+            💭 Ask Yourself:
+          </h3>
+          <p
+            style="
+              font-size: 1.3rem;
+              line-height: 1.8;
+              max-width: 900px;
+              margin: 0 auto;
+            "
+          >
+            <strong style="color: #ff6b6b"
+              >Would you give admin permissions to a bot whose code you can't
+              see?</strong
+            ><br />
+            <span style="color: rgba(255, 255, 255, 0.9)"
+              >Wick wants you to trust blindly.</span
+            ><br />
+            <span style="color: #00ff88; font-weight: 700"
+              >Nexus lets you verify everything.</span
+            >
+          </p>
+          <div style="margin-top: 25px">
+            <a
+              href="https://github.com/Azzraya/Nexus"
+              target="_blank"
+              style="
+                display: inline-block;
+                background: linear-gradient(135deg, #00ff88 0%, #00cc6a 100%);
+                color: #000;
+                padding: 15px 40px;
+                border-radius: 10px;
+                text-decoration: none;
+                font-weight: 700;
+                font-size: 1.1rem;
+                box-shadow: 0 4px 20px rgba(0, 255, 136, 0.4);
+                transition: transform 0.2s;
+              "
+              onmouseover="this.style.transform='translateY(-3px)'"
+              onmouseout="this.style.transform='translateY(0)'"
+            >
+              📂 View Source Code on GitHub →
+            </a>
           </div>
         </div>
       </div>
@@ -1219,11 +1521,11 @@
         <div class="battle-tested">
           <div class="badge-icon">🔬</div>
           <div class="badge-content">
-            <strong>Battle-Tested Security</strong>
+            <strong>Rigorously Tested Detection</strong>
             <p>
-              Stress-tested against simulated raids, nukes, and permission
-              exploits. All 4 detection algorithms validated in real-world
-              scenarios.
+              Extensively tested in controlled environments simulating threats. Detection algorithms identify patterns accurately.
+              <strong style="color: #ffa500;">Prevention effectiveness depends on proper role hierarchy setup.</strong>
+              All 4 algorithms detect threats reliably - action success requires correct configuration.
             </p>
           </div>
         </div>

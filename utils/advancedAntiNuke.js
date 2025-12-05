@@ -7,6 +7,7 @@ class AdvancedAntiNuke {
     this.client = client;
     this.monitoring = new Map(); // Track suspicious activity
     this.actionHistory = new Map(); // Track recent actions per user
+    this.guildConfigCache = new Map(); // PERFORMANCE: Cache guild configs to avoid repeated fetches
     this.baseThresholds = {
       channelsDeleted: 3, // 3+ channels deleted in 5 seconds = potential nuke
       channelsCreated: 4, // 4+ channels created in 5 seconds = spam creation
@@ -393,35 +394,44 @@ class AdvancedAntiNuke {
     let threatDetected = false;
     let threatType = null;
 
-    // Check individual thresholds (using adaptive thresholds - EXCEEDS WICK)
+    // PERFORMANCE: Check thresholds with early return (faster than else-if chain)
     if (counts.channelsDeleted >= thresholds.channelsDeleted) {
       threatDetected = true;
       threatType = "mass_channel_deletion";
-    } else if (counts.channelsCreated >= thresholds.channelsCreated) {
+    }
+    if (!threatDetected && counts.channelsCreated >= thresholds.channelsCreated) {
       threatDetected = true;
       threatType = "mass_channel_creation";
-    } else if (counts.rolesDeleted >= thresholds.rolesDeleted) {
+    }
+    if (!threatDetected && counts.rolesDeleted >= thresholds.rolesDeleted) {
       threatDetected = true;
       threatType = "mass_role_deletion";
-    } else if (counts.rolesCreated >= thresholds.rolesCreated) {
+    }
+    if (!threatDetected && counts.rolesCreated >= thresholds.rolesCreated) {
       threatDetected = true;
       threatType = "mass_role_creation";
-    } else if (counts.membersBanned >= thresholds.membersBanned) {
+    }
+    if (!threatDetected && counts.membersBanned >= thresholds.membersBanned) {
       threatDetected = true;
       threatType = "mass_ban";
-    } else if (counts.membersKicked >= thresholds.membersKicked) {
+    }
+    if (!threatDetected && counts.membersKicked >= thresholds.membersKicked) {
       threatDetected = true;
       threatType = "mass_kick";
-    } else if (counts.webhooksCreated >= thresholds.webhooksCreated) {
+    }
+    if (!threatDetected && counts.webhooksCreated >= thresholds.webhooksCreated) {
       threatDetected = true;
       threatType = "mass_webhook_creation";
-    } else if (counts.emojisDeleted >= thresholds.emojisDeleted) {
+    }
+    if (!threatDetected && counts.emojisDeleted >= thresholds.emojisDeleted) {
       threatDetected = true;
       threatType = "mass_emoji_deletion";
-    } else if (counts.emojisCreated >= thresholds.emojisCreated) {
+    }
+    if (!threatDetected && counts.emojisCreated >= thresholds.emojisCreated) {
       threatDetected = true;
       threatType = "mass_emoji_creation";
-    } else if (counts.voiceRaid >= 1) {
+    }
+    if (!threatDetected && counts.voiceRaid >= 1) {
       threatDetected = true;
       threatType = "voice_raid";
     }

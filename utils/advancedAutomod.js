@@ -7,6 +7,7 @@ class AdvancedAutomod {
     this.client = client;
     this.messageCache = new Map(); // userId-guildId -> [messages]
     this.linkCache = new Map(); // url -> {malicious, timestamp}
+    this.configCache = new Map(); // guildId -> parsed config (for ignored channels/roles)
     this.inviteRegex =
       /(https?:\/\/)?(www\.)?(discord\.(gg|io|me|li)|discordapp\.com\/invite)\/[a-zA-Z0-9]+/gi;
     this.urlRegex = /(https?:\/\/[^\s]+)/gi;
@@ -50,32 +51,44 @@ class AdvancedAutomod {
   }
 
   isIgnored(message, config) {
-    // Check ignored channels
-    if (config.ignored_channels) {
-      const ignored = JSON.parse(config.ignored_channels);
-      if (ignored.includes(message.channel.id)) return true;
+    // PERFORMANCE: Cache parsed JSON to avoid parsing on every message
+    const cacheKey = `${message.guild.id}_ignored`;
+    let cached = this.configCache.get(cacheKey);
+    
+    if (!cached) {
+      cached = {
+        channels: config.ignored_channels ? JSON.parse(config.ignored_channels) : [],
+        roles: config.ignored_roles ? JSON.parse(config.ignored_roles) : []
+      };
+      this.configCache.set(cacheKey, cached);
+      
+      // Clear cache after 5 minutes
+      setTimeout(() => this.configCache.delete(cacheKey), 300000);
     }
 
-    // Check ignored roles
-    if (config.ignored_roles && message.member) {
-      const ignored = JSON.parse(config.ignored_roles);
-      const hasIgnoredRole = message.member.roles.cache.some((role) =>
-        ignored.includes(role.id)
-      );
-      if (hasIgnoredRole) return true;
+    // Check ignored channels (fast array lookup)
+    if (cached.channels.includes(message.channel.id)) return true;
+
+    // Check ignored roles (fast)
+    if (message.member && cached.roles.length > 0) {
+      if (message.member.roles.cache.some(role => cached.roles.includes(role.id))) {
+        return true;
+      }
     }
 
     return false;
   }
 
   async checkMessage(message) {
+    // PERFORMANCE: Early returns to skip processing ASAP
     if (message.author.bot) return null;
     if (!message.guild) return null;
+    if (message.webhookId) return null; // Skip webhook messages
 
     const config = await db.getAutomodConfig(message.guild.id);
-    if (!config) return null;
+    if (!config || !config.enabled) return null; // Skip if automod disabled
 
-    // Check ignored channels/roles
+    // Check ignored channels/roles (now cached)
     if (this.isIgnored(message, config)) return null;
 
     const violations = [];

@@ -5,8 +5,10 @@ const logger = require("../utils/logger");
 module.exports = {
   name: "messageCreate",
   async execute(message, client) {
-    // Ignore bots
+    // PERFORMANCE: Early returns to avoid unnecessary processing
     if (message.author.bot) return;
+    if (!message.guild) return; // DM messages
+    if (message.system) return; // System messages
 
     // Run security checks in parallel for better performance (EXCEEDS WICK)
     const securityChecks = [];
@@ -76,19 +78,33 @@ module.exports = {
       }
     }
 
-    // Check for custom commands
+    // Check for custom commands (OPTIMIZED: Cache custom commands in Redis)
     if (message.content.startsWith("!")) {
       const commandName = message.content.slice(1).split(" ")[0].toLowerCase();
-      const customCommand = await new Promise((resolve, reject) => {
-        db.db.get(
-          "SELECT * FROM custom_commands WHERE guild_id = ? AND command_name = ?",
-          [message.guild.id, commandName],
-          (err, row) => {
-            if (err) reject(err);
-            else resolve(row);
-          }
-        );
-      });
+      
+      // Try cache first
+      const redisCache = require("../utils/redisCache");
+      const cacheKey = `custom_cmd_${message.guild.id}_${commandName}`;
+      let customCommand = await redisCache.get(cacheKey).catch(() => null);
+      
+      if (!customCommand) {
+        // Fetch from database
+        customCommand = await new Promise((resolve, reject) => {
+          db.db.get(
+            "SELECT * FROM custom_commands WHERE guild_id = ? AND command_name = ?",
+            [message.guild.id, commandName],
+            (err, row) => {
+              if (err) reject(err);
+              else resolve(row);
+            }
+          );
+        });
+        
+        // Cache for 10 minutes
+        if (customCommand) {
+          await redisCache.set(cacheKey, customCommand, 600).catch(() => {});
+        }
+      }
 
       if (customCommand) {
         let response = customCommand.response;
