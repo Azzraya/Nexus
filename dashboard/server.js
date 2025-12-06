@@ -84,7 +84,7 @@ class DashboardServer {
             ".webp": "image/webp",
             ".svg": "image/svg+xml",
           };
-          
+
           if (contentTypes[ext]) {
             res.setHeader("Content-Type", contentTypes[ext]);
           }
@@ -96,7 +96,7 @@ class DashboardServer {
 
           // Cache headers for better performance
           res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
-          
+
           // Security headers
           res.setHeader("X-Content-Type-Options", "nosniff");
         },
@@ -288,8 +288,7 @@ class DashboardServer {
       const cleanIP = realIP?.replace("::ffff:", "") || "unknown";
 
       const isWhitelisted =
-        this.allowedIPs.includes(cleanIP) ||
-        this.allowedIPs.includes(realIP);
+        this.allowedIPs.includes(cleanIP) || this.allowedIPs.includes(realIP);
 
       res.json({
         ip: cleanIP,
@@ -648,9 +647,9 @@ class DashboardServer {
       upload.single("image"),
       async (req, res) => {
         try {
-        // Check IP whitelist
-        const realIP = this.getRealIP(req);
-        const cleanIP = realIP?.replace("::ffff:", "") || "unknown";
+          // Check IP whitelist
+          const realIP = this.getRealIP(req);
+          const cleanIP = realIP?.replace("::ffff:", "") || "unknown";
 
           if (
             !this.allowedIPs.includes(cleanIP) &&
