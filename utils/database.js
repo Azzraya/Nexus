@@ -4884,16 +4884,28 @@ class Database {
 
   async getUserAchievements(guildId, userId) {
     return new Promise((resolve, reject) => {
+      // Check if achievements table has the new structure (achievement_id column)
+      // If not, return empty array (old structure not supported)
       this.db.all(
-        `SELECT a.*, ua.unlocked_at 
+        `SELECT a.id, a.achievement_id, a.name, a.description, a.icon, 
+                a.requirement_type, a.requirement_value, a.reward_xp, a.reward_role,
+                a.rarity, a.seasonal, ua.unlocked_at 
          FROM user_achievements ua
          JOIN achievements a ON ua.achievement_id = a.achievement_id
          WHERE ua.guild_id = ? AND ua.user_id = ?
          ORDER BY ua.unlocked_at DESC`,
         [guildId, userId],
         (err, rows) => {
-          if (err) reject(err);
-          else resolve(rows || []);
+          if (err) {
+            // If column doesn't exist, table might be old structure - return empty
+            if (err.message && err.message.includes("no such column")) {
+              resolve([]);
+            } else {
+              reject(err);
+            }
+          } else {
+            resolve(rows || []);
+          }
         }
       );
     });
