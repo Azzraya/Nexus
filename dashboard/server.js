@@ -1234,8 +1234,10 @@ class DashboardServer {
       }
     });
 
-    // Get retention analytics (ADMIN-ONLY - sensitive data)
+    // Get retention analytics (ADMIN-ONLY - sensitive data) - TEMPORARILY DISABLED DUE TO CRASHES
     this.app.get("/api/admin/retention", async (req, res) => {
+      return res.status(503).json({ error: "Retention analytics temporarily disabled - under maintenance" });
+      /*
       try {
         const authHeader = req.headers.authorization;
         if (!authHeader || !authHeader.startsWith("Bearer ")) {
