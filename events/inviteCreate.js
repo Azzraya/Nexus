@@ -35,6 +35,15 @@ module.exports = {
         ]
       );
 
+      // Track invite for growth analytics
+      if (inviter) {
+        db.db.run(
+          `INSERT OR REPLACE INTO invite_tracking (guild_id, invite_code, inviter_id, uses, created_at)
+           VALUES (?, ?, ?, 0, ?)`,
+          [guild.id, invite.code, inviter.id, Date.now()]
+        );
+      }
+
       // Check for mass invite creation (potential raid preparation)
       if (inviter) {
         const recentInvites = await new Promise((resolve) => {
