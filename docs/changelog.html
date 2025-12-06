@@ -84,8 +84,63 @@
 
       <div class="content-section">
         <div class="changelog-entry">
-          <h2>Version 3.24.7 - December 6, 2025</h2>
+          <h2>Version 3.24.9 - December 6, 2025</h2>
           <span class="version-badge">Latest</span>
+          <h3>🔧 DISCORD EMBED DEBUGGING & HTML-FIRST APPROACH</h3>
+          <ul>
+            <li>
+              ✅ <strong>Comprehensive Logging:</strong> Added detailed logging for
+              all CDN requests including user agent, IP, headers, and response type
+              to debug Discord embedding issues
+            </li>
+            <li>
+              ✅ <strong>HTML by Default:</strong> Changed to serve HTML with OG
+              tags by default (Discord's bot needs HTML to crawl), with direct
+              images available via <code>?raw</code> parameter
+            </li>
+            <li>
+              ✅ <strong>Smart Image Detection:</strong> Direct images are served
+              when <code>?raw</code> is present, <code>Accept: image/*</code>
+              header is sent, or for HEAD requests
+            </li>
+            <li>
+              ✅ <strong>OG Image URL:</strong> <code>og:image</code> tag points
+              to <code>?raw</code> URL to ensure Discord fetches the actual image
+              file
+            </li>
+          </ul>
+        </div>
+
+        <div class="changelog-entry">
+          <h2>Version 3.24.8 - December 6, 2025</h2>
+          <h3>🔧 SIMPLIFIED IMAGE SERVING (Discord CDN-Style)</h3>
+          <ul>
+            <li>
+              ✅ <strong>Direct Image by Default:</strong> All requests now
+              receive direct image files by default, matching Discord's CDN
+              behavior exactly
+            </li>
+            <li>
+              ✅ <strong>Simplified Logic:</strong> Removed complex user agent
+              detection - images are served directly unless
+              <code>?preview</code> is explicitly requested
+            </li>
+            <li>
+              ✅ <strong>Better Discord Compatibility:</strong> Discord gets
+              direct image files immediately, just like
+              <code>cdn.discordapp.com</code>
+              URLs
+            </li>
+            <li>
+              ✅ <strong>Optional HTML Preview:</strong> Use
+              <code>?preview</code> parameter to get HTML with OG tags for other
+              social media platforms
+            </li>
+          </ul>
+        </div>
+
+        <div class="changelog-entry">
+          <h2>Version 3.24.7 - December 6, 2025</h2>
           <h3>🔧 DISCORD BOT DETECTION & DIRECT IMAGE SERVING</h3>
           <ul>
             <li>
