@@ -84,17 +84,38 @@
 
       <div class="content-section">
         <div class="changelog-entry">
-          <h2>Version 3.30.0 - December 6, 2025</h2>
+          <h2>Version 3.30.1 - December 6, 2025</h2>
           <span class="version-badge">Latest</span>
+          <h3>🔇 ADJUSTED MEMORY ALERT THRESHOLDS</h3>
+          <ul>
+            <li>
+              ✅ <strong>Raised Warning:</strong> Memory warnings now only at 95%
+              (was 80%) - much less noisy
+            </li>
+            <li>
+              ✅ <strong>Raised Critical:</strong> Critical alerts at 98% (was
+              90%)
+            </li>
+            <li>
+              📊 <strong>Less Spam:</strong> V8 heap chunking won't trigger false
+              warnings anymore
+            </li>
+          </ul>
+        </div>
+
+        <div class="changelog-entry">
+          <h2>Version 3.30.0 - December 6, 2025</h2>
           <h3>📊 RETENTION & CHURN ANALYSIS SYSTEM</h3>
           <ul>
             <li>
-              ✅ <strong>Comprehensive Tracking:</strong> Track why servers leave
-              with 12+ data points (lifetime, commands used, features, etc.)
+              ✅ <strong>Comprehensive Tracking:</strong> Track why servers
+              leave with 12+ data points (lifetime, commands used, features,
+              etc.)
             </li>
             <li>
               ✅ <strong>Smart Pattern Detection:</strong> Automatically
-              identifies churn reasons (quick trial, inactive, active user churn)
+              identifies churn reasons (quick trial, inactive, active user
+              churn)
             </li>
             <li>
               ✅ <strong>Critical Alerts:</strong> DM owner when high-value

@@ -9,8 +9,8 @@ class MemoryMonitor {
     this.memoryHistory = [];
     this.maxHistorySize = 100; // Keep last 100 snapshots
     this.thresholds = {
-      warning: 0.8, // 80% of max heap
-      critical: 0.9, // 90% of max heap
+      warning: 0.95, // 95% of max heap (raised from 80%)
+      critical: 0.98, // 98% of max heap (raised from 90%)
     };
     this.monitoring = false;
     this.alertCooldown = new Map(); // Prevent alert spam

@@ -28,13 +28,7 @@ module.exports = {
       .run(
         `INSERT OR IGNORE INTO server_joins (guild_id, guild_name, member_count, joined_at, source) 
          VALUES (?, ?, ?, ?, ?)`,
-        [
-          guild.id,
-          guild.name,
-          guild.memberCount || 0,
-          Date.now(),
-          inviteSource,
-        ]
+        [guild.id, guild.name, guild.memberCount || 0, Date.now(), inviteSource]
       )
       .catch((err) => {
         logger.error("Failed to track server join for retention:", err);
