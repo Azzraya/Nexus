@@ -554,8 +554,27 @@
           setTimeout(() => {
             copyButton.classList.remove("copied");
             copyButton.textContent = "Copy";
+            // Reset form after copying so user can upload another image
+            resetForm();
           }, 2000);
         });
+      }
+
+      function resetForm() {
+        // Clear file input
+        fileInput.value = "";
+        // Clear filename input
+        filenameInput.value = "";
+        // Hide preview
+        previewImage.style.display = "none";
+        previewImage.src = "";
+        // Reset upload area
+        uploadArea.classList.remove("has-file");
+        // Hide result section
+        resultSection.classList.remove("active", "error");
+        // Reset button states
+        uploadButton.disabled = false;
+        uploadButton.textContent = "Upload Image";
       }
 
       function formatFileSize(bytes) {

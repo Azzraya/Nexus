@@ -84,8 +84,29 @@
 
       <div class="content-section">
         <div class="changelog-entry">
-          <h2>Version 3.24.4 - December 6, 2025</h2>
+          <h2>Version 3.24.5 - December 6, 2025</h2>
           <span class="version-badge">Latest</span>
+          <h3>🔧 UX & EMBED IMPROVEMENTS</h3>
+          <ul>
+            <li>
+              ✅ <strong>Auto-Reset Form:</strong> Upload form now automatically
+              resets after copying URL, allowing quick consecutive uploads
+            </li>
+            <li>
+              ✅ <strong>Better Discord Embedding:</strong> Server now serves
+              HTML wrapper with OG tags for all requests (except direct image
+              requests), ensuring Discord always gets proper metadata
+            </li>
+            <li>
+              ✅ <strong>Smart Content Detection:</strong> Direct image requests
+              (like <code>&lt;img src&gt;</code> tags) still get the image
+              directly, while link previews get HTML with OG tags
+            </li>
+          </ul>
+        </div>
+
+        <div class="changelog-entry">
+          <h2>Version 3.24.4 - December 6, 2025</h2>
           <h3>🔧 DISCORD EMBED IMPROVEMENT</h3>
           <ul>
             <li>

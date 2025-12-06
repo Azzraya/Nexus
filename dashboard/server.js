@@ -70,28 +70,26 @@ class DashboardServer {
     });
 
     // HTML wrapper route for Discord embeds (serves OG tags)
-    // Detect Discord bot or ?embed parameter to serve HTML with OG tags
+    // Serve HTML for all requests - Discord gets OG tags, browsers see the image
     this.app.get("/assets/:filename", (req, res, next) => {
-      const userAgent = req.headers["user-agent"] || "";
-      const isDiscordBot =
-        userAgent.includes("Discordbot") ||
-        userAgent.includes("facebookexternalhit") ||
-        userAgent.includes("Twitterbot") ||
-        userAgent.includes("Slackbot") ||
-        userAgent.includes("LinkedInBot") ||
-        userAgent.includes("WhatsApp") ||
-        userAgent.includes("TelegramBot");
+      // Check if request wants direct image (Accept header contains image/*)
+      const acceptHeader = req.headers.accept || "";
+      const wantsDirectImage = acceptHeader.includes("image/");
 
-      // Serve HTML wrapper if Discord bot or ?embed param is present
-      if (isDiscordBot || req.query.embed !== undefined) {
-        const filename = req.params.filename;
-        const dashboardURL =
-          process.env.DASHBOARD_URL || req.protocol + "://" + req.get("host");
-        // Use the original URL (without ?embed) for the og:image
-        const imageURL = `${dashboardURL}/assets/${encodeURIComponent(filename)}`;
+      // If they explicitly want the image (like <img src> tags), serve it directly
+      if (wantsDirectImage && !req.query.embed) {
+        return next();
+      }
 
-        // Serve HTML with Open Graph tags for Discord embeds
-        const html = `<!DOCTYPE html>
+      // Otherwise, serve HTML wrapper with OG tags (for Discord, social media, etc.)
+      const filename = req.params.filename;
+      const dashboardURL =
+        process.env.DASHBOARD_URL || req.protocol + "://" + req.get("host");
+      // Use the original URL for the og:image
+      const imageURL = `${dashboardURL}/assets/${encodeURIComponent(filename)}`;
+
+      // Serve HTML with Open Graph tags for Discord embeds
+      const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -112,6 +110,11 @@ class DashboardServer {
   <meta name="twitter:image" content="${imageURL}">
   
   <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
     body {
       margin: 0;
       padding: 20px;
@@ -137,11 +140,8 @@ class DashboardServer {
 </body>
 </html>`;
 
-        res.setHeader("Content-Type", "text/html; charset=utf-8");
-        return res.send(html);
-      }
-      // Not a bot and no ?embed param, continue to static file serving
-      next();
+      res.setHeader("Content-Type", "text/html; charset=utf-8");
+      return res.send(html);
     });
 
     // Handle OPTIONS requests for CORS (Discord may send preflight requests)
