@@ -416,7 +416,17 @@ module.exports = {
     await db.updateUserLevel(interaction.guild.id, user.id, newLevel);
 
     await interaction.reply({
-      content: `✅ Removed ${amount} XP from ${user}! They now have ${userData.xp} XP (Level ${newLevel})`,
+      embeds: [
+        new EmbedBuilder()
+          .setTitle("✅ XP Removed")
+          .setDescription(`Removed ${amount} XP from **${user.tag}**`)
+          .addFields(
+            { name: "Current XP", value: `${userData.xp.toLocaleString()}`, inline: true },
+            { name: "Level", value: `${newLevel}`, inline: true }
+          )
+          .setColor(0xff9900)
+          .setThumbnail(user.displayAvatarURL())
+      ],
       ephemeral: true,
     });
   },
