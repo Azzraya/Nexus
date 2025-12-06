@@ -3,6 +3,8 @@ const ShardManager = require("../utils/shardManager");
 const { registerCommands } = require("../utils/registerCommands");
 const logger = require("../utils/logger");
 const databaseBackup = require("../utils/databaseBackup");
+const rateLimitHandler = require("../utils/rateLimitHandler");
+const memoryMonitor = require("../utils/memoryMonitor");
 
 module.exports = {
   name: "clientReady",
@@ -376,6 +378,14 @@ module.exports = {
       try {
         databaseBackup.startSchedule();
         logger.info("Ready", "📦 Database backup system started");
+
+        // Start memory monitoring
+        memoryMonitor.start(60000); // Check every minute
+        logger.info("Ready", "🧠 Memory monitoring started");
+
+        // Initialize rate limit handler
+        rateLimitHandler.initialize(client);
+        logger.info("Ready", "⏱️  Rate limit protection enabled");
       } catch (error) {
         logger.error("Ready", "Failed to start database backup", {
           message: error?.message || String(error),

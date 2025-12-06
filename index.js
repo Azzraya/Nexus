@@ -415,21 +415,38 @@ if (!process.env.USING_SHARDING) {
 }
 // If USING_SHARDING is set, ShardingManager handles login automatically (no need to call client.login)
 
-// Error handling
-process.on("unhandledRejection", (error) => {
+// Advanced error recovery system
+const errorRecovery = require("./utils/errorRecovery");
+errorRecovery.setClient(client);
+
+// Error handling with recovery
+process.on("unhandledRejection", async (error) => {
   logger.error("Unhandled promise rejection:", {
     message: error?.message || String(error),
     stack: error?.stack,
     name: error?.name,
   });
+
+  // Attempt recovery
+  await errorRecovery.handleError(error, {
+    type: "unhandledRejection",
+    recoverable: true,
+  });
 });
 
-process.on("uncaughtException", (error) => {
+process.on("uncaughtException", async (error) => {
   logger.error("Uncaught exception:", {
     message: error.message,
     stack: error.stack,
     name: error.name,
   });
+
+  // Attempt recovery
+  await errorRecovery.handleError(error, {
+    type: "uncaughtException",
+    recoverable: false,
+  });
+
   // Don't exit - let the process manager handle it
 });
 
