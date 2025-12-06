@@ -1,6 +1,7 @@
 const { ClusterManager } = require("discord-hybrid-sharding");
 const path = require("path");
 require("dotenv").config();
+const logger = require("./utils/logger");
 
 if (!process.env.DISCORD_TOKEN) {
   console.error("❌ DISCORD_TOKEN not found in .env file!");
@@ -22,26 +23,32 @@ const manager = new ClusterManager(path.join(__dirname, "shard.js"), {
 
 // Cluster events
 manager.on("clusterCreate", (cluster) => {
-  console.log(`✅ Launched Cluster ${cluster.id}`);
+  logger.info("Cluster", `✅ Launched Cluster ${cluster.id}`);
 
   cluster.on("clientReady", () => {
-    console.log(`🟢 Cluster ${cluster.id} is ready!`);
+    logger.success("Cluster", `🟢 Cluster ${cluster.id} is ready!`);
   });
 
   cluster.on("disconnect", () => {
-    console.log(`🔴 Cluster ${cluster.id} disconnected`);
+    logger.warn("Cluster", `🔴 Cluster ${cluster.id} disconnected`);
   });
 
   cluster.on("reconnecting", () => {
-    console.log(`🟡 Cluster ${cluster.id} reconnecting...`);
+    logger.info("Cluster", `🟡 Cluster ${cluster.id} reconnecting...`);
   });
 
-  cluster.on("death", (cluster) => {
-    console.log(`💀 Cluster ${cluster.id} died, respawning...`);
+  cluster.on("death", () => {
+    logger.error("Cluster", `💀 Cluster ${cluster.id} died, respawning...`);
   });
 
   cluster.on("error", (error) => {
     console.error(`❌ Cluster ${cluster.id} error:`, error);
+    
+    // Track error
+    const clusterErrorTracker = require("./utils/clusterErrorTracker");
+    clusterErrorTracker.trackError(cluster.id, error, {
+      event: "clusterError",
+    });
   });
 
   cluster.on("message", (message) => {
@@ -54,36 +61,57 @@ manager.on("clusterCreate", (cluster) => {
   });
 });
 
-// Spawn all clusters
-manager.spawn({ timeout: -1 }).catch(console.error);
+manager
+  .spawn({ timeout: -1 })
+  .then(() => {
+    // Start cluster health monitoring after all clusters are spawned
+    const clusterHealthMonitor = require("./utils/clusterHealthMonitor");
+    clusterHealthMonitor.start(manager);
+    logger.info("Cluster", "✅ Cluster health monitoring active");
 
-// Graceful shutdown
+    // Start error tracker cleanup
+    const clusterErrorTracker = require("./utils/clusterErrorTracker");
+    clusterErrorTracker.startCleanup();
+    logger.info("Cluster", "✅ Cluster error tracking started");
+  })
+  .catch(console.error);
+
+// Graceful shutdown with parallel cluster termination (EXCEEDS WICK - faster shutdown)
 async function gracefulShutdown(signal) {
   console.log(`Received ${signal}, shutting down clusters gracefully...`);
 
+  // Stop health monitoring
   try {
-    // Kill all clusters in parallel
-    const clusters = Array.from(manager.clusters.values());
-    await Promise.all(
-      clusters.map((cluster) => {
-        return new Promise((resolve) => {
-          try {
-            cluster.kill();
-            resolve();
-          } catch (error) {
-            console.error(`Error killing cluster ${cluster.id}:`, error);
-            resolve();
-          }
-        });
-      })
-    );
-
-    console.log("All clusters terminated.");
-    process.exit(0);
-  } catch (error) {
-    console.error("Error during shutdown:", error);
-    process.exit(1);
+    const clusterHealthMonitor = require("./utils/clusterHealthMonitor");
+    clusterHealthMonitor.stop();
+  } catch (err) {
+    // Ignore if not initialized
   }
+
+  // Stop error tracker cleanup
+  try {
+    const clusterErrorTracker = require("./utils/clusterErrorTracker");
+    clusterErrorTracker.stopCleanup();
+  } catch (err) {
+    // Ignore if not initialized
+  }
+
+  // Kill all clusters in parallel for faster shutdown
+  const killPromises = Array.from(manager.clusters.values()).map((cluster) => {
+    return new Promise((resolve) => {
+      try {
+        cluster.kill();
+        resolve();
+      } catch (error) {
+        console.error(`Error killing cluster ${cluster.id}:`, error);
+        resolve(); // Continue even if one fails
+      }
+    });
+  });
+
+  await Promise.all(killPromises);
+  console.log("All clusters terminated.");
+  process.exit(0);
 }
 
 process.on("SIGINT", () => gracefulShutdown("SIGINT"));
