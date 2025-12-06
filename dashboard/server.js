@@ -79,6 +79,24 @@ class DashboardServer {
     });
 
     // Serve assets from assets directory (publicly accessible for Discord embeds)
+    // Handle both encoded and non-encoded filenames
+    this.app.use("/assets", (req, res, next) => {
+      // If the filename is URL-encoded, decode it
+      if (req.path && req.path !== "/") {
+        try {
+          const decodedPath = decodeURIComponent(req.path);
+          if (decodedPath !== req.path) {
+            // Path was encoded, update the request
+            req.url = req.url.replace(req.path, decodedPath);
+            req.path = decodedPath;
+          }
+        } catch (e) {
+          // Invalid encoding, continue with original path
+        }
+      }
+      next();
+    });
+
     this.app.use(
       "/assets",
       express.static(path.join(__dirname, "../assets"), {
@@ -710,7 +728,9 @@ class DashboardServer {
           const dashboardURL =
             process.env.DASHBOARD_URL || req.protocol + "://" + req.get("host");
           // Filename is sanitized (spaces -> hyphens, dangerous chars removed), safe for URL
-          const fileURL = `${dashboardURL}/assets/${req.file.filename}`;
+          // But still encode it to be safe for Discord and other platforms
+          const encodedFilename = encodeURIComponent(req.file.filename);
+          const fileURL = `${dashboardURL}/assets/${encodedFilename}`;
 
           logger.info(
             "CDN",
