@@ -1192,6 +1192,38 @@ class DashboardServer {
       }
     });
 
+    // Get shard-specific stats and health (public endpoint)
+    this.app.get("/api/shards", async (req, res) => {
+      try {
+        const ShardManager = require("../utils/shardManager");
+        const shardStats = await ShardManager.getShardStats(this.client);
+
+        // Get health data if available
+        let healthSummary = null;
+        try {
+          // Check if running in shard mode and health monitor is available
+          if (process.env.USING_SHARDING === "true") {
+            // Health monitor runs in shard.js, not accessible from client process
+            // We'll add a message-based communication later
+            healthSummary = {
+              note: "Health data available in shard manager logs",
+            };
+          }
+        } catch (err) {
+          // Health monitor not available in this context
+        }
+
+        res.json({
+          shards: shardStats.shards || [shardStats],
+          totalGuilds: shardStats.totalGuilds || shardStats.guilds,
+          totalUsers: shardStats.totalUsers || shardStats.users,
+          health: healthSummary,
+        });
+      } catch (error) {
+        res.status(500).json({ error: error.message });
+      }
+    });
+
     // Get recent global security events (public endpoint)
     this.app.get("/api/security/recent", async (req, res) => {
       try {
