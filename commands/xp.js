@@ -380,7 +380,17 @@ module.exports = {
     await db.updateUserLevel(interaction.guild.id, user.id, newLevel);
 
     await interaction.reply({
-      content: `✅ Added ${amount} XP to **${user.tag}**! They now have ${userData.xp} XP (Level ${newLevel})`,
+      embeds: [
+        new EmbedBuilder()
+          .setTitle("✅ XP Added")
+          .setDescription(`Added ${amount} XP to **${user.tag}**`)
+          .addFields(
+            { name: "Current XP", value: `${userData.xp.toLocaleString()}`, inline: true },
+            { name: "Level", value: `${newLevel}`, inline: true }
+          )
+          .setColor(0x00ff00)
+          .setThumbnail(user.displayAvatarURL())
+      ],
       ephemeral: true,
     });
   },
@@ -435,7 +445,13 @@ module.exports = {
     });
 
     await interaction.reply({
-      content: `✅ Reset **${user.tag}**'s XP and level!`,
+      embeds: [
+        new EmbedBuilder()
+          .setTitle("✅ XP Reset")
+          .setDescription(`Reset **${user.tag}**'s XP and level`)
+          .setColor(0xff0000)
+          .setThumbnail(user.displayAvatarURL())
+      ],
       ephemeral: true,
     });
   },
