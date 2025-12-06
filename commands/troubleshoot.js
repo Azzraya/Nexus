@@ -59,7 +59,7 @@ module.exports = {
     const me = guild.members.me;
     if (me) {
       const requiredPerms = [
-        "ViewChannels",
+        "ViewChannel",
         "SendMessages",
         "EmbedLinks",
         "ReadMessageHistory",

@@ -89,7 +89,7 @@ module.exports = {
     const me = guild.members.me;
     if (me) {
       const criticalPerms = [
-        "ViewChannels",
+        "ViewChannel",
         "SendMessages",
         "EmbedLinks",
         "ManageMessages",
