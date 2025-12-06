@@ -161,7 +161,8 @@ module.exports = {
     }
 
     // Create temporary instance for calculations if client.xpSystem not available
-    const xpSystem = client?.xpSystem || new XPSystem(client || interaction.client);
+    const xpSystem =
+      client?.xpSystem || new XPSystem(client || interaction.client);
     const level = xpSystem.calculateLevel(userData.xp);
     const nextLevelXP = xpSystem.xpForLevel(level);
     const progress = Math.floor((userData.xp / nextLevelXP) * 100);
@@ -379,7 +380,7 @@ module.exports = {
     await db.updateUserLevel(interaction.guild.id, user.id, newLevel);
 
     await interaction.reply({
-      content: `✅ Added ${amount} XP to ${user}! They now have ${userData.xp} XP (Level ${newLevel})`,
+      content: `✅ Added ${amount} XP to **${user.tag}**! They now have ${userData.xp} XP (Level ${newLevel})`,
       ephemeral: true,
     });
   },
@@ -434,7 +435,7 @@ module.exports = {
     });
 
     await interaction.reply({
-      content: `✅ Reset ${user}'s XP and level!`,
+      content: `✅ Reset **${user.tag}**'s XP and level!`,
       ephemeral: true,
     });
   },
