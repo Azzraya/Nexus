@@ -37,21 +37,32 @@ module.exports = {
 
     try {
       // Use the proper unlock method from advancedAntiNuke
-      await interaction.client.advancedAntiNuke.unlockServer(interaction.guild);
+      await interaction.client.advancedAntiNuke.unlockServer(
+        interaction.guild
+      );
+
+      // Double-check if it was actually unlocked
+      const stillLocked =
+        interaction.client.advancedAntiNuke.lockedGuilds.has(
+          interaction.guild.id
+        );
 
       const embed = new EmbedBuilder()
-        .setTitle("✅ Server Unlocked")
+        .setTitle(stillLocked ? "⚠️ Unlock In Progress" : "✅ Server Unlocked")
         .setDescription(
-          `All channels and permissions have been restored.\n\n` +
-            `The server is now back to normal operation.`
+          stillLocked
+            ? `Unlock process started. If channels are still locked, they may not have ManageChannels permission.\n\nUse \`/lock remove channels\` as a fallback.`
+            : `All channels and permissions have been restored.\n\nThe server is now back to normal operation.`
         )
-        .setColor(0x00ff00)
+        .setColor(stillLocked ? 0xff9900 : 0x00ff00)
         .setTimestamp();
 
       await interaction.editReply({ embeds: [embed] });
     } catch (error) {
+      const logger = require("../utils/logger");
+      logger.error("Unlock command error:", error);
       await interaction.editReply({
-        content: "❌ Error unlocking server!",
+        content: `❌ Error unlocking server: ${error.message}`,
       });
     }
   },

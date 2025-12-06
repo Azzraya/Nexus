@@ -1404,29 +1404,35 @@ class AdvancedAntiNuke {
           c.isTextBased() && c.permissionsFor(botMember)?.has("ManageChannels")
       );
 
+      logger.info(
+        `[Anti-Nuke] Unlocking ${channels.size} channels in ${guild.id}`
+      );
+
       let unlockedCount = 0;
+      let failedCount = 0;
       for (const channel of channels.values()) {
         try {
           // Explicitly allow permissions (matching how /lock sets them to false)
-          await channel.permissionOverwrites
-            .edit(guild.roles.everyone, {
-              SendMessages: true, // Explicitly allow (not null to ensure it works)
-              AddReactions: true,
-              CreatePublicThreads: true,
-              CreatePrivateThreads: true,
-            })
-            .catch(() => {
-              // Channel might not have overwrites, continue
-            });
+          await channel.permissionOverwrites.edit(guild.roles.everyone, {
+            SendMessages: true, // Explicitly allow (not null to ensure it works)
+            AddReactions: true,
+            CreatePublicThreads: true,
+            CreatePrivateThreads: true,
+          });
           unlockedCount++;
         } catch (error) {
-          // Continue with other channels
-          logger.debug(
-            `[Anti-Nuke] Failed to unlock channel ${channel.id}:`,
+          failedCount++;
+          // Log error but continue with other channels
+          logger.warn(
+            `[Anti-Nuke] Failed to unlock channel ${channel.id} (${channel.name}):`,
             error.message
           );
         }
       }
+
+      logger.info(
+        `[Anti-Nuke] Unlocked ${unlockedCount}/${channels.size} channels (${failedCount} failed) in ${guild.id}`
+      );
 
       // Restore @everyone role permissions (add back what we removed)
       try {
