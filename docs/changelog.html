@@ -84,8 +84,27 @@
 
       <div class="content-section">
         <div class="changelog-entry">
-          <h2>Version 3.29.1 - December 6, 2025</h2>
+          <h2>Version 3.29.2 - December 6, 2025</h2>
           <span class="version-badge">Latest</span>
+          <h3>🔧 MEMORY CONFIG ADJUSTMENT</h3>
+          <ul>
+            <li>
+              ✅ <strong>Removed Heap Limit:</strong> Server has 4GB available
+              by default - no need to limit to 512MB
+            </li>
+            <li>
+              🚀 <strong>Full Power:</strong> Bot now uses Node.js default 4GB
+              heap for maximum performance
+            </li>
+            <li>
+              📊 <strong>Better Scaling:</strong> Memory warnings adjusted for
+              larger heap size
+            </li>
+          </ul>
+        </div>
+
+        <div class="changelog-entry">
+          <h2>Version 3.29.1 - December 6, 2025</h2>
           <h3>🧠 FIXED MEMORY LIMITS</h3>
           <ul>
             <li>
@@ -136,8 +155,8 @@
               prevents crashes at scale
             </li>
             <li>
-              📊 <strong>Full Observability:</strong> Track performance,
-              errors, and health across all servers
+              📊 <strong>Full Observability:</strong> Track performance, errors,
+              and health across all servers
             </li>
           </ul>
         </div>
