@@ -69,13 +69,30 @@ class DashboardServer {
         ip,
         headers: req.headers,
       });
-      res.json({
-        success: true,
-        message: "Discord bot can reach this server",
-        userAgent,
-        ip,
-        timestamp: new Date().toISOString(),
-      });
+
+      // Serve HTML with OG tags so Discord can test embedding
+      const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Discord Connectivity Test</title>
+  <meta property="og:title" content="Discord Connectivity Test">
+  <meta property="og:description" content="If you see this, Discord bot can reach the server!">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://via.placeholder.com/1200x630.png?text=Discord+Test">
+</head>
+<body>
+  <h1>Discord Connectivity Test</h1>
+  <p>User Agent: ${userAgent}</p>
+  <p>IP: ${ip}</p>
+  <p>Timestamp: ${new Date().toISOString()}</p>
+  <p>If Discord can see this page, the bot is working!</p>
+</body>
+</html>`;
+
+      res.setHeader("Content-Type", "text/html; charset=utf-8");
+      res.send(html);
     });
 
     // Robots.txt to explicitly allow Discord's bot
