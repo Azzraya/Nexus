@@ -75,25 +75,28 @@ class DashboardServer {
     this.app.get("/assets/:filename", async (req, res, next) => {
       const filename = req.params.filename;
       const filePath = path.join(__dirname, "../assets", filename);
-      
+
       // Check if file exists first
       try {
         await fs.access(filePath);
       } catch (error) {
         return res.status(404).send("Image not found.");
       }
-      
+
       const userAgent = (req.headers["user-agent"] || "").toLowerCase();
-      
+
       // Detect Discord's user agent (Discordbot crawls links for embeds)
       // Discord uses "Discordbot" or similar - be specific to avoid false positives
-      const isDiscordBot = userAgent.includes("discordbot") || 
-                          (userAgent.includes("discord") && !userAgent.includes("chrome") && !userAgent.includes("firefox"));
-      
+      const isDiscordBot =
+        userAgent.includes("discordbot") ||
+        (userAgent.includes("discord") &&
+          !userAgent.includes("chrome") &&
+          !userAgent.includes("firefox"));
+
       // Check if request wants direct image (Accept header contains image/* or ?raw param)
       const acceptHeader = req.headers.accept || "";
       const wantsDirectImage =
-        acceptHeader.includes("image/") || 
+        acceptHeader.includes("image/") ||
         req.query.raw !== undefined ||
         isDiscordBot; // Discord gets direct images (like its own CDN)
 
