@@ -404,6 +404,8 @@ class AdvancedAntiRaid {
         joinData.joins,
         guild.id
       ),
+      temporalPattern: this.detectionAlgorithms.temporalPattern(joinData.joins),
+      graphBased: this.detectionAlgorithms.graphBased(joinData.joins),
     };
 
     // Calculate threat score (0-100) - adjusted by server size + sensitivity
