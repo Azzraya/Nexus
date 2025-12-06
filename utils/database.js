@@ -96,6 +96,16 @@ class Database {
             )
         `);
 
+    // Critical indexes for moderation_logs (heavily queried table)
+    this.db.run(`CREATE INDEX IF NOT EXISTS idx_moderation_logs_guild_id
+                 ON moderation_logs(guild_id)`);
+    this.db.run(`CREATE INDEX IF NOT EXISTS idx_moderation_logs_user_id
+                 ON moderation_logs(user_id)`);
+    this.db.run(`CREATE INDEX IF NOT EXISTS idx_moderation_logs_guild_timestamp
+                 ON moderation_logs(guild_id, timestamp)`);
+    this.db.run(`CREATE INDEX IF NOT EXISTS idx_moderation_logs_guild_action
+                 ON moderation_logs(guild_id, action)`);
+
     // Warnings
     this.db.run(`
             CREATE TABLE IF NOT EXISTS warnings (
@@ -107,6 +117,14 @@ class Database {
                 timestamp INTEGER
             )
         `);
+
+    // Critical indexes for warnings (heavily queried table)
+    this.db.run(`CREATE INDEX IF NOT EXISTS idx_warnings_guild_id
+                 ON warnings(guild_id)`);
+    this.db.run(`CREATE INDEX IF NOT EXISTS idx_warnings_user_id  
+                 ON warnings(user_id)`);
+    this.db.run(`CREATE INDEX IF NOT EXISTS idx_warnings_guild_user
+                 ON warnings(guild_id, user_id)`);
 
     // Auto-moderation rules
     this.db.run(`
@@ -158,6 +176,14 @@ class Database {
                 active INTEGER DEFAULT 1
             )
         `);
+
+    // Critical indexes for cases
+    this.db.run(`CREATE INDEX IF NOT EXISTS idx_cases_guild_id
+                 ON cases(guild_id)`);
+    this.db.run(`CREATE INDEX IF NOT EXISTS idx_cases_guild_timestamp
+                 ON cases(guild_id, timestamp)`);
+    this.db.run(`CREATE INDEX IF NOT EXISTS idx_cases_user_id
+                 ON cases(user_id)`);
 
     // Analytics
     this.db.run(`
