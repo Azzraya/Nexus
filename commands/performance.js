@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
 const performanceMonitor = require("../utils/performanceMonitor");
 const ErrorMessages = require("../utils/errorMessages");
+const rateLimitHandler = require("../utils/rateLimitHandler");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -10,6 +11,8 @@ module.exports = {
 
   async execute(interaction) {
     const stats = performanceMonitor.getStats();
+    const rateLimitStats = rateLimitHandler.getStats();
+    const isRateLimited = rateLimitHandler.isRateLimited();
 
     const embed = new EmbedBuilder()
       .setTitle("⚡ Real-Time Performance Metrics")
@@ -41,9 +44,18 @@ module.exports = {
           name: "📊 Current Operations",
           value: `**Active:** ${stats.activeOperations}`,
           inline: true,
+        },
+        {
+          name: isRateLimited.limited ? "⏳ Rate Limits" : "✅ Rate Limits",
+          value: isRateLimited.limited
+            ? `🔴 **ACTIVE**\n${
+                isRateLimited.global ? "Global" : "Endpoint"
+              } limit\nResets in: ${Math.ceil(isRateLimited.resetIn / 1000)}s`
+            : `🟢 **None**\n${rateLimitStats.rateLimitHitRate} hit rate\n${rateLimitStats.totalRequests.toLocaleString()} requests`,
+          inline: true,
         }
       )
-      .setColor(0x00ff00)
+      .setColor(isRateLimited.limited ? 0xff9900 : 0x00ff00)
       .setTimestamp();
 
     // Add performance context
