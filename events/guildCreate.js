@@ -37,15 +37,23 @@ module.exports = {
       });
 
     // Track in server_joins for retention analysis
-    await db
-      .run(
+    await new Promise((resolve, reject) => {
+      db.db.run(
         `INSERT OR IGNORE INTO server_joins (guild_id, guild_name, member_count, joined_at, source) 
          VALUES (?, ?, ?, ?, ?)`,
-        [guild.id, guild.name, guild.memberCount || 0, Date.now(), inviteSource]
-      )
-      .catch((err) => {
-        logger.error("Failed to track server join for retention:", err);
-      });
+        [guild.id, guild.name, guild.memberCount || 0, Date.now(), inviteSource],
+        (err) => {
+          if (err) {
+            logger.error("Failed to track server join for retention:", err);
+            reject(err);
+          } else {
+            resolve();
+          }
+        }
+      );
+    }).catch(() => {
+      // Error already logged
+    });
 
     // Check for verification milestones
     const serverCount = client.guilds.cache.size;
