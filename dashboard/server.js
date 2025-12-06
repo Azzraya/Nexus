@@ -4,6 +4,7 @@ const passport = require("passport");
 const DiscordStrategy = require("passport-discord").Strategy;
 const path = require("path");
 const fs = require("fs").promises;
+const crypto = require("crypto");
 // Ensure logger is loaded first to prevent initialization errors
 const logger = require("../utils/logger");
 const db = require("../utils/database");

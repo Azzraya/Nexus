@@ -84,8 +84,33 @@
 
       <div class="content-section">
         <div class="changelog-entry">
-          <h2>Version 3.24.10 - December 6, 2025</h2>
+          <h2>Version 3.25.0 - December 6, 2025</h2>
           <span class="version-badge">Latest</span>
+          <h3>🗑️ REMOVED CDN FUNCTIONALITY</h3>
+          <ul>
+            <li>
+              ❌ <strong>Removed CDN Upload:</strong> Removed all CDN-related
+              functionality including image upload endpoint, assets serving, and
+              upload page
+            </li>
+            <li>
+              ❌ <strong>Removed Upload Page:</strong> Deleted
+              <code>upload.html</code> and all related upload functionality
+            </li>
+            <li>
+              ❌ <strong>Removed Assets Routes:</strong> Removed all
+              <code>/assets</code> routes, Discord test endpoints, and CDN
+              logging
+            </li>
+            <li>
+              🧹 <strong>Code Cleanup:</strong> Removed multer dependency usage
+              and all CDN-related code
+            </li>
+          </ul>
+        </div>
+
+        <div class="changelog-entry">
+          <h2>Version 3.24.10 - December 6, 2025</h2>
           <h3>🔍 ENHANCED DEBUGGING & CONNECTIVITY TESTING</h3>
           <ul>
             <li>
