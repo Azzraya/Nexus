@@ -1,18 +1,12 @@
 const logger = require("../utils/logger");
 const db = require("../utils/database");
 const growthTracker = require("../utils/growthTracker");
-const retentionTracker = require("../utils/retentionTracker");
 const { version } = require("../package.json");
 
 module.exports = {
   name: "guildDelete",
   async execute(guild, client) {
     logger.info("Guild Delete", `Left server: ${guild.name} (${guild.id})`);
-
-    // Track retention/churn with comprehensive analytics
-    await retentionTracker.trackServerLeave(guild).catch((err) => {
-      logger.error("Retention tracker error:", err);
-    });
 
     // Stop audit log monitoring for removed guild
     if (client.auditLogMonitor) {

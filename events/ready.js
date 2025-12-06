@@ -5,7 +5,6 @@ const logger = require("../utils/logger");
 const databaseBackup = require("../utils/databaseBackup");
 const rateLimitHandler = require("../utils/rateLimitHandler");
 const memoryMonitor = require("../utils/memoryMonitor");
-const retentionTracker = require("../utils/retentionTracker");
 
 module.exports = {
   name: "clientReady",
@@ -388,10 +387,6 @@ module.exports = {
         rateLimitHandler.initialize(client);
         logger.info("Ready", "⏱️  Rate limit protection enabled");
 
-        // Initialize retention tracker
-        const db = require("../utils/database");
-        retentionTracker.setClient(client, db);
-        logger.info("Ready", "📊 Retention tracking initialized");
       } catch (error) {
         logger.error("Ready", "Failed to start database backup", {
           message: error?.message || String(error),

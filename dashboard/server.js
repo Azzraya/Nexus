@@ -1234,49 +1234,6 @@ class DashboardServer {
       }
     });
 
-    // Get retention analytics (ADMIN-ONLY - sensitive data) - TEMPORARILY DISABLED DUE TO CRASHES
-    this.app.get("/api/admin/retention", async (req, res) => {
-      return res.status(503).json({ error: "Retention analytics temporarily disabled - under maintenance" });
-      /*
-      try {
-        const authHeader = req.headers.authorization;
-        if (!authHeader || !authHeader.startsWith("Bearer ")) {
-          return res.status(401).json({ error: "Unauthorized" });
-        }
-
-        const token = authHeader.replace("Bearer ", "");
-
-        // Validate admin token
-        if (!this.adminTokens || !this.adminTokens.has(token)) {
-          return res.status(401).json({ error: "Invalid or expired token" });
-        }
-
-        const tokenData = this.adminTokens.get(token);
-        if (Date.now() > tokenData.expires) {
-          this.adminTokens.delete(token);
-          return res.status(401).json({ error: "Token expired" });
-        }
-
-        const retentionTracker = require("../utils/retentionTracker");
-        // Initialize retentionTracker with client and raw db (db.db is the SQLite database)
-        retentionTracker.setClient(this.client, db.db);
-
-        const stats = await retentionTracker.getRetentionStats();
-        const churnRate = await retentionTracker.getChurnRate();
-        const topReasons = await retentionTracker.getTopChurnReasons(10);
-
-        res.json({
-          retentionStats: stats,
-          churnRate: churnRate,
-          topChurnReasons: topReasons,
-          totalServers: this.client.guilds.cache.size,
-        });
-      } catch (error) {
-        res.status(500).json({ error: error.message });
-      }
-      */
-    });
-
     // Rate Limiting Middleware for Public API
     const checkAPIKey = async (req, res, next) => {
       const apiKey = req.headers["x-api-key"] || req.query.api_key;
