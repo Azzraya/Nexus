@@ -1412,14 +1412,44 @@ class AdvancedAntiNuke {
       let failedCount = 0;
       for (const channel of channels.values()) {
         try {
-          // Explicitly allow permissions (matching how /lock sets them to false)
-          await channel.permissionOverwrites.edit(guild.roles.everyone, {
-            SendMessages: true, // Explicitly allow (not null to ensure it works)
-            AddReactions: true,
-            CreatePublicThreads: true,
-            CreatePrivateThreads: true,
-          });
-          unlockedCount++;
+          // Try to delete the overwrite first (removes it completely)
+          const everyoneOverwrite = channel.permissionOverwrites.cache.get(
+            guild.roles.everyone.id
+          );
+          
+          if (everyoneOverwrite) {
+            // If overwrite exists, try to delete specific permissions or the whole overwrite
+            try {
+              // Delete specific permission overwrites we set during lockdown
+              await channel.permissionOverwrites.edit(guild.roles.everyone, {
+                SendMessages: null, // Remove overwrite (resets to default)
+                AddReactions: null,
+                CreatePublicThreads: null,
+                CreatePrivateThreads: null,
+              });
+              unlockedCount++;
+            } catch (editError) {
+              // If editing fails, try deleting the entire overwrite
+              try {
+                await everyoneOverwrite.delete(
+                  "Anti-Nuke: Remove lockdown overwrites"
+                );
+                unlockedCount++;
+              } catch (deleteError) {
+                // Last resort: explicitly set to true
+                await channel.permissionOverwrites.edit(guild.roles.everyone, {
+                  SendMessages: true,
+                  AddReactions: true,
+                  CreatePublicThreads: true,
+                  CreatePrivateThreads: true,
+                });
+                unlockedCount++;
+              }
+            }
+          } else {
+            // No overwrite exists, channel should already be unlocked
+            unlockedCount++;
+          }
         } catch (error) {
           failedCount++;
           // Log error but continue with other channels
