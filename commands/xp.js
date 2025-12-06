@@ -124,6 +124,11 @@ module.exports = {
     ),
 
   async execute(interaction, client) {
+    // Ensure client exists, fallback to interaction.client
+    if (!client && interaction.client) {
+      client = interaction.client;
+    }
+    
     const subcommand = interaction.options.getSubcommand();
 
     if (subcommand === "rank") {
@@ -137,9 +142,9 @@ module.exports = {
     } else if (subcommand === "rewards") {
       await this.handleRewards(interaction, client);
     } else if (subcommand === "add") {
-      await this.handleAdd(interaction, client);
+      await this.handleAdd(interaction, client || interaction.client);
     } else if (subcommand === "remove") {
-      await this.handleRemove(interaction, client);
+      await this.handleRemove(interaction, client || interaction.client);
     } else if (subcommand === "reset") {
       await this.handleReset(interaction, client);
     }
