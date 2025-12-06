@@ -69,21 +69,40 @@ class DashboardServer {
       });
     });
 
-    // HTML wrapper route for Discord embeds (serves OG tags)
-    // Serve HTML for link previews, but og:image must point to direct image URL
-    this.app.get("/assets/:filename", (req, res, next) => {
+    // Route for /assets/:filename
+    // Discord embeds work best with direct image URLs (like Discord's own CDN)
+    // So we serve images directly to Discord, but HTML with OG tags for other services
+    this.app.get("/assets/:filename", async (req, res, next) => {
+      const filename = req.params.filename;
+      const filePath = path.join(__dirname, "../assets", filename);
+      
+      // Check if file exists first
+      try {
+        await fs.access(filePath);
+      } catch (error) {
+        return res.status(404).send("Image not found.");
+      }
+      
+      const userAgent = (req.headers["user-agent"] || "").toLowerCase();
+      
+      // Detect Discord's user agent (Discordbot crawls links for embeds)
+      // Discord uses "Discordbot" or similar - be specific to avoid false positives
+      const isDiscordBot = userAgent.includes("discordbot") || 
+                          (userAgent.includes("discord") && !userAgent.includes("chrome") && !userAgent.includes("firefox"));
+      
       // Check if request wants direct image (Accept header contains image/* or ?raw param)
       const acceptHeader = req.headers.accept || "";
       const wantsDirectImage =
-        acceptHeader.includes("image/") || req.query.raw !== undefined;
+        acceptHeader.includes("image/") || 
+        req.query.raw !== undefined ||
+        isDiscordBot; // Discord gets direct images (like its own CDN)
 
-      // If they explicitly want the image (like <img src> tags or ?raw), serve it directly
+      // If they explicitly want the image (like <img src> tags, ?raw, or Discord bot), serve it directly
       if (wantsDirectImage) {
-        return next();
+        return next(); // Pass to static file middleware
       }
 
-      // Otherwise, serve HTML wrapper with OG tags (for Discord link previews, social media, etc.)
-      const filename = req.params.filename;
+      // Otherwise, serve HTML wrapper with OG tags (for Twitter, Facebook, etc.)
       const dashboardURL =
         process.env.DASHBOARD_URL || req.protocol + "://" + req.get("host");
       // og:image MUST point to direct image URL (with ?raw to bypass HTML wrapper)
@@ -92,7 +111,7 @@ class DashboardServer {
       )}?raw`;
       const pageURL = `${dashboardURL}/assets/${encodeURIComponent(filename)}`;
 
-      // Serve HTML with Open Graph tags for Discord embeds
+      // Serve HTML with Open Graph tags for other social media embeds
       const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -100,7 +119,7 @@ class DashboardServer {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${filename}</title>
   
-  <!-- Open Graph / Discord -->
+  <!-- Open Graph / Social Media -->
   <meta property="og:type" content="website">
   <meta property="og:title" content="${filename}">
   <meta property="og:image" content="${directImageURL}">
