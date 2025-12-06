@@ -69,6 +69,70 @@ class DashboardServer {
       });
     });
 
+    // HTML wrapper route for Discord embeds (serves OG tags)
+    // When Discord fetches /assets/image.png?embed, it gets HTML with OG tags
+    this.app.get("/assets/:filename", (req, res, next) => {
+      // Only serve HTML wrapper if ?embed query param is present
+      // Otherwise, let static middleware handle the direct image request
+      if (req.query.embed !== undefined) {
+        const filename = req.params.filename;
+        const dashboardURL =
+          process.env.DASHBOARD_URL || req.protocol + "://" + req.get("host");
+        const imageURL = `${dashboardURL}/assets/${encodeURIComponent(filename)}`;
+
+        // Serve HTML with Open Graph tags for Discord embeds
+        const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${filename}</title>
+  
+  <!-- Open Graph / Discord -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="${filename}">
+  <meta property="og:image" content="${imageURL}">
+  <meta property="og:url" content="${dashboardURL}/assets/${encodeURIComponent(filename)}">
+  <meta property="og:site_name" content="Nexus CDN">
+  
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="${filename}">
+  <meta name="twitter:image" content="${imageURL}">
+  
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a1a;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+    img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+    }
+  </style>
+</head>
+<body>
+  <img src="${imageURL}" alt="${filename}" />
+</body>
+</html>`;
+
+        res.setHeader("Content-Type", "text/html; charset=utf-8");
+        return res.send(html);
+      }
+      // No ?embed param, continue to static file serving
+      next();
+    });
+
     // Handle OPTIONS requests for CORS (Discord may send preflight requests)
     this.app.options("/assets/*", (req, res) => {
       res.setHeader("Access-Control-Allow-Origin", "*");
@@ -724,13 +788,15 @@ class DashboardServer {
             });
           }
 
-          // Generate URL (filename is already sanitized, so use directly)
+          // Generate URLs (both direct image and embed wrapper)
           const dashboardURL =
             process.env.DASHBOARD_URL || req.protocol + "://" + req.get("host");
           // Filename is sanitized (spaces -> hyphens, dangerous chars removed), safe for URL
           // But still encode it to be safe for Discord and other platforms
           const encodedFilename = encodeURIComponent(req.file.filename);
-          const fileURL = `${dashboardURL}/assets/${encodedFilename}`;
+          const directURL = `${dashboardURL}/assets/${encodedFilename}`;
+          // Embed URL with ?embed parameter for Discord OG tags
+          const embedURL = `${dashboardURL}/assets/${encodedFilename}?embed`;
 
           logger.info(
             "CDN",
@@ -739,7 +805,9 @@ class DashboardServer {
 
           res.json({
             success: true,
-            url: fileURL,
+            url: embedURL, // Use embed URL for Discord compatibility
+            directUrl: directURL, // Direct image URL for other uses
+            embedUrl: embedURL, // Explicit embed URL
             filename: req.file.filename,
             originalName: req.file.originalname,
             size: req.file.size,
