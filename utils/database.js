@@ -770,6 +770,47 @@ class Database {
     this.db.run(`CREATE INDEX IF NOT EXISTS idx_invite_tracking_inviter
                  ON invite_tracking(inviter_id)`);
 
+    // Server retention tracking (for churn analysis)
+    this.db.run(`
+            CREATE TABLE IF NOT EXISTS server_retention (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                guild_id TEXT,
+                guild_name TEXT,
+                member_count INTEGER,
+                joined_at INTEGER,
+                left_at INTEGER,
+                lifetime_days REAL,
+                commands_used INTEGER DEFAULT 0,
+                features_configured INTEGER DEFAULT 0,
+                last_activity INTEGER,
+                owner_id TEXT,
+                leave_reason_guess TEXT
+            )
+        `);
+
+    this.db.run(`CREATE INDEX IF NOT EXISTS idx_retention_guild
+                 ON server_retention(guild_id)`);
+    this.db.run(`CREATE INDEX IF NOT EXISTS idx_retention_left_at
+                 ON server_retention(left_at)`);
+    this.db.run(`CREATE INDEX IF NOT EXISTS idx_retention_reason
+                 ON server_retention(leave_reason_guess)`);
+
+    // Server joins tracking (for retention calculation)
+    this.db.run(`
+            CREATE TABLE IF NOT EXISTS server_joins (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                guild_id TEXT,
+                guild_name TEXT,
+                member_count INTEGER,
+                joined_at INTEGER,
+                source TEXT DEFAULT 'unknown',
+                UNIQUE(guild_id)
+            )
+        `);
+
+    this.db.run(`CREATE INDEX IF NOT EXISTS idx_server_joins_joined_at
+                 ON server_joins(joined_at)`);
+
     // Anti-nuke whitelist (EXCEEDS WICK - prevents false positives)
     this.db.run(`
             CREATE TABLE IF NOT EXISTS anti_nuke_whitelist (

@@ -2,6 +2,7 @@ const { registerCommands } = require("../utils/registerCommands");
 const db = require("../utils/database");
 const logger = require("../utils/logger");
 const growthTracker = require("../utils/growthTracker");
+const retentionTracker = require("../utils/retentionTracker");
 const { version } = require("../package.json");
 
 module.exports = {
