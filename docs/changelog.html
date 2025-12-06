@@ -84,8 +84,23 @@
 
       <div class="content-section">
         <div class="changelog-entry">
-          <h2>Version 3.27.1 - December 6, 2025</h2>
+          <h2>Version 3.27.2 - December 6, 2025</h2>
           <span class="version-badge">Latest</span>
+          <h3>🔧 FIXED DATABASE BACKUP PATH</h3>
+          <ul>
+            <li>
+              ✅ <strong>Fixed Database Path:</strong> Database backup now looks
+              in correct location (data/nexus.db instead of database.db)
+            </li>
+            <li>
+              ✅ <strong>Backups Working:</strong> Automatic backups will now
+              create successfully at 3 AM daily
+            </li>
+          </ul>
+        </div>
+
+        <div class="changelog-entry">
+          <h2>Version 3.27.1 - December 6, 2025</h2>
           <h3>🐛 FIXED REACTIONROLE DUPLICATE CUSTOM ID BUG</h3>
           <ul>
             <li>
@@ -93,8 +108,8 @@
               users don't select the same role multiple times
             </li>
             <li>
-              ✅ <strong>Fixed Custom IDs:</strong> Button custom IDs now include
-              index to ensure uniqueness
+              ✅ <strong>Fixed Custom IDs:</strong> Button custom IDs now
+              include index to ensure uniqueness
             </li>
             <li>
               ✅ <strong>Better Error Messages:</strong> Clear feedback when

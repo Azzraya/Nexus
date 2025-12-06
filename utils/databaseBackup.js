@@ -5,7 +5,7 @@ const logger = require("./logger");
 class DatabaseBackup {
   constructor() {
     this.backupDir = path.join(__dirname, "../backups/database");
-    this.dbPath = path.join(__dirname, "../database.db");
+    this.dbPath = path.join(__dirname, "../data/nexus.db");
     this.maxBackups = 7; // Keep last 7 days
 
     // Create backup directory if it doesn't exist
