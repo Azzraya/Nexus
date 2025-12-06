@@ -60,65 +60,13 @@ class DashboardServer {
       "::ffff:127.0.0.1", // IPv4 mapped to IPv6
     ];
 
-    // Handle root /assets path (no filename) - must be BEFORE static middleware
+    // Handle root /assets path (no filename)
     this.app.get("/assets", (req, res) => {
-      const realIP = this.getRealIP(req);
-      const cleanIP = realIP?.replace("::ffff:", "") || "unknown";
-
-      const isWhitelisted =
-        this.allowedIPs.includes(cleanIP) ||
-        this.allowedIPs.includes(realIP);
-
-      if (!isWhitelisted) {
-        logger.debug("Assets", `Blocked access to /assets from IP: ${cleanIP} (not whitelisted)`);
-        return res.status(404).send("Not Found");
-      }
-
       res.status(400).json({
         error: "Invalid request",
         message: "Please specify a filename. Example: /assets/giftwrap.png",
         hint: "Use /upload.html to upload images and get URLs",
-        yourIP: cleanIP,
-        isWhitelisted: true,
       });
-    });
-
-    // Protected assets endpoint - allows whitelisted IPs OR Discord embed bots
-    this.app.use("/assets", (req, res, next) => {
-      // Skip IP check for the root /assets path (handled by GET handler above)
-      if (req.path === "/" || req.path === "") {
-        return next();
-      }
-
-      // Get real IP (handles proxies/ngrok)
-      const realIP = this.getRealIP(req);
-      const cleanIP = realIP?.replace("::ffff:", "") || "unknown";
-
-      // Check if request is from Discord embed bot (for image previews/embeds)
-      const userAgent = req.headers["user-agent"] || "";
-      const isDiscordBot = 
-        userAgent.includes("Discordbot") ||
-        userAgent.includes("facebookexternalhit") ||
-        userAgent.includes("Twitterbot") ||
-        userAgent.includes("Slackbot") ||
-        userAgent.includes("LinkedInBot") ||
-        userAgent.includes("WhatsApp") ||
-        userAgent.includes("TelegramBot") ||
-        userAgent.includes("SkypeUriPreview");
-
-      // Allow if IP is whitelisted OR if it's a bot (for embeds)
-      const isWhitelisted =
-        this.allowedIPs.includes(cleanIP) ||
-        this.allowedIPs.includes(realIP);
-
-      if (!isWhitelisted && !isDiscordBot) {
-        logger.debug("Assets", `Blocked access to /assets${req.path} from IP: ${cleanIP} (not whitelisted, not a bot)`);
-        // Return 404 for unauthorized IPs
-        return res.status(404).send("Not Found");
-      }
-
-      // IP is allowed or it's a bot, serve the asset
-      next();
     });
 
     // Serve protected assets from assets directory
