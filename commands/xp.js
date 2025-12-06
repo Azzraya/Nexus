@@ -370,7 +370,8 @@ module.exports = {
     await db.addUserXP(interaction.guild.id, user.id, amount, "manual");
 
     const userData = await db.getUserXP(interaction.guild.id, user.id);
-    const newLevel = client.xpSystem.calculateLevel(userData.xp);
+    const xpSystem = client.xpSystem || new XPSystem(client);
+    const newLevel = xpSystem.calculateLevel(userData.xp);
     await db.updateUserLevel(interaction.guild.id, user.id, newLevel);
 
     await interaction.reply({
@@ -395,7 +396,8 @@ module.exports = {
     await db.addUserXP(interaction.guild.id, user.id, -amount, "manual");
 
     const userData = await db.getUserXP(interaction.guild.id, user.id);
-    const newLevel = client.xpSystem.calculateLevel(userData.xp);
+    const xpSystem = client.xpSystem || new XPSystem(client);
+    const newLevel = xpSystem.calculateLevel(userData.xp);
     await db.updateUserLevel(interaction.guild.id, user.id, newLevel);
 
     await interaction.reply({
