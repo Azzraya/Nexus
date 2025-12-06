@@ -1256,8 +1256,8 @@ class DashboardServer {
         }
 
         const retentionTracker = require("../utils/retentionTracker");
-        // Initialize retentionTracker with client and db
-        retentionTracker.setClient(this.client, db);
+        // Initialize retentionTracker with client and raw db (db.db is the SQLite database)
+        retentionTracker.setClient(this.client, db.db);
         
         const stats = await retentionTracker.getRetentionStats();
         const churnRate = await retentionTracker.getChurnRate();
