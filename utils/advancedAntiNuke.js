@@ -1401,8 +1401,7 @@ class AdvancedAntiNuke {
       // Restore channel permissions by removing overwrites (set to null resets to default)
       const channels = guild.channels.cache.filter(
         (c) =>
-          c.isTextBased() &&
-          c.permissionsFor(botMember)?.has("ManageChannels")
+          c.isTextBased() && c.permissionsFor(botMember)?.has("ManageChannels")
       );
 
       let unlockedCount = 0;

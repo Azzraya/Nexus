@@ -84,24 +84,52 @@
 
       <div class="content-section">
         <div class="changelog-entry">
-          <h2>Version 3.34.0 - December 6, 2025</h2>
+          <h2>Version 3.35.0 - December 6, 2025</h2>
           <span class="version-badge">Latest</span>
+          <h3>🔓 FIXED ANTI-NUKE LOCKDOWN AUTO-UNLOCK</h3>
+          <ul>
+            <li>
+              ✅ <strong>Auto-Unlock Fixed:</strong> Anti-nuke lockdown now
+              properly restores permissions after 5 minutes
+            </li>
+            <li>
+              🔧 <strong>Permission Restoration:</strong> Unlock now explicitly
+              sets SendMessages to true (matching /lock behavior)
+            </li>
+            <li>
+              🛡️ <strong>Complete Recovery:</strong> Restores both channel
+              permissions and @everyone role permissions
+            </li>
+            <li>
+              📝 <strong>/unlock Command:</strong> Now properly unlocks all
+              affected channels after anti-nuke incidents
+            </li>
+          </ul>
+        </div>
+
+        <div class="changelog-entry">
+          <h2>Version 3.34.0 - December 6, 2025</h2>
           <h3>🚀 PRODUCTION-READY CLUSTER MANAGEMENT</h3>
           <ul>
             <li>
-              🏥 <strong>Cluster Health Monitor:</strong> Automatic health checks every 30s
+              🏥 <strong>Cluster Health Monitor:</strong> Automatic health
+              checks every 30s
             </li>
             <li>
-              ✅ <strong>Auto-Restart:</strong> Unhealthy clusters auto-restart after 3 failed checks
+              ✅ <strong>Auto-Restart:</strong> Unhealthy clusters auto-restart
+              after 3 failed checks
             </li>
             <li>
-              🔄 <strong>Rolling Restarts:</strong> Zero-downtime cluster updates (sequential or batch)
+              🔄 <strong>Rolling Restarts:</strong> Zero-downtime cluster
+              updates (sequential or batch)
             </li>
             <li>
-              🔍 <strong>Error Tracking:</strong> Cluster-specific error patterns and recurring issue detection
+              🔍 <strong>Error Tracking:</strong> Cluster-specific error
+              patterns and recurring issue detection
             </li>
             <li>
-              📊 <strong>Better Logging:</strong> Comprehensive cluster event logging
+              📊 <strong>Better Logging:</strong> Comprehensive cluster event
+              logging
             </li>
           </ul>
         </div>

@@ -124,7 +124,7 @@ module.exports = {
         await interaction.reply({
           embeds: [
             {
-              title: "Γ£à Channel Locked",
+              title: "Channel Locked",
               description: `${channel} has been locked.`,
               color: 0xff0000,
             },
@@ -177,7 +177,7 @@ module.exports = {
         await interaction.editReply({
           embeds: [
             {
-              title: "Γ£à All Public Channels Locked",
+              title: "All Public Channels Locked",
               description: `Locked ${locked} channel(s).${
                 failed > 0
                   ? ` Failed to lock ${failed} channel(s) (missing permissions).`
@@ -197,7 +197,7 @@ module.exports = {
         await interaction.reply({
           embeds: [
             {
-              title: "Γ£à Join Lock Enabled",
+              title: "Join Lock Enabled",
               description: "New members joining will be kicked/banned.",
               color: 0xff0000,
             },
@@ -227,7 +227,7 @@ module.exports = {
         await interaction.reply({
           embeds: [
             {
-              title: "Γ£à Role Locked",
+              title: "Role Locked",
               description: `${role} has been locked.`,
               color: 0xff0000,
             },
@@ -266,7 +266,7 @@ module.exports = {
         await interaction.reply({
           embeds: [
             {
-              title: "Γ£à Channel Unlocked",
+              title: "Channel Unlocked",
               description: `${channel} has been unlocked.`,
               color: 0x00ff00,
             },
@@ -321,7 +321,7 @@ module.exports = {
         await interaction.reply({
           embeds: [
             {
-              title: "Γ£à All Channels Unlocked",
+              title: "All Channels Unlocked",
               description: `Unlocked ${unlocked} channel(s).`,
               color: 0x00ff00,
             },
@@ -336,7 +336,7 @@ module.exports = {
         await interaction.reply({
           embeds: [
             {
-              title: "Γ£à Join Lock Disabled",
+              title: "Join Lock Disabled",
               description: "New members can now join normally.",
               color: 0x00ff00,
             },
@@ -365,7 +365,7 @@ module.exports = {
         await interaction.reply({
           embeds: [
             {
-              title: "Γ£à Role Unlocked",
+              title: "Role Unlocked",
               description: `${role} has been unlocked.`,
               color: 0x00ff00,
             },
@@ -400,7 +400,7 @@ module.exports = {
       });
 
       await interaction.reply({
-        content: `Γ£à Announcement sent to ${announcementsChannel}`,
+        content: `Announcement sent to ${announcementsChannel}`,
         flags: MessageFlags.Ephemeral,
       });
     } else if (subcommand === "view") {

@@ -43,7 +43,7 @@ manager.on("clusterCreate", (cluster) => {
 
   cluster.on("error", (error) => {
     console.error(`❌ Cluster ${cluster.id} error:`, error);
-    
+
     // Track error
     const clusterErrorTracker = require("./utils/clusterErrorTracker");
     clusterErrorTracker.trackError(cluster.id, error, {

@@ -385,11 +385,15 @@ module.exports = {
           .setTitle("✅ XP Added")
           .setDescription(`Added ${amount} XP to **${user.tag}**`)
           .addFields(
-            { name: "Current XP", value: `${userData.xp.toLocaleString()}`, inline: true },
+            {
+              name: "Current XP",
+              value: `${userData.xp.toLocaleString()}`,
+              inline: true,
+            },
             { name: "Level", value: `${newLevel}`, inline: true }
           )
           .setColor(0x00ff00)
-          .setThumbnail(user.displayAvatarURL())
+          .setThumbnail(user.displayAvatarURL()),
       ],
       ephemeral: true,
     });
@@ -421,11 +425,15 @@ module.exports = {
           .setTitle("✅ XP Removed")
           .setDescription(`Removed ${amount} XP from **${user.tag}**`)
           .addFields(
-            { name: "Current XP", value: `${userData.xp.toLocaleString()}`, inline: true },
+            {
+              name: "Current XP",
+              value: `${userData.xp.toLocaleString()}`,
+              inline: true,
+            },
             { name: "Level", value: `${newLevel}`, inline: true }
           )
           .setColor(0xff9900)
-          .setThumbnail(user.displayAvatarURL())
+          .setThumbnail(user.displayAvatarURL()),
       ],
       ephemeral: true,
     });
@@ -460,7 +468,7 @@ module.exports = {
           .setTitle("✅ XP Reset")
           .setDescription(`Reset **${user.tag}**'s XP and level`)
           .setColor(0xff0000)
-          .setThumbnail(user.displayAvatarURL())
+          .setThumbnail(user.displayAvatarURL()),
       ],
       ephemeral: true,
     });

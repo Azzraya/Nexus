@@ -37,9 +37,7 @@ module.exports = {
 
     try {
       // Use the proper unlock method from advancedAntiNuke
-      await interaction.client.advancedAntiNuke.unlockServer(
-        interaction.guild
-      );
+      await interaction.client.advancedAntiNuke.unlockServer(interaction.guild);
 
       const embed = new EmbedBuilder()
         .setTitle("✅ Server Unlocked")
