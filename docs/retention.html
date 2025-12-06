@@ -370,10 +370,7 @@
 
           // Update churn reasons
           const reasonsContainer = document.getElementById("churnReasons");
-          if (
-            data.topChurnReasons &&
-            data.topChurnReasons.length > 0
-          ) {
+          if (data.topChurnReasons && data.topChurnReasons.length > 0) {
             reasonsContainer.innerHTML = data.topChurnReasons
               .map((reason) => {
                 const percentage = (
@@ -391,7 +388,10 @@
               .join("");
 
             // Create chart
-            createChurnChart(data.topChurnReasons, data.retentionStats.totalLeft);
+            createChurnChart(
+              data.topChurnReasons,
+              data.retentionStats.totalLeft
+            );
           } else {
             reasonsContainer.innerHTML =
               '<p style="color: #666">No churn data available yet</p>';
@@ -453,10 +453,9 @@
               tooltip: {
                 callbacks: {
                   label: function (context) {
-                    const percentage = (
-                      (context.parsed / total) *
-                      100
-                    ).toFixed(1);
+                    const percentage = ((context.parsed / total) * 100).toFixed(
+                      1
+                    );
                     return `${context.label}: ${context.parsed} (${percentage}%)`;
                   },
                 },

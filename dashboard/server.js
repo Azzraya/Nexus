@@ -1235,28 +1235,34 @@ class DashboardServer {
     });
 
     // Get retention analytics (OWNER-ONLY - sensitive data)
-    this.app.get("/api/analytics/retention", this.checkAuth, async (req, res) => {
-      try {
-        // Only allow bot owner to view retention data
-        if (req.user.id !== process.env.OWNER_ID) {
-          return res.status(403).json({ error: "Access denied - Owner only" });
+    this.app.get(
+      "/api/analytics/retention",
+      this.checkAuth,
+      async (req, res) => {
+        try {
+          // Only allow bot owner to view retention data
+          if (req.user.id !== process.env.OWNER_ID) {
+            return res
+              .status(403)
+              .json({ error: "Access denied - Owner only" });
+          }
+
+          const retentionTracker = require("../utils/retentionTracker");
+          const stats = await retentionTracker.getRetentionStats();
+          const churnRate = await retentionTracker.getChurnRate();
+          const topReasons = await retentionTracker.getTopChurnReasons(10);
+
+          res.json({
+            retentionStats: stats,
+            churnRate: churnRate,
+            topChurnReasons: topReasons,
+            totalServers: this.client.guilds.cache.size,
+          });
+        } catch (error) {
+          res.status(500).json({ error: error.message });
         }
-
-        const retentionTracker = require("../utils/retentionTracker");
-        const stats = await retentionTracker.getRetentionStats();
-        const churnRate = await retentionTracker.getChurnRate();
-        const topReasons = await retentionTracker.getTopChurnReasons(10);
-
-        res.json({
-          retentionStats: stats,
-          churnRate: churnRate,
-          topChurnReasons: topReasons,
-          totalServers: this.client.guilds.cache.size,
-        });
-      } catch (error) {
-        res.status(500).json({ error: error.message });
       }
-    });
+    );
 
     // Rate Limiting Middleware for Public API
     const checkAPIKey = async (req, res, next) => {
