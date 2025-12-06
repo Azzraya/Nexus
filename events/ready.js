@@ -12,7 +12,8 @@ module.exports = {
   name: "clientReady",
   once: true,
   async execute(client) {
-    const shardInfo = ShardManager.getShardInfo(client);
+    try {
+      const shardInfo = ShardManager.getShardInfo(client);
 
     // Initialize dev tracking for support command
     client.devTracking = {
@@ -21,7 +22,17 @@ module.exports = {
     };
 
     // Register slash commands
-    await registerCommands(client);
+    try {
+      await registerCommands(client);
+      logger.info("Ready", "✅ Commands registered successfully");
+    } catch (error) {
+      logger.error("Ready", "❌ Failed to register commands:", {
+        message: error?.message || String(error),
+        stack: error?.stack,
+        name: error?.name,
+      });
+      // Continue anyway - bot should still work
+    }
 
     // Post commands to Discord Bot List (only from shard 0 or non-sharded)
     if (process.env.DISCORDBOTLIST_TOKEN) {
@@ -401,6 +412,14 @@ module.exports = {
           message: error?.message || String(error),
         });
       }
+    }
+    } catch (error) {
+      logger.error("Ready", "❌ Critical error in ready event:", {
+        message: error?.message || String(error),
+        stack: error?.stack,
+        name: error?.name,
+      });
+      // Don't rethrow - let bot continue running
     }
   },
 };
