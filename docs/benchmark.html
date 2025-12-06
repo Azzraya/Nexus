@@ -45,7 +45,9 @@
         padding: 30px;
         border-radius: 20px;
         border: 2px solid rgba(255, 255, 255, 0.2);
-        transition: transform 0.3s, box-shadow 0.3s;
+        transition:
+          transform 0.3s,
+          box-shadow 0.3s;
       }
 
       .comparison-card:hover {
@@ -282,9 +284,7 @@
       <div id="benchmark-content" style="display: none">
         <div class="comparison-grid">
           <div class="comparison-card nexus">
-            <h2 style="margin-bottom: 20px; color: #00d1b2">
-              🚀 Nexus Bot
-            </h2>
+            <h2 style="margin-bottom: 20px; color: #00d1b2">🚀 Nexus Bot</h2>
             <div id="nexus-metrics"></div>
           </div>
 
@@ -336,44 +336,56 @@
           <div class="metric-row">
             <span class="metric-label">Response Time</span>
             <span class="metric-value nexus">${nexus.responseTime}ms</span>
-            ${nexus.responseTime < wick.responseTime
-              ? '<span class="winner-badge winner">FASTER</span>'
-              : '<span class="winner-badge loser">SLOWER</span>'}
+            ${
+              nexus.responseTime < wick.responseTime
+                ? '<span class="winner-badge winner">FASTER</span>'
+                : '<span class="winner-badge loser">SLOWER</span>'
+            }
           </div>
           <div class="metric-row">
             <span class="metric-label">Raid Detection Speed</span>
             <span class="metric-value nexus">${nexus.detectionSpeed}ms</span>
-            ${nexus.detectionSpeed < wick.detectionSpeed
-              ? '<span class="winner-badge winner">FASTER</span>'
-              : '<span class="winner-badge loser">SLOWER</span>'}
+            ${
+              nexus.detectionSpeed < wick.detectionSpeed
+                ? '<span class="winner-badge winner">FASTER</span>'
+                : '<span class="winner-badge loser">SLOWER</span>'
+            }
           </div>
           <div class="metric-row">
             <span class="metric-label">Memory Usage</span>
             <span class="metric-value nexus">${nexus.memory}MB</span>
-            ${nexus.memory < wick.memory
-              ? '<span class="winner-badge winner">LIGHTER</span>'
-              : '<span class="winner-badge loser">HEAVIER</span>'}
+            ${
+              nexus.memory < wick.memory
+                ? '<span class="winner-badge winner">LIGHTER</span>'
+                : '<span class="winner-badge loser">HEAVIER</span>'
+            }
           </div>
           <div class="metric-row">
             <span class="metric-label">CPU Usage</span>
             <span class="metric-value nexus">${nexus.cpu}%</span>
-            ${nexus.cpu < wick.cpu
-              ? '<span class="winner-badge winner">LOWER</span>'
-              : '<span class="winner-badge loser">HIGHER</span>'}
+            ${
+              nexus.cpu < wick.cpu
+                ? '<span class="winner-badge winner">LOWER</span>'
+                : '<span class="winner-badge loser">HIGHER</span>'
+            }
           </div>
           <div class="metric-row">
             <span class="metric-label">Uptime</span>
             <span class="metric-value nexus">${nexus.uptime}%</span>
-            ${nexus.uptime > wick.uptime
-              ? '<span class="winner-badge winner">BETTER</span>'
-              : '<span class="winner-badge loser">WORSE</span>'}
+            ${
+              nexus.uptime > wick.uptime
+                ? '<span class="winner-badge winner">BETTER</span>'
+                : '<span class="winner-badge loser">WORSE</span>'
+            }
           </div>
           <div class="metric-row">
             <span class="metric-label">Commands/sec</span>
             <span class="metric-value nexus">${nexus.commandsPerSecond}</span>
-            ${nexus.commandsPerSecond > wick.commandsPerSecond
-              ? '<span class="winner-badge winner">FASTER</span>'
-              : '<span class="winner-badge loser">SLOWER</span>'}
+            ${
+              nexus.commandsPerSecond > wick.commandsPerSecond
+                ? '<span class="winner-badge winner">FASTER</span>'
+                : '<span class="winner-badge loser">SLOWER</span>'
+            }
           </div>
         `;
 
@@ -383,44 +395,56 @@
           <div class="metric-row">
             <span class="metric-label">Response Time</span>
             <span class="metric-value wick">${wick.responseTime}ms</span>
-            ${wick.responseTime < nexus.responseTime
-              ? '<span class="winner-badge winner">FASTER</span>'
-              : '<span class="winner-badge loser">SLOWER</span>'}
+            ${
+              wick.responseTime < nexus.responseTime
+                ? '<span class="winner-badge winner">FASTER</span>'
+                : '<span class="winner-badge loser">SLOWER</span>'
+            }
           </div>
           <div class="metric-row">
             <span class="metric-label">Raid Detection Speed</span>
             <span class="metric-value wick">${wick.detectionSpeed}ms</span>
-            ${wick.detectionSpeed < nexus.detectionSpeed
-              ? '<span class="winner-badge winner">FASTER</span>'
-              : '<span class="winner-badge loser">SLOWER</span>'}
+            ${
+              wick.detectionSpeed < nexus.detectionSpeed
+                ? '<span class="winner-badge winner">FASTER</span>'
+                : '<span class="winner-badge loser">SLOWER</span>'
+            }
           </div>
           <div class="metric-row">
             <span class="metric-label">Memory Usage</span>
             <span class="metric-value wick">${wick.memory}MB</span>
-            ${wick.memory < nexus.memory
-              ? '<span class="winner-badge winner">LIGHTER</span>'
-              : '<span class="winner-badge loser">HEAVIER</span>'}
+            ${
+              wick.memory < nexus.memory
+                ? '<span class="winner-badge winner">LIGHTER</span>'
+                : '<span class="winner-badge loser">HEAVIER</span>'
+            }
           </div>
           <div class="metric-row">
             <span class="metric-label">CPU Usage</span>
             <span class="metric-value wick">${wick.cpu}%</span>
-            ${wick.cpu < nexus.cpu
-              ? '<span class="winner-badge winner">LOWER</span>'
-              : '<span class="winner-badge loser">HIGHER</span>'}
+            ${
+              wick.cpu < nexus.cpu
+                ? '<span class="winner-badge winner">LOWER</span>'
+                : '<span class="winner-badge loser">HIGHER</span>'
+            }
           </div>
           <div class="metric-row">
             <span class="metric-label">Uptime</span>
             <span class="metric-value wick">${wick.uptime}%</span>
-            ${wick.uptime > nexus.uptime
-              ? '<span class="winner-badge winner">BETTER</span>'
-              : '<span class="winner-badge loser">WORSE</span>'}
+            ${
+              wick.uptime > nexus.uptime
+                ? '<span class="winner-badge winner">BETTER</span>'
+                : '<span class="winner-badge loser">WORSE</span>'
+            }
           </div>
           <div class="metric-row">
             <span class="metric-label">Commands/sec</span>
             <span class="metric-value wick">${wick.commandsPerSecond}</span>
-            ${wick.commandsPerSecond > nexus.commandsPerSecond
-              ? '<span class="winner-badge winner">FASTER</span>'
-              : '<span class="winner-badge loser">SLOWER</span>'}
+            ${
+              wick.commandsPerSecond > nexus.commandsPerSecond
+                ? '<span class="winner-badge winner">FASTER</span>'
+                : '<span class="winner-badge loser">SLOWER</span>'
+            }
           </div>
         `;
 

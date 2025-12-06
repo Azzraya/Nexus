@@ -3,6 +3,9 @@ const session = require("express-session");
 const passport = require("passport");
 const DiscordStrategy = require("passport-discord").Strategy;
 const path = require("path");
+const multer = require("multer");
+const fs = require("fs").promises;
+const crypto = require("crypto");
 // Ensure logger is loaded first to prevent initialization errors
 const logger = require("../utils/logger");
 const db = require("../utils/database");
@@ -17,6 +20,48 @@ class DashboardServer {
     // Middleware
     this.app.use(express.json());
     this.app.use(express.static(path.join(__dirname, "public")));
+
+    // IP whitelist for protected assets (add your IP here)
+    this.allowedIPs = [
+      process.env.ALLOWED_IP || "78.148.9.253", // Your public IP
+      "127.0.0.1", // Localhost
+      "::1", // IPv6 localhost
+      "::ffff:127.0.0.1", // IPv4 mapped to IPv6
+    ];
+
+    // Protected assets endpoint - only allows whitelisted IPs
+    this.app.use("/assets", (req, res, next) => {
+      // Get real IP (handles proxies/ngrok)
+      const realIP =
+        req.headers["x-forwarded-for"]?.split(",")[0].trim() ||
+        req.headers["x-real-ip"] ||
+        req.ip ||
+        req.connection.remoteAddress;
+      const cleanIP = realIP?.replace("::ffff:", "") || "unknown";
+
+      // Check if IP is allowed
+      if (
+        !this.allowedIPs.includes(cleanIP) &&
+        !this.allowedIPs.includes(realIP)
+      ) {
+        // Return 404 for unauthorized IPs
+        return res.status(404).send("Not Found");
+      }
+
+      // IP is allowed, serve the asset
+      next();
+    });
+
+    // Serve protected assets from assets directory
+    this.app.use(
+      "/assets",
+      express.static(path.join(__dirname, "../assets"), {
+        setHeaders: (res, path) => {
+          // Optional: Add cache headers
+          res.setHeader("Cache-Control", "public, max-age=31536000");
+        },
+      })
+    );
 
     // CORS for GitHub Pages and localhost
     this.app.use((req, res, next) => {
@@ -197,6 +242,27 @@ class DashboardServer {
       req.logout(() => res.redirect("/"));
     });
 
+    // Get current IP (helper endpoint to find your IP)
+    this.app.get("/api/my-ip", (req, res) => {
+      const realIP =
+        req.headers["x-forwarded-for"]?.split(",")[0].trim() ||
+        req.headers["x-real-ip"] ||
+        req.ip ||
+        req.connection.remoteAddress;
+      const cleanIP = realIP?.replace("::ffff:", "") || "unknown";
+
+      res.json({
+        ip: cleanIP,
+        rawIP: realIP,
+        headers: {
+          "x-forwarded-for": req.headers["x-forwarded-for"],
+          "x-real-ip": req.headers["x-real-ip"],
+          "cf-connecting-ip": req.headers["cf-connecting-ip"], // Cloudflare
+        },
+        message: "Add this IP to ALLOWED_IP in .env or dashboard/server.js",
+      });
+    });
+
     // Dashboard route
     this.app.get("/dashboard", this.checkAuth, (req, res) => {
       res.sendFile(path.join(__dirname, "public", "dashboard.html"));
@@ -295,159 +361,325 @@ class DashboardServer {
     );
 
     // POST /api/v2/setup/auto-configure - One-click auto-configuration based on server size
-    this.app.post("/api/v2/setup/auto-configure", this.checkAuth, async (req, res) => {
-      try {
-        const { guildId, template } = req.body;
-        const guild = this.client.guilds.cache.get(guildId);
-        
-        if (!guild) {
-          return res.status(404).json({ success: false, error: "Server not found" });
-        }
+    this.app.post(
+      "/api/v2/setup/auto-configure",
+      this.checkAuth,
+      async (req, res) => {
+        try {
+          const { guildId, template } = req.body;
+          const guild = this.client.guilds.cache.get(guildId);
 
-        // Get server size
-        const memberCount = guild.memberCount;
-        const channelCount = guild.channels.cache.size;
-        
-        // Determine server size category
-        let serverSize = "small";
-        if (memberCount > 1000) serverSize = "large";
-        else if (memberCount > 100) serverSize = "medium";
-
-        // Base configuration with smart defaults
-        const baseConfig = {
-          anti_nuke_enabled: true,
-          anti_raid_enabled: true,
-          auto_recovery_enabled: true,
-          threat_intelligence_enabled: true,
-          join_gate_enabled: memberCount > 100, // Enable for larger servers
-          member_screening_enabled: memberCount > 500, // Enable for large servers
-        };
-
-        // Template-specific configurations
-        const templates = {
-          gaming: {
-            ...baseConfig,
-            raid_threshold: serverSize === "large" ? 5 : 3,
-            nuke_threshold: 3,
-            auto_ban_suspicious: true,
-            log_all_actions: true,
-          },
-          community: {
-            ...baseConfig,
-            raid_threshold: serverSize === "large" ? 4 : 2,
-            nuke_threshold: 2,
-            auto_ban_suspicious: serverSize !== "small",
-            log_all_actions: true,
-          },
-          business: {
-            ...baseConfig,
-            raid_threshold: 2,
-            nuke_threshold: 1,
-            auto_ban_suspicious: true,
-            log_all_actions: true,
-            strict_mode: true,
-          },
-          default: baseConfig,
-        };
-
-        const config = templates[template] || templates.default;
-
-        // Apply configuration
-        await db.setServerConfig(guild.id, config);
-
-        // Create default channels if they don't exist
-        const modLogChannel = guild.channels.cache.find(
-          (c) => c.name === "mod-logs" || c.name === "nexus-logs"
-        );
-        if (!modLogChannel && guild.members.me.permissions.has("ManageChannels")) {
-          try {
-            const newChannel = await guild.channels.create({
-              name: "nexus-logs",
-              type: 0, // Text channel
-              topic: "Nexus Bot security and moderation logs",
-              permissionOverwrites: [
-                {
-                  id: guild.id,
-                  deny: ["ViewChannel"],
-                },
-                {
-                  id: guild.members.me.id,
-                  allow: ["ViewChannel", "SendMessages", "EmbedLinks"],
-                },
-              ],
-            });
-            await db.setServerConfig(guild.id, { mod_log_channel: newChannel.id });
-          } catch (error) {
-            logger.warn("Setup", `Could not create mod log channel: ${error.message}`);
+          if (!guild) {
+            return res
+              .status(404)
+              .json({ success: false, error: "Server not found" });
           }
-        }
 
-        res.json({
-          success: true,
-          data: {
-            config,
-            serverSize,
-            memberCount,
-            channelsCreated: modLogChannel ? 0 : 1,
-          },
-        });
-      } catch (error) {
-        logger.error("Setup", "Auto-configure error", error);
-        res.status(500).json({ success: false, error: error.message });
+          // Get server size
+          const memberCount = guild.memberCount;
+          const channelCount = guild.channels.cache.size;
+
+          // Determine server size category
+          let serverSize = "small";
+          if (memberCount > 1000) serverSize = "large";
+          else if (memberCount > 100) serverSize = "medium";
+
+          // Base configuration with smart defaults
+          const baseConfig = {
+            anti_nuke_enabled: true,
+            anti_raid_enabled: true,
+            auto_recovery_enabled: true,
+            threat_intelligence_enabled: true,
+            join_gate_enabled: memberCount > 100, // Enable for larger servers
+            member_screening_enabled: memberCount > 500, // Enable for large servers
+          };
+
+          // Template-specific configurations
+          const templates = {
+            gaming: {
+              ...baseConfig,
+              raid_threshold: serverSize === "large" ? 5 : 3,
+              nuke_threshold: 3,
+              auto_ban_suspicious: true,
+              log_all_actions: true,
+            },
+            community: {
+              ...baseConfig,
+              raid_threshold: serverSize === "large" ? 4 : 2,
+              nuke_threshold: 2,
+              auto_ban_suspicious: serverSize !== "small",
+              log_all_actions: true,
+            },
+            business: {
+              ...baseConfig,
+              raid_threshold: 2,
+              nuke_threshold: 1,
+              auto_ban_suspicious: true,
+              log_all_actions: true,
+              strict_mode: true,
+            },
+            default: baseConfig,
+          };
+
+          const config = templates[template] || templates.default;
+
+          // Apply configuration
+          await db.setServerConfig(guild.id, config);
+
+          // Create default channels if they don't exist
+          const modLogChannel = guild.channels.cache.find(
+            (c) => c.name === "mod-logs" || c.name === "nexus-logs"
+          );
+          if (
+            !modLogChannel &&
+            guild.members.me.permissions.has("ManageChannels")
+          ) {
+            try {
+              const newChannel = await guild.channels.create({
+                name: "nexus-logs",
+                type: 0, // Text channel
+                topic: "Nexus Bot security and moderation logs",
+                permissionOverwrites: [
+                  {
+                    id: guild.id,
+                    deny: ["ViewChannel"],
+                  },
+                  {
+                    id: guild.members.me.id,
+                    allow: ["ViewChannel", "SendMessages", "EmbedLinks"],
+                  },
+                ],
+              });
+              await db.setServerConfig(guild.id, {
+                mod_log_channel: newChannel.id,
+              });
+            } catch (error) {
+              logger.warn(
+                "Setup",
+                `Could not create mod log channel: ${error.message}`
+              );
+            }
+          }
+
+          res.json({
+            success: true,
+            data: {
+              config,
+              serverSize,
+              memberCount,
+              channelsCreated: modLogChannel ? 0 : 1,
+            },
+          });
+        } catch (error) {
+          logger.error("Setup", "Auto-configure error", error);
+          res.status(500).json({ success: false, error: error.message });
+        }
       }
-    });
+    );
 
     // GET /api/v2/setup/recommendations - Get setup recommendations for a server
-    this.app.get("/api/v2/setup/recommendations", this.checkAuth, async (req, res) => {
-      try {
-        const { guildId } = req.query;
-        const guild = this.client.guilds.cache.get(guildId);
-        
-        if (!guild) {
-          return res.status(404).json({ success: false, error: "Server not found" });
+    this.app.get(
+      "/api/v2/setup/recommendations",
+      this.checkAuth,
+      async (req, res) => {
+        try {
+          const { guildId } = req.query;
+          const guild = this.client.guilds.cache.get(guildId);
+
+          if (!guild) {
+            return res
+              .status(404)
+              .json({ success: false, error: "Server not found" });
+          }
+
+          const memberCount = guild.memberCount;
+          const channelCount = guild.channels.cache.size;
+          const roleCount = guild.roles.cache.size;
+
+          const recommendations = {
+            serverSize:
+              memberCount > 1000
+                ? "large"
+                : memberCount > 100
+                  ? "medium"
+                  : "small",
+            recommendedTemplate: memberCount > 500 ? "gaming" : "community",
+            suggestions: [],
+          };
+
+          // Generate smart recommendations
+          if (
+            memberCount > 100 &&
+            !guild.channels.cache.find((c) => c.name.includes("log"))
+          ) {
+            recommendations.suggestions.push({
+              type: "channel",
+              priority: "high",
+              message:
+                "Create a dedicated log channel for better security monitoring",
+            });
+          }
+
+          if (memberCount > 500) {
+            recommendations.suggestions.push({
+              type: "feature",
+              priority: "high",
+              message: "Enable member screening for large server protection",
+            });
+          }
+
+          if (roleCount > 50) {
+            recommendations.suggestions.push({
+              type: "optimization",
+              priority: "medium",
+              message: "Consider consolidating roles for better performance",
+            });
+          }
+
+          res.json({ success: true, data: recommendations });
+        } catch (error) {
+          logger.error("Setup", "Recommendations error", error);
+          res.status(500).json({ success: false, error: error.message });
         }
-
-        const memberCount = guild.memberCount;
-        const channelCount = guild.channels.cache.size;
-        const roleCount = guild.roles.cache.size;
-        
-        const recommendations = {
-          serverSize: memberCount > 1000 ? "large" : memberCount > 100 ? "medium" : "small",
-          recommendedTemplate: memberCount > 500 ? "gaming" : "community",
-          suggestions: [],
-        };
-
-        // Generate smart recommendations
-        if (memberCount > 100 && !guild.channels.cache.find(c => c.name.includes("log"))) {
-          recommendations.suggestions.push({
-            type: "channel",
-            priority: "high",
-            message: "Create a dedicated log channel for better security monitoring",
-          });
-        }
-
-        if (memberCount > 500) {
-          recommendations.suggestions.push({
-            type: "feature",
-            priority: "high",
-            message: "Enable member screening for large server protection",
-          });
-        }
-
-        if (roleCount > 50) {
-          recommendations.suggestions.push({
-            type: "optimization",
-            priority: "medium",
-            message: "Consider consolidating roles for better performance",
-          });
-        }
-
-        res.json({ success: true, data: recommendations });
-      } catch (error) {
-        logger.error("Setup", "Recommendations error", error);
-        res.status(500).json({ success: false, error: error.message });
       }
+    );
+
+    // Configure multer for file uploads
+    const storage = multer.diskStorage({
+      destination: async (req, file, cb) => {
+        const assetsDir = path.join(__dirname, "../assets");
+        try {
+          await fs.mkdir(assetsDir, { recursive: true });
+          cb(null, assetsDir);
+        } catch (error) {
+          cb(error);
+        }
+      },
+      filename: (req, file, cb) => {
+        // Allow custom filename via query parameter, otherwise use random
+        if (req.query.filename) {
+          // Sanitize filename: remove path separators and dangerous chars
+          const customName = req.query.filename
+            .replace(/[\/\\:*?"<>|]/g, "")
+            .trim();
+          const ext = path.extname(file.originalname);
+          // Ensure it has the correct extension
+          const finalName = customName.endsWith(ext)
+            ? customName
+            : customName + ext;
+          cb(null, finalName);
+        } else {
+          // Generate short filename: random 8 chars + original extension
+          const ext = path.extname(file.originalname);
+          const shortName = crypto.randomBytes(4).toString("hex") + ext;
+          cb(null, shortName);
+        }
+      },
     });
+
+    const upload = multer({
+      storage: storage,
+      limits: {
+        fileSize: 10 * 1024 * 1024, // 10MB max
+      },
+      fileFilter: (req, file, cb) => {
+        // Only allow images
+        const allowedMimes = [
+          "image/jpeg",
+          "image/jpg",
+          "image/png",
+          "image/gif",
+          "image/webp",
+          "image/svg+xml",
+        ];
+        if (allowedMimes.includes(file.mimetype)) {
+          cb(null, true);
+        } else {
+          cb(
+            new Error("Only image files are allowed (jpg, png, gif, webp, svg)")
+          );
+        }
+      },
+    });
+
+    // POST /api/v2/cdn/upload - Upload image and get short URL
+    this.app.post(
+      "/api/v2/cdn/upload",
+      upload.single("image"),
+      async (req, res) => {
+        try {
+          // Check IP whitelist
+          const realIP =
+            req.headers["x-forwarded-for"]?.split(",")[0].trim() ||
+            req.headers["x-real-ip"] ||
+            req.ip ||
+            req.connection.remoteAddress;
+          const cleanIP = realIP?.replace("::ffff:", "") || "unknown";
+
+          if (
+            !this.allowedIPs.includes(cleanIP) &&
+            !this.allowedIPs.includes(realIP)
+          ) {
+            // Delete file if uploaded
+            if (req.file) {
+              try {
+                await fs.unlink(req.file.path);
+              } catch (e) {
+                // Ignore deletion errors
+              }
+            }
+            return res.status(403).json({
+              success: false,
+              error: "Unauthorized IP address",
+              message: "Only whitelisted IPs can upload images",
+            });
+          }
+
+          if (!req.file) {
+            return res.status(400).json({
+              success: false,
+              error: "No file uploaded",
+              message: "Please upload an image file",
+            });
+          }
+
+          // Generate URL
+          const dashboardURL =
+            process.env.DASHBOARD_URL || req.protocol + "://" + req.get("host");
+          const fileURL = `${dashboardURL}/assets/${req.file.filename}`;
+
+          logger.info(
+            "CDN",
+            `Image uploaded: ${req.file.filename} by IP ${cleanIP}`
+          );
+
+          res.json({
+            success: true,
+            url: fileURL,
+            filename: req.file.filename,
+            originalName: req.file.originalname,
+            size: req.file.size,
+            mimetype: req.file.mimetype,
+          });
+        } catch (error) {
+          logger.error("CDN", "Upload error", error);
+
+          // Clean up file on error
+          if (req.file) {
+            try {
+              await fs.unlink(req.file.path);
+            } catch (e) {
+              // Ignore deletion errors
+            }
+          }
+
+          res.status(500).json({
+            success: false,
+            error: error.message || "Upload failed",
+          });
+        }
+      }
+    );
 
     // Get real-time alerts (EXCEEDS WICK - live security feed)
     this.app.get("/api/alerts", this.checkAuth, async (req, res) => {
@@ -1645,23 +1877,31 @@ class DashboardServer {
         // Get REAL Nexus performance metrics
         const memoryUsage = process.memoryUsage();
         const wsPing = this.client.ws.ping;
-        
+
         // Calculate actual CPU usage (percentage of one core)
         const cpuUsageStart = process.cpuUsage();
         const startTime = Date.now();
-        await new Promise(resolve => setTimeout(resolve, 100)); // Sample for 100ms
+        await new Promise((resolve) => setTimeout(resolve, 100)); // Sample for 100ms
         const cpuUsageEnd = process.cpuUsage(cpuUsageStart);
         const elapsedTime = Date.now() - startTime;
-        const cpuPercent = Math.min(100, Math.round(
-          ((cpuUsageEnd.user + cpuUsageEnd.system) / 1000) / elapsedTime
-        ));
+        const cpuPercent = Math.min(
+          100,
+          Math.round(
+            (cpuUsageEnd.user + cpuUsageEnd.system) / 1000 / elapsedTime
+          )
+        );
 
         // Calculate uptime percentage (based on actual uptime vs expected)
         const actualUptime = process.uptime();
-        const expectedUptime = (Date.now() - (this.client.readyTimestamp || Date.now())) / 1000;
-        const uptimePercent = expectedUptime > 0 
-          ? Math.min(100, Math.round((actualUptime / expectedUptime) * 100 * 100) / 100)
-          : 99.9;
+        const expectedUptime =
+          (Date.now() - (this.client.readyTimestamp || Date.now())) / 1000;
+        const uptimePercent =
+          expectedUptime > 0
+            ? Math.min(
+                100,
+                Math.round((actualUptime / expectedUptime) * 100 * 100) / 100
+              )
+            : 99.9;
 
         // Get command execution rate from analytics if available
         const commandRate = await new Promise((resolve) => {
@@ -1711,26 +1951,40 @@ class DashboardServer {
         const improvements = [];
 
         metrics.forEach((metric) => {
-          if (metric === "memory" || metric === "cpu" || metric === "responseTime" || metric === "detectionSpeed") {
+          if (
+            metric === "memory" ||
+            metric === "cpu" ||
+            metric === "responseTime" ||
+            metric === "detectionSpeed"
+          ) {
             // Lower is better
             if (nexusMetrics[metric] < wickMetrics[metric]) {
               nexusWins++;
-              const improvement = ((wickMetrics[metric] - nexusMetrics[metric]) / wickMetrics[metric]) * 100;
+              const improvement =
+                ((wickMetrics[metric] - nexusMetrics[metric]) /
+                  wickMetrics[metric]) *
+                100;
               improvements.push(improvement);
             }
           } else {
             // Higher is better (uptime, commandsPerSecond)
             if (nexusMetrics[metric] > wickMetrics[metric]) {
               nexusWins++;
-              const improvement = ((nexusMetrics[metric] - wickMetrics[metric]) / wickMetrics[metric]) * 100;
+              const improvement =
+                ((nexusMetrics[metric] - wickMetrics[metric]) /
+                  wickMetrics[metric]) *
+                100;
               improvements.push(improvement);
             }
           }
         });
 
-        const avgImprovement = improvements.length > 0
-          ? Math.round(improvements.reduce((a, b) => a + b, 0) / improvements.length)
-          : 0;
+        const avgImprovement =
+          improvements.length > 0
+            ? Math.round(
+                improvements.reduce((a, b) => a + b, 0) / improvements.length
+              )
+            : 0;
 
         res.json({
           success: true,
@@ -2123,80 +2377,100 @@ class DashboardServer {
     );
 
     // GET /api/v2/threat-network/shared-threats - Get shared threats from network
-    this.app.get("/api/v2/threat-network/shared-threats", this.checkAuth, async (req, res) => {
-      try {
-        const { networkId, timeWindow = 24 } = req.query; // hours
-        const ThreatIntelligence = require("../utils/threatIntelligence");
-        
-        // Get cross-server analytics
-        const analytics = await ThreatIntelligence.getCrossServerAnalytics(
-          timeWindow * 60 * 60 * 1000
-        );
+    this.app.get(
+      "/api/v2/threat-network/shared-threats",
+      this.checkAuth,
+      async (req, res) => {
+        try {
+          const { networkId, timeWindow = 24 } = req.query; // hours
+          const ThreatIntelligence = require("../utils/threatIntelligence");
 
-        res.json({
-          success: true,
-          data: analytics,
-          apiVersion: "2.0.0",
-        });
-      } catch (error) {
-        logger.error("API", "Threat network error", error);
-        res.status(500).json({
-          success: false,
-          error: error.message,
-          apiVersion: "2.0.0",
-        });
+          // Get cross-server analytics
+          const analytics = await ThreatIntelligence.getCrossServerAnalytics(
+            timeWindow * 60 * 60 * 1000
+          );
+
+          res.json({
+            success: true,
+            data: analytics,
+            apiVersion: "2.0.0",
+          });
+        } catch (error) {
+          logger.error("API", "Threat network error", error);
+          res.status(500).json({
+            success: false,
+            error: error.message,
+            apiVersion: "2.0.0",
+          });
+        }
       }
-    });
+    );
 
     // POST /api/v2/threat-network/share - Share threat with network
-    this.app.post("/api/v2/threat-network/share", this.checkAuth, async (req, res) => {
-      try {
-        const { userId, threatType, threatData, severity, guildId, networkId } = req.body;
-        const ThreatIntelligence = require("../utils/threatIntelligence");
-        const MultiServer = require("../utils/multiServer");
-        
-        // Report threat (automatically detects cross-server patterns)
-        const result = await ThreatIntelligence.reportThreat(
-          userId,
-          threatType,
-          threatData,
-          severity,
-          guildId
-        );
+    this.app.post(
+      "/api/v2/threat-network/share",
+      this.checkAuth,
+      async (req, res) => {
+        try {
+          const {
+            userId,
+            threatType,
+            threatData,
+            severity,
+            guildId,
+            networkId,
+          } = req.body;
+          const ThreatIntelligence = require("../utils/threatIntelligence");
+          const MultiServer = require("../utils/multiServer");
 
-        // If network ID provided, broadcast to network
-        if (networkId) {
-          const network = await db.getServerNetwork(networkId);
-          if (network && network.config.sharedThreats) {
-            // Broadcast threat alert to all servers in network
-            const multiServer = new MultiServer(this.client);
-            await multiServer.broadcastAnnouncement(networkId, {
-              title: "🚨 Network Threat Alert",
-              description: `User <@${userId}> flagged for ${threatType} in server ${guildId}`,
-              color: severity === "critical" ? 0xff0000 : severity === "high" ? 0xff8800 : 0xffaa00,
-              fields: [
-                { name: "Threat Type", value: threatType, inline: true },
-                { name: "Severity", value: severity, inline: true },
-                { name: "Source Server", value: guildId, inline: false },
-              ],
-            });
+          // Report threat (automatically detects cross-server patterns)
+          const result = await ThreatIntelligence.reportThreat(
+            userId,
+            threatType,
+            threatData,
+            severity,
+            guildId
+          );
+
+          // If network ID provided, broadcast to network
+          if (networkId) {
+            const network = await db.getServerNetwork(networkId);
+            if (network && network.config.sharedThreats) {
+              // Broadcast threat alert to all servers in network
+              const multiServer = new MultiServer(this.client);
+              await multiServer.broadcastAnnouncement(networkId, {
+                title: "🚨 Network Threat Alert",
+                description: `User <@${userId}> flagged for ${threatType} in server ${guildId}`,
+                color:
+                  severity === "critical"
+                    ? 0xff0000
+                    : severity === "high"
+                      ? 0xff8800
+                      : 0xffaa00,
+                fields: [
+                  { name: "Threat Type", value: threatType, inline: true },
+                  { name: "Severity", value: severity, inline: true },
+                  { name: "Source Server", value: guildId, inline: false },
+                ],
+              });
+            }
           }
-        }
 
-        res.json({
-          success: true,
-          data: result,
-          apiVersion: "2.0.0",
-        });
-      } catch (error) {
-        logger.error("API", "Share threat error", error);
-        res.status(500).json({
-          success: false,
-          error: error.message,
-          apiVersion: "2.0.0",
-        });
+          res.json({
+            success: true,
+            data: result,
+            apiVersion: "2.0.0",
+          });
+        } catch (error) {
+          logger.error("API", "Share threat error", error);
+          res.status(500).json({
+            success: false,
+            error: error.message,
+            apiVersion: "2.0.0",
+          });
+        }
       }
-    });
+    );
 
     // GET /api/v2/threat-network/global-alerts - Get global raid alerts
     this.app.get("/api/v2/threat-network/global-alerts", async (req, res) => {
@@ -2256,28 +2530,38 @@ class DashboardServer {
     });
 
     // POST /api/v2/threat-network/coordinated-ban - Coordinate ban across network
-    this.app.post("/api/v2/threat-network/coordinated-ban", this.checkAuth, async (req, res) => {
-      try {
-        const { networkId, userId, reason, guildId } = req.body;
-        const MultiServer = require("../utils/multiServer");
-        
-        const multiServer = new MultiServer(this.client);
-        await multiServer.syncBan(networkId, userId, reason, req.user.id, guildId);
+    this.app.post(
+      "/api/v2/threat-network/coordinated-ban",
+      this.checkAuth,
+      async (req, res) => {
+        try {
+          const { networkId, userId, reason, guildId } = req.body;
+          const MultiServer = require("../utils/multiServer");
 
-        res.json({
-          success: true,
-          message: "Ban synced across network",
-          apiVersion: "2.0.0",
-        });
-      } catch (error) {
-        logger.error("API", "Coordinated ban error", error);
-        res.status(500).json({
-          success: false,
-          error: error.message,
-          apiVersion: "2.0.0",
-        });
+          const multiServer = new MultiServer(this.client);
+          await multiServer.syncBan(
+            networkId,
+            userId,
+            reason,
+            req.user.id,
+            guildId
+          );
+
+          res.json({
+            success: true,
+            message: "Ban synced across network",
+            apiVersion: "2.0.0",
+          });
+        } catch (error) {
+          logger.error("API", "Coordinated ban error", error);
+          res.status(500).json({
+            success: false,
+            error: error.message,
+            apiVersion: "2.0.0",
+          });
+        }
       }
-    });
+    );
 
     // GET /api/v2/security-analytics - Get real security analytics (v2)
     this.app.get("/api/v2/security-analytics", async (req, res) => {
@@ -2358,111 +2642,118 @@ class DashboardServer {
     });
 
     // GET /api/v2/analytics/weekly-report - Generate weekly security report
-    this.app.get("/api/v2/analytics/weekly-report", this.checkAuth, async (req, res) => {
-      try {
-        const { guildId } = req.query;
-        if (!guildId) {
-          return res.status(400).json({
-            success: false,
-            error: "guildId query parameter required",
-          });
-        }
+    this.app.get(
+      "/api/v2/analytics/weekly-report",
+      this.checkAuth,
+      async (req, res) => {
+        try {
+          const { guildId } = req.query;
+          if (!guildId) {
+            return res.status(400).json({
+              success: false,
+              error: "guildId query parameter required",
+            });
+          }
 
-        const now = Date.now();
-        const weekAgo = now - 7 * 24 * 60 * 60 * 1000;
+          const now = Date.now();
+          const weekAgo = now - 7 * 24 * 60 * 60 * 1000;
 
-        // Get security events for the week
-        const events = await new Promise((resolve, reject) => {
-          db.db.all(
-            `SELECT * FROM security_events 
+          // Get security events for the week
+          const events = await new Promise((resolve, reject) => {
+            db.db.all(
+              `SELECT * FROM security_events 
              WHERE guild_id = ? AND timestamp > ? 
              ORDER BY timestamp DESC`,
-            [guildId, weekAgo],
-            (err, rows) => {
-              if (err) reject(err);
-              else resolve(rows || []);
-            }
-          );
-        });
+              [guildId, weekAgo],
+              (err, rows) => {
+                if (err) reject(err);
+                else resolve(rows || []);
+              }
+            );
+          });
 
-        // Calculate metrics
-        const totalEvents = events.length;
-        const byType = {};
-        const bySeverity = { critical: 0, high: 0, medium: 0, low: 0 };
-        const dailyBreakdown = {};
+          // Calculate metrics
+          const totalEvents = events.length;
+          const byType = {};
+          const bySeverity = { critical: 0, high: 0, medium: 0, low: 0 };
+          const dailyBreakdown = {};
 
-        events.forEach((event) => {
-          // By type
-          byType[event.event_type] = (byType[event.event_type] || 0) + 1;
-          
-          // By severity
-          if (event.threat_score >= 80) bySeverity.critical++;
-          else if (event.threat_score >= 60) bySeverity.high++;
-          else if (event.threat_score >= 40) bySeverity.medium++;
-          else bySeverity.low++;
+          events.forEach((event) => {
+            // By type
+            byType[event.event_type] = (byType[event.event_type] || 0) + 1;
 
-          // Daily breakdown
-          const date = new Date(event.timestamp).toISOString().split("T")[0];
-          dailyBreakdown[date] = (dailyBreakdown[date] || 0) + 1;
-        });
+            // By severity
+            if (event.threat_score >= 80) bySeverity.critical++;
+            else if (event.threat_score >= 60) bySeverity.high++;
+            else if (event.threat_score >= 40) bySeverity.medium++;
+            else bySeverity.low++;
 
-        // Calculate ROI (estimated time saved)
-        const estimatedTimePerEvent = 5; // minutes
-        const totalTimeSaved = totalEvents * estimatedTimePerEvent;
-        const estimatedCostPerHour = 20; // $20/hour for moderation
-        const costSaved = (totalTimeSaved / 60) * estimatedCostPerHour;
+            // Daily breakdown
+            const date = new Date(event.timestamp).toISOString().split("T")[0];
+            dailyBreakdown[date] = (dailyBreakdown[date] || 0) + 1;
+          });
 
-        res.json({
-          success: true,
-          data: {
-            period: {
-              start: weekAgo,
-              end: now,
-              days: 7,
+          // Calculate ROI (estimated time saved)
+          const estimatedTimePerEvent = 5; // minutes
+          const totalTimeSaved = totalEvents * estimatedTimePerEvent;
+          const estimatedCostPerHour = 20; // $20/hour for moderation
+          const costSaved = (totalTimeSaved / 60) * estimatedCostPerHour;
+
+          res.json({
+            success: true,
+            data: {
+              period: {
+                start: weekAgo,
+                end: now,
+                days: 7,
+              },
+              summary: {
+                totalEvents,
+                byType,
+                bySeverity,
+              },
+              dailyBreakdown,
+              roi: {
+                timeSavedMinutes: totalTimeSaved,
+                costSaved: Math.round(costSaved),
+                eventsPrevented: Math.round(totalEvents * 0.3), // Estimate 30% would have caused damage
+              },
+              topThreats: events
+                .sort((a, b) => b.threat_score - a.threat_score)
+                .slice(0, 10)
+                .map((e) => ({
+                  userId: e.user_id,
+                  type: e.event_type,
+                  score: e.threat_score,
+                  timestamp: e.timestamp,
+                })),
             },
-            summary: {
-              totalEvents,
-              byType,
-              bySeverity,
-            },
-            dailyBreakdown,
-            roi: {
-              timeSavedMinutes: totalTimeSaved,
-              costSaved: Math.round(costSaved),
-              eventsPrevented: Math.round(totalEvents * 0.3), // Estimate 30% would have caused damage
-            },
-            topThreats: events
-              .sort((a, b) => b.threat_score - a.threat_score)
-              .slice(0, 10)
-              .map((e) => ({
-                userId: e.user_id,
-                type: e.event_type,
-                score: e.threat_score,
-                timestamp: e.timestamp,
-              })),
-          },
-          apiVersion: "2.0.0",
-        });
-      } catch (error) {
-        logger.error("API", "Weekly report error", error);
-        res.status(500).json({
-          success: false,
-          error: error.message,
-          apiVersion: "2.0.0",
-        });
+            apiVersion: "2.0.0",
+          });
+        } catch (error) {
+          logger.error("API", "Weekly report error", error);
+          res.status(500).json({
+            success: false,
+            error: error.message,
+            apiVersion: "2.0.0",
+          });
+        }
       }
-    });
+    );
 
     // GET /api/v2/analytics/heatmap - Get threat heatmap data
-    this.app.get("/api/v2/analytics/heatmap", this.checkAuth, async (req, res) => {
-      try {
-        const { guildId, timeRange = 30 } = req.query; // days
-        const since = Date.now() - timeRange * 24 * 60 * 60 * 1000;
+    this.app.get(
+      "/api/v2/analytics/heatmap",
+      this.checkAuth,
+      async (req, res) => {
+        try {
+          const { guildId, timeRange = 30 } = req.query; // days
+          const since = Date.now() - timeRange * 24 * 60 * 60 * 1000;
 
-        // Get events grouped by hour of day and day of week
-        const heatmapData = await new Promise((resolve, reject) => {
-          db.db.all(
-            `SELECT 
+          // Get events grouped by hour of day and day of week
+          const heatmapData = await new Promise((resolve, reject) => {
+            db.db.all(
+              `SELECT 
               strftime('%w', datetime(timestamp/1000, 'unixepoch')) as day_of_week,
               strftime('%H', datetime(timestamp/1000, 'unixepoch')) as hour_of_day,
               COUNT(*) as count,
@@ -2471,66 +2762,70 @@ class DashboardServer {
              WHERE guild_id = ? AND timestamp > ?
              GROUP BY day_of_week, hour_of_day
              ORDER BY day_of_week, hour_of_day`,
-            [guildId, since],
-            (err, rows) => {
-              if (err) reject(err);
-              else {
-                // Format for heatmap visualization
-                const heatmap = {};
-                (rows || []).forEach((row) => {
-                  const day = parseInt(row.day_of_week);
-                  const hour = parseInt(row.hour_of_day);
-                  if (!heatmap[day]) heatmap[day] = {};
-                  heatmap[day][hour] = {
-                    count: row.count,
-                    avgScore: Math.round(row.avg_score),
-                  };
-                });
-                resolve(heatmap);
+              [guildId, since],
+              (err, rows) => {
+                if (err) reject(err);
+                else {
+                  // Format for heatmap visualization
+                  const heatmap = {};
+                  (rows || []).forEach((row) => {
+                    const day = parseInt(row.day_of_week);
+                    const hour = parseInt(row.hour_of_day);
+                    if (!heatmap[day]) heatmap[day] = {};
+                    heatmap[day][hour] = {
+                      count: row.count,
+                      avgScore: Math.round(row.avg_score),
+                    };
+                  });
+                  resolve(heatmap);
+                }
               }
-            }
-          );
-        });
+            );
+          });
 
-        res.json({
-          success: true,
-          data: {
-            heatmap: heatmapData,
-            timeRange: `${timeRange} days`,
-            maxValue: Math.max(
-              ...Object.values(heatmapData).flatMap((day) =>
-                Object.values(day).map((h) => h.count)
+          res.json({
+            success: true,
+            data: {
+              heatmap: heatmapData,
+              timeRange: `${timeRange} days`,
+              maxValue: Math.max(
+                ...Object.values(heatmapData).flatMap((day) =>
+                  Object.values(day).map((h) => h.count)
+                ),
+                0
               ),
-              0
-            ),
-          },
-          apiVersion: "2.0.0",
-        });
-      } catch (error) {
-        logger.error("API", "Heatmap error", error);
-        res.status(500).json({
-          success: false,
-          error: error.message,
-          apiVersion: "2.0.0",
-        });
-      }
-    });
-
-    // GET /api/v2/analytics/member-insights - Get member behavior insights
-    this.app.get("/api/v2/analytics/member-insights", this.checkAuth, async (req, res) => {
-      try {
-        const { guildId } = req.query;
-        if (!guildId) {
-          return res.status(400).json({
+            },
+            apiVersion: "2.0.0",
+          });
+        } catch (error) {
+          logger.error("API", "Heatmap error", error);
+          res.status(500).json({
             success: false,
-            error: "guildId query parameter required",
+            error: error.message,
+            apiVersion: "2.0.0",
           });
         }
+      }
+    );
 
-        // Get member behavior data
-        const insights = await new Promise((resolve, reject) => {
-          db.db.all(
-            `SELECT 
+    // GET /api/v2/analytics/member-insights - Get member behavior insights
+    this.app.get(
+      "/api/v2/analytics/member-insights",
+      this.checkAuth,
+      async (req, res) => {
+        try {
+          const { guildId } = req.query;
+          if (!guildId) {
+            return res.status(400).json({
+              success: false,
+              error: "guildId query parameter required",
+            });
+          }
+
+          // Get member behavior data
+          const insights = await new Promise((resolve, reject) => {
+            db.db.all(
+              `SELECT 
               user_id,
               COUNT(*) as event_count,
               AVG(threat_score) as avg_threat_score,
@@ -2543,52 +2838,54 @@ class DashboardServer {
              HAVING event_count >= 2
              ORDER BY avg_threat_score DESC, event_count DESC
              LIMIT 50`,
-            [guildId],
-            (err, rows) => {
-              if (err) reject(err);
-              else {
-                const memberInsights = (rows || []).map((row) => ({
-                  userId: row.user_id,
-                  eventCount: row.event_count,
-                  avgThreatScore: Math.round(row.avg_threat_score),
-                  maxThreatScore: row.max_threat_score,
-                  firstSeen: row.first_seen,
-                  lastSeen: row.last_seen,
-                  riskLevel:
-                    row.avg_threat_score >= 70
-                      ? "high"
-                      : row.avg_threat_score >= 50
-                      ? "medium"
-                      : "low",
-                }));
-                resolve(memberInsights);
+              [guildId],
+              (err, rows) => {
+                if (err) reject(err);
+                else {
+                  const memberInsights = (rows || []).map((row) => ({
+                    userId: row.user_id,
+                    eventCount: row.event_count,
+                    avgThreatScore: Math.round(row.avg_threat_score),
+                    maxThreatScore: row.max_threat_score,
+                    firstSeen: row.first_seen,
+                    lastSeen: row.last_seen,
+                    riskLevel:
+                      row.avg_threat_score >= 70
+                        ? "high"
+                        : row.avg_threat_score >= 50
+                          ? "medium"
+                          : "low",
+                  }));
+                  resolve(memberInsights);
+                }
               }
-            }
-          );
-        });
+            );
+          });
 
-        res.json({
-          success: true,
-          data: {
-            insights,
-            summary: {
-              totalTrackedMembers: insights.length,
-              highRisk: insights.filter((i) => i.riskLevel === "high").length,
-              mediumRisk: insights.filter((i) => i.riskLevel === "medium").length,
-              lowRisk: insights.filter((i) => i.riskLevel === "low").length,
+          res.json({
+            success: true,
+            data: {
+              insights,
+              summary: {
+                totalTrackedMembers: insights.length,
+                highRisk: insights.filter((i) => i.riskLevel === "high").length,
+                mediumRisk: insights.filter((i) => i.riskLevel === "medium")
+                  .length,
+                lowRisk: insights.filter((i) => i.riskLevel === "low").length,
+              },
             },
-          },
-          apiVersion: "2.0.0",
-        });
-      } catch (error) {
-        logger.error("API", "Member insights error", error);
-        res.status(500).json({
-          success: false,
-          error: error.message,
-          apiVersion: "2.0.0",
-        });
+            apiVersion: "2.0.0",
+          });
+        } catch (error) {
+          logger.error("API", "Member insights error", error);
+          res.status(500).json({
+            success: false,
+            error: error.message,
+            apiVersion: "2.0.0",
+          });
+        }
       }
-    });
+    );
 
     // GET /api/v1/security-analytics - Get real security analytics - DEPRECATED
     this.app.get("/api/v1/security-analytics", async (req, res) => {

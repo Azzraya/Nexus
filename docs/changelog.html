@@ -84,24 +84,58 @@
 
       <div class="content-section">
         <div class="changelog-entry">
-          <h2>Version 3.23.0 - December 5, 2025</h2>
+          <h2>Version 3.24.0 - December 5, 2025</h2>
           <span class="version-badge">Latest</span>
+          <h3>📤 PRIVATE CDN & IMAGE UPLOAD</h3>
+          <ul>
+            <li>
+              ✅ <strong>Image Upload API:</strong> New endpoint <code>/api/v2/cdn/upload</code> for uploading images to private CDN with IP whitelist protection
+            </li>
+            <li>
+              ✅ <strong>Custom Filenames:</strong> Support for custom filenames (e.g., <code>giftwrap.png</code>) or auto-generated short URLs
+            </li>
+            <li>
+              ✅ <strong>Upload Dashboard:</strong> Beautiful drag-and-drop upload interface with image preview, file validation, and one-click URL copying
+            </li>
+            <li>
+              ✅ <strong>IP-Protected Assets:</strong> Assets directory now serves files only to whitelisted IPs, ensuring private CDN access
+            </li>
+            <li>
+              ✅ <strong>File Validation:</strong> Automatic validation for image types (JPG, PNG, GIF, WEBP, SVG) and 10MB size limit
+            </li>
+          </ul>
+        </div>
+
+        <div class="changelog-entry">
+          <h2>Version 3.23.0 - December 5, 2025</h2>
           <h3>🚀 MAJOR UPDATE - COMPETITIVE ADVANTAGES OVER WICK</h3>
           <ul>
             <li>
-              ✅ <strong>Performance Benchmarking Dashboard:</strong> Live comparison page showing Nexus vs Wick metrics (response time, detection speed, resource usage) with real-time updates
+              ✅ <strong>Performance Benchmarking Dashboard:</strong> Live
+              comparison page showing Nexus vs Wick metrics (response time,
+              detection speed, resource usage) with real-time updates
             </li>
             <li>
-              ✅ <strong>One-Click Protection Setup:</strong> Interactive setup wizard with auto-configuration based on server size, smart defaults, and template-based configuration (gaming, community, business)
+              ✅ <strong>One-Click Protection Setup:</strong> Interactive setup
+              wizard with auto-configuration based on server size, smart
+              defaults, and template-based configuration (gaming, community,
+              business)
             </li>
             <li>
-              ✅ <strong>Cross-Server Threat Network:</strong> Real-time threat sharing between Nexus servers, coordinated ban lists, global raid alerts, and network-wide threat intelligence
+              ✅ <strong>Cross-Server Threat Network:</strong> Real-time threat
+              sharing between Nexus servers, coordinated ban lists, global raid
+              alerts, and network-wide threat intelligence
             </li>
             <li>
-              ✅ <strong>Advanced Analytics & Reports:</strong> Weekly security reports with ROI metrics, threat heatmaps (time-based visualization), member behavior insights, and cost savings calculations
+              ✅ <strong>Advanced Analytics & Reports:</strong> Weekly security
+              reports with ROI metrics, threat heatmaps (time-based
+              visualization), member behavior insights, and cost savings
+              calculations
             </li>
             <li>
-              ✅ <strong>New API Endpoints:</strong> Added /api/v2/benchmark, /api/v2/setup/*, /api/v2/threat-network/*, and /api/v2/analytics/* endpoints for comprehensive bot management
+              ✅ <strong>New API Endpoints:</strong> Added /api/v2/benchmark,
+              /api/v2/setup/*, /api/v2/threat-network/*, and /api/v2/analytics/*
+              endpoints for comprehensive bot management
             </li>
           </ul>
         </div>
@@ -111,13 +145,18 @@
           <h3>🔧 BUG FIX - AUDIT LOG SOCKET ERRORS</h3>
           <ul>
             <li>
-              ✅ <strong>Fixed Socket Errors:</strong> Added retry logic with exponential backoff for audit log fetch failures due to network/socket errors
+              ✅ <strong>Fixed Socket Errors:</strong> Added retry logic with
+              exponential backoff for audit log fetch failures due to
+              network/socket errors
             </li>
             <li>
-              ✅ <strong>Graceful Degradation:</strong> Audit log monitor now handles connection failures gracefully without crashing or spamming logs
+              ✅ <strong>Graceful Degradation:</strong> Audit log monitor now
+              handles connection failures gracefully without crashing or
+              spamming logs
             </li>
             <li>
-              ✅ <strong>Rate Limit Handling:</strong> Improved handling of Discord API rate limits with automatic retry and backoff
+              ✅ <strong>Rate Limit Handling:</strong> Improved handling of
+              Discord API rate limits with automatic retry and backoff
             </li>
           </ul>
         </div>

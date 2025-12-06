@@ -104,7 +104,7 @@ class AuditLogMonitor {
   // Fetch audit logs with retry logic for network errors
   async fetchAuditLogsWithRetry(guild, maxRetries = 3) {
     let lastError;
-    
+
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         const auditLogs = await guild.fetchAuditLogs({
@@ -114,18 +114,18 @@ class AuditLogMonitor {
         return auditLogs;
       } catch (error) {
         lastError = error;
-        
+
         // Handle socket/network errors with retry
-        const isSocketError = 
-          error.name === 'SocketError' ||
-          error.message?.includes('socket') ||
-          error.message?.includes('ECONNRESET') ||
-          error.message?.includes('other side closed') ||
-          error.code === 'ECONNRESET';
-        
+        const isSocketError =
+          error.name === "SocketError" ||
+          error.message?.includes("socket") ||
+          error.message?.includes("ECONNRESET") ||
+          error.message?.includes("other side closed") ||
+          error.code === "ECONNRESET";
+
         // Handle rate limit errors
         const isRateLimit = error.code === 429 || error.httpStatus === 429;
-        
+
         if (isSocketError || isRateLimit) {
           if (attempt < maxRetries) {
             // Exponential backoff: 1s, 2s, 4s
@@ -134,7 +134,7 @@ class AuditLogMonitor {
               "AuditLogMonitor",
               `Retry ${attempt}/${maxRetries} for ${guild.name} after ${delay}ms (${error.name || error.message})`
             );
-            await new Promise(resolve => setTimeout(resolve, delay));
+            await new Promise((resolve) => setTimeout(resolve, delay));
             continue;
           } else {
             // Max retries reached, log and skip
@@ -145,12 +145,12 @@ class AuditLogMonitor {
             return null;
           }
         }
-        
+
         // For other errors, throw immediately
         throw error;
       }
     }
-    
+
     return null;
   }
 
