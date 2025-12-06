@@ -97,11 +97,21 @@ module.exports = {
         .setColor(0x0099ff)
         .setTimestamp();
 
+      // Check for duplicate roles
+      const uniqueRoleIds = new Set(roles.map((r) => r.id));
+      if (uniqueRoleIds.size !== roles.length) {
+        return interaction.reply({
+          content:
+            "❌ You cannot use the same role multiple times! Each role must be unique.",
+          flags: MessageFlags.Ephemeral,
+        });
+      }
+
       const buttons = new ActionRowBuilder();
       roles.forEach((role, index) => {
         buttons.addComponents(
           new ButtonBuilder()
-            .setCustomId(`reactionrole_${role.id}`)
+            .setCustomId(`reactionrole_${role.id}_${index}`)
             .setLabel(role.name)
             .setStyle(ButtonStyle.Secondary)
             .setEmoji(emojis[index])
