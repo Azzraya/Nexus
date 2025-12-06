@@ -4,6 +4,7 @@ const {
   PermissionFlagsBits,
 } = require("discord.js");
 const db = require("../utils/database");
+const XPSystem = require("../utils/xpSystem");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -155,8 +156,10 @@ module.exports = {
       });
     }
 
-    const level = client.xpSystem.calculateLevel(userData.xp);
-    const nextLevelXP = client.xpSystem.xpForLevel(level);
+    // Create temporary instance for calculations if client.xpSystem not available
+    const xpSystem = client.xpSystem || new XPSystem(client);
+    const level = xpSystem.calculateLevel(userData.xp);
+    const nextLevelXP = xpSystem.xpForLevel(level);
     const progress = Math.floor((userData.xp / nextLevelXP) * 100);
 
     // Get rank position
@@ -228,7 +231,8 @@ module.exports = {
                   : rank === 3
                     ? "🥉"
                     : `#${rank}`;
-            const level = client.xpSystem.calculateLevel(user.xp);
+            const xpSystem = client.xpSystem || new XPSystem(client);
+            const level = xpSystem.calculateLevel(user.xp);
             return `${medal} <@${user.user_id}> - Level **${level}** (${user.xp.toLocaleString()} XP)`;
           })
           .join("\n")
