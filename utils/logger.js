@@ -198,7 +198,8 @@ class Logger {
               logMessage += "\n" + chalk.gray(JSON.stringify(data, null, 2));
             } catch (e) {
               // Handle circular references gracefully
-              logMessage += "\n" + chalk.gray("[Circular reference or invalid data]");
+              logMessage +=
+                "\n" + chalk.gray("[Circular reference or invalid data]");
             }
           }
         } catch (e) {
@@ -215,7 +216,9 @@ class Logger {
     } catch (e) {
       // If logging itself fails, use basic console.error as last resort
       try {
-        console.error(`[Logger Error] Failed to log: ${String(e.message || e)}`);
+        console.error(
+          `[Logger Error] Failed to log: ${String(e.message || e)}`
+        );
       } catch (e2) {
         // If even console.error fails, silently fail (don't crash the process)
       }

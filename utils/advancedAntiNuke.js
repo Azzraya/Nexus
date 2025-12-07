@@ -1416,7 +1416,7 @@ class AdvancedAntiNuke {
           const everyoneOverwrite = channel.permissionOverwrites.cache.get(
             guild.roles.everyone.id
           );
-          
+
           if (everyoneOverwrite) {
             // If overwrite exists, try to delete specific permissions or the whole overwrite
             try {

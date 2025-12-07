@@ -84,8 +84,33 @@
 
       <div class="content-section">
         <div class="changelog-entry">
-          <h2>Version 3.35.0 - December 6, 2025</h2>
+          <h2>Version 3.36.0 - December 7, 2025</h2>
           <span class="version-badge">Latest</span>
+          <h3>⚡ COMMAND REGISTRATION FIX & UPDATES</h3>
+          <ul>
+            <li>
+              🚀 <strong>Fixed Command Registration Hangs:</strong> Added timeout protection and batch processing to prevent startup hangs
+            </li>
+            <li>
+              ⏱️ <strong>Timeout Protection:</strong> 8-second timeout per guild registration prevents infinite hangs
+            </li>
+            <li>
+              📦 <strong>Batch Processing:</strong> Process commands in batches of 5 to avoid Discord API rate limits
+            </li>
+            <li>
+              🔗 <strong>Updated Support Server:</strong> New Discord invite link (discord.gg/warmA4BsPP) across all files
+            </li>
+            <li>
+              📧 <strong>Updated Support Email:</strong> Changed to nexusbot0@proton.me for better privacy
+            </li>
+            <li>
+              🛡️ <strong>Better Error Handling:</strong> Promise.allSettled ensures one failure doesn't stop all registrations
+            </li>
+          </ul>
+        </div>
+
+        <div class="changelog-entry">
+          <h2>Version 3.35.0 - December 6, 2025</h2>
           <h3>🔓 FIXED ANTI-NUKE LOCKDOWN AUTO-UNLOCK</h3>
           <ul>
             <li>
@@ -4498,7 +4523,7 @@
           <a href="features.html">Features</a>
           <a href="docs.html">Docs</a>
           <a href="faq.html">FAQ</a>
-          <a href="https://discord.com/invite/UHNcUKheZP">Support</a>
+          <a href="https://discord.gg/warmA4BsPP">Support</a>
           <a href="https://github.com/Azzraya/Nexus">GitHub</a>
         </div>
         <p>Nexus - Beyond Wick. Beyond Everything.</p>

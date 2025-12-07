@@ -77,7 +77,7 @@ module.exports = {
               `[Website](https://azzraya.github.io/Nexus/)`,
               `[GitHub](https://github.com/Azzraya/Nexus)`,
               `[Dashboard](https://regular-puma-clearly.ngrok-free.app)`,
-              `[Support](https://discord.gg/your-invite)`,
+              `[Support](https://discord.gg/warmA4BsPP)`,
             ].join(" • "),
             inline: false,
           }

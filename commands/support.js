@@ -108,7 +108,7 @@ module.exports = {
           name: "🔗 Quick Links",
           value: [
             "• [Official Website](https://azzraya.github.io/Nexus/)",
-            "• [Support Server](https://discord.com/invite/UHNcUKheZP)",
+            "• [Support Server](https://discord.gg/warmA4BsPP)",
             "• [GitHub Repository](https://github.com/Azzraya/Nexus)",
             "• [Privacy Policy](https://github.com/Azzraya/Nexus/blob/main/PRIVACY_POLICY.md)",
             "• [Terms of Service](https://github.com/Azzraya/Nexus/blob/main/TERMS_OF_SERVICE.md)",
@@ -138,7 +138,7 @@ module.exports = {
 
     const supportButton = new ButtonBuilder()
       .setLabel("Support Server")
-      .setURL("https://discord.com/invite/UHNcUKheZP")
+      .setURL("https://discord.gg/warmA4BsPP")
       .setStyle(ButtonStyle.Link);
 
     const githubButton = new ButtonBuilder()

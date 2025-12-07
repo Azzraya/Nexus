@@ -64,10 +64,10 @@ module.exports = {
           });
 
           if (mostRecentLog) {
-            db.db.run(
-              `UPDATE logs SET executor_id = ? WHERE id = ?`,
-              [executor.id, mostRecentLog.id]
-            );
+            db.db.run(`UPDATE logs SET executor_id = ? WHERE id = ?`, [
+              executor.id,
+              mostRecentLog.id,
+            ]);
           }
 
           // Potential anti-nuke check - mass unbanning

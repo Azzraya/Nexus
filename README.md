@@ -4,7 +4,7 @@
 
 ### The Free Discord Security Bot That Exceeds Wick
 
-[![Discord](https://img.shields.io/badge/Discord-Join%20Support-7289DA?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/UHNcUKheZP)
+[![Discord](https://img.shields.io/badge/Discord-Join%20Support-7289DA?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/warmA4BsPP)
 [![Top.gg](https://img.shields.io/badge/Top.gg-Vote-FF3366?style=for-the-badge&logo=))](https://top.gg/bot/1444739230679957646)
 [![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 [![Version](https://img.shields.io/badge/Version-3.4.4-blue?style=for-the-badge)](https://github.com/Azzraya/Nexus)
@@ -145,7 +145,7 @@ Nexus is **open source** and **community-driven**.
 - 🐛 Found a bug? [Open an issue](https://github.com/Azzraya/Nexus/issues)
 - 💡 Have a feature idea? [Request it](https://github.com/Azzraya/Nexus/issues)
 - 🔧 Want to contribute? PRs welcome!
-- 💬 Need help? [Join support server](https://discord.gg/UHNcUKheZP)
+- 💬 Need help? [Join support server](https://discord.gg/warmA4BsPP)
 
 **Star ⭐ this repo if you find it useful!**
 
@@ -155,7 +155,7 @@ Nexus is **open source** and **community-driven**.
 - 📚 **Full Documentation:** https://azzraya.github.io/Nexus/docs.html
 - ⚔️ **Nexus vs Wick Comparison:** https://azzraya.github.io/Nexus/comparison.html
 - 📊 **API Documentation:** https://azzraya.github.io/Nexus/api.html
-- 💬 **Support Server:** https://discord.gg/UHNcUKheZP
+- 💬 **Support Server:** https://discord.gg/warmA4BsPP
 - 🗳️ **Vote on Top.gg:** https://top.gg/bot/1444739230679957646
 
 ---

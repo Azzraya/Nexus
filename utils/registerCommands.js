@@ -39,9 +39,9 @@ async function registerCommands(client) {
   }
 
   // Create REST client with timeout to prevent hanging requests
-  const rest = new REST({ 
+  const rest = new REST({
     version: "10",
-    timeout: 10000 // 10 second timeout per request
+    timeout: 10000, // 10 second timeout per request
   }).setToken(process.env.DISCORD_TOKEN);
 
   try {

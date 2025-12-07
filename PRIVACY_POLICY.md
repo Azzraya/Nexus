@@ -242,7 +242,7 @@ You have the right to request your data in a portable format.
 
 ### How to Request:
 
-1. Join our support server: https://discord.gg/UHNcUKheZP
+1. Join our support server: https://discord.gg/warmA4BsPP
 2. Open a ticket or contact a moderator
 3. Specify what data you'd like exported
 
@@ -410,8 +410,8 @@ We may update this Privacy Policy from time to time. We will:
 
 For privacy concerns, data requests, or questions:
 
-- **Discord Support Server:** https://discord.gg/UHNcUKheZP (Preferred method)
-- **Privacy Email:** ashlynnadams635@gmail.com (For formal privacy requests)
+- **Discord Support Server:** https://discord.gg/warmA4BsPP (Preferred method)
+- **Privacy Email:** nexusbot0@proton.me (For formal privacy requests)
 - **General Contact:** Open a ticket in our support server
 - **GitHub Issues:** https://github.com/Azzraya/Nexus/issues (For code-related questions)
 

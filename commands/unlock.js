@@ -46,9 +46,10 @@ module.exports = {
       );
     });
 
-    const isInLockdownSet = interaction.client.advancedAntiNuke.lockedGuilds.has(
-      interaction.guild.id
-    );
+    const isInLockdownSet =
+      interaction.client.advancedAntiNuke.lockedGuilds.has(
+        interaction.guild.id
+      );
 
     // If not in Set AND no locked channels found, server isn't locked
     if (!isInLockdownSet && lockedChannels.size === 0) {

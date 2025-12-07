@@ -259,8 +259,8 @@ Since Nexus Bot is open source:
 
 For data-related questions, data requests, or concerns:
 
-- **Discord Support Server:** https://discord.gg/UHNcUKheZP (Preferred method)
-- **Privacy Email:** ashlynnadams635@gmail.com (For formal data requests)
+- **Discord Support Server:** https://discord.gg/warmA4BsPP (Preferred method)
+- **Privacy Email:** nexusbot0@proton.me (For formal data requests)
 - **General Contact:** Open a ticket in our support server
 - **GitHub:** https://github.com/Azzraya/Nexus (For code-related questions)
 

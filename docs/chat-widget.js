@@ -162,7 +162,7 @@ class SupportChat {
           </div>
           <div class="chat-message bot">
             <strong>Or join our Discord:</strong><br>
-            <a href="https://discord.gg/your-server" target="_blank" style="color: #667eea; font-weight: bold;">
+            <a href="https://discord.gg/warmA4BsPP" target="_blank" style="color: #667eea; font-weight: bold;">
               Join Support Server →
             </a>
           </div>

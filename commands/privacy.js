@@ -99,7 +99,7 @@ module.exports = {
           {
             name: "📧 Contact",
             value:
-              "For privacy concerns: ashlynnadams635@gmail.com or join our [Support Server](https://discord.gg/UHNcUKheZP)",
+              "For privacy concerns: nexusbot0@proton.me or join our [Support Server](https://discord.gg/warmA4BsPP)",
             inline: false,
           }
         )
