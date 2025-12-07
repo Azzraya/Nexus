@@ -2,23 +2,12 @@ MIT License
 
 Copyright (c) 2025 Nexus Bot
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
@@ -27,33 +16,87 @@ BRANDING AND INTELLECTUAL PROPERTY RESTRICTIONS
 Notwithstanding the above permissions, the following are EXPRESSLY PROHIBITED:
 
 1. **Branding and Trademarks**: You may NOT use, copy, modify, or distribute:
-   - The "Nexus Bot" name, logo, or any variations thereof
+   - The "Nexus Bot" name, logo, or any variations thereof (including but not limited to "Nexus", "NexusBot", "Nexus-Bot")
    - Any branding elements, visual identity, or trademarked materials
    - Bot profile pictures, avatars, or any proprietary images
    - Service marks or trade names associated with Nexus Bot
+   - Official URLs, domains, or website content (including but not limited to azzraya.github.io/Nexus)
+   - Discord server invite links or community resources associated with Nexus Bot
+   - Support email addresses (e.g., nexusbot0@proton.me) or official contact information
+   - Bot IDs, application IDs, or other unique identifiers that identify Nexus Bot
 
-2. **Legal Documents**: You may NOT use, copy, modify, or distribute:
+2. **Taglines, Slogans, and Marketing Copy**: You may NOT use, copy, modify, or distribute:
+   - Taglines and slogans including but not limited to: "Beyond Wick. Beyond Everything.", "The Free Discord Security Bot That Exceeds Wick", "Everything Wick does, Nexus does better. 100% FREE."
+   - Marketing descriptions, positioning statements, or competitive comparisons
+   - Feature descriptions that are substantially similar to Nexus Bot's marketing materials
+   - Any catchphrases, mottos, or distinctive marketing language associated with Nexus Bot
+
+3. **Trade Dress and Visual Identity**: You may NOT use, copy, modify, or distribute:
+   - The overall look and feel, color schemes, or design patterns distinctive to Nexus Bot
+   - Layout, formatting, or presentation styles that are substantially similar to Nexus Bot's branded materials
+   - Command structures, naming conventions, or user interface elements that closely mimic Nexus Bot's distinctive presentation
+   - Any elements that would cause confusion or create an impression of association with Nexus Bot
+
+4. **Legal Documents**: You may NOT use, copy, modify, or distribute:
    - Privacy Policy (PRIVACY_POLICY.md)
    - Terms of Service (TERMS_OF_SERVICE.md)
    - Data Handling Policy (DATA_HANDLING.md)
    - Any other legal or policy documents created for Nexus Bot
 
-3. **Documentation**: While you may reference the code structure, you may NOT:
+5. **Documentation**: While you may reference the code structure, you may NOT:
    - Use Nexus Bot's documentation verbatim or substantially similar
    - Claim authorship of Nexus Bot's documentation
    - Use Nexus Bot's documentation as your own
 
-4. **Prohibited Uses**: 
+6. **Source Code Protection**: While the source code is open, you may NOT:
+   - Remove or alter copyright notices, license headers, or attribution in source files
+   - Remove or modify embedded branding, comments, or identifiers in the codebase
+   - Claim authorship or ownership of the original Nexus Bot codebase
+   - Obfuscate the source of derivative works to hide their origin from Nexus Bot
+
+7. **Prohibited Uses**:
    - You may NOT present your fork or modification as an official Nexus Bot product
    - You may NOT use Nexus Bot branding to imply endorsement or affiliation
    - You may NOT use Nexus Bot's legal documents for your own bot
+   - You may NOT use Nexus Bot's support channels, Discord servers, or contact methods for your fork
+   - You may NOT remove or alter copyright notices, attribution, or licensing information in source files
+   - You may NOT claim that your modifications are endorsed by or affiliated with Nexus Bot
 
-Violation of these restrictions constitutes trademark infringement and may result
-in legal action. If you wish to use any of the above protected materials, you
-must obtain explicit written permission from the copyright holders.
+8. **Attribution Requirements**: When distributing modified code:
+   - You MUST include the original copyright notice: "Copyright (c) 2025 Nexus Bot"
+   - You MUST include a clear statement that your project is NOT affiliated with Nexus Bot
+   - You MUST NOT use "Nexus Bot" or similar naming that would cause confusion
+   - You MUST distinguish your fork/modification clearly from the official Nexus Bot
+   - You MUST NOT use Nexus Bot's taglines, slogans, or marketing copy
+   - You MUST provide a link to the original project when reasonable
+
+Violation of these restrictions constitutes trademark infringement and may result in legal action, including but not limited to:
+
+- Cease and desist orders
+- Injunctive relief
+- Monetary damages
+- Termination of license rights
+
+If you wish to use any of the above protected materials, you must obtain explicit written permission from the copyright holders. Contact information:
+
+- Support Server: https://discord.gg/warmA4BsPP
+- Privacy Email: nexusbot0@proton.me
+
+**Termination of License**: The license granted herein shall automatically terminate upon any breach of these restrictions. Upon termination, you must immediately cease all use of protected materials and destroy all copies in your possession.
+
+**Good Faith Use**: This license is granted in good faith. Users are expected to respect the distinction between open source code (free to modify) and intellectual property/branding (protected). Attempting to circumvent these restrictions through technical means, obfuscation, or legal loopholes is expressly prohibited and may result in immediate termination of license rights.
+
+**No Support Obligation**: Forks, derivatives, or modifications do not receive support, updates, or assistance from Nexus Bot or its developers. You may not claim or imply that support is available through official Nexus Bot channels for your derivative work.
+
+**Commercial Use Disclaimer**: While this license permits commercial use of the code, you may NOT use Nexus Bot's branding, name, or protected materials in any commercial context without explicit written permission. Commercial forks must clearly distinguish themselves from the official Nexus Bot in all customer-facing materials.
 
 ---
 
-This license applies ONLY to the source code. All branding, legal documents,
-and intellectual property remain the exclusive property of Nexus Bot and its
-copyright holders.
+**Governing Law and Jurisdiction**: These restrictions are governed by the laws of England and Wales. Any disputes arising from these restrictions shall be subject to the exclusive jurisdiction of the courts of England and Wales.
+
+**Severability**: If any provision of these restrictions is found to be unenforceable,
+the remaining provisions shall remain in full force and effect.
+
+---
+
+This license applies ONLY to the source code. All branding, legal documents, URLs, contact information, and intellectual property remain the exclusive property of Nexus Bot and its copyright holders.
