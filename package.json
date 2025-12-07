@@ -1,6 +1,6 @@
 {
   "name": "nexus-bot",
-  "version": "3.40.0",
+  "version": "3.41.0",
   "description": "Advanced Discord bot that exceeds Wick and all competitors",
   "author": "Nexus Bot Team",
   "license": "MIT",
@@ -28,6 +28,7 @@
     "axios": "^1.6.2",
     "chalk": "^4.1.2",
     "cheerio": "^1.1.2",
+    "compression": "^1.8.1",
     "discord-hybrid-sharding": "^3.0.1",
     "discord.js": "^14.14.1",
     "discordbotlist": "^1.1.1",
@@ -49,8 +50,8 @@
     "winston": "^3.11.0"
   },
   "optionalDependencies": {
-    "redis": "^4.7.1",
     "bufferutil": "^4.0.8",
+    "redis": "^4.7.1",
     "zlib-sync": "^0.1.9"
   },
   "devDependencies": {

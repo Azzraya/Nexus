@@ -5,6 +5,7 @@ const DiscordStrategy = require("passport-discord").Strategy;
 const path = require("path");
 const fs = require("fs").promises;
 const crypto = require("crypto");
+const compression = require("compression");
 // Ensure logger is loaded first to prevent initialization errors
 const logger = require("../utils/logger");
 const db = require("../utils/database");
@@ -47,9 +48,52 @@ class DashboardServer {
       );
     };
 
-    // Middleware
+    // Middleware - Compression for better performance
+    this.app.use(compression({ level: 6, threshold: 1024 })); // Compress responses > 1KB
+
+    // Security headers
+    this.app.use((req, res, next) => {
+      // Security headers
+      res.setHeader("X-Content-Type-Options", "nosniff");
+      res.setHeader("X-Frame-Options", "SAMEORIGIN");
+      res.setHeader("X-XSS-Protection", "1; mode=block");
+      res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+      res.setHeader(
+        "Content-Security-Policy",
+        "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' " +
+          (process.env.DASHBOARD_URL || "") +
+          " https://azzraya.github.io;"
+      );
+
+      // Cache static assets for 1 day
+      if (
+        req.path.match(
+          /\.(css|js|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$/
+        )
+      ) {
+        res.setHeader("Cache-Control", "public, max-age=86400"); // 1 day
+      }
+
+      // No cache for API endpoints and HTML
+      if (req.path.startsWith("/api") || req.path.endsWith(".html")) {
+        res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
+        res.setHeader("Pragma", "no-cache");
+        res.setHeader("Expires", "0");
+      }
+
+      next();
+    });
+
     this.app.use(express.json());
-    this.app.use(express.static(path.join(__dirname, "public")));
+
+    // Static files with caching
+    this.app.use(
+      express.static(path.join(__dirname, "public"), {
+        maxAge: "1d", // Cache static files for 1 day
+        etag: true, // Enable ETag for better caching
+        lastModified: true,
+      })
+    );
 
     // IP whitelist for protected assets (add your IP here)
     this.allowedIPs = [

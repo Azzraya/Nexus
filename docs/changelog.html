@@ -84,8 +84,44 @@
 
       <div class="content-section">
         <div class="changelog-entry">
-          <h2>Version 3.40.0 - December 7, 2025</h2>
+          <h2>Version 3.41.0 - December 7, 2025</h2>
           <span class="version-badge">Latest</span>
+          <h3>🌐 WEBSITE PERFORMANCE & OPTIMIZATION</h3>
+          <ul>
+            <li>
+              🚀 <strong>Dashboard Server Optimizations:</strong> Added compression
+              middleware for 30-50% response size reduction, comprehensive security
+              headers (CSP, XSS protection, frame options), and intelligent caching
+              strategies for static assets
+            </li>
+            <li>
+              ⚡ <strong>GitHub Pages Improvements:</strong> Centralized API
+              configuration system for easy URL updates, performance optimizations
+              with preconnect/DNS prefetch, improved error handling with graceful
+              degradation, and unified API helper functions
+            </li>
+            <li>
+              💾 <strong>Service Worker Implementation:</strong> Full offline support
+              with intelligent caching strategies, cache-first for static assets,
+              network-first for dynamic content, automatic cache cleanup, and hourly
+              update checks
+            </li>
+            <li>
+              🔒 <strong>Security Enhancements:</strong> Content Security Policy
+              headers, XSS protection, clickjacking prevention, and secure caching
+              headers across dashboard and website
+            </li>
+            <li>
+              📦 <strong>Configuration Management:</strong> Single config file
+              (<code>docs/config.js</code>) for API URL management, dynamic
+              configuration support, and improved maintainability
+            </li>
+          </ul>
+        </div>
+
+        <div class="changelog-entry">
+          <h2>Version 3.40.0 - December 7, 2025</h2>
+          <span class="version-badge">Previous</span>
           <h3>🚀 DASHBOARD ENHANCEMENTS & WEB VERIFICATION</h3>
           <ul>
             <li>
