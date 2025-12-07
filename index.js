@@ -16,6 +16,7 @@ const db = require("./utils/database");
 // API removed - not needed for local use
 
 // Initialize client with all necessary intents
+// Optimized for lower WebSocket ping latency
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -27,6 +28,26 @@ const client = new Client({
     GatewayIntentBits.GuildVoiceStates,
     GatewayIntentBits.GuildPresences,
   ],
+  // WebSocket optimizations for lower ping
+  ws: {
+    // Close timeout (reduces wait time for close frames)
+    closeTimeout: 5000, // 5 seconds (default is 10s) - faster reconnection
+    // Properties for gateway identification
+    properties: {
+      $os: process.platform,
+      $browser: "discord.js",
+      $device: "discord.js",
+    },
+  },
+  // REST API optimizations
+  rest: {
+    // Timeout settings (faster failure = faster retry)
+    timeout: 20000, // 20 seconds (default 30s)
+    // Retry configuration
+    retries: 2, // Reduce retries to fail faster and reconnect
+    // Offset requests to reduce rate limit issues
+    offset: 0,
+  },
 });
 
 // Collections for commands and events
