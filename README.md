@@ -170,14 +170,24 @@ Nexus is **open source** and **community-driven**.
 
 ## 📄 License
 
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the **MIT License** with additional branding restrictions - see the [LICENSE](LICENSE) file for details.
 
 **You can:**
 
 - ✅ Use commercially
-- ✅ Modify and distribute
+- ✅ Modify and distribute the code
 - ✅ Self-host your own instance
 - ✅ Contribute improvements
+
+**You CANNOT:**
+
+- ❌ Use "Nexus Bot" branding, name, or logo
+- ❌ Copy our Privacy Policy, Terms of Service, or legal documents
+- ❌ Use our bot profile pictures or avatars
+- ❌ Present your fork as an official Nexus Bot product
+- ❌ Use our documentation verbatim
+
+**All branding, legal documents, and intellectual property remain protected.**
 
 ---
 

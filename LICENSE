@@ -19,3 +19,41 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+---
+
+BRANDING AND INTELLECTUAL PROPERTY RESTRICTIONS
+
+Notwithstanding the above permissions, the following are EXPRESSLY PROHIBITED:
+
+1. **Branding and Trademarks**: You may NOT use, copy, modify, or distribute:
+   - The "Nexus Bot" name, logo, or any variations thereof
+   - Any branding elements, visual identity, or trademarked materials
+   - Bot profile pictures, avatars, or any proprietary images
+   - Service marks or trade names associated with Nexus Bot
+
+2. **Legal Documents**: You may NOT use, copy, modify, or distribute:
+   - Privacy Policy (PRIVACY_POLICY.md)
+   - Terms of Service (TERMS_OF_SERVICE.md)
+   - Data Handling Policy (DATA_HANDLING.md)
+   - Any other legal or policy documents created for Nexus Bot
+
+3. **Documentation**: While you may reference the code structure, you may NOT:
+   - Use Nexus Bot's documentation verbatim or substantially similar
+   - Claim authorship of Nexus Bot's documentation
+   - Use Nexus Bot's documentation as your own
+
+4. **Prohibited Uses**: 
+   - You may NOT present your fork or modification as an official Nexus Bot product
+   - You may NOT use Nexus Bot branding to imply endorsement or affiliation
+   - You may NOT use Nexus Bot's legal documents for your own bot
+
+Violation of these restrictions constitutes trademark infringement and may result
+in legal action. If you wish to use any of the above protected materials, you
+must obtain explicit written permission from the copyright holders.
+
+---
+
+This license applies ONLY to the source code. All branding, legal documents,
+and intellectual property remain the exclusive property of Nexus Bot and its
+copyright holders.
