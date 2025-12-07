@@ -5,6 +5,7 @@ const {
 } = require("discord.js");
 const backupManager = require("../utils/backupManager");
 const ErrorMessages = require("../utils/errorMessages");
+const securityAuditor = require("../utils/securityAuditor");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -135,7 +136,6 @@ module.exports = {
       }
 
       // Sanitize guild name for display
-      const securityAuditor = require("../utils/securityAuditor");
       const sanitizedGuildName = securityAuditor.sanitizeInput(interaction.guild.name || "Unknown Server");
 
       const embed = new EmbedBuilder()
@@ -144,9 +144,6 @@ module.exports = {
         .setColor("#667eea")
         .setTimestamp();
 
-      // Sanitize guild names for display
-      const securityAuditor = require("../utils/securityAuditor");
-      
       backups.slice(0, 10).forEach((backup, index) => {
         const sanitizedName = securityAuditor.sanitizeInput(backup.guildName || "Unknown Server");
         embed.addFields({
@@ -271,10 +268,7 @@ module.exports = {
           },
           {
             name: "🖥️ Server",
-            value: (() => {
-              const securityAuditor = require("../utils/securityAuditor");
-              return securityAuditor.sanitizeInput(backup.guildName || "Unknown Server");
-            })(),
+            value: securityAuditor.sanitizeInput(backup.guildName || "Unknown Server"),
             inline: true,
           },
           {
