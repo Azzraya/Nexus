@@ -28,9 +28,102 @@ class Logger {
   }
 
   /**
+   * Check if error is a permission-related error that should be filtered
+   */
+  isPermissionError(message, error, data) {
+    const errorStr = String(message || "").toLowerCase();
+
+    // Extract error information from various sources
+    let errorMessage = "";
+    let errorCode = null;
+
+    if (error) {
+      if (error instanceof Error) {
+        errorMessage = error.message?.toLowerCase() || "";
+        errorCode = error.code;
+      } else if (typeof error === "object") {
+        errorMessage = error.message?.toLowerCase() || "";
+        errorCode = error.code;
+      }
+    }
+
+    if (data) {
+      if (data instanceof Error) {
+        errorMessage = errorMessage || data.message?.toLowerCase() || "";
+        errorCode = errorCode || data.code;
+      } else if (typeof data === "object") {
+        errorMessage = errorMessage || data.message?.toLowerCase() || "";
+        errorCode = errorCode || data.code;
+      }
+    }
+
+    const dataStr =
+      data && typeof data === "object" && !(data instanceof Error)
+        ? JSON.stringify(data).toLowerCase()
+        : "";
+
+    const combinedStr = `${errorStr} ${errorMessage} ${dataStr}`;
+
+    // Discord API permission error codes
+    const permissionCodes = [50001, 50013, 50025];
+    if (errorCode && permissionCodes.includes(errorCode)) {
+      return true;
+    }
+
+    // Check if it's specifically about sending messages and permissions
+    const sendMessagePatterns = [
+      /failed to send.*permission/i,
+      /cannot send.*permission/i,
+      /missing.*permission.*send/i,
+      /failed to send.*message/i,
+      /missing.*access.*send/i,
+    ];
+
+    for (const pattern of sendMessagePatterns) {
+      if (pattern.test(combinedStr)) {
+        return true;
+      }
+    }
+
+    // Check for generic permission errors related to sending
+    if (
+      combinedStr.includes("send") &&
+      (combinedStr.includes("permission") ||
+        combinedStr.includes("missing") ||
+        combinedStr.includes("access") ||
+        combinedStr.includes("cannot"))
+    ) {
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
    * Core logging function
    */
   log(level, category, message, data = null) {
+    // Filter out permission errors for sending messages
+    if (level === "ERROR") {
+      // Extract error object from data
+      let errorObj = null;
+      if (data instanceof Error) {
+        errorObj = data;
+      } else if (data && typeof data === "object" && data.stack) {
+        errorObj = data;
+      } else if (
+        data &&
+        typeof data === "object" &&
+        (data.message || data.code)
+      ) {
+        errorObj = data;
+      }
+
+      if (this.isPermissionError(message, errorObj, data)) {
+        return; // Silently skip permission errors
+      }
+    }
+
     const levelConfig = this.levels[level] || this.levels.INFO;
     const timestamp = chalk.gray(`[${this.getTimestamp()}]`);
     const prefix = levelConfig.prefix;
@@ -54,7 +147,16 @@ class Logger {
 
     // Add data if provided (and it's actually defined)
     if (data !== null && data !== undefined) {
-      logMessage += "\n" + chalk.gray(JSON.stringify(data, null, 2));
+      // For Error objects, include stack trace
+      if (data instanceof Error) {
+        logMessage +=
+          "\n" + chalk.gray(data.stack || data.message || String(data));
+      } else if (data && typeof data === "object" && data.stack) {
+        logMessage +=
+          "\n" + chalk.gray(data.stack || JSON.stringify(data, null, 2));
+      } else {
+        logMessage += "\n" + chalk.gray(JSON.stringify(data, null, 2));
+      }
     }
 
     console.log(logMessage);
@@ -71,10 +173,12 @@ class Logger {
     if (message === undefined && category.includes("[")) {
       const match = category.match(/\[([^\]]+)\]\s*(.*)/);
       if (match) {
-        return this.log("ERROR", match[1], match[2], error?.stack || error);
+        // Pass error object as-is for permission filtering (log will handle stack separately)
+        return this.log("ERROR", match[1], match[2], error);
       }
     }
-    this.log("ERROR", category, message, error?.stack || error);
+    // Pass error object as-is for permission filtering (log will handle stack separately)
+    this.log("ERROR", category, message, error);
   }
 
   warn(category, message, data = null) {
