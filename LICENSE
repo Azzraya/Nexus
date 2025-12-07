@@ -2,10 +2,9 @@ MIT License
 
 Copyright (c) 2025 Nexus Bot
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, and distribute copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
@@ -36,6 +35,12 @@ Notwithstanding the above permissions, the following are EXPRESSLY PROHIBITED:
    - Layout, formatting, or presentation styles that are substantially similar to Nexus Bot's branded materials
    - Command structures, naming conventions, or user interface elements that closely mimic Nexus Bot's distinctive presentation
    - Any elements that would cause confusion or create an impression of association with Nexus Bot
+   
+   **"Substantially Similar" Definition**: Visual elements are considered substantially similar if they:
+   - Use identical or near-identical color schemes, layouts, or design patterns
+   - Mimic distinctive UI elements, command structures, or presentation styles
+   - Create visual confusion where users might mistake the fork for official Nexus Bot
+   - **Examples**: Using the same shield emoji (🛡️) prominently in branding, copying the "Nexus vs Wick" comparison table structure, using identical embed colors or formatting styles that are distinctive to Nexus Bot
 
 4. **Legal Documents**: You may NOT use, copy, modify, or distribute:
    - Privacy Policy (PRIVACY_POLICY.md)
@@ -47,6 +52,13 @@ Notwithstanding the above permissions, the following are EXPRESSLY PROHIBITED:
    - Use Nexus Bot's documentation verbatim or substantially similar
    - Claim authorship of Nexus Bot's documentation
    - Use Nexus Bot's documentation as your own
+   
+   **"Substantially Similar" Definition**: Documentation is considered substantially similar if it:
+   - Copies 50% or more of the original text without significant modification
+   - Uses identical or near-identical structure, headings, and organization
+   - Reproduces unique explanations, examples, or technical descriptions
+   - Maintains the same tone, style, and presentation as Nexus Bot's documentation
+   - **Examples**: Copying entire sections from README.md, using identical feature descriptions, reproducing the same command explanations or API documentation structure
 
 6. **Source Code Protection**: While the source code is open, you may NOT:
    - Remove or alter copyright notices, license headers, or attribution in source files
@@ -69,6 +81,12 @@ Notwithstanding the above permissions, the following are EXPRESSLY PROHIBITED:
    - You MUST distinguish your fork/modification clearly from the official Nexus Bot
    - You MUST NOT use Nexus Bot's taglines, slogans, or marketing copy
    - You MUST provide a link to the original project when reasonable
+   
+   **"Reasonable" Attribution Definition**: Providing a link to the original project is considered reasonable when:
+   - You are distributing the code publicly (GitHub, website, documentation, etc.)
+   - You have space/ability to include a link without significant burden
+   - The link is accessible and functional (not hidden or obfuscated)
+   - **Examples**: Including link in README.md, LICENSE file, or project documentation is reasonable. Not required for: internal/private use, code comments only, or when link would be technically infeasible
 
 Violation of these restrictions constitutes trademark infringement and may result in legal action, including but not limited to:
 
@@ -82,13 +100,32 @@ If you wish to use any of the above protected materials, you must obtain explici
 - Support Server: https://discord.gg/warmA4BsPP
 - Privacy Email: nexusbot0@proton.me
 
-**Termination of License**: The license granted herein shall automatically terminate upon any breach of these restrictions. Upon termination, you must immediately cease all use of protected materials and destroy all copies in your possession.
+**Termination of License**: The license granted herein shall automatically terminate upon any breach of these restrictions. However, before termination, you will receive a written notice of violation (sent to the contact information provided in your distribution or to the email associated with your GitHub account) allowing **14 calendar days** to remedy the violation. Termination will only occur if:
+- The violation is not remedied within 14 days of written notice, OR
+- The violation is willful and intentional (e.g., deliberate trademark infringement, malicious impersonation), in which case termination may occur immediately upon notice
+
+Upon termination, you must immediately cease all use of protected materials and destroy all copies in your possession, except that you may retain copies necessary to comply with legal obligations or to remove the violating materials.
+
+**Dispute Resolution**: Before initiating any legal proceedings, parties agree to first attempt to resolve disputes through:
+1. **Good faith negotiation** (14 days from written notice of dispute)
+2. **Mediation** (30 days) through a mutually agreed mediator or mediation service in England
+3. If mediation fails, disputes shall proceed to the exclusive jurisdiction of the courts of England and Wales as specified in the Governing Law section below
+
+This dispute resolution process applies to all disputes arising from these restrictions, except where immediate injunctive relief is necessary to prevent irreparable harm.
 
 **Good Faith Use**: This license is granted in good faith. Users are expected to respect the distinction between open source code (free to modify) and intellectual property/branding (protected). Attempting to circumvent these restrictions through technical means, obfuscation, or legal loopholes is expressly prohibited and may result in immediate termination of license rights.
 
 **No Support Obligation**: Forks, derivatives, or modifications do not receive support, updates, or assistance from Nexus Bot or its developers. You may not claim or imply that support is available through official Nexus Bot channels for your derivative work.
 
 **Commercial Use Disclaimer**: While this license permits commercial use of the code, you may NOT use Nexus Bot's branding, name, or protected materials in any commercial context without explicit written permission. Commercial forks must clearly distinguish themselves from the official Nexus Bot in all customer-facing materials.
+
+**"Commercial Use" Definition**: Use is considered commercial if it:
+   - Involves charging money (one-time payment, subscription, or fees) for the software, derivative works, or services incorporating the code
+   - Is used in a commercial/business context (company internal use, client services, B2B offerings)
+   - Generates revenue directly or indirectly from the software (advertising, data collection, premium features)
+   - Is used to promote, market, or support a commercial product or service
+   - **Examples**: Selling a modified version, offering it as paid service/SaaS, using it in commercial client work, monetizing a fork through ads or premium features
+   - **Not Commercial**: Personal projects, educational use, non-profit use, open source distributions (even if company uses internally)
 
 ---
 
