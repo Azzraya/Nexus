@@ -18,7 +18,7 @@ class AdvancedAntiNuke {
       webhooksCreated: 3, // 3+ webhooks in 5 seconds
       emojisDeleted: 3, // 3+ emojis deleted in 5 seconds
       emojisCreated: 6, // 6+ emojis created in 5 seconds (spam)
-      voiceRaid: 10, // 10+ voice joins in 10 seconds
+      voiceRaid: 75, // 75+ voice joins in 10 seconds (increased for large events)
     };
     this.thresholds = { ...this.baseThresholds }; // Will be adapted per server
     this.rateLimitQueue = new Map(); // Rate limit protection (guildId -> queue)

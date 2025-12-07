@@ -50,7 +50,6 @@ module.exports = {
       const command = client.commands.get(interaction.commandName);
       if (!command) return;
 
-
       try {
         // Track performance and log in parallel (EXCEEDS WICK - faster response)
         const startTime = Date.now();

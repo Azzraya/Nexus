@@ -19,26 +19,43 @@ module.exports = {
 
         // Track voice joins for raid detection
         const key = `${guild.id}`;
+        const timeWindow = 15000; // 15 seconds (increased from 10 for large events)
+        
         if (!client.advancedAntiNuke.voiceRaids.has(key)) {
           client.advancedAntiNuke.voiceRaids.set(key, {
             joinCount: 0,
+            firstJoin: Date.now(),
             lastJoin: Date.now(),
             userIds: new Set(),
           });
         }
 
         const raidData = client.advancedAntiNuke.voiceRaids.get(key);
-        raidData.joinCount++;
+        
+        // Reset if time window has passed
+        const timeSinceFirstJoin = Date.now() - raidData.firstJoin;
+        if (timeSinceFirstJoin >= timeWindow) {
+          raidData.joinCount = 1;
+          raidData.firstJoin = Date.now();
+          raidData.userIds = new Set([userId]);
+        } else {
+          raidData.joinCount++;
+          raidData.userIds.add(userId);
+        }
+        
         raidData.lastJoin = Date.now();
-        raidData.userIds.add(userId);
 
-        // If 10+ users join voice in 10 seconds, it's a raid
+        // Get adaptive threshold based on server size (allows large events)
+        const thresholds = client.advancedAntiNuke.getAdaptiveThresholds(guild);
+        const voiceRaidThreshold = thresholds.voiceRaid;
+
+        // Check if threshold exceeded within time window
         if (
-          raidData.joinCount >= 10 &&
-          Date.now() - raidData.lastJoin < 10000
+          raidData.joinCount >= voiceRaidThreshold &&
+          timeSinceFirstJoin < timeWindow
         ) {
           logger.warn(
-            `[Anti-Nuke] 🚨 VOICE RAID DETECTED: ${raidData.joinCount} users joined voice in ${guild.id}`
+            `[Anti-Nuke] 🚨 VOICE RAID DETECTED: ${raidData.joinCount} users joined voice in ${guild.id} (threshold: ${voiceRaidThreshold})`
           );
 
           // Trigger threat handling

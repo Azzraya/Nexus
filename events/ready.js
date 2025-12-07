@@ -168,7 +168,6 @@ module.exports = {
       logger.info("Ready", "⚙️ Workflows loaded");
     }
 
-
     // Start automatic snapshot scheduler (EXCEEDS WICK - point-in-time recovery)
     if (
       client.snapshotScheduler &&

@@ -106,7 +106,6 @@ module.exports = {
         });
       }
 
-
       try {
         const result = await customCommands.createCommand(
           interaction.guild.id,
@@ -176,7 +175,6 @@ module.exports = {
           content: "❌ Invalid color. Use hex format like #667eea",
         });
       }
-
 
       try {
         await customCommands.createCommand(interaction.guild.id, {

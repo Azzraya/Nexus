@@ -58,14 +58,25 @@ class VoiceMonitoring {
     const joins = this.recentJoins.get(guild.id);
     joins.push({ userId: member.id, channelId: channel.id, timestamp: now });
 
-    // Clean old joins (older than 30 seconds)
-    const filtered = joins.filter((j) => now - j.timestamp < 30000);
+    // Clean old joins (older than 60 seconds - increased for large events)
+    const filtered = joins.filter((j) => now - j.timestamp < 60000);
     this.recentJoins.set(guild.id, filtered);
 
-    // Check for voice raid (10+ joins in 30 seconds)
+    // Check for voice raid (75+ joins in 60 seconds - increased for large events)
     const config = await db.getVoiceMonitoringConfig(guild.id);
     if (config && config.raid_detection_enabled) {
-      if (filtered.length >= (config.raid_threshold || 10)) {
+      // Use adaptive threshold based on server size
+      const memberCount = guild.memberCount || 1;
+      let adaptiveThreshold = config.raid_threshold || 75; // Default increased from 10 to 75
+      
+      // Scale threshold based on server size for large events
+      if (memberCount >= 5000) {
+        adaptiveThreshold = Math.max(adaptiveThreshold, 150); // Very large servers: 150+
+      } else if (memberCount >= 2000) {
+        adaptiveThreshold = Math.max(adaptiveThreshold, 100); // Large servers: 100+
+      }
+      
+      if (filtered.length >= adaptiveThreshold) {
         await this.handleVoiceRaid(guild, filtered, config);
       }
     }
@@ -131,7 +142,7 @@ class VoiceMonitoring {
 
   async handleVoiceRaid(guild, joins, config) {
     logger.warn(
-      `[VoiceMonitoring] Voice raid detected in ${guild.name}: ${joins.length} joins in 30s`
+      `[VoiceMonitoring] Voice raid detected in ${guild.name}: ${joins.length} joins in 60s`
     );
 
     // Disconnect all recent joiners
@@ -154,7 +165,7 @@ class VoiceMonitoring {
         const embed = new EmbedBuilder()
           .setTitle("🚨 Voice Raid Detected")
           .setDescription(
-            `${joins.length} users joined voice channels in 30 seconds`
+            `${joins.length} users joined voice channels in 60 seconds`
           )
           .setColor(0xff0000)
           .addFields({
