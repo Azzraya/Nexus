@@ -49,11 +49,26 @@ module.exports = {
             `Ban removed by: ${executor.tag} (${executor.id})`
           );
 
-          // Update log with executor info
-          db.db.run(
-            `UPDATE logs SET executor_id = ? WHERE guild_id = ? AND event_type = ? AND user_id = ? AND executor_id IS NULL ORDER BY timestamp DESC LIMIT 1`,
-            [executor.id, guild.id, "UNBAN", user.id]
-          );
+          // Update log with executor info (get the most recent unban log first)
+          const mostRecentLog = await new Promise((resolve, reject) => {
+            db.db.get(
+              `SELECT id FROM logs 
+               WHERE guild_id = ? AND event_type = ? AND user_id = ? AND executor_id IS NULL 
+               ORDER BY timestamp DESC LIMIT 1`,
+              [guild.id, "UNBAN", user.id],
+              (err, row) => {
+                if (err) reject(err);
+                else resolve(row);
+              }
+            );
+          });
+
+          if (mostRecentLog) {
+            db.db.run(
+              `UPDATE logs SET executor_id = ? WHERE id = ?`,
+              [executor.id, mostRecentLog.id]
+            );
+          }
 
           // Potential anti-nuke check - mass unbanning
           const recentUnbans = await new Promise((resolve) => {
