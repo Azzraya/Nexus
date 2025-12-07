@@ -134,15 +134,23 @@ module.exports = {
         });
       }
 
+      // Sanitize guild name for display
+      const securityAuditor = require("../utils/securityAuditor");
+      const sanitizedGuildName = securityAuditor.sanitizeInput(interaction.guild.name || "Unknown Server");
+
       const embed = new EmbedBuilder()
-        .setTitle(`📦 Backups for ${interaction.guild.name}`)
+        .setTitle(`📦 Backups for ${sanitizedGuildName}`)
         .setDescription(`Found **${backups.length}** backup(s)`)
         .setColor("#667eea")
         .setTimestamp();
 
+      // Sanitize guild names for display
+      const securityAuditor = require("../utils/securityAuditor");
+      
       backups.slice(0, 10).forEach((backup, index) => {
+        const sanitizedName = securityAuditor.sanitizeInput(backup.guildName || "Unknown Server");
         embed.addFields({
-          name: `${index + 1}. ${backup.guildName}`,
+          name: `${index + 1}. ${sanitizedName}`,
           value: [
             `**ID:** \`${backup.id}\``,
             `**Created:** <t:${Math.floor(backup.timestamp / 1000)}:R>`,
@@ -263,7 +271,10 @@ module.exports = {
           },
           {
             name: "🖥️ Server",
-            value: backup.guildName,
+            value: (() => {
+              const securityAuditor = require("../utils/securityAuditor");
+              return securityAuditor.sanitizeInput(backup.guildName || "Unknown Server");
+            })(),
             inline: true,
           },
           {

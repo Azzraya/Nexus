@@ -65,11 +65,11 @@ class BackupManager {
 
     const filename = `${validated}.json`;
     const filepath = path.join(this.backupDir, filename);
-    
+
     // Resolve to absolute path and verify it's within backup directory
     const resolved = path.resolve(filepath);
     const resolvedBackupDir = path.resolve(this.backupDir);
-    
+
     // Ensure the resolved path starts with the backup directory (prevents traversal)
     if (!resolved.startsWith(resolvedBackupDir)) {
       console.error(
@@ -127,10 +127,14 @@ class BackupManager {
       }
 
       // Create backup data
+      // Sanitize guild name to prevent XSS attacks
+      const securityAuditor = require("./securityAuditor");
+      const sanitizedName = securityAuditor.sanitizeInput(guild.name || "Unknown Server");
+
       const backupData = {
         id: backupId,
         guildId: guild.id,
-        guildName: guild.name,
+        guildName: sanitizedName,
         timestamp,
         version: "1.0",
         data: {
@@ -138,7 +142,7 @@ class BackupManager {
           roles,
           channels,
           guildSettings: {
-            name: guild.name,
+            name: sanitizedName,
             verificationLevel: guild.verificationLevel,
             defaultMessageNotifications: guild.defaultMessageNotifications,
             explicitContentFilter: guild.explicitContentFilter,
@@ -260,13 +264,23 @@ class BackupManager {
       }
 
       const data = await fs.readFile(filepath, "utf8");
-      return JSON.parse(data);
+      const backup = JSON.parse(data);
+      
+      // Sanitize guild name in loaded backup to prevent XSS from old backups
+      if (backup.guildName) {
+        const securityAuditor = require("./securityAuditor");
+        backup.guildName = securityAuditor.sanitizeInput(backup.guildName);
+      }
+      if (backup.data?.guildSettings?.name) {
+        const securityAuditor = require("./securityAuditor");
+        backup.data.guildSettings.name = securityAuditor.sanitizeInput(backup.data.guildSettings.name);
+      }
+      
+      return backup;
     } catch (error) {
       // Don't log the full path in error to avoid leaking information
       if (error.code === "ENOENT") {
-        console.error(
-          `[Backup Manager] Backup not found: ${backupId}`
-        );
+        console.error(`[Backup Manager] Backup not found: ${backupId}`);
       } else {
         console.error("[Backup Manager] Load backup error:", error.message);
       }
@@ -426,10 +440,14 @@ class BackupManager {
           const data = await fs.readFile(filepath, "utf8");
           const backup = JSON.parse(data);
 
+          // Sanitize guild name to prevent XSS from old backups
+          const securityAuditor = require("./securityAuditor");
+          const sanitizedName = securityAuditor.sanitizeInput(backup.guildName || "Unknown Server");
+
           backups.push({
             id: backup.id,
             timestamp: backup.timestamp,
-            guildName: backup.guildName,
+            guildName: sanitizedName,
             size: JSON.stringify(backup).length,
           });
         }
