@@ -38,7 +38,11 @@ async function registerCommands(client) {
     }
   }
 
-  const rest = new REST({ version: "10" }).setToken(process.env.DISCORD_TOKEN);
+  // Create REST client with timeout to prevent hanging requests
+  const rest = new REST({ 
+    version: "10",
+    timeout: 10000 // 10 second timeout per request
+  }).setToken(process.env.DISCORD_TOKEN);
 
   try {
     logger.info("Commands", `Registering ${commands.length} slash commands...`);
@@ -59,19 +63,90 @@ async function registerCommands(client) {
     let successCount = 0;
     let failCount = 0;
 
-    for (const guild of client.guilds.cache.values()) {
-      try {
-        await rest.put(
-          Routes.applicationGuildCommands(client.user.id, guild.id),
-          { body: commands }
-        );
-        successCount++;
-      } catch (error) {
-        logger.error(
-          `❌ Failed to register commands for ${guild.name}:`,
-          error.message
-        );
-        failCount++;
+    // Helper function to add timeout to promises
+    const withTimeout = (promise, timeoutMs, guildName) => {
+      return Promise.race([
+        promise,
+        new Promise((_, reject) =>
+          setTimeout(
+            () => reject(new Error(`Timeout after ${timeoutMs}ms`)),
+            timeoutMs
+          )
+        ),
+      ]).catch((error) => {
+        if (error.message.includes("Timeout")) {
+          logger.error(
+            `❌ Timeout registering commands for ${guildName} after ${timeoutMs}ms`
+          );
+        }
+        throw error;
+      });
+    };
+
+    const guilds = Array.from(client.guilds.cache.values());
+    logger.info(
+      "Commands",
+      `Registering commands for ${guilds.length} servers...`
+    );
+
+    // Process in small batches to avoid rate limits and prevent hanging
+    const batchSize = 5;
+    const totalBatches = Math.ceil(guilds.length / batchSize);
+
+    for (let i = 0; i < guilds.length; i += batchSize) {
+      const batch = guilds.slice(i, i + batchSize);
+      const batchNum = Math.floor(i / batchSize) + 1;
+
+      logger.info(
+        "Commands",
+        `Processing batch ${batchNum}/${totalBatches} (${batch.length} servers)...`
+      );
+
+      // Process batch in parallel with timeout protection
+      const batchPromises = batch.map(async (guild) => {
+        try {
+          await withTimeout(
+            rest.put(
+              Routes.applicationGuildCommands(client.user.id, guild.id),
+              { body: commands }
+            ),
+            8000,
+            guild.name
+          );
+          return { success: true, guild: guild.name };
+        } catch (error) {
+          return { success: false, guild: guild.name, error: error.message };
+        }
+      });
+
+      const batchResults = await Promise.allSettled(batchPromises);
+
+      // Count successes and failures
+      batchResults.forEach((result) => {
+        if (result.status === "fulfilled") {
+          if (result.value.success) {
+            successCount++;
+          } else {
+            failCount++;
+            if (!result.value.error.includes("Timeout")) {
+              logger.error(
+                `❌ Failed to register commands for ${result.value.guild}:`,
+                result.value.error
+              );
+            }
+          }
+        } else {
+          failCount++;
+          logger.error(
+            `❌ Batch registration error:`,
+            result.reason?.message || String(result.reason)
+          );
+        }
+      });
+
+      // Small delay between batches to avoid rate limits
+      if (i + batchSize < guilds.length) {
+        await new Promise((resolve) => setTimeout(resolve, 500));
       }
     }
 

@@ -20,8 +20,21 @@ module.exports = {
       currentStatus: null,
     };
 
-    // Register slash commands
-    await registerCommands(client);
+    // Register slash commands with timeout protection
+    try {
+      const registrationPromise = registerCommands(client);
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("Command registration timeout after 2 minutes")), 120000)
+      );
+      
+      await Promise.race([registrationPromise, timeoutPromise]).catch((error) => {
+        logger.error("Ready", `Command registration failed or timed out: ${error.message}`);
+        // Continue anyway - bot should still work
+      });
+    } catch (error) {
+      logger.error("Ready", "Critical error in command registration:", error);
+      // Continue anyway
+    }
 
     // Post commands to Discord Bot List (only from shard 0 or non-sharded)
     if (process.env.DISCORDBOTLIST_TOKEN) {
