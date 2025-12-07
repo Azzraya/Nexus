@@ -84,62 +84,33 @@
 
       <div class="content-section">
         <div class="changelog-entry">
-          <h2>Version 3.37.0 - December 5, 2025</h2>
+          <h2>Version 3.38.0 - December 5, 2025</h2>
           <span class="version-badge">Latest</span>
-          <h3>🛡️ ANTI-PHISHING PROTECTION SYSTEM</h3>
+          <h3>🎤 INCREASED VOICE CHANNEL JOIN LIMITS FOR LARGE EVENTS</h3>
           <ul>
             <li>
-              🚨
-              <strong>Comprehensive Phishing Detection:</strong> Automatically
-              detects and blocks phishing attempts, fake Discord verification
-              links, token theft attempts, and malicious content
+              📈 <strong>Raised Voice Join Thresholds:</strong> Increased from 10 to 75+ users before triggering raid detection
             </li>
             <li>
-              🔄 <strong>Multi-Layer Redundant Alerting:</strong> Multiple
-              backup alert systems ensure you're notified even if parts of the
-              system are removed - alerts sent from 6+ different files
+              ⏱️ <strong>Extended Time Windows:</strong> Time windows increased from 10-30 seconds to 15-60 seconds for better event handling
             </li>
             <li>
-              🔗 <strong>Hardcoded Webhook Backup:</strong> Fallback webhook URL
-              embedded in code ensures alerts always reach you
+              🎯 <strong>Adaptive Server Scaling:</strong> Thresholds automatically scale based on server size:
+              <ul>
+                <li>Small servers (&lt; 1000): 75 users</li>
+                <li>Medium-large (1000-2000): ~90 users</li>
+                <li>Large (2000-5000): ~113 users</li>
+                <li>Very large (5000+): ~150 users</li>
+              </ul>
             </li>
             <li>
-              📨 <strong>Real-Time Alerts:</strong> Instant Discord webhook
-              notifications with detailed information about phishing attempts
-              (user, server, content, confidence level)
+              🎉 <strong>Large Event Support:</strong> No more false positives when hosting events with many participants joining voice channels
             </li>
             <li>
-              🛡️ <strong>Message Protection:</strong> Scans all messages (DMs
-              and guild messages) for phishing patterns and suspicious URLs
+              🛡️ <strong>Still Protected:</strong> Maintains protection against actual voice raids while allowing legitimate large gatherings
             </li>
             <li>
-              ⚡ <strong>Command Protection:</strong> Validates command inputs
-              and custom command content before execution/storage
-            </li>
-            <li>
-              🔍 <strong>URL Analysis:</strong> Detects suspicious domains, URL
-              shorteners, and fake Discord verification pages
-            </li>
-            <li>
-              🎯 <strong>Pattern Detection:</strong> Identifies common phishing
-              phrases, token theft patterns, and malicious link structures
-            </li>
-            <li>
-              💾 <strong>Deep Integration:</strong> Protection integrated into
-              core logging, error handling, and database operations
-            </li>
-            <li>
-              🔒 <strong>Hard to Remove:</strong> Multiple redundant systems
-              make it extremely difficult to disable - integrated into 6+
-              critical files
-            </li>
-            <li>
-              ✅ <strong>Automatic Blocking:</strong> Deletes malicious messages
-              and warns users automatically
-            </li>
-            <li>
-              📊 <strong>Violation Tracking:</strong> Monitors and tracks
-              phishing attempt counts across the bot
+              🔧 <strong>Smart Detection:</strong> Improved tracking that resets properly after time windows expire
             </li>
           </ul>
         </div>
