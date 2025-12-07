@@ -22,7 +22,6 @@ const db = require("./utils/database");
 // API removed - not needed for local use
 
 // Initialize client with all necessary intents
-// Optimized for lower WebSocket ping latency and memory efficiency
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -34,73 +33,6 @@ const client = new Client({
     GatewayIntentBits.GuildVoiceStates,
     GatewayIntentBits.GuildPresences,
   ],
-  // Cache optimization - reduce memory usage for better performance
-  makeCache: Options.cacheWithLimits({
-    // Limit message cache to reduce memory (100 messages per channel)
-    MessageManager: 100,
-    // Limit member cache (will keep bot's own member once client is ready)
-    GuildMemberManager: {
-      maxSize: 200,
-      keepOverLimit: (member) => {
-        // Keep bot's own member in cache if client.user exists
-        return client.user ? member.id === client.user.id : false;
-      },
-    },
-    // Limit reaction cache
-    ReactionManager: 50,
-    // Limit presence cache (reduce unnecessary data)
-    PresenceManager: 100,
-    // Limit voice state cache
-    VoiceStateManager: 50,
-    // Limit thread member cache
-    ThreadMemberManager: 100,
-  }),
-  // Automatic cache sweeping - remove stale data to reduce memory
-  sweepers: {
-    // Sweep old messages every 30 minutes (remove messages older than 15 minutes)
-    messages: {
-      interval: 1800, // 30 minutes in seconds
-      lifetime: 900, // 15 minutes in seconds
-    },
-    // Sweep bot users (except our bot) every hour
-    users: {
-      interval: 3600, // 1 hour in seconds
-      filter: () => (user) => user.bot && user.id !== client.user?.id,
-    },
-    // Note: threadMembers sweeper might not be supported in this version
-    // Removed to prevent errors - thread members are cached per-guild and auto-cleaned
-  },
-  // WebSocket optimizations for lower ping
-  ws: {
-    // Close timeout (reduces wait time for close frames)
-    closeTimeout: 5000, // 5 seconds (default is 10s) - faster reconnection
-    // Properties for gateway identification
-    properties: {
-      $os: process.platform,
-      $browser: "discord.js",
-      $device: "discord.js",
-    },
-    // Build number for gateway
-    version: 10,
-  },
-  // REST API optimizations
-  rest: {
-    // Timeout settings (faster failure = faster retry)
-    timeout: 20000, // 20 seconds (default 30s)
-    // Retry configuration
-    retries: 2, // Reduce retries to fail faster and reconnect
-    // Offset requests to reduce rate limit issues
-    offset: 0,
-    // Use global requests for better connection pooling
-    globalRequestsPerSecond: 50,
-  },
-  // HTTP request optimizations
-  http: {
-    // Use HTTP/2 if available (faster)
-    version: 2,
-    // API version
-    api: "https://discord.com/api/v10",
-  },
 });
 
 // Collections for commands and events
