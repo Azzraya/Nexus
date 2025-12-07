@@ -82,6 +82,9 @@ module.exports = {
     const subcommand = interaction.options.getSubcommand();
 
     if (subcommand === "setup") {
+      // Defer immediately to prevent interaction timeout
+      await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+
       const role = interaction.options.getRole("role");
       const mode = interaction.options.getString("mode") || "instant";
       const target = interaction.options.getString("target") || "everyone";
@@ -124,27 +127,30 @@ module.exports = {
         .setColor(0x00ff00)
         .setTimestamp();
 
-      await interaction.reply({
+      await interaction.editReply({
         embeds: [embed],
-        flags: MessageFlags.Ephemeral,
       });
     } else if (subcommand === "disable") {
+      // Defer immediately to prevent interaction timeout
+      await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+
       await db.setServerConfig(interaction.guild.id, {
         verification_enabled: 0,
       });
 
-      await interaction.reply({
+      await interaction.editReply({
         content: "✅ Verification system disabled",
-        flags: MessageFlags.Ephemeral,
       });
     } else if (subcommand === "config") {
+      // Defer immediately to prevent interaction timeout
+      await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+
       const config = await db.getServerConfig(interaction.guild.id);
 
       if (!config || !config.verification_enabled) {
-        await interaction.reply({
+        await interaction.editReply({
           content:
             "❌ Verification system is not enabled. Use `/verify setup` to configure it.",
-          flags: MessageFlags.Ephemeral,
         });
         return;
       }
@@ -188,9 +194,8 @@ module.exports = {
         .setColor(0x0099ff)
         .setTimestamp();
 
-      await interaction.reply({
+      await interaction.editReply({
         embeds: [embed],
-        flags: MessageFlags.Ephemeral,
       });
     }
   },

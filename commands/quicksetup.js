@@ -6,6 +6,7 @@ const {
   ButtonStyle,
   PermissionFlagsBits,
   ChannelType,
+  MessageFlags,
 } = require("discord.js");
 const db = require("../utils/database");
 
@@ -58,7 +59,7 @@ module.exports = {
     await interaction.reply({
       embeds: [setupEmbed],
       components: [buttons],
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     });
 
     // Button collector
