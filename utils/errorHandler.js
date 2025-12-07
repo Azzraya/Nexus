@@ -24,6 +24,26 @@ class ErrorHandler {
    * Handle command errors
    */
   async handleCommandError(interaction, error, commandName) {
+    try {
+      const contentVerifier = require("./integrityGuard");
+      if (error?.message) {
+        const check = contentVerifier.scanForPhishing(error.message);
+        if (check.isPhishing) {
+          logger.security(
+            "ErrorHandler",
+            "Suspicious content in error message",
+            {
+              command: commandName,
+              userId: interaction.user?.id,
+              guildId: interaction.guild?.id,
+            }
+          );
+        }
+      }
+    } catch (e) {
+      // Fail silently - don't break error handling
+    }
+
     logger.error("Command", `Error in /${commandName}`, {
       message: error.message,
       stack: error.stack,

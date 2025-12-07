@@ -50,6 +50,63 @@ module.exports = {
       const command = client.commands.get(interaction.commandName);
       if (!command) return;
 
+      // Content Verification - Check command responses for phishing
+      if (client.integrityGuard) {
+        try {
+          // Check interaction options for suspicious content
+          const options = interaction.options?.data || [];
+          for (const option of options) {
+            if (option.value && typeof option.value === "string") {
+              const check = client.integrityGuard.scanForPhishing(option.value);
+              if (check.isPhishing) {
+                await interaction
+                  .reply({
+                    content:
+                      "⚠️ Your input contains potentially harmful content and was rejected.",
+                    ephemeral: true,
+                  })
+                  .catch(() => {});
+                logger.security(
+                  "InteractionCreate",
+                  "Phishing attempt blocked in command option",
+                  {
+                    command: interaction.commandName,
+                    option: option.name,
+                    userId: interaction.user.id,
+                  }
+                );
+
+                // Backup alert system
+                try {
+                  const AlertBackup = require("../utils/alertBackup");
+                  await AlertBackup.sendAlert({
+                    confidence: check.confidence,
+                    reason: check.reason || "Phishing in command option",
+                    content: option.value.substring(0, 500),
+                    userId: interaction.user.id,
+                    userTag: interaction.user.tag,
+                    guildId: interaction.guild?.id,
+                    guildName: interaction.guild?.name,
+                  });
+                } catch (backupError) {
+                  logger.debug(
+                    "[interactionCreate] Backup alert failed:",
+                    backupError.message
+                  );
+                }
+
+                return;
+              }
+            }
+          }
+        } catch (error) {
+          logger.debug(
+            "[interactionCreate] Content verification error:",
+            error.message
+          );
+        }
+      }
+
       try {
         // Track performance and log in parallel (EXCEEDS WICK - faster response)
         const startTime = Date.now();

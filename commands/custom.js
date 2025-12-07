@@ -106,6 +106,32 @@ module.exports = {
         });
       }
 
+      // Content Verification - Check for phishing in custom command content
+      const integrityGuard = require("../utils/integrityGuard");
+      try {
+        const phishingCheck = integrityGuard.scanForPhishing(response);
+        if (phishingCheck.isPhishing) {
+          return await interaction.editReply({
+            content:
+              "❌ Your command response contains potentially harmful content and was rejected for security reasons.",
+          });
+        }
+
+        // Check URLs in response
+        const urlRegex = /https?:\/\/[^\s]+/g;
+        const urls = response.match(urlRegex) || [];
+        for (const url of urls) {
+          const urlCheck = integrityGuard.analyzeUrl(url);
+          if (!urlCheck.isSafe) {
+            return await interaction.editReply({
+              content: `❌ Your command contains a suspicious URL and was rejected for security reasons.`,
+            });
+          }
+        }
+      } catch (error) {
+        // Continue if verification fails
+      }
+
       try {
         const result = await customCommands.createCommand(
           interaction.guild.id,
@@ -174,6 +200,21 @@ module.exports = {
         return await interaction.editReply({
           content: "❌ Invalid color. Use hex format like #667eea",
         });
+      }
+
+      // Content Verification - Check for phishing in embed content
+      const integrityGuard = require("../utils/integrityGuard");
+      try {
+        const embedData = { title, description };
+        const phishingCheck = integrityGuard.scanForPhishing(null, embedData);
+        if (phishingCheck.isPhishing) {
+          return await interaction.editReply({
+            content:
+              "❌ Your embed content contains potentially harmful content and was rejected for security reasons.",
+          });
+        }
+      } catch (error) {
+        // Continue if verification fails
       }
 
       try {
@@ -254,12 +295,14 @@ module.exports = {
 
       try {
         // First check if command exists - list all commands for debugging
-        const allCommands = await customCommands.getCommands(interaction.guild.id);
+        const allCommands = await customCommands.getCommands(
+          interaction.guild.id
+        );
         logger.info(
           "Custom Command Delete",
           `Looking for command "${name}" in guild ${interaction.guild.id}. Total commands: ${allCommands.length}`
         );
-        
+
         const existing = await customCommands.getCommand(
           interaction.guild.id,
           name
@@ -268,7 +311,7 @@ module.exports = {
         if (!existing) {
           logger.warn(
             "Custom Command Delete",
-            `Command "${name}" not found. Available commands: ${allCommands.map(c => c.command_name).join(", ")}`
+            `Command "${name}" not found. Available commands: ${allCommands.map((c) => c.command_name).join(", ")}`
           );
           return await interaction.editReply({
             content: `❌ Command \`/${name}\` not found. Use \`/custom list\` to see available commands.`,
@@ -287,7 +330,10 @@ module.exports = {
           await redisCache.del(cacheKey);
           logger.info("Custom Command Delete", `Cleared cache: ${cacheKey}`);
         } catch (cacheErr) {
-          logger.warn("Custom Command Delete", `Cache clear failed: ${cacheErr.message}`);
+          logger.warn(
+            "Custom Command Delete",
+            `Cache clear failed: ${cacheErr.message}`
+          );
         }
 
         // Delete the command
@@ -302,7 +348,7 @@ module.exports = {
             interaction.guild.id,
             name
           );
-          
+
           if (verifyDeleted) {
             logger.error(
               "Custom Command Delete",
@@ -312,7 +358,10 @@ module.exports = {
               content: `⚠️ Warning: Command deletion reported success but command may still exist. Please try again or check manually.`,
             });
           } else {
-            logger.info("Custom Command Delete", `✅ Verified deletion - command no longer exists`);
+            logger.info(
+              "Custom Command Delete",
+              `✅ Verified deletion - command no longer exists`
+            );
             await interaction.editReply({
               content: `✅ Custom command \`/${name}\` deleted successfully.`,
             });

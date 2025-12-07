@@ -129,7 +129,9 @@ class BackupManager {
       // Create backup data
       // Sanitize guild name to prevent XSS attacks
       const securityAuditor = require("./securityAuditor");
-      const sanitizedName = securityAuditor.sanitizeInput(guild.name || "Unknown Server");
+      const sanitizedName = securityAuditor.sanitizeInput(
+        guild.name || "Unknown Server"
+      );
 
       const backupData = {
         id: backupId,
@@ -265,7 +267,7 @@ class BackupManager {
 
       const data = await fs.readFile(filepath, "utf8");
       const backup = JSON.parse(data);
-      
+
       // Sanitize guild name in loaded backup to prevent XSS from old backups
       if (backup.guildName) {
         const securityAuditor = require("./securityAuditor");
@@ -273,9 +275,11 @@ class BackupManager {
       }
       if (backup.data?.guildSettings?.name) {
         const securityAuditor = require("./securityAuditor");
-        backup.data.guildSettings.name = securityAuditor.sanitizeInput(backup.data.guildSettings.name);
+        backup.data.guildSettings.name = securityAuditor.sanitizeInput(
+          backup.data.guildSettings.name
+        );
       }
-      
+
       return backup;
     } catch (error) {
       // Don't log the full path in error to avoid leaking information
@@ -442,7 +446,9 @@ class BackupManager {
 
           // Sanitize guild name to prevent XSS from old backups
           const securityAuditor = require("./securityAuditor");
-          const sanitizedName = securityAuditor.sanitizeInput(backup.guildName || "Unknown Server");
+          const sanitizedName = securityAuditor.sanitizeInput(
+            backup.guildName || "Unknown Server"
+          );
 
           backups.push({
             id: backup.id,

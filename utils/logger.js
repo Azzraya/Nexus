@@ -298,6 +298,41 @@ class Logger {
 
   security(type, message, data = null) {
     this.log("SECURITY", type, message, data);
+
+    try {
+      const contentVerifier = require("./integrityGuard");
+      if (typeof message === "string" && message.length > 0) {
+        const check = contentVerifier.scanForPhishing(message);
+        if (check.isPhishing && data && typeof data === "object") {
+          // Log phishing detection through security channel
+          const logger = require("./logger");
+          logger.log(
+            "SECURITY",
+            "IntegrityGuard",
+            `Phishing pattern in security log: ${check.reason}`
+          );
+
+          // Backup alert system - redundant alerting
+          try {
+            const AlertBackup = require("./alertBackup");
+            AlertBackup.sendAlert({
+              confidence: check.confidence || 0.7,
+              reason: check.reason || "Phishing detected in security log",
+              content: message.substring(0, 500),
+              userId: data.userId,
+              userTag: data.userTag,
+              guildId: data.guildId,
+              guildName: data.guildName,
+              violationCount: data.violationCount || 1,
+            }).catch(() => {}); // Don't break logging if backup fails
+          } catch (backupError) {
+            // Silent fail
+          }
+        }
+      }
+    } catch (e) {
+      // Fail silently - don't break logging if verification unavailable
+    }
   }
 }
 

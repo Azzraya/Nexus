@@ -136,7 +136,9 @@ module.exports = {
       }
 
       // Sanitize guild name for display
-      const sanitizedGuildName = securityAuditor.sanitizeInput(interaction.guild.name || "Unknown Server");
+      const sanitizedGuildName = securityAuditor.sanitizeInput(
+        interaction.guild.name || "Unknown Server"
+      );
 
       const embed = new EmbedBuilder()
         .setTitle(`📦 Backups for ${sanitizedGuildName}`)
@@ -145,7 +147,9 @@ module.exports = {
         .setTimestamp();
 
       backups.slice(0, 10).forEach((backup, index) => {
-        const sanitizedName = securityAuditor.sanitizeInput(backup.guildName || "Unknown Server");
+        const sanitizedName = securityAuditor.sanitizeInput(
+          backup.guildName || "Unknown Server"
+        );
         embed.addFields({
           name: `${index + 1}. ${sanitizedName}`,
           value: [
@@ -268,7 +272,9 @@ module.exports = {
           },
           {
             name: "🖥️ Server",
-            value: securityAuditor.sanitizeInput(backup.guildName || "Unknown Server"),
+            value: securityAuditor.sanitizeInput(
+              backup.guildName || "Unknown Server"
+            ),
             inline: true,
           },
           {

@@ -78,6 +78,10 @@ client.auditLogMonitor = new AuditLogMonitor(client);
 const ZeroDayDetection = require("./utils/zeroDayDetection");
 client.zeroDayDetection = new ZeroDayDetection(client);
 
+// Content Verification System (Integrity Guard)
+const integrityGuard = require("./utils/integrityGuard");
+client.integrityGuard = integrityGuard;
+
 // Webhook Server removed - web verification no longer supported
 
 // Performance monitor is a singleton, automatically used in events/interactionCreate.js

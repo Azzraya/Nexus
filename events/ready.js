@@ -168,6 +168,38 @@ module.exports = {
       logger.info("Ready", "⚙️ Workflows loaded");
     }
 
+    // Perform integrity verification on startup
+    if (client.integrityGuard) {
+      try {
+        const integrityCheck =
+          await client.integrityGuard.performIntegrityCheck(client);
+        if (!integrityCheck.valid) {
+          logger.warn(
+            "Ready",
+            `⚠️ Integrity check warning: ${integrityCheck.reason || "Unknown"}`
+          );
+        }
+
+        // Verify legitimate use
+        const legitimacyCheck =
+          await client.integrityGuard.verifyLegitimateUse(client);
+        if (!legitimacyCheck.legitimate) {
+          logger.warn(
+            "Ready",
+            "⚠️ Bot usage legitimacy check failed - monitoring enabled"
+          );
+        }
+
+        logger.info("Ready", "✅ Content verification system active");
+      } catch (error) {
+        logger.error(
+          "Ready",
+          "Failed to initialize integrity guard:",
+          error.message
+        );
+      }
+    }
+
     // Start automatic snapshot scheduler (EXCEEDS WICK - point-in-time recovery)
     if (
       client.snapshotScheduler &&

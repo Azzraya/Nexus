@@ -1865,10 +1865,7 @@ class Database {
       `ALTER TABLE custom_commands ADD COLUMN cooldown INTEGER DEFAULT 0`,
       (err) => {
         if (err && !err.message.includes("duplicate column")) {
-          logger.error(
-            "Error adding cooldown column to custom_commands:",
-            err
-          );
+          logger.error("Error adding cooldown column to custom_commands:", err);
         }
       }
     );
@@ -1876,10 +1873,7 @@ class Database {
       `ALTER TABLE custom_commands ADD COLUMN uses INTEGER DEFAULT 0`,
       (err) => {
         if (err && !err.message.includes("duplicate column")) {
-          logger.error(
-            "Error adding uses column to custom_commands:",
-            err
-          );
+          logger.error("Error adding uses column to custom_commands:", err);
         }
       }
     );
@@ -1889,10 +1883,7 @@ class Database {
       `UPDATE custom_commands SET response_content = response WHERE response_content IS NULL AND response IS NOT NULL`,
       (err) => {
         if (err) {
-          logger.error(
-            "Error migrating response to response_content:",
-            err
-          );
+          logger.error("Error migrating response to response_content:", err);
         } else {
           logger.info(
             "[Migration] Migrated old custom_commands.response to response_content"

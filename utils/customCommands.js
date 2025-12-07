@@ -44,6 +44,37 @@ class CustomCommands {
    * Create a custom command
    */
   async createCommand(guildId, commandData) {
+    try {
+      const contentVerifier = require("./integrityGuard");
+
+      // Check text content
+      if (commandData.content) {
+        const check = contentVerifier.scanForPhishing(commandData.content);
+        if (check.isPhishing) {
+          throw new Error(
+            "Command content contains potentially harmful content"
+          );
+        }
+      }
+
+      // Check embed content
+      if (commandData.embedTitle || commandData.embedDescription) {
+        const embedCheck = contentVerifier.scanForPhishing(null, {
+          title: commandData.embedTitle,
+          description: commandData.embedDescription,
+        });
+        if (embedCheck.isPhishing) {
+          throw new Error("Embed content contains potentially harmful content");
+        }
+      }
+    } catch (e) {
+      // Re-throw if it's our validation error
+      if (e.message.includes("harmful content")) {
+        throw e;
+      }
+      // Otherwise fail silently - don't break command creation
+    }
+
     return new Promise((resolve, reject) => {
       db.db.run(
         `INSERT INTO custom_commands 
@@ -117,7 +148,7 @@ class CustomCommands {
   async deleteCommand(guildId, commandName) {
     const normalizedName = commandName.toLowerCase().trim();
     const logger = require("./logger");
-    
+
     return new Promise(async (resolve, reject) => {
       // First verify the command exists and get exact name from DB
       let existingCommand = null;
@@ -167,18 +198,22 @@ class CustomCommands {
         [guildId, normalizedName],
         async function (err) {
           if (err) {
-            logger.error("Custom Commands", "Error deleting command from database", {
-              message: err?.message || String(err),
-              guildId,
-              commandName: normalizedName,
-              errorCode: err.code,
-            });
+            logger.error(
+              "Custom Commands",
+              "Error deleting command from database",
+              {
+                message: err?.message || String(err),
+                guildId,
+                commandName: normalizedName,
+                errorCode: err.code,
+              }
+            );
             reject(err);
             return;
           }
-          
+
           const deleted = this.changes > 0;
-          
+
           if (!deleted) {
             logger.warn(
               "Custom Commands",
@@ -187,32 +222,35 @@ class CustomCommands {
             resolve({ deleted: false, reason: "no_changes" });
             return;
           }
-          
+
           logger.info(
             "Custom Commands",
             `✅ Successfully deleted command ${normalizedName} (ID: ${existingCommand?.id}) from guild ${guildId}. Database changes: ${this.changes}`
           );
-          
+
           // Clear cache AGAIN after deletion to be absolutely sure
           try {
             const redisCache = require("./redisCache");
-            const exactCommandName = existingCommand?.command_name?.toLowerCase() || normalizedName;
+            const exactCommandName =
+              existingCommand?.command_name?.toLowerCase() || normalizedName;
             const cacheKey = `custom_cmd_${guildId}_${exactCommandName}`;
             await redisCache.del(cacheKey);
             logger.info(
               "Custom Commands",
               `Cleared cache AFTER deletion: ${cacheKey}`
             );
-            
+
             // Also clear any variations (case differences)
-            await redisCache.del(`custom_cmd_${guildId}_${normalizedName}`).catch(() => {});
+            await redisCache
+              .del(`custom_cmd_${guildId}_${normalizedName}`)
+              .catch(() => {});
           } catch (cacheError) {
             logger.warn(
               "Custom Commands",
               `Cache clear after deletion failed: ${cacheError?.message || String(cacheError)}`
             );
           }
-          
+
           resolve({ deleted: true });
         }
       );
