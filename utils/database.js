@@ -5045,12 +5045,29 @@ class Database {
 
   async getAllAchievements() {
     return new Promise((resolve, reject) => {
+      // Check if achievements table has the new structure with rarity column
       this.db.all(
         `SELECT * FROM achievements ORDER BY rarity, name`,
         [],
         (err, rows) => {
-          if (err) reject(err);
-          else resolve(rows || []);
+          if (err) {
+            // If rarity column doesn't exist, try querying without it
+            if (err.message && err.message.includes("no such column: rarity")) {
+              // Try with just name ordering (old structure)
+              this.db.all(
+                `SELECT * FROM achievements ORDER BY name`,
+                [],
+                (err2, rows2) => {
+                  if (err2) reject(err2);
+                  else resolve(rows2 || []);
+                }
+              );
+            } else {
+              reject(err);
+            }
+          } else {
+            resolve(rows || []);
+          }
         }
       );
     });
