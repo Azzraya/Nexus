@@ -119,10 +119,11 @@ class CustomCommands {
     const logger = require("./logger");
     
     return new Promise(async (resolve, reject) => {
-      // First verify the command exists
+      // First verify the command exists and get exact name from DB
+      let existingCommand = null;
       try {
-        const existing = await this.getCommand(guildId, normalizedName);
-        if (!existing) {
+        existingCommand = await this.getCommand(guildId, normalizedName);
+        if (!existingCommand) {
           logger.debug(
             "Custom Commands",
             `Command not found for deletion: ${normalizedName} in guild ${guildId}`
@@ -130,6 +131,10 @@ class CustomCommands {
           resolve({ deleted: false, reason: "not_found" });
           return;
         }
+        logger.info(
+          "Custom Commands",
+          `Found command to delete: ${existingCommand.command_name} (ID: ${existingCommand.id}) in guild ${guildId}`
+        );
       } catch (checkError) {
         logger.error("Custom Commands", "Error checking if command exists", {
           message: checkError?.message || String(checkError),
@@ -138,6 +143,25 @@ class CustomCommands {
         return;
       }
 
+      // Clear cache FIRST to prevent race conditions
+      try {
+        const redisCache = require("./redisCache");
+        // Clear with exact command name from DB (in case of case mismatch)
+        const exactCommandName = existingCommand.command_name.toLowerCase();
+        const cacheKey = `custom_cmd_${guildId}_${exactCommandName}`;
+        await redisCache.del(cacheKey);
+        logger.info(
+          "Custom Commands",
+          `Cleared cache BEFORE deletion: ${cacheKey}`
+        );
+      } catch (cacheError) {
+        logger.warn(
+          "Custom Commands",
+          `Failed to clear cache before deletion (will retry after): ${cacheError?.message || String(cacheError)}`
+        );
+      }
+
+      // Now delete from database
       db.db.run(
         "DELETE FROM custom_commands WHERE guild_id = ? AND command_name = ?",
         [guildId, normalizedName],
@@ -147,6 +171,7 @@ class CustomCommands {
               message: err?.message || String(err),
               guildId,
               commandName: normalizedName,
+              errorCode: err.code,
             });
             reject(err);
             return;
@@ -157,7 +182,7 @@ class CustomCommands {
           if (!deleted) {
             logger.warn(
               "Custom Commands",
-              `Delete query executed but no rows affected for ${normalizedName} in guild ${guildId}`
+              `Delete query executed but no rows affected for ${normalizedName} in guild ${guildId}. Changes: ${this.changes}`
             );
             resolve({ deleted: false, reason: "no_changes" });
             return;
@@ -165,23 +190,26 @@ class CustomCommands {
           
           logger.info(
             "Custom Commands",
-            `Successfully deleted command ${normalizedName} from guild ${guildId}`
+            `✅ Successfully deleted command ${normalizedName} (ID: ${existingCommand?.id}) from guild ${guildId}. Database changes: ${this.changes}`
           );
           
-          // Clear Redis cache if command was deleted
+          // Clear cache AGAIN after deletion to be absolutely sure
           try {
             const redisCache = require("./redisCache");
-            const cacheKey = `custom_cmd_${guildId}_${normalizedName}`;
+            const exactCommandName = existingCommand?.command_name?.toLowerCase() || normalizedName;
+            const cacheKey = `custom_cmd_${guildId}_${exactCommandName}`;
             await redisCache.del(cacheKey);
-            logger.debug(
+            logger.info(
               "Custom Commands",
-              `Cleared cache for deleted command: ${cacheKey}`
+              `Cleared cache AFTER deletion: ${cacheKey}`
             );
+            
+            // Also clear any variations (case differences)
+            await redisCache.del(`custom_cmd_${guildId}_${normalizedName}`).catch(() => {});
           } catch (cacheError) {
-            // Non-critical - log but don't fail
-            logger.debug(
+            logger.warn(
               "Custom Commands",
-              `Cache clear failed (non-critical): ${cacheError?.message || String(cacheError)}`
+              `Cache clear after deletion failed: ${cacheError?.message || String(cacheError)}`
             );
           }
           

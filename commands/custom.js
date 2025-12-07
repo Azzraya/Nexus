@@ -249,19 +249,45 @@ module.exports = {
     } else if (subcommand === "delete") {
       await interaction.deferReply({ ephemeral: true });
 
-      const name = interaction.options.getString("name").toLowerCase();
+      const name = interaction.options.getString("name").toLowerCase().trim();
+      const logger = require("../utils/logger");
 
       try {
-        // First check if command exists
+        // First check if command exists - list all commands for debugging
+        const allCommands = await customCommands.getCommands(interaction.guild.id);
+        logger.info(
+          "Custom Command Delete",
+          `Looking for command "${name}" in guild ${interaction.guild.id}. Total commands: ${allCommands.length}`
+        );
+        
         const existing = await customCommands.getCommand(
           interaction.guild.id,
           name
         );
 
         if (!existing) {
+          logger.warn(
+            "Custom Command Delete",
+            `Command "${name}" not found. Available commands: ${allCommands.map(c => c.command_name).join(", ")}`
+          );
           return await interaction.editReply({
-            content: `❌ Command \`/${name}\` not found.`,
+            content: `❌ Command \`/${name}\` not found. Use \`/custom list\` to see available commands.`,
           });
+        }
+
+        logger.info(
+          "Custom Command Delete",
+          `Found command to delete: "${existing.command_name}" (ID: ${existing.id})`
+        );
+
+        // Clear cache BEFORE deletion
+        try {
+          const redisCache = require("../utils/redisCache");
+          const cacheKey = `custom_cmd_${interaction.guild.id}_${name}`;
+          await redisCache.del(cacheKey);
+          logger.info("Custom Command Delete", `Cleared cache: ${cacheKey}`);
+        } catch (cacheErr) {
+          logger.warn("Custom Command Delete", `Cache clear failed: ${cacheErr.message}`);
         }
 
         // Delete the command
@@ -271,16 +297,36 @@ module.exports = {
         );
 
         if (result.deleted) {
-          await interaction.editReply({
-            content: `✅ Custom command \`/${name}\` deleted successfully.`,
-          });
+          // Verify it's actually gone
+          const verifyDeleted = await customCommands.getCommand(
+            interaction.guild.id,
+            name
+          );
+          
+          if (verifyDeleted) {
+            logger.error(
+              "Custom Command Delete",
+              `Command still exists after deletion! Command: ${name}`
+            );
+            await interaction.editReply({
+              content: `⚠️ Warning: Command deletion reported success but command may still exist. Please try again or check manually.`,
+            });
+          } else {
+            logger.info("Custom Command Delete", `✅ Verified deletion - command no longer exists`);
+            await interaction.editReply({
+              content: `✅ Custom command \`/${name}\` deleted successfully.`,
+            });
+          }
         } else {
+          logger.warn(
+            "Custom Command Delete",
+            `Deletion failed: ${result.reason || "unknown"}`
+          );
           await interaction.editReply({
-            content: `❌ Failed to delete command \`/${name}\`. Please try again.`,
+            content: `❌ Failed to delete command \`/${name}\`. Reason: ${result.reason || "unknown"}`,
           });
         }
       } catch (error) {
-        const logger = require("../utils/logger");
         logger.error("Custom Command Delete", "Error deleting command", {
           message: error?.message || String(error),
           stack: error?.stack,
