@@ -2447,6 +2447,10 @@ class Database {
       "auto_mod_caps",
       "auto_mod_mentions",
       "snapshot_interval",
+      "seasonal_theme",
+      "verification_mode",
+      "alert_threshold",
+      "webhook_url",
     ];
 
     // Filter data to only allowed keys
