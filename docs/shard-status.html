@@ -725,6 +725,9 @@
               });
               item.addEventListener("mouseleave", hideTooltip);
             });
+
+            // Restore flashing state if a shard was being flashed
+            restoreFlashState();
           } else {
             shardsGrid.innerHTML =
               '<div class="error">No shard data available</div>';
@@ -757,8 +760,13 @@
 
       let flashInterval = null;
       let currentHighlightedShard = null;
+      let flashingShardId = null; // Track which shard should be flashing
+      let isContinuousFlash = false; // Track if flash should be continuous
 
       function flashShard(shardId, continuous = false) {
+        flashingShardId = shardId;
+        isContinuousFlash = continuous;
+        
         // Clear any existing flash
         if (flashInterval) {
           clearInterval(flashInterval);
@@ -784,9 +792,10 @@
         // If not continuous, flash for 5 seconds then stop
         if (!continuous) {
           setTimeout(() => {
-            if (currentHighlightedShard === shardElement) {
+            if (currentHighlightedShard === shardElement && !isContinuousFlash) {
               currentHighlightedShard.classList.remove("flashing");
               currentHighlightedShard = null;
+              flashingShardId = null;
             }
           }, 5000);
         }
@@ -801,6 +810,24 @@
         if (currentHighlightedShard) {
           currentHighlightedShard.classList.remove("flashing");
           currentHighlightedShard = null;
+        }
+        flashingShardId = null;
+        isContinuousFlash = false;
+      }
+
+      // Restore flashing state after grid refresh
+      function restoreFlashState() {
+        if (flashingShardId && isContinuousFlash) {
+          // Re-apply flashing to the shard after grid refresh
+          setTimeout(() => {
+            const shardElement = document.querySelector(
+              `.shard-item[data-shard-id="${flashingShardId}"]`
+            );
+            if (shardElement) {
+              currentHighlightedShard = shardElement;
+              shardElement.classList.add("flashing");
+            }
+          }, 100);
         }
       }
 
