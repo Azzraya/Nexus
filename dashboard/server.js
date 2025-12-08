@@ -272,15 +272,90 @@ class DashboardServer {
     });
 
     // Auth routes
-    this.app.get("/login", passport.authenticate("discord"));
+    this.app.get("/login", (req, res, next) => {
+      const ip = this.getRealIP(req);
+      const userAgent = req.headers["user-agent"] || "Unknown";
+      const timestamp = new Date().toISOString();
+
+      logger.info(
+        "OAuth",
+        `🔐 OAuth login attempt | IP: ${ip} | User-Agent: ${userAgent} | Time: ${timestamp}`
+      );
+
+      passport.authenticate("discord")(req, res, next);
+    });
 
     this.app.get(
       "/callback",
-      passport.authenticate("discord", { failureRedirect: "/" }),
-      (req, res) => res.redirect("/dashboard")
+      passport.authenticate("discord", {
+        failureRedirect: "/",
+        failureFlash: false,
+      }),
+      (req, res) => {
+        const ip = this.getRealIP(req);
+        const userAgent = req.headers["user-agent"] || "Unknown";
+        const timestamp = new Date().toISOString();
+        const user = req.user;
+
+        if (user) {
+          logger.info(
+            "OAuth",
+            `✅ OAuth login SUCCESS | User: ${user.username}#${user.discriminator} (${user.id}) | IP: ${ip} | User-Agent: ${userAgent} | Time: ${timestamp}`
+          );
+
+          // Store login in database for analytics
+          db.db.run(
+            `INSERT INTO oauth_logins (user_id, username, ip, user_agent, timestamp, success) 
+             VALUES (?, ?, ?, ?, ?, ?)`,
+            [user.id, user.username, ip, userAgent, timestamp, 1],
+            (err) => {
+              if (err) {
+                logger.error(
+                  "OAuth",
+                  "Failed to store login in database",
+                  err
+                );
+              }
+            }
+          );
+        } else {
+          logger.warn(
+            "OAuth",
+            `❌ OAuth login FAILED | IP: ${ip} | User-Agent: ${userAgent} | Time: ${timestamp}`
+          );
+
+          // Store failed login attempt
+          db.db.run(
+            `INSERT INTO oauth_logins (user_id, username, ip, user_agent, timestamp, success) 
+             VALUES (?, ?, ?, ?, ?, ?)`,
+            [null, "FAILED_LOGIN", ip, userAgent, timestamp, 0],
+            (err) => {
+              if (err) {
+                logger.error(
+                  "OAuth",
+                  "Failed to store failed login in database",
+                  err
+                );
+              }
+            }
+          );
+        }
+
+        res.redirect("/dashboard");
+      }
     );
 
     this.app.get("/logout", (req, res) => {
+      const user = req.user;
+      const ip = this.getRealIP(req);
+
+      if (user) {
+        logger.info(
+          "OAuth",
+          `🚪 User logged out: ${user.username}#${user.discriminator} (${user.id}) | IP: ${ip}`
+        );
+      }
+
       req.logout(() => res.redirect("/"));
     });
 
@@ -311,21 +386,25 @@ class DashboardServer {
 
     // Dashboard routes
     // New: Server-specific dashboard with URL persistence
-    this.app.get("/:guildId/dashboard", this.checkAuthPage.bind(this), (req, res) => {
-      const guildId = req.params.guildId;
-      const userGuilds = req.user.guilds || [];
-      
-      // Check if user has admin permissions for this guild
-      const hasAccess = userGuilds.some(
-        (g) => g.id === guildId && (g.permissions & 0x8) === 0x8 // ADMINISTRATOR permission
-      );
+    this.app.get(
+      "/:guildId/dashboard",
+      this.checkAuthPage.bind(this),
+      (req, res) => {
+        const guildId = req.params.guildId;
+        const userGuilds = req.user.guilds || [];
 
-      if (!hasAccess) {
-        return res.redirect("/no-access");
+        // Check if user has admin permissions for this guild
+        const hasAccess = userGuilds.some(
+          (g) => g.id === guildId && (g.permissions & 0x8) === 0x8 // ADMINISTRATOR permission
+        );
+
+        if (!hasAccess) {
+          return res.redirect("/no-access");
+        }
+
+        res.sendFile(path.join(__dirname, "public", "dashboard.html"));
       }
-
-      res.sendFile(path.join(__dirname, "public", "dashboard.html"));
-    });
+    );
 
     // Legacy: Redirect to server selection (for backwards compatibility)
     this.app.get("/dashboard", this.checkAuthPage.bind(this), (req, res) => {

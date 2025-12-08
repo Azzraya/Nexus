@@ -1121,18 +1121,47 @@ class Database {
 
     // Create indexes for IP logs
     this.db.run(`
-            CREATE INDEX IF NOT EXISTS idx_ip_logs_timestamp 
+            CREATE INDEX IF NOT EXISTS idx_ip_logs_timestamp
             ON ip_logs(timestamp)
         `);
 
     this.db.run(`
-            CREATE INDEX IF NOT EXISTS idx_ip_logs_ip 
+            CREATE INDEX IF NOT EXISTS idx_ip_logs_ip
             ON ip_logs(ip_address)
         `);
 
     this.db.run(`
-            CREATE INDEX IF NOT EXISTS idx_ip_logs_user 
+            CREATE INDEX IF NOT EXISTS idx_ip_logs_user
             ON ip_logs(discord_user_id)
+        `);
+
+    // OAuth login tracking table
+    this.db.run(`
+            CREATE TABLE IF NOT EXISTS oauth_logins (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id TEXT,
+                username TEXT,
+                ip TEXT NOT NULL,
+                user_agent TEXT,
+                timestamp TEXT NOT NULL,
+                success INTEGER DEFAULT 1
+            )
+        `);
+
+    // Create indexes for OAuth logs
+    this.db.run(`
+            CREATE INDEX IF NOT EXISTS idx_oauth_logins_timestamp
+            ON oauth_logins(timestamp)
+        `);
+
+    this.db.run(`
+            CREATE INDEX IF NOT EXISTS idx_oauth_logins_user
+            ON oauth_logins(user_id)
+        `);
+
+    this.db.run(`
+            CREATE INDEX IF NOT EXISTS idx_oauth_logins_ip
+            ON oauth_logins(ip)
         `);
 
     // Invite source tracking table
