@@ -1358,18 +1358,188 @@ async function deleteDiscordAutoModRule(ruleId) {
   }
 }
 
-function editDiscordAutoModRule(ruleId) {
-  alert(
-    "Edit functionality coming soon! For now, delete and recreate the rule."
-  );
-  // TODO: Implement edit modal
+async function editDiscordAutoModRule(ruleId) {
+  try {
+    // Fetch current rule data
+    const response = await fetch(`/api/server/${currentServer}/automod`);
+    const data = await response.json();
+    const rule = data.rules.find(r => r.id === ruleId);
+    
+    if (!rule) {
+      alert("❌ Rule not found");
+      return;
+    }
+
+    // Create modal
+    const modal = document.createElement("div");
+    modal.className = "modal-overlay";
+    modal.innerHTML = `
+      <div class="modal-content" style="max-width: 600px;">
+        <h2>✏️ Edit AutoMod Rule</h2>
+        <form id="editRuleForm" onsubmit="return false;">
+          <div class="form-group">
+            <label>Rule Type</label>
+            <select id="editRuleType" class="form-control" required>
+              <option value="spam" ${rule.rule_type === 'spam' ? 'selected' : ''}>Spam Detection</option>
+              <option value="links" ${rule.rule_type === 'links' ? 'selected' : ''}>Link Blocking</option>
+              <option value="invites" ${rule.rule_type === 'invites' ? 'selected' : ''}>Invite Blocking</option>
+              <option value="mentions" ${rule.rule_type === 'mentions' ? 'selected' : ''}>Mass Mentions</option>
+              <option value="caps" ${rule.rule_type === 'caps' ? 'selected' : ''}>Excessive Caps</option>
+              <option value="profanity" ${rule.rule_type === 'profanity' ? 'selected' : ''}>Profanity Filter</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Trigger Pattern (regex or keywords, comma-separated)</label>
+            <textarea id="editRuleTrigger" class="form-control" rows="3" required>${rule.trigger || ''}</textarea>
+            <small style="opacity:0.7;">Example: discord.gg, bit.ly, .* (any text)</small>
+          </div>
+          <div class="form-group">
+            <label>Action</label>
+            <select id="editRuleAction" class="form-control" required>
+              <option value="delete" ${rule.action === 'delete' ? 'selected' : ''}>Delete Message</option>
+              <option value="warn" ${rule.action === 'warn' ? 'selected' : ''}>Warn User</option>
+              <option value="timeout" ${rule.action === 'timeout' ? 'selected' : ''}>Timeout User (5m)</option>
+              <option value="kick" ${rule.action === 'kick' ? 'selected' : ''}>Kick User</option>
+              <option value="ban" ${rule.action === 'ban' ? 'selected' : ''}>Ban User</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>
+              <input type="checkbox" id="editRuleEnabled" ${rule.enabled ? 'checked' : ''}>
+              Enabled
+            </label>
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn-secondary" onclick="this.closest('.modal-overlay').remove()">Cancel</button>
+            <button type="button" class="btn-primary" onclick="saveAutoModRuleEdit(${ruleId})">Save Changes</button>
+          </div>
+        </form>
+      </div>
+    `;
+    document.body.appendChild(modal);
+  } catch (error) {
+    alert(`❌ Error loading rule: ${error.message}`);
+  }
+}
+
+async function saveAutoModRuleEdit(ruleId) {
+  const ruleType = document.getElementById("editRuleType").value;
+  const trigger = document.getElementById("editRuleTrigger").value;
+  const action = document.getElementById("editRuleAction").value;
+  const enabled = document.getElementById("editRuleEnabled").checked;
+
+  try {
+    const response = await fetch(`/api/dashboard/automod/${ruleId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ rule_type: ruleType, trigger, action, enabled: enabled ? 1 : 0 })
+    });
+
+    if (!response.ok) throw new Error("Failed to update rule");
+
+    document.querySelector(".modal-overlay").remove();
+    loadAutoModPage();
+    showNotification("✅ Rule updated successfully!");
+  } catch (error) {
+    alert(`❌ Error: ${error.message}`);
+  }
 }
 
 function showCreateAutoModRuleModal() {
-  // TODO: Implement create rule modal
-  alert(
-    "Create rule modal coming soon! Use Discord AutoMod commands or Discord's server settings for now."
-  );
+  const modal = document.createElement("div");
+  modal.className = "modal-overlay";
+  modal.innerHTML = `
+    <div class="modal-content" style="max-width: 600px;">
+      <h2>➕ Create AutoMod Rule</h2>
+      <form id="createRuleForm" onsubmit="return false;">
+        <div class="form-group">
+          <label>Rule Type</label>
+          <select id="createRuleType" class="form-control" required>
+            <option value="">Select a type...</option>
+            <option value="spam">Spam Detection</option>
+            <option value="links">Link Blocking</option>
+            <option value="invites">Invite Blocking</option>
+            <option value="mentions">Mass Mentions</option>
+            <option value="caps">Excessive Caps</option>
+            <option value="profanity">Profanity Filter</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Trigger Pattern (regex or keywords, comma-separated)</label>
+          <textarea id="createRuleTrigger" class="form-control" rows="3" required placeholder="discord.gg, bit.ly, or .* for any"></textarea>
+          <small style="opacity:0.7;">Use .* to match any text, or specific keywords/patterns</small>
+        </div>
+        <div class="form-group">
+          <label>Action</label>
+          <select id="createRuleAction" class="form-control" required>
+            <option value="">Select an action...</option>
+            <option value="delete">Delete Message</option>
+            <option value="warn">Warn User</option>
+            <option value="timeout">Timeout User (5m)</option>
+            <option value="kick">Kick User</option>
+            <option value="ban">Ban User</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>
+            <input type="checkbox" id="createRuleEnabled" checked>
+            Enabled
+          </label>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" onclick="this.closest('.modal-overlay').remove()">Cancel</button>
+          <button type="button" class="btn-primary" onclick="createAutoModRule()">Create Rule</button>
+        </div>
+      </form>
+    </div>
+  `;
+  document.body.appendChild(modal);
+}
+
+async function createAutoModRule() {
+  const ruleType = document.getElementById("createRuleType").value;
+  const trigger = document.getElementById("createRuleTrigger").value;
+  const action = document.getElementById("createRuleAction").value;
+  const enabled = document.getElementById("createRuleEnabled").checked;
+
+  if (!ruleType || !trigger || !action) {
+    alert("❌ Please fill in all fields");
+    return;
+  }
+
+  try {
+    const response = await fetch(`/api/dashboard/automod`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        guild_id: currentServer,
+        rule_type: ruleType,
+        trigger,
+        action,
+        enabled: enabled ? 1 : 0
+      })
+    });
+
+    if (!response.ok) throw new Error("Failed to create rule");
+
+    document.querySelector(".modal-overlay").remove();
+    loadAutoModPage();
+    showNotification("✅ Rule created successfully!");
+  } catch (error) {
+    alert(`❌ Error: ${error.message}`);
+  }
+}
+
+function showNotification(message) {
+  const notification = document.createElement("div");
+  notification.style.cssText = `
+    position: fixed; top: 20px; right: 20px; background: #4CAF50; color: white;
+    padding: 15px 25px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    z-index: 10000; animation: slideIn 0.3s ease-out;
+  `;
+  notification.textContent = message;
+  document.body.appendChild(notification);
+  setTimeout(() => notification.remove(), 3000);
 }
 
 // Join Gate Configuration Page
@@ -2287,6 +2457,165 @@ function startAutoRefresh() {
 
 // Navigation
 document.addEventListener("DOMContentLoaded", () => {
+  // Theme Toggle System
+  const themeToggle = document.getElementById("themeToggle");
+  const themeIcon = document.getElementById("themeIcon");
+  const savedTheme = localStorage.getItem("theme") || "dark";
+  
+  // Apply saved theme
+  document.documentElement.setAttribute("data-theme", savedTheme);
+  themeIcon.textContent = savedTheme === "dark" ? "🌙" : "☀️";
+  
+  themeToggle.addEventListener("click", () => {
+    const currentTheme = document.documentElement.getAttribute("data-theme");
+    const newTheme = currentTheme === "dark" ? "light" : "dark";
+    
+    document.documentElement.setAttribute("data-theme", newTheme);
+    localStorage.setItem("theme", newTheme);
+    themeIcon.textContent = newTheme === "dark" ? "🌙" : "☀️";
+  });
+
+  // Keyboard Shortcuts System
+  document.addEventListener("keydown", (e) => {
+    // Ctrl+K or Cmd+K: Command Palette (Quick Navigation)
+    if ((e.ctrlKey || e.metaKey) && e.key === "k") {
+      e.preventDefault();
+      showCommandPalette();
+      return;
+    }
+
+    // Ctrl+T or Cmd+T: Toggle Theme
+    if ((e.ctrlKey || e.metaKey) && e.key === "t") {
+      e.preventDefault();
+      themeToggle.click();
+      return;
+    }
+
+    // Ctrl+H or Cmd+H: Go Home
+    if ((e.ctrlKey || e.metaKey) && e.key === "h") {
+      e.preventDefault();
+      window.location.href = "/dashboard";
+      return;
+    }
+
+    // Escape: Close modals
+    if (e.key === "Escape") {
+      const modal = document.querySelector(".modal-overlay");
+      if (modal) modal.remove();
+      const palette = document.getElementById("commandPalette");
+      if (palette) palette.remove();
+      return;
+    }
+
+    // Number keys 1-9: Navigate to pages
+    if (!e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) {
+      if (e.key >= "1" && e.key <= "9") {
+        const index = parseInt(e.key) - 1;
+        const navItems = document.querySelectorAll(".nav-item");
+        if (navItems[index]) {
+          navItems[index].click();
+        }
+      }
+    }
+  });
+
+  // Command Palette Function
+  function showCommandPalette() {
+    // Remove existing palette if any
+    const existing = document.getElementById("commandPalette");
+    if (existing) existing.remove();
+
+    const commands = [
+      { name: "Overview", page: "overview", icon: "📊", key: "1" },
+      { name: "Anti-Nuke", page: "anti-nuke", icon: "🛡️", key: "2" },
+      { name: "Anti-Raid", page: "anti-raid", icon: "⚔️", key: "3" },
+      { name: "Join Gate", page: "joingate", icon: "🛡️", key: "4" },
+      { name: "Verification", page: "verification", icon: "✅", key: "5" },
+      { name: "Auto-Mod", page: "auto-mod", icon: "🤖", key: "6" },
+      { name: "Mod Logs", page: "modlogs", icon: "⚖️", key: "7" },
+      { name: "Message Logs", page: "message-logs", icon: "💬", key: "8" },
+      { name: "Security Logs", page: "security", icon: "🔒", key: "9" },
+      { name: "Toggle Theme", action: () => themeToggle.click(), icon: "🎨", key: "T" },
+      { name: "Go Home", action: () => window.location.href = "/dashboard", icon: "🏠", key: "H" }
+    ];
+
+    const palette = document.createElement("div");
+    palette.id = "commandPalette";
+    palette.style.cssText = `
+      position: fixed; top: 20%; left: 50%; transform: translateX(-50%);
+      background: var(--bg-card); border: 1px solid var(--border-color);
+      border-radius: 12px; padding: 20px; width: 90%; max-width: 600px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5); z-index: 10000;
+      backdrop-filter: blur(20px);
+    `;
+
+    let html = `
+      <h3 style="margin-bottom: 15px; color: var(--text-primary);">⚡ Command Palette</h3>
+      <input type="text" id="paletteSearch" placeholder="Search commands..." style="
+        width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color);
+        background: var(--bg-primary); color: var(--text-primary); margin-bottom: 15px;
+        font-size: 16px;
+      ">
+      <div id="commandList" style="max-height: 400px; overflow-y: auto;">
+    `;
+
+    commands.forEach((cmd, i) => {
+      html += `
+        <div class="command-item" data-page="${cmd.page}" data-action="${i}" style="
+          padding: 12px; border-radius: 8px; margin-bottom: 8px; cursor: pointer;
+          display: flex; justify-content: space-between; align-items: center;
+          background: var(--bg-primary); transition: all 0.2s ease;
+        ">
+          <span style="color: var(--text-primary);">${cmd.icon} ${cmd.name}</span>
+          <kbd style="background: var(--bg-card); padding: 4px 8px; border-radius: 4px; 
+                      font-size: 12px; color: var(--text-secondary);">${cmd.key}</kbd>
+        </div>
+      `;
+    });
+
+    html += `</div>`;
+    palette.innerHTML = html;
+    document.body.appendChild(palette);
+
+    // Focus search input
+    const searchInput = document.getElementById("paletteSearch");
+    searchInput.focus();
+
+    // Search functionality
+    searchInput.addEventListener("input", (e) => {
+      const query = e.target.value.toLowerCase();
+      const items = document.querySelectorAll(".command-item");
+      items.forEach(item => {
+        const text = item.textContent.toLowerCase();
+        item.style.display = text.includes(query) ? "flex" : "none";
+      });
+    });
+
+    // Click handlers
+    document.querySelectorAll(".command-item").forEach((item, i) => {
+      item.addEventListener("click", () => {
+        const cmd = commands[i];
+        if (cmd.page) {
+          const navItem = document.querySelector(`[data-page="${cmd.page}"]`);
+          if (navItem) navItem.click();
+        } else if (cmd.action) {
+          cmd.action();
+        }
+        palette.remove();
+      });
+
+      item.addEventListener("mouseenter", () => {
+        item.style.background = "var(--accent-secondary)";
+        item.style.transform = "translateX(5px)";
+      });
+
+      item.addEventListener("mouseleave", () => {
+        item.style.background = "var(--bg-primary)";
+        item.style.transform = "translateX(0)";
+      });
+    });
+  }
+
   // Check if URL contains guild ID (e.g., /123456789/dashboard)
   const pathParts = window.location.pathname.split("/").filter((p) => p);
   const urlGuildId =

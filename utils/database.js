@@ -17,6 +17,11 @@ class Database {
     const dbPath = path.join(__dirname, "..", "data", "nexus.db");
     const dataDir = path.dirname(dbPath);
 
+    // Prepared statement cache for performance
+    this.preparedStatements = new Map();
+    this.queryCache = new Map();
+    this.queryCacheTimeout = 30000; // 30 second cache
+
     if (!fs.existsSync(dataDir)) {
       fs.mkdirSync(dataDir, { recursive: true });
     }
@@ -5216,6 +5221,130 @@ class Database {
         }
       );
     });
+  }
+
+  // ========== PERFORMANCE OPTIMIZATION METHODS ==========
+
+  /**
+   * Execute query with caching (for frequently read data)
+   * @param {string} query - SQL query
+   * @param {array} params - Query parameters
+   * @param {number} cacheDuration - Cache duration in milliseconds
+   */
+  async cachedQuery(query, params = [], cacheDuration = 30000) {
+    const cacheKey = `${query}_${JSON.stringify(params)}`;
+    
+    // Check cache
+    if (this.queryCache.has(cacheKey)) {
+      const cached = this.queryCache.get(cacheKey);
+      if (Date.now() < cached.expires) {
+        return cached.data;
+      }
+      this.queryCache.delete(cacheKey);
+    }
+
+    // Execute query
+    const result = await new Promise((resolve, reject) => {
+      this.db.all(query, params, (err, rows) => {
+        if (err) reject(err);
+        else resolve(rows);
+      });
+    });
+
+    // Cache result
+    this.queryCache.set(cacheKey, {
+      data: result,
+      expires: Date.now() + cacheDuration
+    });
+
+    return result;
+  }
+
+  /**
+   * Batch operations for better performance
+   * @param {array} operations - Array of {query, params} objects
+   */
+  async batchExecute(operations) {
+    return new Promise((resolve, reject) => {
+      this.db.serialize(() => {
+        this.db.run("BEGIN TRANSACTION");
+        
+        const promises = operations.map(op => {
+          return new Promise((res, rej) => {
+            this.db.run(op.query, op.params, (err) => {
+              if (err) rej(err);
+              else res();
+            });
+          });
+        });
+
+        Promise.all(promises)
+          .then(() => {
+            this.db.run("COMMIT", (err) => {
+              if (err) reject(err);
+              else resolve();
+            });
+          })
+          .catch((err) => {
+            this.db.run("ROLLBACK");
+            reject(err);
+          });
+      });
+    });
+  }
+
+  /**
+   * Clear query cache
+   */
+  clearCache(pattern = null) {
+    if (pattern) {
+      // Clear specific pattern
+      for (const [key, value] of this.queryCache.entries()) {
+        if (key.includes(pattern)) {
+          this.queryCache.delete(key);
+        }
+      }
+    } else {
+      // Clear all
+      this.queryCache.clear();
+    }
+  }
+
+  /**
+   * Get database statistics
+   */
+  async getStats() {
+    const stats = {
+      cacheSize: this.queryCache.size,
+      preparedStatements: this.preparedStatements.size
+    };
+
+    // Get table sizes
+    const tables = await new Promise((resolve, reject) => {
+      this.db.all(
+        "SELECT name FROM sqlite_master WHERE type='table'",
+        (err, rows) => {
+          if (err) reject(err);
+          else resolve(rows);
+        }
+      );
+    });
+
+    stats.tables = {};
+    for (const table of tables) {
+      const count = await new Promise((resolve, reject) => {
+        this.db.get(
+          `SELECT COUNT(*) as count FROM ${table.name}`,
+          (err, row) => {
+            if (err) reject(err);
+            else resolve(row.count);
+          }
+        );
+      });
+      stats.tables[table.name] = count;
+    }
+
+    return stats;
   }
 }
 

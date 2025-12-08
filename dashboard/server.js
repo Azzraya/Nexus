@@ -1108,6 +1108,79 @@ class DashboardServer {
       }
     );
 
+    // Dashboard AutoMod management (simplified routes for frontend)
+    this.app.post(
+      "/api/dashboard/automod",
+      this.checkAuth,
+      async (req, res) => {
+        try {
+          const { guild_id, rule_type, trigger, action, enabled } = req.body;
+          const guild = this.client.guilds.cache.get(guild_id);
+          if (!guild) return res.status(404).json({ error: "Server not found" });
+
+          // Store in database
+          await new Promise((resolve, reject) => {
+            db.db.run(
+              `INSERT INTO automod_rules (guild_id, rule_type, trigger, action, enabled) VALUES (?, ?, ?, ?, ?)`,
+              [guild_id, rule_type, trigger, action, enabled || 1],
+              (err) => (err ? reject(err) : resolve())
+            );
+          });
+
+          res.json({ success: true, message: "AutoMod rule created" });
+        } catch (error) {
+          res.status(500).json({ error: error.message });
+        }
+      }
+    );
+
+    this.app.put(
+      "/api/dashboard/automod/:ruleId",
+      this.checkAuth,
+      async (req, res) => {
+        try {
+          const { rule_type, trigger, action, enabled } = req.body;
+          const updates = [];
+          const values = [];
+
+          if (rule_type !== undefined) {
+            updates.push("rule_type = ?");
+            values.push(rule_type);
+          }
+          if (trigger !== undefined) {
+            updates.push("trigger = ?");
+            values.push(trigger);
+          }
+          if (action !== undefined) {
+            updates.push("action = ?");
+            values.push(action);
+          }
+          if (enabled !== undefined) {
+            updates.push("enabled = ?");
+            values.push(enabled);
+          }
+
+          if (updates.length === 0) {
+            return res.status(400).json({ error: "No fields to update" });
+          }
+
+          values.push(req.params.ruleId);
+
+          await new Promise((resolve, reject) => {
+            db.db.run(
+              `UPDATE automod_rules SET ${updates.join(", ")} WHERE id = ?`,
+              values,
+              (err) => (err ? reject(err) : resolve())
+            );
+          });
+
+          res.json({ success: true, message: "AutoMod rule updated" });
+        } catch (error) {
+          res.status(500).json({ error: error.message });
+        }
+      }
+    );
+
     // Join Gate API endpoints
     const JoinGate = require("../utils/joinGate");
 
