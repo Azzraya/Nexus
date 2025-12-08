@@ -214,6 +214,26 @@
 
       .shard-item.flashing,
       .cluster-item.flashing {
+        animation: flash 1s ease-in-out infinite;
+        border-color: #667eea !important;
+        box-shadow: 0 0 20px rgba(102, 126, 234, 0.8) !important;
+        background: rgba(102, 126, 234, 0.4) !important;
+        z-index: 100;
+      }
+
+      @keyframes flash {
+        0%, 100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 0.7;
+          transform: scale(1.05);
+        }
+      }
+
+      .shard-item.flashing,
+      .cluster-item.flashing {
         animation: flash 0.5s ease-in-out infinite;
         border-color: #667eea;
         box-shadow: 0 0 20px rgba(102, 126, 234, 0.8);
@@ -738,10 +758,11 @@
       let flashInterval = null;
       let currentHighlightedShard = null;
 
-      function flashShard(shardId) {
+      function flashShard(shardId, continuous = false) {
         // Clear any existing flash
         if (flashInterval) {
           clearInterval(flashInterval);
+          flashInterval = null;
         }
         if (currentHighlightedShard) {
           currentHighlightedShard.classList.remove("flashing");
@@ -751,23 +772,59 @@
         const shardElement = document.querySelector(
           `.shard-item[data-shard-id="${shardId}"]`
         );
-        if (!shardElement) return;
+        if (!shardElement) {
+          console.warn(`Shard ${shardId} not found in grid`);
+          return;
+        }
 
         currentHighlightedShard = shardElement;
         shardElement.classList.add("flashing");
         shardElement.scrollIntoView({ behavior: "smooth", block: "center" });
 
-        // Flash for 5 seconds, then stop
-        setTimeout(() => {
-          if (flashInterval) {
-            clearInterval(flashInterval);
-            flashInterval = null;
+        // If not continuous, flash for 5 seconds then stop
+        if (!continuous) {
+          setTimeout(() => {
+            if (currentHighlightedShard === shardElement) {
+              currentHighlightedShard.classList.remove("flashing");
+              currentHighlightedShard = null;
+            }
+          }, 5000);
+        }
+        // If continuous, it will keep flashing until search is cleared
+      }
+
+      function stopFlashing() {
+        if (flashInterval) {
+          clearInterval(flashInterval);
+          flashInterval = null;
+        }
+        if (currentHighlightedShard) {
+          currentHighlightedShard.classList.remove("flashing");
+          currentHighlightedShard = null;
+        }
+      }
+
+      async function searchForGuild(guildId, continuous = false) {
+        if (!guildId || !/^\d+$/.test(guildId)) {
+          return null;
+        }
+
+        try {
+          const response = await window.apiCall(`/api/shards?guild=${guildId}`);
+          if (response.yourGuild && response.yourGuild.shardId !== undefined) {
+            const shardId = response.yourGuild.shardId;
+            flashShard(shardId, continuous);
+            return shardId;
+          } else if (response.yourGuild && response.yourGuild.error) {
+            alert(`Server not found: ${response.yourGuild.error}`);
+            return null;
           }
-          if (currentHighlightedShard) {
-            currentHighlightedShard.classList.remove("flashing");
-            currentHighlightedShard = null;
-          }
-        }, 5000);
+        } catch (error) {
+          console.error("Failed to fetch guild shard:", error);
+          alert(`Error finding server: ${error.message}`);
+          return null;
+        }
+        return null;
       }
 
       // Server search functionality
@@ -775,35 +832,22 @@
         const searchId = e.target.value.trim();
         
         // Reset all highlights
+        stopFlashing();
         document.querySelectorAll(".shard-item, .cluster-item").forEach((item) => {
           item.style.border = "";
           item.style.boxShadow = "";
           item.style.background = "";
-          item.classList.remove("flashing");
         });
 
         if (!searchId) {
-          if (flashInterval) {
-            clearInterval(flashInterval);
-            flashInterval = null;
-          }
-          currentHighlightedShard = null;
           return;
         }
 
         // Check if it's a numeric ID (likely a guild ID)
         if (/^\d+$/.test(searchId) && searchId.length > 10) {
-          // This looks like a guild ID, fetch shard info
-          try {
-            const response = await window.apiCall(`/api/shards?guild=${searchId}`);
-            if (response.yourGuild && response.yourGuild.shardId !== undefined) {
-              const shardId = response.yourGuild.shardId;
-              flashShard(shardId);
-              return;
-            }
-          } catch (error) {
-            console.error("Failed to fetch guild shard:", error);
-          }
+          // This looks like a guild ID, fetch shard info (non-continuous for typing)
+          await searchForGuild(searchId, false);
+          return;
         }
 
         // Otherwise, highlight matching shard/cluster by ID
@@ -815,6 +859,45 @@
             item.scrollIntoView({ behavior: "smooth", block: "center" });
           }
         });
+      });
+
+      // Handle Enter key for continuous flashing
+      document.getElementById("serverSearch").addEventListener("keypress", async (e) => {
+        if (e.key === "Enter") {
+          const searchId = e.target.value.trim();
+          
+          // Stop any existing flash
+          stopFlashing();
+          
+          // Reset all highlights
+          document.querySelectorAll(".shard-item, .cluster-item").forEach((item) => {
+            item.style.border = "";
+            item.style.boxShadow = "";
+            item.style.background = "";
+          });
+
+          if (!searchId) {
+            return;
+          }
+
+          // Check if it's a numeric ID (likely a guild ID)
+          if (/^\d+$/.test(searchId) && searchId.length > 10) {
+            // This looks like a guild ID, fetch shard info and flash continuously
+            await searchForGuild(searchId, true);
+            return;
+          }
+
+          // Otherwise, highlight matching shard/cluster by ID
+          const matchingItem = Array.from(document.querySelectorAll(".shard-item, .cluster-item")).find(
+            (item) => item.textContent === searchId
+          );
+          
+          if (matchingItem) {
+            matchingItem.classList.add("flashing");
+            matchingItem.scrollIntoView({ behavior: "smooth", block: "center" });
+            currentHighlightedShard = matchingItem;
+          }
+        }
       });
 
       // Initial load
