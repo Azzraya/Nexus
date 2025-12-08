@@ -11,7 +11,7 @@ async function loadUser() {
     // Auto-redirect on auth errors
     if (!response.ok && (response.status === 401 || response.status === 403)) {
       console.log("Unauthorized access, redirecting to login...");
-      window.location.href = "/auth/discord";
+      window.location.href = "/login";
       return;
     }
 
@@ -33,7 +33,7 @@ async function loadServers() {
     // Auto-redirect on auth errors
     if (!response.ok && (response.status === 401 || response.status === 403)) {
       console.log("Unauthorized access, redirecting to login...");
-      window.location.href = "/auth/discord";
+      window.location.href = "/login";
       return;
     }
 
@@ -220,7 +220,7 @@ async function loadServerData(serverId) {
       // Auto-redirect on auth errors
       if (response.status === 401 || response.status === 403) {
         console.log("Unauthorized access, redirecting to login...");
-        window.location.href = "/auth/discord";
+        window.location.href = "/login";
         return;
       }
       throw new Error(`Server returned ${response.status}`);
@@ -2413,7 +2413,7 @@ document.addEventListener("DOMContentLoaded", () => {
         (response.status === 401 || response.status === 403)
       ) {
         console.log("Unauthorized access, redirecting to login...");
-        window.location.href = "/auth/discord";
+        window.location.href = "/login";
         return;
       }
 

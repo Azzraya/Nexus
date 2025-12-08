@@ -1960,7 +1960,7 @@ class DashboardServer {
   // Middleware for HTML pages - redirects to Discord login
   checkAuthPage(req, res, next) {
     if (req.isAuthenticated()) return next();
-    res.redirect("/auth/discord");
+    res.redirect("/login");
   }
 
   // ===== PUBLIC API v1 Routes =====
