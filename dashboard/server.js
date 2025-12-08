@@ -306,12 +306,12 @@ class DashboardServer {
 
     // Dashboard routes
     // New: Server-specific dashboard with URL persistence
-    this.app.get("/:guildId/dashboard", this.checkAuth, (req, res) => {
+    this.app.get("/:guildId/dashboard", this.checkAuthPage.bind(this), (req, res) => {
       res.sendFile(path.join(__dirname, "public", "dashboard.html"));
     });
 
     // Legacy: Redirect to server selection (for backwards compatibility)
-    this.app.get("/dashboard", this.checkAuth, (req, res) => {
+    this.app.get("/dashboard", this.checkAuthPage.bind(this), (req, res) => {
       res.sendFile(path.join(__dirname, "public", "dashboard.html"));
     });
 
@@ -1955,6 +1955,12 @@ class DashboardServer {
   checkAuth(req, res, next) {
     if (req.isAuthenticated()) return next();
     res.status(401).json({ error: "Unauthorized" });
+  }
+
+  // Middleware for HTML pages - redirects to Discord login
+  checkAuthPage(req, res, next) {
+    if (req.isAuthenticated()) return next();
+    res.redirect("/auth/discord");
   }
 
   // ===== PUBLIC API v1 Routes =====
