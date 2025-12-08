@@ -2343,13 +2343,9 @@ document.addEventListener("DOMContentLoaded", () => {
     // URL has guild ID - load that server directly
     currentServer = urlGuildId;
 
-    // Show sidebar since we have a server selected
+    // Show sidebar since we have a server selected (explicitly set to flex)
     const sidebar = document.querySelector(".sidebar");
-    sidebar.style.display = "";
-
-    // On mobile, sidebar needs to be visible (not hidden off-screen)
-    // But don't auto-open it - let the user click the menu button
-    // We'll just ensure it's ready to be toggled
+    sidebar.style.display = "flex";
 
     loadUser();
 
