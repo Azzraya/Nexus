@@ -3,7 +3,8 @@ const session = require("express-session");
 const passport = require("passport");
 const DiscordStrategy = require("passport-discord").Strategy;
 const path = require("path");
-const fs = require("fs").promises;
+const fs = require("fs"); // For sync methods (existsSync, readFileSync, writeFileSync)
+const fsPromises = require("fs").promises; // For async methods (readFile, writeFile)
 const crypto = require("crypto");
 const compression = require("compression");
 // Ensure logger is loaded first to prevent initialization errors
@@ -5864,7 +5865,7 @@ class DashboardServer {
           gradient: req.body.gradient || { from: "#667eea", to: "#764ba2" },
         };
 
-        await fs.writeFile(bannerPath, JSON.stringify(bannerData, null, 2));
+        await fsPromises.writeFile(bannerPath, JSON.stringify(bannerData, null, 2));
         logger.info("Banner", "Updated successfully");
         res.json({ success: true, banner: bannerData });
       } catch (error) {
