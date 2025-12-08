@@ -59,21 +59,20 @@ module.exports = {
     const subcommand = interaction.options.getSubcommand();
 
     if (subcommand === "create") {
-      await interaction.reply({
-        content:
-          "🔄 Workflow creation is interactive. Use `/workflow create` and follow the prompts, or use the web dashboard for advanced workflow building.",
-        flags: MessageFlags.Ephemeral,
-      });
-
-      // Simplified workflow creation
       const name = interaction.options.getString("name");
       const description =
         interaction.options.getString("description") || "No description";
 
+      await interaction.reply({
+        content:
+          "⚙️ **Workflow Reference Created**\n\nTo configure triggers and actions, use the web dashboard. This command creates a workflow entry only.",
+        flags: MessageFlags.Ephemeral,
+      });
+
       const embed = new EmbedBuilder()
-        .setTitle("⚙️ Create Workflow")
+        .setTitle("⚙️ Workflow Created")
         .setDescription(
-          `**Name:** ${name}\n**Description:** ${description}\n\nWorkflows allow you to automate actions based on triggers. Use the web dashboard for full workflow builder, or configure via commands.`
+          `**Name:** ${name}\n**Description:** ${description}\n\n**Next Step:** Visit the web dashboard to configure triggers and actions for this workflow.\n\n**Dashboard:** Use \`/dashboard\` to get the link.`
         )
         .addFields({
           name: "Available Triggers",
