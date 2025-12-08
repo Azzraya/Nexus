@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Access Denied - Nexus</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+
+      .error-container {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        padding: 60px 40px;
+        text-align: center;
+        max-width: 500px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        animation: slideIn 0.5s ease-out;
+      }
+
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateY(-30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .error-icon {
+        font-size: 80px;
+        margin-bottom: 20px;
+        animation: pulse 2s ease-in-out infinite;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.1);
+        }
+      }
+
+      h1 {
+        color: #333;
+        font-size: 32px;
+        margin-bottom: 15px;
+      }
+
+      p {
+        color: #666;
+        font-size: 18px;
+        line-height: 1.6;
+        margin-bottom: 30px;
+      }
+
+      .button-group {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      .btn {
+        padding: 15px 40px;
+        border-radius: 10px;
+        text-decoration: none;
+        font-size: 16px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+      }
+
+      .btn-secondary {
+        background: #f0f0f0;
+        color: #333;
+      }
+
+      .btn-secondary:hover {
+        background: #e0e0e0;
+        transform: translateY(-2px);
+      }
+
+      .info-box {
+        background: #f8f9fa;
+        border-left: 4px solid #667eea;
+        padding: 15px;
+        margin-top: 30px;
+        border-radius: 5px;
+        text-align: left;
+      }
+
+      .info-box h3 {
+        color: #667eea;
+        font-size: 16px;
+        margin-bottom: 8px;
+      }
+
+      .info-box ul {
+        list-style: none;
+        color: #666;
+        font-size: 14px;
+      }
+
+      .info-box li {
+        padding: 5px 0;
+        padding-left: 20px;
+        position: relative;
+      }
+
+      .info-box li:before {
+        content: "•";
+        position: absolute;
+        left: 0;
+        color: #667eea;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="error-container">
+      <div class="error-icon">🚫</div>
+      <h1>Access Denied</h1>
+      <p>
+        You don't have permission to moderate this Discord server. Only server
+        administrators can access the Nexus dashboard.
+      </p>
+
+      <div class="button-group">
+        <a href="/" class="btn btn-primary">
+          <span>🏠</span>
+          <span>Go Home</span>
+        </a>
+        <a href="/dashboard" class="btn btn-secondary">
+          <span>📊</span>
+          <span>My Servers</span>
+        </a>
+      </div>
+
+      <div class="info-box">
+        <h3>Need Access?</h3>
+        <ul>
+          <li>Ask a server admin to grant you Administrator permissions</li>
+          <li>Make sure you're logged in with the correct Discord account</li>
+          <li>Check that Nexus is added to the server</li>
+        </ul>
+      </div>
+    </div>
+  </body>
+</html>

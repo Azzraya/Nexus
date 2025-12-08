@@ -304,9 +304,26 @@ class DashboardServer {
       });
     });
 
+    // No access error page
+    this.app.get("/no-access", (req, res) => {
+      res.sendFile(path.join(__dirname, "public", "no-access.html"));
+    });
+
     // Dashboard routes
     // New: Server-specific dashboard with URL persistence
     this.app.get("/:guildId/dashboard", this.checkAuthPage.bind(this), (req, res) => {
+      const guildId = req.params.guildId;
+      const userGuilds = req.user.guilds || [];
+      
+      // Check if user has admin permissions for this guild
+      const hasAccess = userGuilds.some(
+        (g) => g.id === guildId && (g.permissions & 0x8) === 0x8 // ADMINISTRATOR permission
+      );
+
+      if (!hasAccess) {
+        return res.redirect("/no-access");
+      }
+
       res.sendFile(path.join(__dirname, "public", "dashboard.html"));
     });
 
