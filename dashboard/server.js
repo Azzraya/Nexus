@@ -1527,21 +1527,57 @@ class DashboardServer {
       res.status(200).end();
     });
 
-    // Get shard-specific stats (public endpoint for users to check their shard)
+    // Get shard and cluster stats (public endpoint)
     this.app.get("/api/shards", async (req, res) => {
       try {
         const ShardManager = require("../utils/shardManager");
         const shardStats = await ShardManager.getShardStats(this.client);
         const guildId = req.query.guild; // Optional: check specific guild's shard
 
+        // Check if using clusters (via environment or client property)
+        const usingClusters = process.env.USING_CLUSTERING === "true" || this.client.cluster !== undefined;
+        let clusterInfo = null;
+
+        // Try to get cluster information if available
+        if (usingClusters && this.client.cluster) {
+          try {
+            // Get cluster stats via broadcastEval if available
+            const clusterStats = await this.client.cluster.broadcastEval(() => {
+              return {
+                clusterId: this.cluster.id,
+                shardIds: this.shard.ids,
+                guilds: this.guilds.cache.size,
+                users: this.users.cache.size,
+                ping: this.ws.ping,
+                status: this.ws.status,
+                uptime: process.uptime(),
+                memory: process.memoryUsage(),
+              };
+            }).catch(() => null);
+
+            if (clusterStats) {
+              clusterInfo = {
+                totalClusters: clusterStats.length,
+                clusters: clusterStats,
+                totalGuilds: clusterStats.reduce((acc, c) => acc + c.guilds, 0),
+                totalUsers: clusterStats.reduce((acc, c) => acc + c.users, 0),
+              };
+            }
+          } catch (err) {
+            // Cluster info not available, continue with shard info only
+          }
+        }
+
         let response = {
           shards: shardStats.shards || [shardStats],
-          totalGuilds: shardStats.totalGuilds || shardStats.guilds,
-          totalUsers: shardStats.totalUsers || shardStats.users,
+          totalGuilds: shardStats.totalGuilds || shardStats.guilds || 0,
+          totalUsers: shardStats.totalUsers || shardStats.users || 0,
           timestamp: Date.now(),
+          usingClusters: usingClusters,
+          clusters: clusterInfo,
         };
 
-        // If guild ID provided, find which shard it's on
+        // If guild ID provided, find which shard/cluster it's on
         if (guildId) {
           const guild = this.client.guilds.cache.get(guildId);
           if (guild) {
@@ -1550,6 +1586,7 @@ class DashboardServer {
               id: guildId,
               name: guild.name,
               shardId,
+              clusterId: this.client.cluster?.id || null,
               memberCount: guild.memberCount,
             };
           } else {
@@ -1561,6 +1598,7 @@ class DashboardServer {
 
         res.json(response);
       } catch (error) {
+        logger.error("API", "Shards endpoint error", error);
         res.status(500).json({ error: error.message });
       }
     });

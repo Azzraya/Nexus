@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Shard & Cluster Status - Nexus Bot</title>
+    <link rel="icon" type="image/webp" href="https://cdn.discordapp.com/avatars/1444739230679957646/32f2d77d44c2f3989fecd858be53f396.webp?size=256" />
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      .status-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      .status-header {
+        text-align: center;
+        margin-bottom: 40px;
+        color: white;
+      }
+
+      .status-header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+      }
+
+      .status-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 15px;
+        padding: 30px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        color: #333;
+      }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+      }
+
+      .stat-box {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 20px;
+        border-radius: 10px;
+        color: white;
+        text-align: center;
+      }
+
+      .stat-box h3 {
+        font-size: 0.9rem;
+        opacity: 0.9;
+        margin-bottom: 10px;
+      }
+
+      .stat-box .value {
+        font-size: 2rem;
+        font-weight: bold;
+      }
+
+      .shards-grid,
+      .clusters-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+      }
+
+      .shard-card,
+      .cluster-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 20px;
+        border-radius: 10px;
+        color: white;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        transition: transform 0.2s;
+      }
+
+      .shard-card:hover,
+      .cluster-card:hover {
+        transform: translateY(-3px);
+      }
+
+      .shard-card h4,
+      .cluster-card h4 {
+        font-size: 1.5rem;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .status-badge {
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+      }
+
+      .status-online {
+        background: rgba(76, 175, 80, 0.3);
+        border: 1px solid #4caf50;
+      }
+
+      .status-connecting {
+        background: rgba(255, 193, 7, 0.3);
+        border: 1px solid #ffc107;
+      }
+
+      .status-disconnected {
+        background: rgba(244, 67, 54, 0.3);
+        border: 1px solid #f44336;
+      }
+
+      .shard-stat,
+      .cluster-stat {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        font-size: 0.9rem;
+      }
+
+      .shard-stat:last-child,
+      .cluster-stat:last-child {
+        border-bottom: none;
+      }
+
+      .refresh-btn {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        padding: 15px 25px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 50px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        transition: transform 0.2s;
+        z-index: 1000;
+      }
+
+      .refresh-btn:hover {
+        transform: scale(1.05);
+      }
+
+      .refresh-btn:active {
+        transform: scale(0.95);
+      }
+
+      .auto-refresh {
+        text-align: center;
+        margin-top: 20px;
+        padding: 15px;
+        background: #f0f4ff;
+        border-radius: 8px;
+        color: #666;
+      }
+
+      .loading {
+        text-align: center;
+        padding: 40px;
+        color: #667eea;
+        font-size: 1.2rem;
+      }
+
+      .error {
+        background: #fee;
+        color: #c33;
+        padding: 20px;
+        border-radius: 10px;
+        border-left: 4px solid #c33;
+        margin: 20px 0;
+      }
+
+      @media (max-width: 768px) {
+        .status-header h1 {
+          font-size: 2rem;
+        }
+
+        .stats-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .shards-grid,
+        .clusters-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .refresh-btn {
+          bottom: 20px;
+          right: 20px;
+          padding: 12px 20px;
+        }
+      }
+    </style>
+  </head>
+  <body style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh;">
+    <div class="status-container">
+      <div class="status-header">
+        <h1>⚡ Shard & Cluster Status</h1>
+        <p style="opacity: 0.9; font-size: 1.1rem;">Real-time status of all bot shards and clusters</p>
+      </div>
+
+      <div class="status-card">
+        <div class="stats-grid" id="summaryStats">
+          <div class="stat-box">
+            <h3>Total Shards</h3>
+            <div class="value" id="totalShards">-</div>
+          </div>
+          <div class="stat-box">
+            <h3>Total Clusters</h3>
+            <div class="value" id="totalClusters">-</div>
+          </div>
+          <div class="stat-box">
+            <h3>Total Servers</h3>
+            <div class="value" id="totalGuilds">-</div>
+          </div>
+          <div class="stat-box">
+            <h3>Total Users</h3>
+            <div class="value" id="totalUsers">-</div>
+          </div>
+        </div>
+
+        <div class="auto-refresh">
+          <label>
+            <input type="checkbox" id="autoRefresh" checked />
+            Auto-refresh every 5 seconds
+          </label>
+        </div>
+      </div>
+
+      <div id="clustersSection" style="display: none;">
+        <div class="status-card">
+          <h2 style="margin-bottom: 20px; color: #667eea;">🔄 Clusters</h2>
+          <div class="clusters-grid" id="clustersGrid">
+            <div class="loading">Loading clusters...</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="status-card">
+        <h2 style="margin-bottom: 20px; color: #667eea;">⚡ Shards</h2>
+        <div class="shards-grid" id="shardsGrid">
+          <div class="loading">Loading shards...</div>
+        </div>
+      </div>
+    </div>
+
+    <button class="refresh-btn" onclick="loadStatus()" id="refreshBtn">🔄 Refresh</button>
+
+    <script src="config.js"></script>
+    <script>
+      const API_BASE = window.NEXUS_API_URL || "https://regular-puma-clearly.ngrok-free.app";
+      let refreshInterval = null;
+
+      function getStatusBadge(status) {
+        const statusMap = {
+          0: { text: "READY", class: "status-online" },
+          1: { text: "CONNECTING", class: "status-connecting" },
+          2: { text: "RECONNECTING", class: "status-connecting" },
+          3: { text: "IDLE", class: "status-connecting" },
+          4: { text: "NEARLY", class: "status-connecting" },
+          5: { text: "DISCONNECTED", class: "status-disconnected" },
+          6: { text: "WAITING_FOR_GUILDS", class: "status-connecting" },
+          7: { text: "IDENTIFYING", class: "status-connecting" },
+          8: { text: "RESUMING", class: "status-connecting" },
+        };
+        const statusInfo = statusMap[status] || { text: "UNKNOWN", class: "status-disconnected" };
+        return `<span class="status-badge ${statusInfo.class}">${statusInfo.text}</span>`;
+      }
+
+      function formatUptime(seconds) {
+        const days = Math.floor(seconds / 86400);
+        const hours = Math.floor((seconds % 86400) / 3600);
+        const minutes = Math.floor((seconds % 3600) / 60);
+        if (days > 0) return `${days}d ${hours}h`;
+        if (hours > 0) return `${hours}h ${minutes}m`;
+        return `${minutes}m`;
+      }
+
+      function formatMemory(bytes) {
+        const mb = bytes / 1024 / 1024;
+        return `${mb.toFixed(1)} MB`;
+      }
+
+      async function loadStatus() {
+        const refreshBtn = document.getElementById("refreshBtn");
+        refreshBtn.disabled = true;
+        refreshBtn.textContent = "🔄 Loading...";
+
+        try {
+          const response = await window.apiCall("/api/shards");
+          const data = response;
+
+          // Update summary stats
+          document.getElementById("totalShards").textContent = data.shards?.length || 0;
+          document.getElementById("totalClusters").textContent = data.clusters?.totalClusters || (data.usingClusters ? "N/A" : "N/A");
+          document.getElementById("totalGuilds").textContent = (data.totalGuilds || 0).toLocaleString();
+          document.getElementById("totalUsers").textContent = (data.totalUsers || 0).toLocaleString();
+
+          // Display clusters if available
+          if (data.clusters && data.clusters.clusters) {
+            document.getElementById("clustersSection").style.display = "block";
+            const clustersGrid = document.getElementById("clustersGrid");
+            clustersGrid.innerHTML = data.clusters.clusters
+              .map(
+                (cluster) => `
+              <div class="cluster-card">
+                <h4>
+                  Cluster ${cluster.clusterId}
+                  ${getStatusBadge(cluster.status)}
+                </h4>
+                <div class="cluster-stat">
+                  <span>Shards:</span>
+                  <span>${cluster.shardIds.join(", ")}</span>
+                </div>
+                <div class="cluster-stat">
+                  <span>Servers:</span>
+                  <span>${cluster.guilds.toLocaleString()}</span>
+                </div>
+                <div class="cluster-stat">
+                  <span>Users:</span>
+                  <span>${cluster.users.toLocaleString()}</span>
+                </div>
+                <div class="cluster-stat">
+                  <span>Ping:</span>
+                  <span>${cluster.ping}ms</span>
+                </div>
+                <div class="cluster-stat">
+                  <span>Uptime:</span>
+                  <span>${formatUptime(cluster.uptime)}</span>
+                </div>
+                <div class="cluster-stat">
+                  <span>Memory:</span>
+                  <span>${formatMemory(cluster.memory?.heapUsed || 0)}</span>
+                </div>
+              </div>
+            `
+              )
+              .join("");
+          } else {
+            document.getElementById("clustersSection").style.display = "none";
+          }
+
+          // Display shards
+          const shardsGrid = document.getElementById("shardsGrid");
+          if (data.shards && data.shards.length > 0) {
+            shardsGrid.innerHTML = data.shards
+              .map(
+                (shard) => `
+              <div class="shard-card">
+                <h4>
+                  Shard ${shard.id}
+                  ${getStatusBadge(shard.status)}
+                </h4>
+                <div class="shard-stat">
+                  <span>Servers:</span>
+                  <span>${shard.guilds.toLocaleString()}</span>
+                </div>
+                <div class="shard-stat">
+                  <span>Users:</span>
+                  <span>${shard.users.toLocaleString()}</span>
+                </div>
+                <div class="shard-stat">
+                  <span>Ping:</span>
+                  <span>${shard.ping}ms</span>
+                </div>
+                <div class="shard-stat">
+                  <span>Uptime:</span>
+                  <span>${formatUptime(shard.uptime || 0)}</span>
+                </div>
+                ${shard.memory ? `
+                <div class="shard-stat">
+                  <span>Memory:</span>
+                  <span>${formatMemory(shard.memory.heapUsed || 0)}</span>
+                </div>
+                ` : ""}
+              </div>
+            `
+              )
+              .join("");
+          } else {
+            shardsGrid.innerHTML = '<div class="error">No shard data available</div>';
+          }
+        } catch (error) {
+          console.error("Failed to load status:", error);
+          document.getElementById("shardsGrid").innerHTML = `
+            <div class="error">
+              <h3>❌ Error Loading Status</h3>
+              <p>${error.message}</p>
+            </div>
+          `;
+        } finally {
+          refreshBtn.disabled = false;
+          refreshBtn.textContent = "🔄 Refresh";
+        }
+      }
+
+      // Auto-refresh toggle
+      document.getElementById("autoRefresh").addEventListener("change", (e) => {
+        if (e.target.checked) {
+          refreshInterval = setInterval(loadStatus, 5000);
+        } else {
+          if (refreshInterval) {
+            clearInterval(refreshInterval);
+            refreshInterval = null;
+          }
+        }
+      });
+
+      // Initial load
+      loadStatus();
+      if (document.getElementById("autoRefresh").checked) {
+        refreshInterval = setInterval(loadStatus, 5000);
+      }
+    </script>
+  </body>
+</html>
