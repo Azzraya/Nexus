@@ -2407,7 +2407,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     try {
       const response = await fetch(
-        `/api/dashboard/workflows?guild=${currentGuild}`
+        `/api/dashboard/workflows?guild=${currentServer}`
       );
       const data = await response.json();
 
@@ -2547,7 +2547,7 @@ document.addEventListener("DOMContentLoaded", () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          guild: currentGuild,
+          guild: currentServer,
           name,
           description,
           trigger_type: trigger,
