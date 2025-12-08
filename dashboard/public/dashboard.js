@@ -948,53 +948,6 @@ async function bulkToggle(setting, value) {
     resultEl.style.display = "none";
   }, 10000);
 }
-
-// Initialize
-document.addEventListener("DOMContentLoaded", () => {
-  loadUser();
-  loadServers();
-
-  // Handle navigation
-  document.querySelectorAll(".nav-item").forEach((item) => {
-    item.addEventListener("click", (e) => {
-      e.preventDefault();
-
-      // Update active state
-      document
-        .querySelectorAll(".nav-item")
-        .forEach((i) => i.classList.remove("active"));
-      item.classList.add("active");
-
-      const page = item.dataset.page;
-      currentPage = page;
-
-      // Update page title
-      const pageTitle = item.querySelector("span:last-child").textContent;
-      document.getElementById("currentPage").textContent = pageTitle;
-
-      // Load page content
-      if (page === "overview") {
-        if (currentServer) loadServerData(currentServer);
-      } else {
-        loadPage(page);
-      }
-    });
-  });
-
-  // Mobile menu toggle
-  const mobileMenuToggle = document.getElementById("mobileMenuToggle");
-  const sidebar = document.getElementById("sidebar");
-  const overlay = document.getElementById("sidebarOverlay");
-
-  function toggleMobileMenu() {
-    sidebar.classList.toggle("active");
-    overlay.classList.toggle("active");
-  }
-
-  mobileMenuToggle.addEventListener("click", toggleMobileMenu);
-  overlay.addEventListener("click", toggleMobileMenu);
-});
-
 // Anti-Nuke Settings Page
 async function loadAntiNukePage() {
   const contentArea = document.getElementById("contentArea");
@@ -2351,6 +2304,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Always load server data first to populate sidebar
     loadServerData(urlGuildId).then(() => {
+      // Ensure sidebar stays visible (something might be hiding it)
+      const sidebar = document.querySelector(".sidebar");
+      sidebar.style.display = "flex";
+
       // Check if there's a hash in URL (e.g., /{guildId}/dashboard#anti-nuke)
       const hash = window.location.hash.replace("#", "");
       if (hash && hash !== "overview") {
