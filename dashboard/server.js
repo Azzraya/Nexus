@@ -3,7 +3,8 @@ const session = require("express-session");
 const passport = require("passport");
 const DiscordStrategy = require("passport-discord").Strategy;
 const path = require("path");
-const fs = require("fs").promises;
+const fs = require("fs");
+const fsPromises = require("fs").promises;
 const crypto = require("crypto");
 const compression = require("compression");
 // Ensure logger is loaded first to prevent initialization errors
