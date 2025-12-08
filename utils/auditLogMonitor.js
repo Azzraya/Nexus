@@ -180,6 +180,28 @@ class AuditLogMonitor {
         return;
       }
 
+      // Handle connection timeout errors - suppress logging to avoid spam
+      const isTimeoutError =
+        error.name === "ConnectTimeoutError" ||
+        error.name === "TimeoutError" ||
+        error.message?.includes("Connect Timeout") ||
+        error.message?.includes("timeout") ||
+        error.message?.includes("ETIMEDOUT") ||
+        error.code === "ETIMEDOUT";
+
+      if (isTimeoutError) {
+        // Only log at debug level for timeouts, and stop monitoring after many consecutive timeouts
+        if (monitoring.consecutiveErrors >= this.maxConsecutiveErrors * 3) {
+          logger.debug(
+            "AuditLogMonitor",
+            `Stopped monitoring ${guild.name || guild.id} (${guild.id}) after ${monitoring.consecutiveErrors} consecutive connection timeouts`
+          );
+          this.stopMonitoring(guild.id);
+        }
+        // Otherwise, silently skip this cycle
+        return;
+      }
+
       // For other errors, log but don't stop immediately
       logger.error("AuditLogMonitor", "Error analyzing audit logs", {
         message: error?.message || String(error),
@@ -241,6 +263,15 @@ class AuditLogMonitor {
           return null;
         }
 
+        // Handle connection timeout errors (suppress logging to avoid spam)
+        const isTimeoutError =
+          error.name === "ConnectTimeoutError" ||
+          error.name === "TimeoutError" ||
+          error.message?.includes("Connect Timeout") ||
+          error.message?.includes("timeout") ||
+          error.message?.includes("ETIMEDOUT") ||
+          error.code === "ETIMEDOUT";
+
         // Handle socket/network errors with retry
         const isSocketError =
           error.name === "SocketError" ||
@@ -252,22 +283,37 @@ class AuditLogMonitor {
         // Handle rate limit errors
         const isRateLimit = error.code === 429 || error.httpStatus === 429;
 
-        if (isSocketError || isRateLimit) {
+        if (isTimeoutError || isSocketError || isRateLimit) {
           if (attempt < maxRetries) {
             // Exponential backoff: 1s, 2s, 4s
             const delay = Math.min(1000 * Math.pow(2, attempt - 1), 5000);
-            logger.debug(
-              "AuditLogMonitor",
-              `Retry ${attempt}/${maxRetries} for ${guild.name || guild.id} after ${delay}ms (${error.name || error.message})`
-            );
+            // Only log at debug level for timeouts to avoid spam
+            if (isTimeoutError) {
+              logger.debug(
+                "AuditLogMonitor",
+                `Connection timeout for ${guild.name || guild.id}, retry ${attempt}/${maxRetries} after ${delay}ms`
+              );
+            } else {
+              logger.debug(
+                "AuditLogMonitor",
+                `Retry ${attempt}/${maxRetries} for ${guild.name || guild.id} after ${delay}ms (${error.name || error.message})`
+              );
+            }
             await new Promise((resolve) => setTimeout(resolve, delay));
             continue;
           } else {
-            // Max retries reached, log and skip
-            logger.debug(
-              "AuditLogMonitor",
-              `Max retries reached for ${guild.name || guild.id}, skipping this cycle`
-            );
+            // Max retries reached, silently skip for timeouts
+            if (isTimeoutError) {
+              logger.debug(
+                "AuditLogMonitor",
+                `Max retries reached for ${guild.name || guild.id} due to connection timeouts, skipping this cycle`
+              );
+            } else {
+              logger.debug(
+                "AuditLogMonitor",
+                `Max retries reached for ${guild.name || guild.id}, skipping this cycle`
+              );
+            }
             return null;
           }
         }
