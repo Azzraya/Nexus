@@ -38,6 +38,21 @@ Nexus Bot ("we", "our", "us") is committed to protecting your privacy. This Priv
 - API usage data
 - Event processing times
 
+### Dashboard Authentication Information
+
+When you log in to the Nexus Bot dashboard, we collect:
+
+- **Discord ID** - Your unique Discord identifier
+- **Username** - Your Discord username
+- **IP Address** - For security monitoring and breach detection
+- **User Agent** - Browser and device information for analytics
+- **Login Timestamp** - When you accessed the dashboard
+- **Login Success/Failure** - To detect unauthorized access attempts
+
+**Purpose:** This data is collected for security monitoring, analytics, and detecting unauthorized access to the dashboard. We use this information to protect your account and improve our service.
+
+**Retention:** OAuth login logs are retained for **90 days** for security purposes, then automatically deleted.
+
 ## How We Use Information
 
 ### Security & Moderation
@@ -401,6 +416,7 @@ We may update this Privacy Policy from time to time. We will:
 
 ## Version History
 
+- **December 5, 2025** - Added OAuth dashboard authentication tracking documentation
 - **December 5, 2025** - Added message edit/delete event logging documentation, API v2 deprecation notice
 - **December 1, 2025** - Added enhanced recovery features (webhooks, emojis, stickers, server settings), whitelist system, predictive threat detection documentation
 - **December 1, 2025** - Added auto-recovery snapshots documentation, performance metrics, enhanced security logging, server lockdown features
