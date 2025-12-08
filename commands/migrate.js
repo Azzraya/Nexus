@@ -15,9 +15,6 @@ module.exports = {
     try {
       await interaction.deferReply({ ephemeral: true });
 
-      const fromBot = interaction.options.getString("from");
-
-      if (fromBot === "wick") {
       const WickMigration = require("../utils/wickMigration");
       const migration = new WickMigration(interaction.client);
 
