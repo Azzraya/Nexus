@@ -1535,25 +1535,29 @@ class DashboardServer {
         const guildId = req.query.guild; // Optional: check specific guild's shard
 
         // Check if using clusters (via environment or client property)
-        const usingClusters = process.env.USING_CLUSTERING === "true" || this.client.cluster !== undefined;
+        const usingClusters =
+          process.env.USING_CLUSTERING === "true" ||
+          this.client.cluster !== undefined;
         let clusterInfo = null;
 
         // Try to get cluster information if available
         if (usingClusters && this.client.cluster) {
           try {
             // Get cluster stats via broadcastEval if available
-            const clusterStats = await this.client.cluster.broadcastEval(() => {
-              return {
-                clusterId: this.cluster.id,
-                shardIds: this.shard.ids,
-                guilds: this.guilds.cache.size,
-                users: this.users.cache.size,
-                ping: this.ws.ping,
-                status: this.ws.status,
-                uptime: process.uptime(),
-                memory: process.memoryUsage(),
-              };
-            }).catch(() => null);
+            const clusterStats = await this.client.cluster
+              .broadcastEval(() => {
+                return {
+                  clusterId: this.cluster.id,
+                  shardIds: this.shard.ids,
+                  guilds: this.guilds.cache.size,
+                  users: this.users.cache.size,
+                  ping: this.ws.ping,
+                  status: this.ws.status,
+                  uptime: process.uptime(),
+                  memory: process.memoryUsage(),
+                };
+              })
+              .catch(() => null);
 
             if (clusterStats) {
               clusterInfo = {
@@ -5903,7 +5907,10 @@ class DashboardServer {
           gradient: req.body.gradient || { from: "#667eea", to: "#764ba2" },
         };
 
-        await fsPromises.writeFile(bannerPath, JSON.stringify(bannerData, null, 2));
+        await fsPromises.writeFile(
+          bannerPath,
+          JSON.stringify(bannerData, null, 2)
+        );
         logger.info("Banner", "Updated successfully");
         res.json({ success: true, banner: bannerData });
       } catch (error) {

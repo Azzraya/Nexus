@@ -190,7 +190,11 @@
 
       .shard-item.operational,
       .cluster-item.operational {
-        background: linear-gradient(135deg, rgba(102, 126, 234, 0.3) 0%, rgba(118, 75, 162, 0.3) 100%);
+        background: linear-gradient(
+          135deg,
+          rgba(102, 126, 234, 0.3) 0%,
+          rgba(118, 75, 162, 0.3) 100%
+        );
         border-color: #667eea;
         color: #c4b5fd;
         box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
@@ -222,7 +226,8 @@
       }
 
       @keyframes flash {
-        0%, 100% {
+        0%,
+        100% {
           opacity: 1;
           transform: scale(1);
         }
@@ -241,7 +246,8 @@
       }
 
       @keyframes flash {
-        0%, 100% {
+        0%,
+        100% {
           background: rgba(102, 126, 234, 0.4);
           transform: scale(1);
         }
@@ -551,12 +557,16 @@
         tooltip.innerHTML = `
           <div class="tooltip-title">${isCluster ? `Cluster ${data.id}` : `Shard ${data.id}`}</div>
           <div class="tooltip-info">
-            ${isCluster ? `
+            ${
+              isCluster
+                ? `
               <div class="tooltip-row">
                 <span class="tooltip-label">Shards:</span>
                 <span class="tooltip-value">${data.shardIds?.join(", ") || "N/A"}</span>
               </div>
-            ` : ""}
+            `
+                : ""
+            }
             <div class="tooltip-row">
               <span class="tooltip-label">Servers:</span>
               <span class="tooltip-value">${(data.guilds || 0).toLocaleString()}</span>
@@ -577,12 +587,16 @@
               <span class="tooltip-label">Uptime:</span>
               <span class="tooltip-value">${formatUptime(data.uptime || 0)}</span>
             </div>
-            ${data.memory ? `
+            ${
+              data.memory
+                ? `
               <div class="tooltip-row">
                 <span class="tooltip-label">Memory:</span>
                 <span class="tooltip-value">${formatMemory(data.memory.heapUsed || data.memory)}</span>
               </div>
-            ` : ""}
+            `
+                : ""
+            }
           </div>
           <div class="tooltip-arrow"></div>
         `;
@@ -603,7 +617,8 @@
         if (top < 10) {
           top = rect.bottom + 12;
           tooltip.querySelector(".tooltip-arrow").style.top = "-8px";
-          tooltip.querySelector(".tooltip-arrow").style.transform = "translateX(-50%) rotate(180deg)";
+          tooltip.querySelector(".tooltip-arrow").style.transform =
+            "translateX(-50%) rotate(180deg)";
         }
 
         tooltip.style.left = `${left}px`;
@@ -638,6 +653,10 @@
         refreshBtn.disabled = true;
         refreshBtn.textContent = "🔄 Loading...";
 
+        // Preserve flashing state if active
+        const wasFlashing = currentHighlightedShard ? currentHighlightedShard.dataset.shardId : null;
+        const wasFlashingContinuous = wasFlashing && currentHighlightedShard?.classList.contains("flashing");
+
         try {
           const response = await window.apiCall("/api/shards");
           const data = response;
@@ -653,7 +672,8 @@
           const outageShards = shards.filter((s) => s.status === 5).length;
 
           document.getElementById("totalShards").textContent = shards.length;
-          document.getElementById("operationalShards").textContent = `${operationalShards}/${shards.length}`;
+          document.getElementById("operationalShards").textContent =
+            `${operationalShards}/${shards.length}`;
           document.getElementById("totalGuilds").textContent = (
             data.totalGuilds || 0
           ).toLocaleString();
@@ -669,10 +689,14 @@
               (c) => c.status !== 0 || c.ping >= 200
             ).length;
 
-            document.getElementById("totalClusters").textContent = clusters.length;
-            document.getElementById("problemClusters").textContent = `${problemClusters}/${clusters.length}`;
+            document.getElementById("totalClusters").textContent =
+              clusters.length;
+            document.getElementById("problemClusters").textContent =
+              `${problemClusters}/${clusters.length}`;
             if (problemClusters > 0) {
-              document.getElementById("problemClusters").classList.add("problem");
+              document
+                .getElementById("problemClusters")
+                .classList.add("problem");
             }
 
             const clustersGrid = document.getElementById("clustersGrid");
@@ -690,7 +714,9 @@
             // Add hover events for clusters
             clustersGrid.querySelectorAll(".cluster-item").forEach((item) => {
               const clusterId = parseInt(item.dataset.clusterId);
-              const clusterData = clusters.find((c) => c.clusterId === clusterId);
+              const clusterData = clusters.find(
+                (c) => c.clusterId === clusterId
+              );
               item.addEventListener("mouseenter", (e) => {
                 createTooltip(e.target, clusterData, true);
               });
@@ -766,7 +792,7 @@
       function flashShard(shardId, continuous = false) {
         flashingShardId = shardId;
         isContinuousFlash = continuous;
-        
+
         // Clear any existing flash
         if (flashInterval) {
           clearInterval(flashInterval);
@@ -792,7 +818,10 @@
         // If not continuous, flash for 5 seconds then stop
         if (!continuous) {
           setTimeout(() => {
-            if (currentHighlightedShard === shardElement && !isContinuousFlash) {
+            if (
+              currentHighlightedShard === shardElement &&
+              !isContinuousFlash
+            ) {
               currentHighlightedShard.classList.remove("flashing");
               currentHighlightedShard = null;
               flashingShardId = null;
@@ -855,53 +884,20 @@
       }
 
       // Server search functionality
-      document.getElementById("serverSearch").addEventListener("input", async (e) => {
-        const searchId = e.target.value.trim();
-        
-        // Reset all highlights
-        stopFlashing();
-        document.querySelectorAll(".shard-item, .cluster-item").forEach((item) => {
-          item.style.border = "";
-          item.style.boxShadow = "";
-          item.style.background = "";
-        });
-
-        if (!searchId) {
-          return;
-        }
-
-        // Check if it's a numeric ID (likely a guild ID)
-        if (/^\d+$/.test(searchId) && searchId.length > 10) {
-          // This looks like a guild ID, fetch shard info (non-continuous for typing)
-          await searchForGuild(searchId, false);
-          return;
-        }
-
-        // Otherwise, highlight matching shard/cluster by ID
-        document.querySelectorAll(".shard-item, .cluster-item").forEach((item) => {
-          if (item.textContent === searchId) {
-            item.style.border = "2px solid #667eea";
-            item.style.boxShadow = "0 0 15px rgba(102, 126, 234, 0.7)";
-            item.style.background = "rgba(102, 126, 234, 0.3)";
-            item.scrollIntoView({ behavior: "smooth", block: "center" });
-          }
-        });
-      });
-
-      // Handle Enter key for continuous flashing
-      document.getElementById("serverSearch").addEventListener("keypress", async (e) => {
-        if (e.key === "Enter") {
+      document
+        .getElementById("serverSearch")
+        .addEventListener("input", async (e) => {
           const searchId = e.target.value.trim();
-          
-          // Stop any existing flash
-          stopFlashing();
-          
+
           // Reset all highlights
-          document.querySelectorAll(".shard-item, .cluster-item").forEach((item) => {
-            item.style.border = "";
-            item.style.boxShadow = "";
-            item.style.background = "";
-          });
+          stopFlashing();
+          document
+            .querySelectorAll(".shard-item, .cluster-item")
+            .forEach((item) => {
+              item.style.border = "";
+              item.style.boxShadow = "";
+              item.style.background = "";
+            });
 
           if (!searchId) {
             return;
@@ -909,23 +905,69 @@
 
           // Check if it's a numeric ID (likely a guild ID)
           if (/^\d+$/.test(searchId) && searchId.length > 10) {
-            // This looks like a guild ID, fetch shard info and flash continuously
-            await searchForGuild(searchId, true);
+            // This looks like a guild ID, fetch shard info (non-continuous for typing)
+            await searchForGuild(searchId, false);
             return;
           }
 
           // Otherwise, highlight matching shard/cluster by ID
-          const matchingItem = Array.from(document.querySelectorAll(".shard-item, .cluster-item")).find(
-            (item) => item.textContent === searchId
-          );
-          
-          if (matchingItem) {
-            matchingItem.classList.add("flashing");
-            matchingItem.scrollIntoView({ behavior: "smooth", block: "center" });
-            currentHighlightedShard = matchingItem;
+          document
+            .querySelectorAll(".shard-item, .cluster-item")
+            .forEach((item) => {
+              if (item.textContent === searchId) {
+                item.style.border = "2px solid #667eea";
+                item.style.boxShadow = "0 0 15px rgba(102, 126, 234, 0.7)";
+                item.style.background = "rgba(102, 126, 234, 0.3)";
+                item.scrollIntoView({ behavior: "smooth", block: "center" });
+              }
+            });
+        });
+
+      // Handle Enter key for continuous flashing
+      document
+        .getElementById("serverSearch")
+        .addEventListener("keypress", async (e) => {
+          if (e.key === "Enter") {
+            const searchId = e.target.value.trim();
+
+            // Stop any existing flash
+            stopFlashing();
+
+            // Reset all highlights
+            document
+              .querySelectorAll(".shard-item, .cluster-item")
+              .forEach((item) => {
+                item.style.border = "";
+                item.style.boxShadow = "";
+                item.style.background = "";
+              });
+
+            if (!searchId) {
+              return;
+            }
+
+            // Check if it's a numeric ID (likely a guild ID)
+            if (/^\d+$/.test(searchId) && searchId.length > 10) {
+              // This looks like a guild ID, fetch shard info and flash continuously
+              await searchForGuild(searchId, true);
+              return;
+            }
+
+            // Otherwise, highlight matching shard/cluster by ID
+            const matchingItem = Array.from(
+              document.querySelectorAll(".shard-item, .cluster-item")
+            ).find((item) => item.textContent === searchId);
+
+            if (matchingItem) {
+              matchingItem.classList.add("flashing");
+              matchingItem.scrollIntoView({
+                behavior: "smooth",
+                block: "center",
+              });
+              currentHighlightedShard = matchingItem;
+            }
           }
-        }
-      });
+        });
 
       // Initial load
       loadStatus();
