@@ -15,8 +15,12 @@ module.exports = {
         client.channelPins = new Map();
       }
 
-      // Fetch pinned messages to see what changed (using new API)
-      const pinnedMessages = await channel.messages.fetchPins();
+      // Fetch pinned messages to see what changed (using new API - fetchPins instead of deprecated fetchPinned)
+      const pinnedMessages = await channel.messages.fetchPins().catch(() => null);
+      if (!pinnedMessages) {
+        // If fetch fails, exit early
+        return;
+      }
       
       // Ensure channelPins is still a Map after async operation
       if (!client.channelPins || !(client.channelPins instanceof Map)) {
