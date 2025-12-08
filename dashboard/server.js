@@ -6018,12 +6018,44 @@ class DashboardServer {
       async (req, res) => {
         try {
           const { id } = req.params;
-          const { enabled } = req.body;
+          const { enabled, name, description, trigger_type, action_type } =
+            req.body;
+
+          // Build dynamic update query based on provided fields
+          const updates = [];
+          const values = [];
+
+          if (enabled !== undefined) {
+            updates.push("enabled = ?");
+            values.push(enabled ? 1 : 0);
+          }
+          if (name) {
+            updates.push("name = ?");
+            values.push(name);
+          }
+          if (description !== undefined) {
+            updates.push("description = ?");
+            values.push(description);
+          }
+          if (trigger_type) {
+            updates.push("trigger_type = ?");
+            values.push(trigger_type);
+          }
+          if (action_type) {
+            updates.push("action_type = ?");
+            values.push(action_type);
+          }
+
+          if (updates.length === 0) {
+            return res.status(400).json({ error: "No fields to update" });
+          }
+
+          values.push(id); // Add ID for WHERE clause
 
           await new Promise((resolve, reject) => {
             db.db.run(
-              `UPDATE workflows SET enabled = ? WHERE id = ?`,
-              [enabled ? 1 : 0, id],
+              `UPDATE workflows SET ${updates.join(", ")} WHERE id = ?`,
+              values,
               (err) => {
                 if (err) reject(err);
                 else resolve();

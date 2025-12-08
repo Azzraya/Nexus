@@ -2395,9 +2395,6 @@ document.addEventListener("DOMContentLoaded", () => {
       <div class="content-header">
         <h1>⚙️ Automation Workflows</h1>
         <p>Create custom automation with triggers and actions</p>
-        <button class="btn" onclick="showCreateWorkflowModal()" style="margin-top: 15px;">
-          ➕ Create New Workflow
-        </button>
       </div>
 
       <div id="workflowsList" style="margin-top: 30px;">
@@ -2414,9 +2411,15 @@ document.addEventListener("DOMContentLoaded", () => {
       const workflowsList = document.getElementById("workflowsList");
 
       if (data.workflows && data.workflows.length > 0) {
-        workflowsList.innerHTML = data.workflows
-          .map(
-            (w) => `
+        workflowsList.innerHTML =
+          `
+          <button class="btn" onclick="showCreateWorkflowModal()" style="margin-bottom: 20px;">
+            ➕ Create New Workflow
+          </button>
+        ` +
+          data.workflows
+            .map(
+              (w) => `
           <div class="setting-card" style="margin-bottom: 20px;">
             <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
               <div>
@@ -2452,8 +2455,8 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>
           </div>
         `
-          )
-          .join("");
+            )
+            .join("");
       } else {
         workflowsList.innerHTML = `
           <div class="setting-card" style="text-align: center; padding: 40px;">
@@ -2592,9 +2595,98 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  window.editWorkflow = function (id) {
-    alert(
-      "Edit functionality coming soon! For now, delete and recreate the workflow."
-    );
+  window.editWorkflow = async function (id) {
+    try {
+      // Fetch workflow data
+      const response = await fetch(
+        `/api/dashboard/workflows?guild=${currentServer}`
+      );
+      const data = await response.json();
+      const workflow = data.workflows.find((w) => w.id === id);
+
+      if (!workflow) {
+        alert("❌ Workflow not found");
+        return;
+      }
+
+      // Show edit modal with pre-filled data
+      const modal = document.createElement("div");
+      modal.style.cssText =
+        "position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 9999;";
+
+      modal.innerHTML = `
+        <div style="background: #1e1e2e; padding: 30px; border-radius: 15px; max-width: 600px; width: 90%;">
+          <h2>Edit Workflow</h2>
+          <div style="margin: 20px 0;">
+            <label style="display: block; margin-bottom: 8px;">Workflow Name</label>
+            <input type="text" id="editWorkflowName" value="${workflow.name}" placeholder="e.g., Auto-ban raiders" style="width: 100%; padding: 12px; background: #2a2a3e; border: 1px solid #3a3a4e; border-radius: 8px; color: white;">
+          </div>
+          <div style="margin: 20px 0;">
+            <label style="display: block; margin-bottom: 8px;">Description</label>
+            <textarea id="editWorkflowDesc" placeholder="What does this workflow do?" style="width: 100%; padding: 12px; background: #2a2a3e; border: 1px solid #3a3a4e; border-radius: 8px; color: white; min-height: 80px;">${workflow.description || ""}</textarea>
+          </div>
+          <div style="margin: 20px 0;">
+            <label style="display: block; margin-bottom: 8px;">Trigger</label>
+            <select id="editWorkflowTrigger" style="width: 100%; padding: 12px; background: #2a2a3e; border: 1px solid #3a3a4e; border-radius: 8px; color: white;">
+              <option value="member_join" ${workflow.trigger_type === "member_join" ? "selected" : ""}>Member Joins</option>
+              <option value="member_leave" ${workflow.trigger_type === "member_leave" ? "selected" : ""}>Member Leaves</option>
+              <option value="message_delete" ${workflow.trigger_type === "message_delete" ? "selected" : ""}>Message Deleted</option>
+              <option value="role_add" ${workflow.trigger_type === "role_add" ? "selected" : ""}>Role Added</option>
+            </select>
+          </div>
+          <div style="margin: 20px 0;">
+            <label style="display: block; margin-bottom: 8px;">Action</label>
+            <select id="editWorkflowAction" style="width: 100%; padding: 12px; background: #2a2a3e; border: 1px solid #3a3a4e; border-radius: 8px; color: white;">
+              <option value="ban_user" ${workflow.action_type === "ban_user" ? "selected" : ""}>Ban User</option>
+              <option value="kick_user" ${workflow.action_type === "kick_user" ? "selected" : ""}>Kick User</option>
+              <option value="send_message" ${workflow.action_type === "send_message" ? "selected" : ""}>Send Message</option>
+              <option value="add_role" ${workflow.action_type === "add_role" ? "selected" : ""}>Add Role</option>
+            </select>
+          </div>
+          <div style="display: flex; gap: 10px; margin-top: 30px;">
+            <button class="btn" onclick="saveWorkflowEdit(${id})" style="flex: 1;">Save Changes</button>
+            <button class="btn btn-secondary" onclick="this.closest('div').parentElement.parentElement.remove()" style="flex: 1;">Cancel</button>
+          </div>
+        </div>
+      `;
+
+      document.body.appendChild(modal);
+      modal.onclick = (e) => {
+        if (e.target === modal) modal.remove();
+      };
+    } catch (error) {
+      alert(`❌ Error loading workflow: ${error.message}`);
+    }
+  };
+
+  window.saveWorkflowEdit = async function (id) {
+    const name = document.getElementById("editWorkflowName").value;
+    const description = document.getElementById("editWorkflowDesc").value;
+    const trigger = document.getElementById("editWorkflowTrigger").value;
+    const action = document.getElementById("editWorkflowAction").value;
+
+    if (!name) {
+      alert("❌ Please enter a workflow name");
+      return;
+    }
+
+    try {
+      await fetch(`/api/dashboard/workflows/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name,
+          description,
+          trigger_type: trigger,
+          action_type: action,
+        }),
+      });
+
+      document.querySelector('div[style*="position: fixed"]').remove();
+      loadWorkflows();
+      alert("✅ Workflow updated!");
+    } catch (error) {
+      alert(`❌ Error: ${error.message}`);
+    }
   };
 });
