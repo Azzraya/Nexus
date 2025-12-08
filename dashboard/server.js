@@ -5940,6 +5940,121 @@ class DashboardServer {
       }
     });
 
+    // Workflow API endpoints
+    this.app.get(
+      "/api/dashboard/workflows",
+      this.checkAuth,
+      async (req, res) => {
+        try {
+          const guildId = req.query.guild;
+          if (!guildId) {
+            return res.status(400).json({ error: "Guild ID required" });
+          }
+
+          const workflows = await db.getWorkflows(guildId);
+          res.json({ workflows: workflows || [] });
+        } catch (error) {
+          logger.error("API", "Error fetching workflows:", error);
+          res.status(500).json({ error: error.message });
+        }
+      }
+    );
+
+    this.app.post(
+      "/api/dashboard/workflows",
+      this.checkAuth,
+      async (req, res) => {
+        try {
+          const {
+            guild,
+            name,
+            description,
+            trigger_type,
+            action_type,
+            enabled,
+          } = req.body;
+
+          if (!guild || !name || !trigger_type || !action_type) {
+            return res.status(400).json({ error: "Missing required fields" });
+          }
+
+          await new Promise((resolve, reject) => {
+            db.db.run(
+              `INSERT INTO workflows (guild_id, name, description, trigger_type, action_type, enabled, created_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?)`,
+              [
+                guild,
+                name,
+                description || "",
+                trigger_type,
+                action_type,
+                enabled ? 1 : 0,
+                Date.now(),
+              ],
+              function (err) {
+                if (err) reject(err);
+                else resolve(this.lastID);
+              }
+            );
+          });
+
+          res.json({ success: true, message: "Workflow created" });
+        } catch (error) {
+          logger.error("API", "Error creating workflow:", error);
+          res.status(500).json({ error: error.message });
+        }
+      }
+    );
+
+    this.app.put(
+      "/api/dashboard/workflows/:id",
+      this.checkAuth,
+      async (req, res) => {
+        try {
+          const { id } = req.params;
+          const { enabled } = req.body;
+
+          await new Promise((resolve, reject) => {
+            db.db.run(
+              `UPDATE workflows SET enabled = ? WHERE id = ?`,
+              [enabled ? 1 : 0, id],
+              (err) => {
+                if (err) reject(err);
+                else resolve();
+              }
+            );
+          });
+
+          res.json({ success: true, message: "Workflow updated" });
+        } catch (error) {
+          logger.error("API", "Error updating workflow:", error);
+          res.status(500).json({ error: error.message });
+        }
+      }
+    );
+
+    this.app.delete(
+      "/api/dashboard/workflows/:id",
+      this.checkAuth,
+      async (req, res) => {
+        try {
+          const { id } = req.params;
+
+          await new Promise((resolve, reject) => {
+            db.db.run(`DELETE FROM workflows WHERE id = ?`, [id], (err) => {
+              if (err) reject(err);
+              else resolve();
+            });
+          });
+
+          res.json({ success: true, message: "Workflow deleted" });
+        } catch (error) {
+          logger.error("API", "Error deleting workflow:", error);
+          res.status(500).json({ error: error.message });
+        }
+      }
+    );
+
     logger.info("API", "🔥 API v2 active (v1 deprecated)");
   }
 

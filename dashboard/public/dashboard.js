@@ -505,6 +505,9 @@ function loadPage(page) {
     case "templates":
       loadTemplates();
       break;
+    case "workflows":
+      loadWorkflows();
+      break;
     default:
       alert(`${page} page coming soon!`);
   }
@@ -2360,4 +2363,204 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
   }
+
+  // Workflows Management
+  window.loadWorkflows = async function() {
+    const contentArea = document.getElementById("contentArea");
+    
+    contentArea.innerHTML = `
+      <div class="content-header">
+        <h1>⚙️ Automation Workflows</h1>
+        <p>Create custom automation with triggers and actions</p>
+        <button class="btn" onclick="showCreateWorkflowModal()" style="margin-top: 15px;">
+          ➕ Create New Workflow
+        </button>
+      </div>
+
+      <div id="workflowsList" style="margin-top: 30px;">
+        <div class="loading">Loading workflows...</div>
+      </div>
+    `;
+
+    try {
+      const response = await fetch(`/api/dashboard/workflows?guild=${currentGuild}`);
+      const data = await response.json();
+      
+      const workflowsList = document.getElementById("workflowsList");
+      
+      if (data.workflows && data.workflows.length > 0) {
+        workflowsList.innerHTML = data.workflows.map(w => `
+          <div class="setting-card" style="margin-bottom: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
+              <div>
+                <h3>${w.name}</h3>
+                <p style="opacity: 0.7; margin: 5px 0;">${w.description || 'No description'}</p>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" ${w.enabled ? 'checked' : ''} onchange="toggleWorkflow(${w.id}, this.checked)">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            
+            <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+              <div style="margin-bottom: 10px;">
+                <strong>Trigger:</strong> ${w.trigger_type || 'Not configured'}
+              </div>
+              <div>
+                <strong>Actions:</strong> ${w.action_type || 'Not configured'}
+              </div>
+            </div>
+            
+            <div style="display: flex; gap: 10px;">
+              <button class="btn btn-secondary" onclick="editWorkflow(${w.id})" style="flex: 1;">
+                ✏️ Edit
+              </button>
+              <button class="btn btn-danger" onclick="deleteWorkflow(${w.id})" style="flex: 1;">
+                🗑️ Delete
+              </button>
+            </div>
+            
+            <div style="margin-top: 10px; opacity: 0.6; font-size: 0.9rem;">
+              Triggered: ${w.trigger_count || 0} times
+            </div>
+          </div>
+        `).join('');
+      } else {
+        workflowsList.innerHTML = `
+          <div class="setting-card" style="text-align: center; padding: 40px;">
+            <div style="font-size: 3rem; margin-bottom: 15px;">⚙️</div>
+            <h3>No Workflows Yet</h3>
+            <p style="opacity: 0.7; margin: 15px 0;">Create your first automation workflow to get started</p>
+            <button class="btn" onclick="showCreateWorkflowModal()">
+              ➕ Create Workflow
+            </button>
+          </div>
+        `;
+      }
+    } catch (error) {
+      workflowsList.innerHTML = `<div class="error">Failed to load workflows: ${error.message}</div>`;
+    }
+  };
+
+  window.showCreateWorkflowModal = function() {
+    const modal = document.createElement('div');
+    modal.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 9999;';
+    
+    modal.innerHTML = `
+      <div style="background: #1e1e2e; padding: 30px; border-radius: 15px; max-width: 600px; width: 90%;">
+        <h2>Create Workflow</h2>
+        
+        <div style="margin: 20px 0;">
+          <label style="display: block; margin-bottom: 8px;">Workflow Name</label>
+          <input type="text" id="workflowName" placeholder="e.g., Auto-ban raiders" style="width: 100%; padding: 12px; background: #2a2a3e; border: 1px solid #3a3a4e; border-radius: 8px; color: white;">
+        </div>
+        
+        <div style="margin: 20px 0;">
+          <label style="display: block; margin-bottom: 8px;">Description (optional)</label>
+          <textarea id="workflowDesc" placeholder="What does this workflow do?" style="width: 100%; padding: 12px; background: #2a2a3e; border: 1px solid #3a3a4e; border-radius: 8px; color: white; min-height: 80px;"></textarea>
+        </div>
+        
+        <div style="margin: 20px 0;">
+          <label style="display: block; margin-bottom: 8px;">Trigger</label>
+          <select id="workflowTrigger" style="width: 100%; padding: 12px; background: #2a2a3e; border: 1px solid #3a3a4e; border-radius: 8px; color: white;">
+            <option value="">Select trigger...</option>
+            <option value="message_pattern">Message Pattern</option>
+            <option value="user_join">User Join</option>
+            <option value="user_leave">User Leave</option>
+            <option value="heat_threshold">Heat Threshold</option>
+            <option value="threat_detected">Threat Detected</option>
+            <option value="time_based">Time Based</option>
+          </select>
+        </div>
+        
+        <div style="margin: 20px 0;">
+          <label style="display: block; margin-bottom: 8px;">Action</label>
+          <select id="workflowAction" style="width: 100%; padding: 12px; background: #2a2a3e; border: 1px solid #3a3a4e; border-radius: 8px; color: white;">
+            <option value="">Select action...</option>
+            <option value="ban">Ban User</option>
+            <option value="kick">Kick User</option>
+            <option value="mute">Mute User</option>
+            <option value="warn">Warn User</option>
+            <option value="add_role">Add Role</option>
+            <option value="remove_role">Remove Role</option>
+            <option value="send_message">Send Message</option>
+            <option value="quarantine">Quarantine User</option>
+          </select>
+        </div>
+        
+        <div style="display: flex; gap: 10px; margin-top: 30px;">
+          <button class="btn" onclick="createWorkflow()" style="flex: 1;">Create</button>
+          <button class="btn btn-secondary" onclick="this.closest('div').parentElement.parentElement.remove()" style="flex: 1;">Cancel</button>
+        </div>
+      </div>
+    `;
+    
+    document.body.appendChild(modal);
+    modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+  };
+
+  window.createWorkflow = async function() {
+    const name = document.getElementById('workflowName').value;
+    const description = document.getElementById('workflowDesc').value;
+    const trigger = document.getElementById('workflowTrigger').value;
+    const action = document.getElementById('workflowAction').value;
+    
+    if (!name || !trigger || !action) {
+      alert('Please fill in all required fields');
+      return;
+    }
+    
+    try {
+      const response = await fetch('/api/dashboard/workflows', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          guild: currentGuild,
+          name,
+          description,
+          trigger_type: trigger,
+          action_type: action,
+          enabled: true
+        })
+      });
+      
+      if (response.ok) {
+        document.querySelector('[style*="z-index: 9999"]').remove();
+        loadWorkflows();
+        alert('✅ Workflow created successfully!');
+      } else {
+        alert('❌ Failed to create workflow');
+      }
+    } catch (error) {
+      alert(`❌ Error: ${error.message}`);
+    }
+  };
+
+  window.toggleWorkflow = async function(id, enabled) {
+    try {
+      await fetch(`/api/dashboard/workflows/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ enabled })
+      });
+    } catch (error) {
+      alert(`❌ Error: ${error.message}`);
+    }
+  };
+
+  window.deleteWorkflow = async function(id) {
+    if (!confirm('Are you sure you want to delete this workflow?')) return;
+    
+    try {
+      await fetch(`/api/dashboard/workflows/${id}`, { method: 'DELETE' });
+      loadWorkflows();
+      alert('✅ Workflow deleted');
+    } catch (error) {
+      alert(`❌ Error: ${error.message}`);
+    }
+  };
+
+  window.editWorkflow = function(id) {
+    alert('Edit functionality coming soon! For now, delete and recreate the workflow.');
+  };
 });
