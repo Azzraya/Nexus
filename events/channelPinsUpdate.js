@@ -16,11 +16,20 @@ module.exports = {
       }
 
       // Fetch pinned messages to see what changed (using new API - fetchPins instead of deprecated fetchPinned)
+      // Add safety check for channel.messages existence
+      if (!channel.messages) {
+        logger.debug(
+          "ChannelPinsUpdate",
+          `Channel ${channel.id} has no messages manager`
+        );
+        return;
+      }
+
       const pinnedMessages = await channel.messages
         .fetchPins()
         .catch(() => null);
-      if (!pinnedMessages) {
-        // If fetch fails, exit early
+      if (!pinnedMessages || pinnedMessages.size === undefined) {
+        // If fetch fails or returns invalid data, exit early
         return;
       }
 
@@ -69,6 +78,15 @@ module.exports = {
       // Log pin events
       for (const messageId of newlyPinned) {
         try {
+          // Safety check: ensure pinnedMessages is still a Collection
+          if (!pinnedMessages || typeof pinnedMessages.get !== "function") {
+            logger.debug(
+              "ChannelPinsUpdate",
+              `pinnedMessages is not a valid Collection`
+            );
+            break;
+          }
+
           const message = pinnedMessages.get(messageId);
           if (message) {
             await EnhancedLogging.log(
