@@ -14,7 +14,7 @@ class ThreatVisualization {
    * Generate threat heatmap data (for Chart.js)
    */
   async generateHeatmap(guildId, days = 30) {
-    const since = Date.now() - (days * 86400000);
+    const since = Date.now() - days * 86400000;
 
     const threats = await new Promise((resolve, reject) => {
       db.db.all(
@@ -36,28 +36,33 @@ class ThreatVisualization {
 
     // Transform to heatmap format
     const heatmap = {};
-    threats.forEach(threat => {
+    threats.forEach((threat) => {
       const key = `${threat.date}_${threat.hour}`;
       if (!heatmap[key]) {
-        heatmap[key] = { date: threat.date, hour: parseInt(threat.hour), threats: {} };
+        heatmap[key] = {
+          date: threat.date,
+          hour: parseInt(threat.hour),
+          threats: {},
+        };
       }
-      heatmap[key].threats[threat.threat_type] = (heatmap[key].threats[threat.threat_type] || 0) + threat.count;
+      heatmap[key].threats[threat.threat_type] =
+        (heatmap[key].threats[threat.threat_type] || 0) + threat.count;
     });
 
     // Convert to array and calculate intensity
-    const heatmapData = Object.values(heatmap).map(cell => ({
+    const heatmapData = Object.values(heatmap).map((cell) => ({
       ...cell,
       totalThreats: Object.values(cell.threats).reduce((a, b) => a + b, 0),
-      intensity: this.calculateIntensity(cell.threats)
+      intensity: this.calculateIntensity(cell.threats),
     }));
 
     return {
       data: heatmapData,
       summary: {
-        totalHotspots: heatmapData.filter(c => c.intensity >= 70).length,
+        totalHotspots: heatmapData.filter((c) => c.intensity >= 70).length,
         peakHour: this.findPeakHour(heatmapData),
-        mostCommonThreat: this.findMostCommonThreat(threats)
-      }
+        mostCommonThreat: this.findMostCommonThreat(threats),
+      },
     };
   }
 
@@ -66,19 +71,22 @@ class ThreatVisualization {
    */
   calculateIntensity(threats) {
     const total = Object.values(threats).reduce((a, b) => a + b, 0);
-    
+
     // Weight by threat severity
     const weights = {
       raid: 10,
       nuke: 15,
       spam: 3,
       mass_mention: 8,
-      suspicious_join: 5
+      suspicious_join: 5,
     };
 
-    const weightedTotal = Object.entries(threats).reduce((sum, [type, count]) => {
-      return sum + (count * (weights[type] || 1));
-    }, 0);
+    const weightedTotal = Object.entries(threats).reduce(
+      (sum, [type, count]) => {
+        return sum + count * (weights[type] || 1);
+      },
+      0
+    );
 
     return Math.min(100, weightedTotal);
   }
@@ -90,13 +98,16 @@ class ThreatVisualization {
     if (heatmapData.length === 0) return null;
 
     const hourCounts = {};
-    heatmapData.forEach(cell => {
+    heatmapData.forEach((cell) => {
       hourCounts[cell.hour] = (hourCounts[cell.hour] || 0) + cell.totalThreats;
     });
 
-    const peakHour = Object.entries(hourCounts).reduce((max, [hour, count]) => {
-      return count > max.count ? { hour: parseInt(hour), count } : max;
-    }, { hour: 0, count: 0 });
+    const peakHour = Object.entries(hourCounts).reduce(
+      (max, [hour, count]) => {
+        return count > max.count ? { hour: parseInt(hour), count } : max;
+      },
+      { hour: 0, count: 0 }
+    );
 
     return peakHour;
   }
@@ -106,13 +117,16 @@ class ThreatVisualization {
    */
   findMostCommonThreat(threats) {
     const typeCounts = {};
-    threats.forEach(t => {
+    threats.forEach((t) => {
       typeCounts[t.threat_type] = (typeCounts[t.threat_type] || 0) + t.count;
     });
 
-    const mostCommon = Object.entries(typeCounts).reduce((max, [type, count]) => {
-      return count > max.count ? { type, count } : max;
-    }, { type: 'none', count: 0 });
+    const mostCommon = Object.entries(typeCounts).reduce(
+      (max, [type, count]) => {
+        return count > max.count ? { type, count } : max;
+      },
+      { type: "none", count: 0 }
+    );
 
     return mostCommon;
   }
@@ -121,7 +135,7 @@ class ThreatVisualization {
    * Generate attack timeline
    */
   async generateTimeline(guildId, hours = 24) {
-    const since = Date.now() - (hours * 3600000);
+    const since = Date.now() - hours * 3600000;
 
     const events = await new Promise((resolve, reject) => {
       db.db.all(
@@ -139,25 +153,25 @@ class ThreatVisualization {
 
     // Group by time intervals (1-hour buckets)
     const timeline = {};
-    events.forEach(event => {
+    events.forEach((event) => {
       const hourKey = Math.floor(event.timestamp / 3600000);
       if (!timeline[hourKey]) {
         timeline[hourKey] = {
           timestamp: hourKey * 3600000,
           events: [],
-          summary: { total: 0, high: 0, critical: 0 }
+          summary: { total: 0, high: 0, critical: 0 },
         };
       }
       timeline[hourKey].events.push(event);
       timeline[hourKey].summary.total++;
-      if (event.severity === 'high') timeline[hourKey].summary.high++;
-      if (event.severity === 'critical') timeline[hourKey].summary.critical++;
+      if (event.severity === "high") timeline[hourKey].summary.high++;
+      if (event.severity === "critical") timeline[hourKey].summary.critical++;
     });
 
     return {
       timeline: Object.values(timeline),
       totalEvents: events.length,
-      criticalEvents: events.filter(e => e.severity === 'critical').length
+      criticalEvents: events.filter((e) => e.severity === "critical").length,
     };
   }
 
@@ -182,12 +196,12 @@ class ThreatVisualization {
     const nodes = new Map(); // userId -> node data
     const edges = []; // Connections between users
 
-    recentThreats.forEach(threat => {
+    recentThreats.forEach((threat) => {
       if (!nodes.has(threat.user_id)) {
         nodes.set(threat.user_id, {
           id: threat.user_id,
           threatCount: 0,
-          actions: []
+          actions: [],
         });
       }
       const node = nodes.get(threat.user_id);
@@ -201,14 +215,16 @@ class ThreatVisualization {
       for (let j = i + 1; j < recentThreats.length; j++) {
         const threat1 = recentThreats[i];
         const threat2 = recentThreats[j];
-        
-        if (Math.abs(threat1.timestamp - threat2.timestamp) < timeWindow &&
-            threat1.user_id !== threat2.user_id) {
+
+        if (
+          Math.abs(threat1.timestamp - threat2.timestamp) < timeWindow &&
+          threat1.user_id !== threat2.user_id
+        ) {
           edges.push({
             source: threat1.user_id,
             target: threat2.user_id,
             weight: 1,
-            timeGap: Math.abs(threat1.timestamp - threat2.timestamp)
+            timeGap: Math.abs(threat1.timestamp - threat2.timestamp),
           });
         }
       }
@@ -220,8 +236,8 @@ class ThreatVisualization {
       summary: {
         totalActors: nodes.size,
         coordinatedPairs: edges.length,
-        suspectedBotnet: edges.length >= 5
-      }
+        suspectedBotnet: edges.length >= 5,
+      },
     };
   }
 
@@ -232,11 +248,9 @@ class ThreatVisualization {
     // This would integrate with IP geolocation
     // For now, return structure for future implementation
     return {
-      regions: [
-        { country: 'Unknown', threatCount: 0, percentage: 0 }
-      ],
+      regions: [{ country: "Unknown", threatCount: 0, percentage: 0 }],
       topRegions: [],
-      totalThreats: 0
+      totalThreats: 0,
     };
   }
 
@@ -247,14 +261,14 @@ class ThreatVisualization {
     const [heatmap, timeline, network] = await Promise.all([
       this.generateHeatmap(guildId, 7),
       this.generateTimeline(guildId, 24),
-      this.generateNetworkGraph(guildId)
+      this.generateNetworkGraph(guildId),
     ]);
 
     return {
       heatmap,
       timeline,
       network,
-      generatedAt: Date.now()
+      generatedAt: Date.now(),
     };
   }
 }

@@ -14,13 +14,13 @@ class ThreatReporting {
    * Generate weekly security report
    */
   async generateWeeklyReport(guildId) {
-    const weekAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
+    const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
 
     const [threats, modActions, raidAttempts, growth] = await Promise.all([
       this.getThreats(guildId, weekAgo),
       this.getModActions(guildId, weekAgo),
       this.getRaidAttempts(guildId, weekAgo),
-      this.getGrowthStats(guildId, weekAgo)
+      this.getGrowthStats(guildId, weekAgo),
     ]);
 
     const report = {
@@ -28,24 +28,33 @@ class ThreatReporting {
       period: {
         start: weekAgo,
         end: Date.now(),
-        days: 7
+        days: 7,
       },
       summary: {
         totalThreats: threats.length,
-        threatsBlocked: threats.filter(t => t.action_taken).length,
+        threatsBlocked: threats.filter((t) => t.action_taken).length,
         modActions: modActions.length,
         raidsBlocked: raidAttempts.length,
-        memberGrowth: growth.joins - growth.leaves
+        memberGrowth: growth.joins - growth.leaves,
       },
       breakdown: {
-        threatsByType: this.groupBy(threats, 'threat_type'),
-        threatsBySeverity: this.groupBy(threats, 'severity'),
-        modActionsByType: this.groupBy(modActions, 'action'),
-        hourlyThreatPattern: this.analyzeHourlyPattern(threats)
+        threatsByType: this.groupBy(threats, "threat_type"),
+        threatsBySeverity: this.groupBy(threats, "severity"),
+        modActionsByType: this.groupBy(modActions, "action"),
+        hourlyThreatPattern: this.analyzeHourlyPattern(threats),
       },
-      insights: this.generateInsights(threats, modActions, raidAttempts, growth),
-      recommendations: this.generateRecommendations(threats, modActions, growth),
-      generatedAt: Date.now()
+      insights: this.generateInsights(
+        threats,
+        modActions,
+        raidAttempts,
+        growth
+      ),
+      recommendations: this.generateRecommendations(
+        threats,
+        modActions,
+        growth
+      ),
+      generatedAt: Date.now(),
     };
 
     // Store report
@@ -126,8 +135,8 @@ class ThreatReporting {
    */
   groupBy(array, field) {
     const grouped = {};
-    array.forEach(item => {
-      const key = item[field] || 'unknown';
+    array.forEach((item) => {
+      const key = item[field] || "unknown";
       grouped[key] = (grouped[key] || 0) + 1;
     });
     return grouped;
@@ -138,16 +147,19 @@ class ThreatReporting {
    */
   analyzeHourlyPattern(threats) {
     const hourly = {};
-    
-    threats.forEach(threat => {
+
+    threats.forEach((threat) => {
       const hour = new Date(threat.timestamp).getHours();
       hourly[hour] = (hourly[hour] || 0) + 1;
     });
 
     // Find peak hour
-    const peakHour = Object.entries(hourly).reduce((max, [hour, count]) => {
-      return count > max.count ? { hour: parseInt(hour), count } : max;
-    }, { hour: 0, count: 0 });
+    const peakHour = Object.entries(hourly).reduce(
+      (max, [hour, count]) => {
+        return count > max.count ? { hour: parseInt(hour), count } : max;
+      },
+      { hour: 0, count: 0 }
+    );
 
     return { hourly, peakHour };
   }
@@ -162,9 +174,13 @@ class ThreatReporting {
     if (threats.length === 0) {
       insights.push("✅ Perfect security week - zero threats detected!");
     } else {
-      const criticalThreats = threats.filter(t => t.severity === 'critical').length;
+      const criticalThreats = threats.filter(
+        (t) => t.severity === "critical"
+      ).length;
       if (criticalThreats > 0) {
-        insights.push(`⚠️ ${criticalThreats} critical threat(s) detected this week`);
+        insights.push(
+          `⚠️ ${criticalThreats} critical threat(s) detected this week`
+        );
       }
     }
 
@@ -175,13 +191,17 @@ class ThreatReporting {
 
     // Growth analysis
     if (growth.joins - growth.leaves > 50) {
-      insights.push(`📈 Strong growth: +${growth.joins - growth.leaves} members this week`);
+      insights.push(
+        `📈 Strong growth: +${growth.joins - growth.leaves} members this week`
+      );
     } else if (growth.joins - growth.leaves < -20) {
-      insights.push(`📉 Member loss detected: ${growth.joins - growth.leaves} net members`);
+      insights.push(
+        `📉 Member loss detected: ${growth.joins - growth.leaves} net members`
+      );
     }
 
     // Moderation activity
-    const bans = modActions.filter(a => a.action === 'ban').length;
+    const bans = modActions.filter((a) => a.action === "ban").length;
     if (bans > 10) {
       insights.push(`⚖️ High moderation activity: ${bans} bans this week`);
     }
@@ -200,7 +220,7 @@ class ThreatReporting {
       recommendations.push({
         priority: "high",
         action: "Increase security level",
-        reason: `${threats.length} threats detected this week`
+        reason: `${threats.length} threats detected this week`,
       });
     }
 
@@ -209,7 +229,7 @@ class ThreatReporting {
       recommendations.push({
         priority: "medium",
         action: "Review server engagement",
-        reason: "Negative member growth detected"
+        reason: "Negative member growth detected",
       });
     }
 
@@ -218,7 +238,7 @@ class ThreatReporting {
       recommendations.push({
         priority: "low",
         action: "Server is well-protected",
-        reason: "No security issues detected"
+        reason: "No security issues detected",
       });
     }
 
@@ -251,10 +271,13 @@ class ThreatReporting {
         [guildId, limit],
         (err, rows) => {
           if (err) reject(err);
-          else resolve((rows || []).map(r => ({
-            ...r,
-            report_data: JSON.parse(r.report_data)
-          })));
+          else
+            resolve(
+              (rows || []).map((r) => ({
+                ...r,
+                report_data: JSON.parse(r.report_data),
+              }))
+            );
         }
       );
     });
@@ -266,26 +289,27 @@ class ThreatReporting {
   formatForDiscord(report) {
     return {
       title: "📊 Weekly Security Report",
-      description: 
+      description:
         `**Period:** ${new Date(report.period.start).toLocaleDateString()} - ${new Date(report.period.end).toLocaleDateString()}\n\n` +
         `**Summary:**\n` +
         `• Total Threats: ${report.summary.totalThreats}\n` +
         `• Threats Blocked: ${report.summary.threatsBlocked}\n` +
         `• Raids Blocked: ${report.summary.raidsBlocked}\n` +
-        `• Member Growth: ${report.summary.memberGrowth > 0 ? '+' : ''}${report.summary.memberGrowth}\n\n` +
+        `• Member Growth: ${report.summary.memberGrowth > 0 ? "+" : ""}${report.summary.memberGrowth}\n\n` +
         `**Insights:**\n` +
-        report.insights.map(i => `${i}`).join('\n'),
-      color: 0x9333EA,
+        report.insights.map((i) => `${i}`).join("\n"),
+      color: 0x9333ea,
       fields: [
         {
           name: "💡 Recommendations",
-          value: report.recommendations
-            .slice(0, 3)
-            .map(r => `${r.priority === 'high' ? '🔴' : '🟡'} ${r.action}`)
-            .join('\n') || 'Keep up the great work!'
-        }
+          value:
+            report.recommendations
+              .slice(0, 3)
+              .map((r) => `${r.priority === "high" ? "🔴" : "🟡"} ${r.action}`)
+              .join("\n") || "Keep up the great work!",
+        },
       ],
-      timestamp: new Date()
+      timestamp: new Date(),
     };
   }
 }

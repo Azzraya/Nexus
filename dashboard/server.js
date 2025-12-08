@@ -310,11 +310,7 @@ class DashboardServer {
             [user.id, user.username, ip, userAgent, timestamp, 1],
             (err) => {
               if (err) {
-                logger.error(
-                  "OAuth",
-                  "Failed to store login in database",
-                  err
-                );
+                logger.error("OAuth", "Failed to store login in database", err);
               }
             }
           );
@@ -1116,7 +1112,8 @@ class DashboardServer {
         try {
           const { guild_id, rule_type, trigger, action, enabled } = req.body;
           const guild = this.client.guilds.cache.get(guild_id);
-          if (!guild) return res.status(404).json({ error: "Server not found" });
+          if (!guild)
+            return res.status(404).json({ error: "Server not found" });
 
           // Store in database
           await new Promise((resolve, reject) => {
@@ -1573,7 +1570,9 @@ class DashboardServer {
       res.setHeader("Connection", "keep-alive");
 
       // Send initial connection message
-      res.write(`data: ${JSON.stringify({ type: "connected", timestamp: Date.now() })}\n\n`);
+      res.write(
+        `data: ${JSON.stringify({ type: "connected", timestamp: Date.now() })}\n\n`
+      );
 
       // Store client for broadcasting
       if (!this.sseClients) this.sseClients = new Set();
@@ -1581,7 +1580,9 @@ class DashboardServer {
 
       // Send heartbeat every 30 seconds
       const heartbeat = setInterval(() => {
-        res.write(`data: ${JSON.stringify({ type: "heartbeat", timestamp: Date.now() })}\n\n`);
+        res.write(
+          `data: ${JSON.stringify({ type: "heartbeat", timestamp: Date.now() })}\n\n`
+        );
       }, 30000);
 
       // Clean up on close
@@ -1595,7 +1596,7 @@ class DashboardServer {
     this.broadcastEvent = (event) => {
       if (!this.sseClients) return;
       const data = JSON.stringify(event);
-      this.sseClients.forEach(client => {
+      this.sseClients.forEach((client) => {
         try {
           client.write(`data: ${data}\n\n`);
         } catch (error) {
@@ -6307,33 +6308,38 @@ class DashboardServer {
     );
 
     // ========== ADVANCED ANALYTICS API ==========
-    this.app.get("/api/analytics/advanced", this.checkAuth, async (req, res) => {
-      try {
-        const { guild } = req.query;
-        const PredictiveAnalytics = require("../utils/predictiveAnalytics");
-        const ServerComparison = require("../utils/serverComparison");
-        const GrowthAnalytics = require("../utils/growthAnalytics");
+    this.app.get(
+      "/api/analytics/advanced",
+      this.checkAuth,
+      async (req, res) => {
+        try {
+          const { guild } = req.query;
+          const PredictiveAnalytics = require("../utils/predictiveAnalytics");
+          const ServerComparison = require("../utils/serverComparison");
+          const GrowthAnalytics = require("../utils/growthAnalytics");
 
-        const predictive = new PredictiveAnalytics(this.client);
-        const comparison = new ServerComparison(this.client);
-        const growth = new GrowthAnalytics(this.client);
+          const predictive = new PredictiveAnalytics(this.client);
+          const comparison = new ServerComparison(this.client);
+          const growth = new GrowthAnalytics(this.client);
 
-        const [raidPrediction, securityScore, growthForecast] = await Promise.all([
-          predictive.predictRaidLikelihood(guild, 48),
-          comparison.calculateSecurityScore(guild),
-          growth.forecastGrowth(guild, 30)
-        ]);
+          const [raidPrediction, securityScore, growthForecast] =
+            await Promise.all([
+              predictive.predictRaidLikelihood(guild, 48),
+              comparison.calculateSecurityScore(guild),
+              growth.forecastGrowth(guild, 30),
+            ]);
 
-        res.json({
-          raidLikelihood: raidPrediction.likelihood,
-          securityScore: securityScore.score,
-          badge: comparison.getBadge(securityScore.score).name,
-          forecastedGrowth: growthForecast.forecast[29]?.predicted || 0
-        });
-      } catch (error) {
-        res.status(500).json({ error: error.message });
+          res.json({
+            raidLikelihood: raidPrediction.likelihood,
+            securityScore: securityScore.score,
+            badge: comparison.getBadge(securityScore.score).name,
+            forecastedGrowth: growthForecast.forecast[29]?.predicted || 0,
+          });
+        } catch (error) {
+          res.status(500).json({ error: error.message });
+        }
       }
-    });
+    );
 
     // ========== LEADERBOARD API ==========
     this.app.get("/api/leaderboard/global", async (req, res) => {
@@ -6345,7 +6351,7 @@ class DashboardServer {
 
         res.json({
           leaderboard,
-          timestamp: Date.now()
+          timestamp: Date.now(),
         });
       } catch (error) {
         res.status(500).json({ error: error.message });
@@ -6372,7 +6378,8 @@ class DashboardServer {
       try {
         const { guild } = req.query;
         const guildObj = this.client.guilds.cache.get(guild);
-        if (!guildObj) return res.status(404).json({ error: "Server not found" });
+        if (!guildObj)
+          return res.status(404).json({ error: "Server not found" });
 
         const WickMigration = require("../utils/wickMigration");
         const migration = new WickMigration(this.client);
@@ -6384,29 +6391,34 @@ class DashboardServer {
           hasWick: analysis.hasWick,
           detectedSettings: analysis.detectedSettings,
           recommendations: analysis.recommendations,
-          comparison: comparisonData.features
+          comparison: comparisonData.features,
         });
       } catch (error) {
         res.status(500).json({ error: error.message });
       }
     });
 
-    this.app.post("/api/migration/execute", this.checkAuth, async (req, res) => {
-      try {
-        const { guild_id } = req.body;
-        const guild = this.client.guilds.cache.get(guild_id);
-        if (!guild) return res.status(404).json({ error: "Server not found" });
+    this.app.post(
+      "/api/migration/execute",
+      this.checkAuth,
+      async (req, res) => {
+        try {
+          const { guild_id } = req.body;
+          const guild = this.client.guilds.cache.get(guild_id);
+          if (!guild)
+            return res.status(404).json({ error: "Server not found" });
 
-        const WickMigration = require("../utils/wickMigration");
-        const migration = new WickMigration(this.client);
+          const WickMigration = require("../utils/wickMigration");
+          const migration = new WickMigration(this.client);
 
-        const result = await migration.migrate(guild);
+          const result = await migration.migrate(guild);
 
-        res.json(result);
-      } catch (error) {
-        res.status(500).json({ error: error.message });
+          res.json(result);
+        } catch (error) {
+          res.status(500).json({ error: error.message });
+        }
       }
-    });
+    );
 
     logger.info("API", "🔥 API v2 active (v1 deprecated)");
   }

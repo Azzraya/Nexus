@@ -14,10 +14,10 @@
   --border-color: rgba(255, 255, 255, 0.1);
   --accent-primary: #b794f6;
   --accent-secondary: #9333ea;
-  --success: #4CAF50;
+  --success: #4caf50;
   --warning: #ff9800;
   --danger: #f44336;
-  --info: #2196F3;
+  --info: #2196f3;
 }
 
 [data-theme="light"] {
@@ -29,18 +29,24 @@
   --border-color: rgba(0, 0, 0, 0.1);
   --accent-primary: #9333ea;
   --accent-secondary: #b794f6;
-  --success: #4CAF50;
+  --success: #4caf50;
   --warning: #ff9800;
   --danger: #f44336;
-  --info: #2196F3;
+  --info: #2196f3;
 }
 
 body {
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--bg-primary) 0%,
+    var(--bg-secondary) 100%
+  );
   color: var(--text-primary);
   overflow-x: hidden;
-  transition: background 0.3s ease, color 0.3s ease;
+  transition:
+    background 0.3s ease,
+    color 0.3s ease;
 }
 
 /* Theme Toggle Button */
@@ -96,7 +102,11 @@ body {
 
 .sidebar-header h2 {
   font-size: 1.5rem;
-  background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--accent-primary) 0%,
+    var(--accent-secondary) 100%
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

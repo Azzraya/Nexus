@@ -1,4 +1,8 @@
-const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require("discord.js");
+const {
+  SlashCommandBuilder,
+  EmbedBuilder,
+  PermissionFlagsBits,
+} = require("discord.js");
 const logger = require("../utils/logger");
 
 module.exports = {
@@ -35,8 +39,10 @@ module.exports = {
         if (!analysis.hasWick) {
           const embed = new EmbedBuilder()
             .setTitle("ℹ️ Wick Not Found")
-            .setDescription("Wick bot is not in this server. Nothing to migrate!")
-            .setColor(0x2196F3);
+            .setDescription(
+              "Wick bot is not in this server. Nothing to migrate!"
+            )
+            .setColor(0x2196f3);
 
           return await interaction.editReply({ embeds: [embed] });
         }
@@ -47,30 +53,37 @@ module.exports = {
           .setTitle("🔄 Wick Migration Ready")
           .setDescription(
             `**Found Wick in your server!**\n\n` +
-            `Ready to migrate and upgrade your security?\n\n` +
-            `**What we'll import:**\n` +
-            (analysis.detectedSettings.logChannels ? `✅ ${analysis.detectedSettings.logChannels.length} log channel(s)\n` : '') +
-            (analysis.detectedSettings.quarantineRoles ? `✅ ${analysis.detectedSettings.quarantineRoles.length} moderation role(s)\n` : '') +
-            `✅ All compatible settings`
+              `Ready to migrate and upgrade your security?\n\n` +
+              `**What we'll import:**\n` +
+              (analysis.detectedSettings.logChannels
+                ? `✅ ${analysis.detectedSettings.logChannels.length} log channel(s)\n`
+                : "") +
+              (analysis.detectedSettings.quarantineRoles
+                ? `✅ ${analysis.detectedSettings.quarantineRoles.length} moderation role(s)\n`
+                : "") +
+              `✅ All compatible settings`
           )
-          .setColor(0x9333EA)
+          .setColor(0x9333ea)
           .addFields({
             name: "🚀 Instant Upgrades You'll Get",
             value: comparisonData.features
-              .filter(f => f.advantage === 'nexus')
+              .filter((f) => f.advantage === "nexus")
               .slice(0, 5)
-              .map(f => `✅ **${f.feature}:** ${f.wick} → ${f.nexus}`)
-              .join('\n')
+              .map((f) => `✅ **${f.feature}:** ${f.wick} → ${f.nexus}`)
+              .join("\n"),
           })
-          .setFooter({ text: "Use the dashboard to complete migration: /dashboard" });
+          .setFooter({
+            text: "Use the dashboard to complete migration: /dashboard",
+          });
 
         await interaction.editReply({ embeds: [embed] });
-
       } else {
         const embed = new EmbedBuilder()
           .setTitle("🔜 Migration Coming Soon")
-          .setDescription(`Migration from ${fromBot} is being developed!\n\nFor now, use manual setup: \`/quicksetup\``)
-          .setColor(0xFF9800);
+          .setDescription(
+            `Migration from ${fromBot} is being developed!\n\nFor now, use manual setup: \`/quicksetup\``
+          )
+          .setColor(0xff9800);
 
         await interaction.editReply({ embeds: [embed] });
       }
@@ -80,10 +93,12 @@ module.exports = {
       logger.error("Command", "Migration error", error);
       const errorEmbed = new EmbedBuilder()
         .setTitle("❌ Error")
-        .setDescription("Migration failed. Please try manual setup with `/quicksetup`")
-        .setColor(0xF44336);
+        .setDescription(
+          "Migration failed. Please try manual setup with `/quicksetup`"
+        )
+        .setColor(0xf44336);
 
       await interaction.editReply({ embeds: [errorEmbed] });
     }
-  }
+  },
 };

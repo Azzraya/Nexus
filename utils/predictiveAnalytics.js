@@ -21,7 +21,10 @@ class PredictiveAnalytics {
       const currentMetrics = await this.getCurrentMetrics(guildId);
 
       // Calculate risk factors
-      const riskFactors = this.calculateRiskFactors(historicalRaids, currentMetrics);
+      const riskFactors = this.calculateRiskFactors(
+        historicalRaids,
+        currentMetrics
+      );
 
       // Generate prediction
       const likelihood = this.calculateLikelihood(riskFactors);
@@ -32,7 +35,7 @@ class PredictiveAnalytics {
         timeframe: `${hoursAhead} hours`,
         riskFactors,
         recommendations: this.generateRecommendations(likelihood),
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
     } catch (error) {
       logger.error("PredictiveAnalytics", "Raid prediction error", error);
@@ -84,7 +87,7 @@ class PredictiveAnalytics {
       recentJoins,
       createdAt: guild.createdTimestamp,
       serverAge: Date.now() - guild.createdTimestamp,
-      verificationLevel: guild.verificationLevel
+      verificationLevel: guild.verificationLevel,
     };
   }
 
@@ -97,21 +100,21 @@ class PredictiveAnalytics {
 
     // Factor 1: Recent raid history
     const raidsLastWeek = historicalRaids.filter(
-      r => r.timestamp > Date.now() - 604800000
+      (r) => r.timestamp > Date.now() - 604800000
     ).length;
 
     if (raidsLastWeek >= 3) {
       factors.push({
-        factor: 'Multiple recent raids',
+        factor: "Multiple recent raids",
         weight: 35,
-        description: `${raidsLastWeek} raids in the past week`
+        description: `${raidsLastWeek} raids in the past week`,
       });
       totalRisk += 35;
     } else if (raidsLastWeek >= 1) {
       factors.push({
-        factor: 'Recent raid activity',
+        factor: "Recent raid activity",
         weight: 20,
-        description: `${raidsLastWeek} raid(s) in the past week`
+        description: `${raidsLastWeek} raid(s) in the past week`,
       });
       totalRisk += 20;
     }
@@ -119,19 +122,20 @@ class PredictiveAnalytics {
     // Factor 2: Rapid member growth
     if (currentMetrics.recentJoins >= 20) {
       factors.push({
-        factor: 'Rapid member growth',
+        factor: "Rapid member growth",
         weight: 25,
-        description: `${currentMetrics.recentJoins} joins in the last hour`
+        description: `${currentMetrics.recentJoins} joins in the last hour`,
       });
       totalRisk += 25;
     }
 
     // Factor 3: New server (more vulnerable)
-    if (currentMetrics.serverAge < 2592000000) { // < 30 days
+    if (currentMetrics.serverAge < 2592000000) {
+      // < 30 days
       factors.push({
-        factor: 'New server',
+        factor: "New server",
         weight: 15,
-        description: 'Servers under 30 days old are more vulnerable'
+        description: "Servers under 30 days old are more vulnerable",
       });
       totalRisk += 15;
     }
@@ -139,27 +143,28 @@ class PredictiveAnalytics {
     // Factor 4: Low verification level
     if (currentMetrics.verificationLevel < 2) {
       factors.push({
-        factor: 'Low verification level',
+        factor: "Low verification level",
         weight: 10,
-        description: 'Consider increasing Discord verification requirements'
+        description: "Consider increasing Discord verification requirements",
       });
       totalRisk += 10;
     }
 
     // Factor 5: Day of week patterns
     const dayOfWeek = new Date().getDay();
-    if (dayOfWeek === 5 || dayOfWeek === 6) { // Friday/Saturday
+    if (dayOfWeek === 5 || dayOfWeek === 6) {
+      // Friday/Saturday
       factors.push({
-        factor: 'Weekend peak',
+        factor: "Weekend peak",
         weight: 5,
-        description: 'Raids are more common on weekends'
+        description: "Raids are more common on weekends",
       });
       totalRisk += 5;
     }
 
     return {
       factors,
-      totalRisk: Math.min(totalRisk, 100)
+      totalRisk: Math.min(totalRisk, 100),
     };
   }
 
@@ -191,43 +196,43 @@ class PredictiveAnalytics {
 
     if (likelihood >= 70) {
       recommendations.push({
-        priority: 'critical',
-        action: 'Enable lockdown mode',
-        description: 'High raid risk - consider temporary invite disable'
+        priority: "critical",
+        action: "Enable lockdown mode",
+        description: "High raid risk - consider temporary invite disable",
       });
       recommendations.push({
-        priority: 'critical',
-        action: 'Alert moderators',
-        description: 'Ensure mod team is aware and ready'
+        priority: "critical",
+        action: "Alert moderators",
+        description: "Ensure mod team is aware and ready",
       });
     }
 
     if (likelihood >= 50) {
       recommendations.push({
-        priority: 'high',
-        action: 'Increase verification requirements',
-        description: 'Temporarily raise barriers for new joins'
+        priority: "high",
+        action: "Increase verification requirements",
+        description: "Temporarily raise barriers for new joins",
       });
       recommendations.push({
-        priority: 'high',
-        action: 'Review recent joins',
-        description: 'Check for suspicious accounts'
+        priority: "high",
+        action: "Review recent joins",
+        description: "Check for suspicious accounts",
       });
     }
 
     if (likelihood >= 30) {
       recommendations.push({
-        priority: 'medium',
-        action: 'Enable stricter auto-mod',
-        description: 'Prepare defenses for potential activity'
+        priority: "medium",
+        action: "Enable stricter auto-mod",
+        description: "Prepare defenses for potential activity",
       });
     }
 
     if (likelihood < 30) {
       recommendations.push({
-        priority: 'low',
-        action: 'Maintain current security',
-        description: 'No immediate threats detected'
+        priority: "low",
+        action: "Maintain current security",
+        description: "No immediate threats detected",
       });
     }
 
@@ -239,7 +244,7 @@ class PredictiveAnalytics {
    */
   async predictChurn(guildId) {
     const stats = await db.getServerConfig(guildId);
-    const growthStats = await this.getGrowthStats(guildId, 'month');
+    const growthStats = await this.getGrowthStats(guildId, "month");
 
     const churnProbability = growthStats.churnRate;
 
@@ -247,9 +252,13 @@ class PredictiveAnalytics {
       probability: Math.min(churnProbability, 100),
       expectedLosses: Math.round((churnProbability / 100) * growthStats.joins),
       factors: [
-        growthStats.churnRate > 50 ? 'High churn rate detected' : 'Churn rate acceptable',
-        growthStats.netGrowth < 0 ? 'Negative growth trend' : 'Positive growth trend'
-      ]
+        growthStats.churnRate > 50
+          ? "High churn rate detected"
+          : "Churn rate acceptable",
+        growthStats.netGrowth < 0
+          ? "Negative growth trend"
+          : "Positive growth trend",
+      ],
     };
   }
 
@@ -259,7 +268,7 @@ class PredictiveAnalytics {
     const timeframes = {
       day: 86400000,
       week: 604800000,
-      month: 2592000000
+      month: 2592000000,
     };
 
     const since = Date.now() - (timeframes[timeframe] || timeframes.week);
@@ -277,7 +286,8 @@ class PredictiveAnalytics {
           else {
             const stats = row || { joins: 0, leaves: 0 };
             stats.netGrowth = stats.joins - stats.leaves;
-            stats.churnRate = stats.joins > 0 ? (stats.leaves / stats.joins) * 100 : 0;
+            stats.churnRate =
+              stats.joins > 0 ? (stats.leaves / stats.joins) * 100 : 0;
             resolve(stats);
           }
         }

@@ -4,23 +4,29 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Nexus Dashboard</title>
-    
+
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#9333ea" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
     <meta name="apple-mobile-web-app-title" content="Nexus" />
-    
+
     <!-- Resource Hints for Performance -->
     <link rel="preconnect" href="https://cdn.jsdelivr.net" />
     <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
-    
+
     <!-- Critical CSS -->
     <link rel="stylesheet" href="/dashboard.css" />
-    
+
     <!-- Defer non-critical scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"
+      defer
+    ></script>
   </head>
   <body>
     <!-- Theme Toggle -->
@@ -165,7 +171,7 @@
     </div>
 
     <script src="/dashboard.js" defer></script>
-    
+
     <!-- PWA Service Worker Registration -->
     <script>
       if ("serviceWorker" in navigator) {
@@ -173,17 +179,19 @@
           navigator.serviceWorker
             .register("/service-worker.js")
             .then((reg) => console.log("Service Worker registered", reg))
-            .catch((err) => console.log("Service Worker registration failed", err));
+            .catch((err) =>
+              console.log("Service Worker registration failed", err)
+            );
         });
       }
     </script>
-    
+
     <script>
       // Lazy Loading System
       document.addEventListener("DOMContentLoaded", () => {
         // Lazy load images
         const imageObserver = new IntersectionObserver((entries, observer) => {
-          entries.forEach(entry => {
+          entries.forEach((entry) => {
             if (entry.isIntersecting) {
               const img = entry.target;
               if (img.dataset.src) {
@@ -196,7 +204,7 @@
         });
 
         // Observe all images with data-src
-        document.querySelectorAll("img[data-src]").forEach(img => {
+        document.querySelectorAll("img[data-src]").forEach((img) => {
           imageObserver.observe(img);
         });
 
@@ -205,7 +213,7 @@
           requestIdleCallback(() => {
             // Prefetch dashboard pages
             const pages = ["anti-nuke", "anti-raid", "workflows"];
-            pages.forEach(page => {
+            pages.forEach((page) => {
               const link = document.createElement("link");
               link.rel = "prefetch";
               link.href = `/api/server/${window.currentServer}/${page}`;
@@ -219,7 +227,9 @@
           const perfObserver = new PerformanceObserver((list) => {
             for (const entry of list.getEntries()) {
               if (entry.duration > 1000) {
-                console.warn(`Slow operation: ${entry.name} took ${entry.duration}ms`);
+                console.warn(
+                  `Slow operation: ${entry.name} took ${entry.duration}ms`
+                );
               }
             }
           });

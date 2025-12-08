@@ -89,7 +89,7 @@ module.exports = {
 
           // Record successful execution
           const executionTime = performanceMonitor.end(perfTimer, true);
-          
+
           // Track command analytics
           if (client.commandAnalytics) {
             client.commandAnalytics.trackCommand(
@@ -102,8 +102,12 @@ module.exports = {
           }
         } catch (cmdError) {
           // Record failed execution
-          const executionTime = performanceMonitor.end(perfTimer, false, cmdError);
-          
+          const executionTime = performanceMonitor.end(
+            perfTimer,
+            false,
+            cmdError
+          );
+
           // Track failed command
           if (client.commandAnalytics) {
             client.commandAnalytics.trackCommand(
@@ -114,7 +118,7 @@ module.exports = {
               executionTime
             );
           }
-          
+
           throw cmdError; // Re-throw to be caught by outer catch
         }
 

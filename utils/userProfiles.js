@@ -45,7 +45,7 @@ class UserProfiles {
       threats_detected: 0,
       contributions: 0,
       badges: [],
-      created_at: Date.now()
+      created_at: Date.now(),
     };
 
     await new Promise((resolve, reject) => {
@@ -68,7 +68,10 @@ class UserProfiles {
    */
   async updateReputation(userId, change, reason) {
     const profile = await this.getProfile(userId);
-    const newReputation = Math.max(0, Math.min(1000, profile.reputation + change));
+    const newReputation = Math.max(
+      0,
+      Math.min(1000, profile.reputation + change)
+    );
 
     await new Promise((resolve, reject) => {
       db.db.run(
@@ -91,7 +94,10 @@ class UserProfiles {
       [userId, change, reason, Date.now()]
     );
 
-    logger.info("UserProfiles", `${userId} reputation: ${change > 0 ? '+' : ''}${change} (${reason})`);
+    logger.info(
+      "UserProfiles",
+      `${userId} reputation: ${change > 0 ? "+" : ""}${change} (${reason})`
+    );
 
     return newReputation;
   }
@@ -101,7 +107,7 @@ class UserProfiles {
    */
   async awardBadge(userId, badgeId, badgeName) {
     const profile = await this.getProfile(userId);
-    const badges = JSON.parse(profile.badges || '[]');
+    const badges = JSON.parse(profile.badges || "[]");
 
     if (!badges.includes(badgeId)) {
       badges.push(badgeId);
@@ -121,12 +127,14 @@ class UserProfiles {
       try {
         const user = await this.client.users.fetch(userId);
         await user.send({
-          embeds: [{
-            title: "🏅 New Badge Earned!",
-            description: `You've earned: **${badgeName}**`,
-            color: 0xFFD700,
-            timestamp: new Date()
-          }]
+          embeds: [
+            {
+              title: "🏅 New Badge Earned!",
+              description: `You've earned: **${badgeName}**`,
+              color: 0xffd700,
+              timestamp: new Date(),
+            },
+          ],
         });
       } catch (error) {
         // DMs disabled or other error
@@ -140,11 +148,16 @@ class UserProfiles {
    * Get user tier based on reputation
    */
   getTier(reputation) {
-    if (reputation >= 900) return { name: "Legendary", emoji: "🌟", color: "#FFD700" };
-    if (reputation >= 700) return { name: "Elite", emoji: "💎", color: "#00F5FF" };
-    if (reputation >= 500) return { name: "Veteran", emoji: "⭐", color: "#C0C0C0" };
-    if (reputation >= 300) return { name: "Trusted", emoji: "✅", color: "#4CAF50" };
-    if (reputation >= 100) return { name: "Member", emoji: "👤", color: "#2196F3" };
+    if (reputation >= 900)
+      return { name: "Legendary", emoji: "🌟", color: "#FFD700" };
+    if (reputation >= 700)
+      return { name: "Elite", emoji: "💎", color: "#00F5FF" };
+    if (reputation >= 500)
+      return { name: "Veteran", emoji: "⭐", color: "#C0C0C0" };
+    if (reputation >= 300)
+      return { name: "Trusted", emoji: "✅", color: "#4CAF50" };
+    if (reputation >= 100)
+      return { name: "Member", emoji: "👤", color: "#2196F3" };
     return { name: "New", emoji: "🆕", color: "#FF9800" };
   }
 
@@ -170,7 +183,7 @@ class UserProfiles {
   /**
    * Increment contribution counter
    */
-  async incrementContributions(userId, type = 'general') {
+  async incrementContributions(userId, type = "general") {
     await db.db.run(
       `UPDATE user_profiles SET contributions = contributions + 1 WHERE user_id = ?`,
       [userId]

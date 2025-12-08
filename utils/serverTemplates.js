@@ -14,11 +14,17 @@ class ServerTemplates {
   /**
    * Create template from server configuration
    */
-  async createTemplate(guildId, creatorId, templateName, description, isPublic = false) {
+  async createTemplate(
+    guildId,
+    creatorId,
+    templateName,
+    description,
+    isPublic = false
+  ) {
     try {
       // Get server configuration
       const config = await db.getServerConfig(guildId);
-      
+
       // Strip server-specific IDs
       const template = {
         name: templateName,
@@ -31,12 +37,12 @@ class ServerTemplates {
           heat_system_enabled: config.heat_system_enabled,
           verification_enabled: config.verification_enabled,
           verification_mode: config.verification_mode,
-          alert_threshold: config.alert_threshold
+          alert_threshold: config.alert_threshold,
         },
         is_public: isPublic,
         downloads: 0,
         rating: 0,
-        created_at: Date.now()
+        created_at: Date.now(),
       };
 
       // Store template
@@ -45,8 +51,15 @@ class ServerTemplates {
           `INSERT INTO server_templates 
            (name, description, creator_id, config_data, is_public, created_at) 
            VALUES (?, ?, ?, ?, ?, ?)`,
-          [templateName, description, creatorId, JSON.stringify(template.config), isPublic ? 1 : 0, Date.now()],
-          function(err) {
+          [
+            templateName,
+            description,
+            creatorId,
+            JSON.stringify(template.config),
+            isPublic ? 1 : 0,
+            Date.now(),
+          ],
+          function (err) {
             if (err) reject(err);
             else resolve(this.lastID);
           }
@@ -71,10 +84,13 @@ class ServerTemplates {
         [limit],
         (err, rows) => {
           if (err) reject(err);
-          else resolve((rows || []).map(r => ({
-            ...r,
-            config_data: JSON.parse(r.config_data)
-          })));
+          else
+            resolve(
+              (rows || []).map((r) => ({
+                ...r,
+                config_data: JSON.parse(r.config_data),
+              }))
+            );
         }
       );
     });
@@ -110,12 +126,15 @@ class ServerTemplates {
         [templateId]
       );
 
-      logger.success("ServerTemplates", `Applied template ${template.name} to guild ${guildId}`);
+      logger.success(
+        "ServerTemplates",
+        `Applied template ${template.name} to guild ${guildId}`
+      );
 
       return {
         success: true,
         templateName: template.name,
-        appliedSettings: Object.keys(config)
+        appliedSettings: Object.keys(config),
       };
     } catch (error) {
       logger.error("ServerTemplates", "Failed to apply template", error);
@@ -150,10 +169,10 @@ class ServerTemplates {
       });
 
       // Update template
-      await db.db.run(
-        `UPDATE server_templates SET rating = ? WHERE id = ?`,
-        [avgRating, templateId]
-      );
+      await db.db.run(`UPDATE server_templates SET rating = ? WHERE id = ?`, [
+        avgRating,
+        templateId,
+      ]);
 
       return avgRating;
     } catch (error) {
@@ -175,10 +194,13 @@ class ServerTemplates {
         [limit],
         (err, rows) => {
           if (err) reject(err);
-          else resolve((rows || []).map(r => ({
-            ...r,
-            config_data: JSON.parse(r.config_data)
-          })));
+          else
+            resolve(
+              (rows || []).map((r) => ({
+                ...r,
+                config_data: JSON.parse(r.config_data),
+              }))
+            );
         }
       );
     });
@@ -190,20 +212,21 @@ class ServerTemplates {
   getFeaturedTemplates() {
     return [
       {
-        id: 'featured_gaming',
+        id: "featured_gaming",
         name: "Gaming Community",
-        description: "Optimized for gaming servers - fast anti-raid, minimal verification",
+        description:
+          "Optimized for gaming servers - fast anti-raid, minimal verification",
         config: {
           anti_raid_enabled: 1,
           anti_nuke_enabled: 1,
           auto_mod_enabled: 1,
           verification_enabled: 0,
-          alert_threshold: 50
+          alert_threshold: 50,
         },
-        badge: "🎮 Official"
+        badge: "🎮 Official",
       },
       {
-        id: 'featured_professional',
+        id: "featured_professional",
         name: "Professional Server",
         description: "Enterprise-grade security for business servers",
         config: {
@@ -211,13 +234,13 @@ class ServerTemplates {
           anti_nuke_enabled: 1,
           auto_mod_enabled: 1,
           verification_enabled: 1,
-          verification_mode: 'manual',
-          alert_threshold: 70
+          verification_mode: "manual",
+          alert_threshold: 70,
         },
-        badge: "💼 Official"
+        badge: "💼 Official",
       },
       {
-        id: 'featured_maximum',
+        id: "featured_maximum",
         name: "Maximum Security",
         description: "All features enabled - fortress mode",
         config: {
@@ -226,10 +249,10 @@ class ServerTemplates {
           auto_mod_enabled: 1,
           heat_system_enabled: 1,
           verification_enabled: 1,
-          alert_threshold: 30
+          alert_threshold: 30,
         },
-        badge: "🔒 Official"
-      }
+        badge: "🔒 Official",
+      },
     ];
   }
 }

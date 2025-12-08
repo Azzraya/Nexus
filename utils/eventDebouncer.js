@@ -81,7 +81,7 @@ class EventDebouncer {
   getStats() {
     return {
       pendingEvents: this.pending.size,
-      queuedCallbacks: this.callbacks.size
+      queuedCallbacks: this.callbacks.size,
     };
   }
 
@@ -93,16 +93,16 @@ class EventDebouncer {
 
     return (key, callback) => {
       const now = Date.now();
-      
+
       if (!calls.has(key)) {
         calls.set(key, []);
       }
 
       const timestamps = calls.get(key);
-      
+
       // Remove old timestamps outside window
-      const validTimestamps = timestamps.filter(t => now - t < windowMs);
-      
+      const validTimestamps = timestamps.filter((t) => now - t < windowMs);
+
       if (validTimestamps.length >= maxCalls) {
         // Rate limit exceeded
         logger.debug("EventDebouncer", `Rate limit exceeded for ${key}`);
@@ -112,7 +112,7 @@ class EventDebouncer {
       // Add this call
       validTimestamps.push(now);
       calls.set(key, validTimestamps);
-      
+
       // Execute callback
       callback();
       return true;

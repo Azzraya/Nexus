@@ -23,7 +23,7 @@ class SecurityChallenges {
         description: "Detect and block 10 threats",
         goal: 10,
         metric: "threats_blocked",
-        reward: { badge: "Threat Hunter 🎯", points: 100 }
+        reward: { badge: "Threat Hunter 🎯", points: 100 },
       },
       {
         id: "security_expert",
@@ -31,7 +31,7 @@ class SecurityChallenges {
         description: "Configure all security features",
         goal: 1,
         metric: "full_config",
-        reward: { badge: "Security Expert 🛡️", points: 150 }
+        reward: { badge: "Security Expert 🛡️", points: 150 },
       },
       {
         id: "community_guardian",
@@ -39,7 +39,7 @@ class SecurityChallenges {
         description: "Moderate 50 users this week",
         goal: 50,
         metric: "moderation_actions",
-        reward: { badge: "Community Guardian 👥", points: 75 }
+        reward: { badge: "Community Guardian 👥", points: 75 },
       },
       {
         id: "raid_defender",
@@ -47,7 +47,7 @@ class SecurityChallenges {
         description: "Block 3 raid attempts",
         goal: 3,
         metric: "raids_blocked",
-        reward: { badge: "Raid Defender ⚔️", points: 200 }
+        reward: { badge: "Raid Defender ⚔️", points: 200 },
       },
       {
         id: "perfect_week",
@@ -55,8 +55,8 @@ class SecurityChallenges {
         description: "Zero security incidents for 7 days",
         goal: 1,
         metric: "zero_incidents",
-        reward: { badge: "Perfect Week 💯", points: 250 }
-      }
+        reward: { badge: "Perfect Week 💯", points: 250 },
+      },
     ];
   }
 
@@ -78,7 +78,11 @@ class SecurityChallenges {
 
     try {
       // Get current progress
-      const progress = await this.getProgress(guildId, userId, currentChallenge.id);
+      const progress = await this.getProgress(
+        guildId,
+        userId,
+        currentChallenge.id
+      );
       const newProgress = progress + amount;
 
       // Update progress
@@ -86,11 +90,20 @@ class SecurityChallenges {
         `INSERT OR REPLACE INTO challenge_progress 
          (guild_id, user_id, challenge_id, progress, week_number) 
          VALUES (?, ?, ?, ?, ?)`,
-        [guildId, userId, currentChallenge.id, newProgress, this.getWeekNumber()]
+        [
+          guildId,
+          userId,
+          currentChallenge.id,
+          newProgress,
+          this.getWeekNumber(),
+        ]
       );
 
       // Check if challenge completed
-      if (newProgress >= currentChallenge.goal && progress < currentChallenge.goal) {
+      if (
+        newProgress >= currentChallenge.goal &&
+        progress < currentChallenge.goal
+      ) {
         await this.awardChallenge(guildId, userId, currentChallenge);
       }
     } catch (error) {
@@ -132,19 +145,24 @@ class SecurityChallenges {
       const user = await this.client.users.fetch(userId);
       if (user) {
         await user.send({
-          embeds: [{
-            title: "🎉 Challenge Complete!",
-            description: 
-              `Congratulations! You completed: **${challenge.name}**\n\n` +
-              `**Reward:** ${challenge.reward.badge}\n` +
-              `**Points Earned:** ${challenge.reward.points}`,
-            color: 0x4CAF50,
-            timestamp: new Date()
-          }]
+          embeds: [
+            {
+              title: "🎉 Challenge Complete!",
+              description:
+                `Congratulations! You completed: **${challenge.name}**\n\n` +
+                `**Reward:** ${challenge.reward.badge}\n` +
+                `**Points Earned:** ${challenge.reward.points}`,
+              color: 0x4caf50,
+              timestamp: new Date(),
+            },
+          ],
         });
       }
 
-      logger.success("SecurityChallenges", `${user.tag} completed ${challenge.name}`);
+      logger.success(
+        "SecurityChallenges",
+        `${user.tag} completed ${challenge.name}`
+      );
     } catch (error) {
       logger.error("SecurityChallenges", "Failed to award challenge", error);
     }

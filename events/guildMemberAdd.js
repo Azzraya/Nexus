@@ -10,14 +10,23 @@ module.exports = {
   async execute(member, client) {
     // Track growth analytics
     if (client.growthAnalytics) {
-      client.growthAnalytics.trackJoin(member.guild.id, member.user.id, 'invite');
+      client.growthAnalytics.trackJoin(
+        member.guild.id,
+        member.user.id,
+        "invite"
+      );
     }
 
     // Track behavioral patterns
     if (client.behavioralFP) {
-      client.behavioralFP.trackBehavior(member.user.id, member.guild.id, 'join', {
-        accountAge: Date.now() - member.user.createdTimestamp
-      });
+      client.behavioralFP.trackBehavior(
+        member.user.id,
+        member.guild.id,
+        "join",
+        {
+          accountAge: Date.now() - member.user.createdTimestamp,
+        }
+      );
     }
 
     // Start performance tracking

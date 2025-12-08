@@ -5390,7 +5390,7 @@ class Database {
    */
   async cachedQuery(query, params = [], cacheDuration = 30000) {
     const cacheKey = `${query}_${JSON.stringify(params)}`;
-    
+
     // Check cache
     if (this.queryCache.has(cacheKey)) {
       const cached = this.queryCache.get(cacheKey);
@@ -5411,7 +5411,7 @@ class Database {
     // Cache result
     this.queryCache.set(cacheKey, {
       data: result,
-      expires: Date.now() + cacheDuration
+      expires: Date.now() + cacheDuration,
     });
 
     return result;
@@ -5425,8 +5425,8 @@ class Database {
     return new Promise((resolve, reject) => {
       this.db.serialize(() => {
         this.db.run("BEGIN TRANSACTION");
-        
-        const promises = operations.map(op => {
+
+        const promises = operations.map((op) => {
           return new Promise((res, rej) => {
             this.db.run(op.query, op.params, (err) => {
               if (err) rej(err);
@@ -5473,7 +5473,7 @@ class Database {
   async getStats() {
     const stats = {
       cacheSize: this.queryCache.size,
-      preparedStatements: this.preparedStatements.size
+      preparedStatements: this.preparedStatements.size,
     };
 
     // Get table sizes

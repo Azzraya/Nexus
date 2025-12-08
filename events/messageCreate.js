@@ -12,11 +12,16 @@ module.exports = {
 
     // Track behavioral patterns
     if (client.behavioralFP) {
-      client.behavioralFP.trackBehavior(message.author.id, message.guild.id, 'message', {
-        length: message.content.length,
-        hasAttachments: message.attachments.size > 0,
-        hasMentions: message.mentions.users.size > 0
-      });
+      client.behavioralFP.trackBehavior(
+        message.author.id,
+        message.guild.id,
+        "message",
+        {
+          length: message.content.length,
+          hasAttachments: message.attachments.size > 0,
+          hasMentions: message.mentions.users.size > 0,
+        }
+      );
     }
 
     // Run security checks in parallel for better performance (EXCEEDS WICK)

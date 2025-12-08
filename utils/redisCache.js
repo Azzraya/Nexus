@@ -168,14 +168,14 @@ class RedisCache {
    */
   async mget(keys) {
     if (!this.enabled || !this.client) {
-      return keys.map(k => this.fallbackCache.get(k) || null);
+      return keys.map((k) => this.fallbackCache.get(k) || null);
     }
 
     try {
       return await this.client.mGet(keys);
     } catch (error) {
       logger.debug("[Redis] MGET error, using fallback:", error.message);
-      return keys.map(k => this.fallbackCache.get(k) || null);
+      return keys.map((k) => this.fallbackCache.get(k) || null);
     }
   }
 
@@ -229,7 +229,7 @@ class RedisCache {
     if (!this.enabled || !this.client) {
       const keys = [];
       for (const key of this.fallbackCache.keys()) {
-        if (key.includes(pattern.replace('*', ''))) {
+        if (key.includes(pattern.replace("*", ""))) {
           keys.push(key);
         }
       }
@@ -252,7 +252,7 @@ class RedisCache {
     if (keys.length === 0) return 0;
 
     if (!this.enabled || !this.client) {
-      keys.forEach(k => this.fallbackCache.delete(k));
+      keys.forEach((k) => this.fallbackCache.delete(k));
       return keys.length;
     }
 
@@ -268,9 +268,14 @@ class RedisCache {
   /**
    * Cache with automatic refresh
    */
-  async cacheWithRefresh(key, fetchFunction, ttl = 3600, refreshInterval = 1800) {
+  async cacheWithRefresh(
+    key,
+    fetchFunction,
+    ttl = 3600,
+    refreshInterval = 1800
+  ) {
     const value = await this.getCached(key, fetchFunction, ttl);
-    
+
     // Set up background refresh (refresh at 50% of TTL)
     setTimeout(async () => {
       try {
@@ -290,7 +295,7 @@ class RedisCache {
   async getStats() {
     const stats = {
       enabled: this.enabled,
-      fallbackSize: this.fallbackCache.size
+      fallbackSize: this.fallbackCache.size,
     };
 
     if (this.enabled && this.client) {
@@ -298,7 +303,7 @@ class RedisCache {
         const info = await this.client.info();
         stats.redisInfo = {
           connected: true,
-          keysTotal: await this.client.dbSize()
+          keysTotal: await this.client.dbSize(),
         };
       } catch (error) {
         stats.redisInfo = { connected: false, error: error.message };

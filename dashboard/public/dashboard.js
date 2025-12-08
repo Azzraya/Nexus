@@ -1375,8 +1375,8 @@ async function editDiscordAutoModRule(ruleId) {
     // Fetch current rule data
     const response = await fetch(`/api/server/${currentServer}/automod`);
     const data = await response.json();
-    const rule = data.rules.find(r => r.id === ruleId);
-    
+    const rule = data.rules.find((r) => r.id === ruleId);
+
     if (!rule) {
       alert("❌ Rule not found");
       return;
@@ -1392,32 +1392,32 @@ async function editDiscordAutoModRule(ruleId) {
           <div class="form-group">
             <label>Rule Type</label>
             <select id="editRuleType" class="form-control" required>
-              <option value="spam" ${rule.rule_type === 'spam' ? 'selected' : ''}>Spam Detection</option>
-              <option value="links" ${rule.rule_type === 'links' ? 'selected' : ''}>Link Blocking</option>
-              <option value="invites" ${rule.rule_type === 'invites' ? 'selected' : ''}>Invite Blocking</option>
-              <option value="mentions" ${rule.rule_type === 'mentions' ? 'selected' : ''}>Mass Mentions</option>
-              <option value="caps" ${rule.rule_type === 'caps' ? 'selected' : ''}>Excessive Caps</option>
-              <option value="profanity" ${rule.rule_type === 'profanity' ? 'selected' : ''}>Profanity Filter</option>
+              <option value="spam" ${rule.rule_type === "spam" ? "selected" : ""}>Spam Detection</option>
+              <option value="links" ${rule.rule_type === "links" ? "selected" : ""}>Link Blocking</option>
+              <option value="invites" ${rule.rule_type === "invites" ? "selected" : ""}>Invite Blocking</option>
+              <option value="mentions" ${rule.rule_type === "mentions" ? "selected" : ""}>Mass Mentions</option>
+              <option value="caps" ${rule.rule_type === "caps" ? "selected" : ""}>Excessive Caps</option>
+              <option value="profanity" ${rule.rule_type === "profanity" ? "selected" : ""}>Profanity Filter</option>
             </select>
           </div>
           <div class="form-group">
             <label>Trigger Pattern (regex or keywords, comma-separated)</label>
-            <textarea id="editRuleTrigger" class="form-control" rows="3" required>${rule.trigger || ''}</textarea>
+            <textarea id="editRuleTrigger" class="form-control" rows="3" required>${rule.trigger || ""}</textarea>
             <small style="opacity:0.7;">Example: discord.gg, bit.ly, .* (any text)</small>
           </div>
           <div class="form-group">
             <label>Action</label>
             <select id="editRuleAction" class="form-control" required>
-              <option value="delete" ${rule.action === 'delete' ? 'selected' : ''}>Delete Message</option>
-              <option value="warn" ${rule.action === 'warn' ? 'selected' : ''}>Warn User</option>
-              <option value="timeout" ${rule.action === 'timeout' ? 'selected' : ''}>Timeout User (5m)</option>
-              <option value="kick" ${rule.action === 'kick' ? 'selected' : ''}>Kick User</option>
-              <option value="ban" ${rule.action === 'ban' ? 'selected' : ''}>Ban User</option>
+              <option value="delete" ${rule.action === "delete" ? "selected" : ""}>Delete Message</option>
+              <option value="warn" ${rule.action === "warn" ? "selected" : ""}>Warn User</option>
+              <option value="timeout" ${rule.action === "timeout" ? "selected" : ""}>Timeout User (5m)</option>
+              <option value="kick" ${rule.action === "kick" ? "selected" : ""}>Kick User</option>
+              <option value="ban" ${rule.action === "ban" ? "selected" : ""}>Ban User</option>
             </select>
           </div>
           <div class="form-group">
             <label>
-              <input type="checkbox" id="editRuleEnabled" ${rule.enabled ? 'checked' : ''}>
+              <input type="checkbox" id="editRuleEnabled" ${rule.enabled ? "checked" : ""}>
               Enabled
             </label>
           </div>
@@ -1444,7 +1444,12 @@ async function saveAutoModRuleEdit(ruleId) {
     const response = await fetch(`/api/dashboard/automod/${ruleId}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ rule_type: ruleType, trigger, action, enabled: enabled ? 1 : 0 })
+      body: JSON.stringify({
+        rule_type: ruleType,
+        trigger,
+        action,
+        enabled: enabled ? 1 : 0,
+      }),
     });
 
     if (!response.ok) throw new Error("Failed to update rule");
@@ -1528,8 +1533,8 @@ async function createAutoModRule() {
         rule_type: ruleType,
         trigger,
         action,
-        enabled: enabled ? 1 : 0
-      })
+        enabled: enabled ? 1 : 0,
+      }),
     });
 
     if (!response.ok) throw new Error("Failed to create rule");
@@ -2470,7 +2475,7 @@ function startAutoRefresh() {
 // ========== ADVANCED ANALYTICS PAGE ==========
 async function loadAdvancedAnalytics() {
   const contentArea = document.getElementById("contentArea");
-  
+
   contentArea.innerHTML = `
     <h2>📊 Advanced Analytics</h2>
     <div class="analytics-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 20px;">
@@ -2494,23 +2499,25 @@ async function loadAdvancedAnalytics() {
 
   // Fetch analytics data
   try {
-    const response = await fetch(`/api/analytics/advanced?guild=${currentServer}`);
+    const response = await fetch(
+      `/api/analytics/advanced?guild=${currentServer}`
+    );
     const data = await response.json();
-    
+
     document.getElementById("raidPrediction").innerHTML = `
-      <div style="font-size: 2rem; font-weight: bold; color: ${data.raidLikelihood > 70 ? '#f44336' : '#4CAF50'};">
+      <div style="font-size: 2rem; font-weight: bold; color: ${data.raidLikelihood > 70 ? "#f44336" : "#4CAF50"};">
         ${data.raidLikelihood}%
       </div>
       <p>Likelihood in next 48h</p>
     `;
-    
+
     document.getElementById("growthForecast").innerHTML = `
       <div style="font-size: 2rem; font-weight: bold; color: #2196F3;">
         +${data.forecastedGrowth}
       </div>
       <p>Expected members (30 days)</p>
     `;
-    
+
     document.getElementById("securityScore").innerHTML = `
       <div style="font-size: 2rem; font-weight: bold; color: #9333EA;">
         ${data.securityScore}/100
@@ -2525,7 +2532,7 @@ async function loadAdvancedAnalytics() {
 // ========== LEADERBOARD PAGE ==========
 async function loadLeaderboard() {
   const contentArea = document.getElementById("contentArea");
-  
+
   contentArea.innerHTML = `
     <h2>🏆 Global Security Leaderboard</h2>
     <p style="opacity: 0.8; margin-bottom: 20px;">Top servers by security score (anonymized)</p>
@@ -2541,15 +2548,22 @@ async function loadLeaderboard() {
   try {
     const response = await fetch(`/api/leaderboard/global`);
     const data = await response.json();
-    
+
     let html = '<div class="leaderboard-list">';
     data.leaderboard.forEach((entry, index) => {
-      const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index + 1}`;
+      const medal =
+        index === 0
+          ? "🥇"
+          : index === 1
+            ? "🥈"
+            : index === 2
+              ? "🥉"
+              : `#${index + 1}`;
       html += `
         <div class="leaderboard-entry" style="
           display: flex; justify-content: space-between; align-items: center;
           padding: 15px; margin-bottom: 10px; background: var(--bg-card);
-          border-radius: 8px; border-left: 4px solid ${index < 3 ? '#FFD700' : 'var(--border-color)'};
+          border-radius: 8px; border-left: 4px solid ${index < 3 ? "#FFD700" : "var(--border-color)"};
         ">
           <div>
             <span style="font-size: 1.5rem; margin-right: 15px;">${medal}</span>
@@ -2561,8 +2575,8 @@ async function loadLeaderboard() {
         </div>
       `;
     });
-    html += '</div>';
-    
+    html += "</div>";
+
     // Show current server's rank if available
     if (data.yourRank) {
       html += `
@@ -2575,10 +2589,10 @@ async function loadLeaderboard() {
         </div>
       `;
     }
-    
+
     document.getElementById("leaderboardContainer").innerHTML = html;
   } catch (error) {
-    document.getElementById("leaderboardContainer").innerHTML = 
+    document.getElementById("leaderboardContainer").innerHTML =
       `<p style="color: var(--danger);">❌ Failed to load leaderboard</p>`;
   }
 }
@@ -2586,7 +2600,7 @@ async function loadLeaderboard() {
 // ========== SERVER COMPARISON PAGE ==========
 async function loadServerComparison() {
   const contentArea = document.getElementById("contentArea");
-  
+
   contentArea.innerHTML = `
     <h2>📊 Server Comparison</h2>
     <p style="opacity: 0.8; margin-bottom: 20px;">See how your security compares to other servers</p>
@@ -2602,7 +2616,7 @@ async function loadServerComparison() {
   try {
     const response = await fetch(`/api/comparison?guild=${currentServer}`);
     const data = await response.json();
-    
+
     document.getElementById("comparisonData").innerHTML = `
       <div class="comparison-header" style="text-align: center; padding: 40px; background: var(--bg-card); border-radius: 12px; margin-bottom: 30px;">
         <div style="font-size: 4rem; margin-bottom: 10px;">${data.badge.emoji}</div>
@@ -2617,25 +2631,33 @@ async function loadServerComparison() {
 
       <h3 style="margin-bottom: 20px;">📈 Score Breakdown</h3>
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px;">
-        ${Object.entries(data.breakdown).map(([key, value]) => `
+        ${Object.entries(data.breakdown)
+          .map(
+            ([key, value]) => `
           <div style="padding: 15px; background: var(--bg-card); border-radius: 8px;">
             <div style="font-size: 1.5rem; font-weight: bold;">${value}</div>
             <p style="opacity: 0.8;">${this.formatKey(key)}</p>
           </div>
-        `).join('')}
+        `
+          )
+          .join("")}
       </div>
 
       <h3 style="margin-bottom: 20px;">💡 Recommendations</h3>
-      ${data.recommendations.map(rec => `
-        <div style="padding: 15px; margin-bottom: 10px; background: var(--bg-card); border-radius: 8px; border-left: 4px solid ${rec.priority === 'high' ? 'var(--danger)' : 'var(--info)'};">
+      ${data.recommendations
+        .map(
+          (rec) => `
+        <div style="padding: 15px; margin-bottom: 10px; background: var(--bg-card); border-radius: 8px; border-left: 4px solid ${rec.priority === "high" ? "var(--danger)" : "var(--info)"};">
           <strong>${rec.title}</strong>
           <p style="opacity: 0.8; margin-top: 5px;">${rec.description}</p>
           <span style="color: var(--success);">${rec.impact}</span>
         </div>
-      `).join('')}
+      `
+        )
+        .join("")}
     `;
   } catch (error) {
-    document.getElementById("comparisonData").innerHTML = 
+    document.getElementById("comparisonData").innerHTML =
       `<p style="color: var(--danger);">❌ Failed to load comparison data</p>`;
   }
 }
@@ -2643,7 +2665,7 @@ async function loadServerComparison() {
 // ========== WICK MIGRATION TOOL PAGE ==========
 async function loadMigrationTool() {
   const contentArea = document.getElementById("contentArea");
-  
+
   contentArea.innerHTML = `
     <h2>🔄 Migrate from Wick</h2>
     <p style="opacity: 0.8; margin-bottom: 20px;">Automatically import your Wick settings and upgrade to Nexus</p>
@@ -2657,9 +2679,11 @@ async function loadMigrationTool() {
   `;
 
   try {
-    const response = await fetch(`/api/migration/analyze?guild=${currentServer}`);
+    const response = await fetch(
+      `/api/migration/analyze?guild=${currentServer}`
+    );
     const data = await response.json();
-    
+
     if (data.hasWick) {
       document.getElementById("migrationStatus").innerHTML = `
         <div style="padding: 30px; background: var(--bg-card); border-radius: 12px; margin-bottom: 20px;">
@@ -2668,8 +2692,8 @@ async function loadMigrationTool() {
           
           <h4 style="margin-top: 20px;">🔍 What We Found:</h4>
           <ul style="margin: 10px 0 20px 20px;">
-            ${data.detectedSettings.logChannels ? `<li>${data.detectedSettings.logChannels.length} log channel(s)</li>` : ''}
-            ${data.detectedSettings.quarantineRoles ? `<li>${data.detectedSettings.quarantineRoles.length} quarantine role(s)</li>` : ''}
+            ${data.detectedSettings.logChannels ? `<li>${data.detectedSettings.logChannels.length} log channel(s)</li>` : ""}
+            ${data.detectedSettings.quarantineRoles ? `<li>${data.detectedSettings.quarantineRoles.length} quarantine role(s)</li>` : ""}
           </ul>
 
           <button onclick="startMigration()" class="btn-primary" style="width: 100%; padding: 15px; margin-top: 20px;">
@@ -2679,13 +2703,17 @@ async function loadMigrationTool() {
 
         <h3>📊 Why Switch to Nexus?</h3>
         <div style="margin-top: 15px;">
-          ${data.comparison.map(item => `
+          ${data.comparison
+            .map(
+              (item) => `
             <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; padding: 15px; margin-bottom: 10px; background: var(--bg-card); border-radius: 8px;">
               <div><strong>${item.feature}</strong></div>
               <div style="opacity: 0.7;">Wick: ${item.wick}</div>
               <div style="color: var(--success);">Nexus: ${item.nexus}</div>
             </div>
-          `).join('')}
+          `
+            )
+            .join("")}
         </div>
       `;
     } else {
@@ -2700,36 +2728,45 @@ async function loadMigrationTool() {
       `;
     }
   } catch (error) {
-    document.getElementById("migrationStatus").innerHTML = 
+    document.getElementById("migrationStatus").innerHTML =
       `<p style="color: var(--danger);">❌ Failed to check for Wick</p>`;
   }
 }
 
-window.startMigration = async function() {
-  if (!confirm("Start migration from Wick to Nexus? This will import settings and enable advanced features.")) return;
-  
+window.startMigration = async function () {
+  if (
+    !confirm(
+      "Start migration from Wick to Nexus? This will import settings and enable advanced features."
+    )
+  )
+    return;
+
   try {
     const response = await fetch(`/api/migration/execute`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ guild_id: currentServer })
+      body: JSON.stringify({ guild_id: currentServer }),
     });
-    
+
     const result = await response.json();
-    
+
     if (result.success) {
-      alert(`✅ Migration complete!\n\n${result.migratedSettings.join('\n')}\n\n${result.improvements.join('\n')}`);
+      alert(
+        `✅ Migration complete!\n\n${result.migratedSettings.join("\n")}\n\n${result.improvements.join("\n")}`
+      );
       loadMigrationTool();
     } else {
-      alert(`❌ Migration failed: ${result.errors.join(', ')}`);
+      alert(`❌ Migration failed: ${result.errors.join(", ")}`);
     }
   } catch (error) {
     alert(`❌ Migration error: ${error.message}`);
   }
 };
 
-window.formatKey = function(key) {
-  return key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+window.formatKey = function (key) {
+  return key
+    .replace(/([A-Z])/g, " $1")
+    .replace(/^./, (str) => str.toUpperCase());
 };
 
 // Navigation
@@ -2738,15 +2775,15 @@ document.addEventListener("DOMContentLoaded", () => {
   const themeToggle = document.getElementById("themeToggle");
   const themeIcon = document.getElementById("themeIcon");
   const savedTheme = localStorage.getItem("theme") || "dark";
-  
+
   // Apply saved theme
   document.documentElement.setAttribute("data-theme", savedTheme);
   themeIcon.textContent = savedTheme === "dark" ? "🌙" : "☀️";
-  
+
   themeToggle.addEventListener("click", () => {
     const currentTheme = document.documentElement.getAttribute("data-theme");
     const newTheme = currentTheme === "dark" ? "light" : "dark";
-    
+
     document.documentElement.setAttribute("data-theme", newTheme);
     localStorage.setItem("theme", newTheme);
     themeIcon.textContent = newTheme === "dark" ? "🌙" : "☀️";
@@ -2812,8 +2849,18 @@ document.addEventListener("DOMContentLoaded", () => {
       { name: "Mod Logs", page: "modlogs", icon: "⚖️", key: "7" },
       { name: "Message Logs", page: "message-logs", icon: "💬", key: "8" },
       { name: "Security Logs", page: "security", icon: "🔒", key: "9" },
-      { name: "Toggle Theme", action: () => themeToggle.click(), icon: "🎨", key: "T" },
-      { name: "Go Home", action: () => window.location.href = "/dashboard", icon: "🏠", key: "H" }
+      {
+        name: "Toggle Theme",
+        action: () => themeToggle.click(),
+        icon: "🎨",
+        key: "T",
+      },
+      {
+        name: "Go Home",
+        action: () => (window.location.href = "/dashboard"),
+        icon: "🏠",
+        key: "H",
+      },
     ];
 
     const palette = document.createElement("div");
@@ -2862,7 +2909,7 @@ document.addEventListener("DOMContentLoaded", () => {
     searchInput.addEventListener("input", (e) => {
       const query = e.target.value.toLowerCase();
       const items = document.querySelectorAll(".command-item");
-      items.forEach(item => {
+      items.forEach((item) => {
         const text = item.textContent.toLowerCase();
         item.style.display = text.includes(query) ? "flex" : "none";
       });

@@ -1,4 +1,9 @@
-const { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } = require("discord.js");
+const {
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+  EmbedBuilder,
+} = require("discord.js");
 const db = require("./database");
 const logger = require("./logger");
 
@@ -21,7 +26,7 @@ class SetupWizard {
       guildId: interaction.guild.id,
       step: 0,
       selections: {},
-      startTime: Date.now()
+      startTime: Date.now(),
     };
 
     this.activeWizards.set(interaction.user.id, wizardState);
@@ -38,30 +43,30 @@ class SetupWizard {
       .setTitle("🎯 Nexus Setup Wizard")
       .setDescription(
         "Let's configure Nexus to perfectly match your server!\n\n" +
-        "**First, what type of server is this?**\n" +
-        "This helps us optimize settings for your community."
+          "**First, what type of server is this?**\n" +
+          "This helps us optimize settings for your community."
       )
-      .setColor(0x9333EA)
+      .setColor(0x9333ea)
       .addFields(
         {
           name: "🎮 Gaming Community",
-          value: "Optimized for gaming servers with focus on anti-raid"
+          value: "Optimized for gaming servers with focus on anti-raid",
         },
         {
           name: "💼 Professional/Business",
-          value: "Professional settings with balanced protection"
+          value: "Professional settings with balanced protection",
         },
         {
           name: "🎨 Creative Community",
-          value: "Art, music, content creation servers"
+          value: "Art, music, content creation servers",
         },
         {
           name: "📚 Educational/Learning",
-          value: "Schools, courses, study groups"
+          value: "Schools, courses, study groups",
         },
         {
           name: "🌟 Social/General",
-          value: "General community or social server"
+          value: "General community or social server",
         }
       );
 
@@ -96,7 +101,7 @@ class SetupWizard {
     await interaction.reply({
       embeds: [embed],
       components: [buttons],
-      ephemeral: true
+      ephemeral: true,
     });
   }
 
@@ -122,22 +127,23 @@ class SetupWizard {
       .setTitle("🛡️ Security Level")
       .setDescription(
         "How strict should Nexus be?\n\n" +
-        "**Higher security** = Better protection but more restrictive\n" +
-        "**Lower security** = More relaxed but allows more risk"
+          "**Higher security** = Better protection but more restrictive\n" +
+          "**Lower security** = More relaxed but allows more risk"
       )
-      .setColor(0x9333EA)
+      .setColor(0x9333ea)
       .addFields(
         {
           name: "🔴 Maximum Security",
-          value: "Strict verification, aggressive anti-raid, all features enabled"
+          value:
+            "Strict verification, aggressive anti-raid, all features enabled",
         },
         {
           name: "🟡 Balanced (Recommended)",
-          value: "Smart protection without being too restrictive"
+          value: "Smart protection without being too restrictive",
         },
         {
           name: "🟢 Relaxed",
-          value: "Minimal restrictions, only block obvious threats"
+          value: "Minimal restrictions, only block obvious threats",
         }
       );
 
@@ -161,7 +167,7 @@ class SetupWizard {
 
     await interaction.update({
       embeds: [embed],
-      components: [buttons]
+      components: [buttons],
     });
   }
 
@@ -196,13 +202,17 @@ class SetupWizard {
       // Clean up wizard state
       this.activeWizards.delete(wizardState.userId);
 
-      logger.success("SetupWizard", `Configured ${interaction.guild.name} as ${selections.serverType} with ${selections.securityLevel} security`);
+      logger.success(
+        "SetupWizard",
+        `Configured ${interaction.guild.name} as ${selections.serverType} with ${selections.securityLevel} security`
+      );
     } catch (error) {
       logger.error("SetupWizard", "Configuration failed", error);
       await interaction.update({
-        content: "❌ Setup failed. Please try again or use manual configuration.",
+        content:
+          "❌ Setup failed. Please try again or use manual configuration.",
         embeds: [],
-        components: []
+        components: [],
       });
     }
   }
@@ -219,37 +229,37 @@ class SetupWizard {
         anti_raid_enabled: 1,
         anti_nuke_enabled: 1,
         auto_mod_enabled: 1,
-        heat_system_enabled: 1
+        heat_system_enabled: 1,
       },
-      features: []
+      features: [],
     };
 
     // Adjust based on server type
-    if (serverType === 'gaming') {
+    if (serverType === "gaming") {
       config.settings.verification_enabled = 0; // Less friction for gamers
       config.settings.alert_threshold = 50; // Lower threshold
       config.features.push("Gaming-optimized anti-raid");
       config.features.push("Lower verification barriers");
-    } else if (serverType === 'professional') {
+    } else if (serverType === "professional") {
       config.settings.verification_enabled = 1;
-      config.settings.verification_mode = 'manual';
+      config.settings.verification_mode = "manual";
       config.features.push("Professional verification flow");
       config.features.push("Enhanced audit logging");
-    } else if (serverType === 'educational') {
+    } else if (serverType === "educational") {
       config.settings.verification_enabled = 1;
-      config.settings.verification_mode = 'instant';
+      config.settings.verification_mode = "instant";
       config.features.push("Student-friendly verification");
       config.features.push("Educational safety features");
     }
 
     // Adjust based on security level
-    if (securityLevel === 'maximum') {
+    if (securityLevel === "maximum") {
       config.settings.verification_enabled = 1;
       config.settings.alert_threshold = 30;
       config.features.push("Maximum protection mode");
       config.features.push("Aggressive anti-raid");
       config.features.push("All security features enabled");
-    } else if (securityLevel === 'relaxed') {
+    } else if (securityLevel === "relaxed") {
       config.settings.alert_threshold = 80;
       config.features.push("Relaxed protection mode");
       config.features.push("Minimal restrictions");
@@ -271,32 +281,33 @@ class SetupWizard {
       .setTitle("✅ Setup Complete!")
       .setDescription(
         "Nexus has been configured for your server!\n\n" +
-        "**Features Enabled:**\n" +
-        config.features.map(f => `✅ ${f}`).join('\n')
+          "**Features Enabled:**\n" +
+          config.features.map((f) => `✅ ${f}`).join("\n")
       )
-      .setColor(0x4CAF50)
+      .setColor(0x4caf50)
       .addFields(
         {
           name: "🎯 Next Steps",
-          value: 
+          value:
             "1️⃣ Use `/dashboard` to fine-tune settings\n" +
             "2️⃣ Check `/performance` to verify everything works\n" +
-            "3️⃣ Run `/quick` for quick actions panel"
+            "3️⃣ Run `/quick` for quick actions panel",
         },
         {
           name: "🛡️ You're Protected!",
-          value: "Nexus is now monitoring your server 24/7 with:\n" +
-                 "• 4 Anti-Raid Algorithms\n" +
-                 "• AI-Powered Threat Detection\n" +
-                 "• Hourly Auto-Backups\n" +
-                 "• Real-Time Monitoring"
+          value:
+            "Nexus is now monitoring your server 24/7 with:\n" +
+            "• 4 Anti-Raid Algorithms\n" +
+            "• AI-Powered Threat Detection\n" +
+            "• Hourly Auto-Backups\n" +
+            "• Real-Time Monitoring",
         }
       )
       .setFooter({ text: "Need help? Use /help or visit our support server" });
 
     await interaction.update({
       embeds: [embed],
-      components: []
+      components: [],
     });
   }
 
