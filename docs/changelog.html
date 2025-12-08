@@ -84,8 +84,143 @@
 
       <div class="content-section">
         <div class="changelog-entry">
-          <h2>Version 3.42.0 - December 8, 2025</h2>
+          <h2>Version 4.0.0 - December 8, 2025</h2>
           <span class="version-badge">Latest</span>
+          <h3>🎉 MAJOR RELEASE - PRODUCTION INFRASTRUCTURE OVERHAUL</h3>
+          <p>
+            <strong>Major version bump</strong> consolidating all 3.x features
+            into a production-ready release with enhanced monitoring, error
+            recovery, and enterprise-grade reliability.
+          </p>
+          <h3>🗄️ DATABASE ENHANCEMENTS</h3>
+          <ul>
+            <li>
+              📊 <strong>Server Retention Analytics:</strong> New
+              <code>server_retention</code> table tracking lifetime, churn
+              reasons, commands used, and features configured per server
+            </li>
+            <li>
+              📈 <strong>Server Joins Tracking:</strong> New
+              <code>server_joins</code> table for retention calculations and
+              growth analysis
+            </li>
+            <li>
+              📝 <strong>General Logs Table:</strong> New
+              <code>logs</code> table for tracking all Discord events (messages,
+              roles, channels, emojis) with indexed queries
+            </li>
+            <li>
+              📎 <strong>Invite Tracking Enhancements:</strong> New
+              <code>invite_tracking</code> table with guild-level invite
+              attribution and analytics
+            </li>
+            <li>
+              🔧 <strong>Custom Commands Migration:</strong> Enhanced
+              custom_commands table with 11 new columns (description,
+              response_type, embed support, role requirements, channel
+              restrictions, cooldowns, usage tracking)
+            </li>
+          </ul>
+          <h3>🛡️ ENHANCED AUDIT LOG MONITORING</h3>
+          <ul>
+            <li>
+              ✅ <strong>Unknown Guild Handling:</strong> Automatically detects
+              when bot is kicked/removed and stops monitoring immediately (error
+              code 10004)
+            </li>
+            <li>
+              🧹 <strong>Stale Guild Cleanup:</strong> Periodic cleanup every 5
+              minutes removes monitoring for guilds bot is no longer in
+            </li>
+            <li>
+              🔇 <strong>Timeout Error Suppression:</strong> Connection timeout
+              errors now logged at debug level only to prevent console spam
+            </li>
+            <li>
+              🔄 <strong>Better Retry Logic:</strong> Enhanced handling for
+              timeouts, socket errors, and network issues with exponential
+              backoff
+            </li>
+            <li>
+              📊 <strong>Guild Verification:</strong> Verifies guild exists
+              before every monitoring cycle to prevent errors
+            </li>
+          </ul>
+          <h3>🚀 RELIABILITY & MONITORING</h3>
+          <ul>
+            <li>
+              ⏱️ <strong>Rate Limit Handler:</strong> New intelligent rate limit
+              protection with automatic retry and request queuing
+            </li>
+            <li>
+              🧠 <strong>Memory Monitor:</strong> Tracks memory usage and
+              detects potential leaks (disabled by default to reduce noise)
+            </li>
+            <li>
+              📈 <strong>Auto-Scaling Monitor:</strong> Monitors guild-to-shard
+              ratio and recommends rescaling at 1000 guilds/shard
+            </li>
+            <li>
+              🔍 <strong>Shard Error Tracker:</strong> Tracks shard-specific
+              errors and provides recovery recommendations
+            </li>
+            <li>
+              ⏰ <strong>Command Registration Timeout:</strong> 2-minute timeout
+              protection prevents startup hangs with graceful fallback
+            </li>
+            <li>
+              💾 <strong>Channel Pins Cache:</strong> Initialized Map cache for
+              pin/unpin tracking to prevent undefined errors
+            </li>
+          </ul>
+          <h3>🎯 GUILD MANAGEMENT IMPROVEMENTS</h3>
+          <ul>
+            <li>
+              🛡️ <strong>Enhanced Content Filtering:</strong> Auto-leaves
+              offensive guilds and sanitizes guild names in logs during join
+              event
+            </li>
+            <li>
+              📊 <strong>Server Join Attribution:</strong> Tracks join source,
+              member count, and metadata in new server_joins table
+            </li>
+            <li>
+              ✅ <strong>Better Permission Checks:</strong> Added ViewChannel
+              permission check before sending messages to system channels
+            </li>
+            <li>
+              🔄 <strong>Improved Error Recovery:</strong> Falls back to DM if
+              system channel send fails
+            </li>
+          </ul>
+          <h3>⚙️ INFRASTRUCTURE</h3>
+          <ul>
+            <li>
+              📦 <strong>New Dependencies:</strong> Added compression (response
+              optimization), bufferutil and zlib-sync (WebSocket performance
+              boost)
+            </li>
+            <li>
+              🔒 <strong>Database Migrations:</strong> Automatic schema
+              migrations for all new tables and columns with backward
+              compatibility
+            </li>
+            <li>
+              ✅ <strong>Enhanced Startup Sequence:</strong> Database backups,
+              auto-scaling, and monitoring all initialize automatically on shard
+              0
+            </li>
+          </ul>
+          <p>
+            <strong>Breaking Changes:</strong> Database schema updated with new
+            tables (server_retention, server_joins, logs, invite_tracking).
+            Automatic migrations run on startup. Custom commands schema enhanced
+            - old data automatically migrated.
+          </p>
+        </div>
+
+        <div class="changelog-entry">
+          <h2>Version 3.42.0 - December 8, 2025</h2>
           <h3>🐛 BUG FIXES & IMPROVEMENTS</h3>
           <ul>
             <li>

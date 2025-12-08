@@ -654,8 +654,12 @@
         refreshBtn.textContent = "🔄 Loading...";
 
         // Preserve flashing state if active
-        const wasFlashing = currentHighlightedShard ? currentHighlightedShard.dataset.shardId : null;
-        const wasFlashingContinuous = wasFlashing && currentHighlightedShard?.classList.contains("flashing");
+        const wasFlashing = currentHighlightedShard
+          ? currentHighlightedShard.dataset.shardId
+          : null;
+        const wasFlashingContinuous =
+          wasFlashing &&
+          currentHighlightedShard?.classList.contains("flashing");
 
         try {
           const response = await window.apiCall("/api/shards");
