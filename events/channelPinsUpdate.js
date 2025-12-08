@@ -10,15 +10,15 @@ module.exports = {
     if (!channel.guild) return;
 
     try {
-      // Fetch pinned messages to see what changed
-      const pinnedMessages = await channel.messages.fetchPinned();
-      const previousPins = client.channelPins?.get(channel.id) || new Set();
-      const currentPins = new Set(pinnedMessages.map((m) => m.id));
-
-      // Initialize pins cache if it doesn't exist
-      if (!client.channelPins) {
+      // Initialize pins cache if it doesn't exist or is not a Map
+      if (!client.channelPins || !(client.channelPins instanceof Map)) {
         client.channelPins = new Map();
       }
+
+      // Fetch pinned messages to see what changed
+      const pinnedMessages = await channel.messages.fetchPinned();
+      const previousPins = client.channelPins.get(channel.id) || new Set();
+      const currentPins = new Set(pinnedMessages.map((m) => m.id));
 
       // Find newly pinned messages
       const newlyPinned = [];
@@ -36,8 +36,23 @@ module.exports = {
         }
       }
 
-      // Update cache
-      client.channelPins.set(channel.id, currentPins);
+      // Update cache - ensure channelPins is still a Map before setting
+      try {
+        if (client.channelPins instanceof Map) {
+          client.channelPins.set(channel.id, currentPins);
+        } else {
+          // Fallback: reinitialize if somehow it's not a Map
+          client.channelPins = new Map();
+          client.channelPins.set(channel.id, currentPins);
+        }
+      } catch (cacheError) {
+        // If cache update fails, log but don't crash
+        logger.debug(
+          "ChannelPinsUpdate",
+          `Failed to update pin cache for channel ${channel.id}:`,
+          cacheError.message
+        );
+      }
 
       // Log pin events
       for (const messageId of newlyPinned) {
