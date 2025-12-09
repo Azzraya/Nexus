@@ -30,7 +30,11 @@ module.exports = {
     const embed = new EmbedBuilder()
       .setTitle("⚡ Shard Information")
       .addFields(
-        { name: "Current Shard", value: getShardDisplay(shardInfo.shardId), inline: true },
+        {
+          name: "Current Shard",
+          value: getShardDisplay(shardInfo.shardId),
+          inline: true,
+        },
         {
           name: "Total Shards",
           value: `${shardInfo.shardCount}`,
@@ -58,7 +62,10 @@ module.exports = {
               gatewayInfo = ` | 🌐 ${gwShard.connectionQuality}% quality`;
               // Add gateway server name if available
               if (gwShard.gatewayUrl) {
-                const serverName = gwShard.gatewayUrl.replace('wss://', '').replace('.discord.gg', '').split('.')[0];
+                const serverName = gwShard.gatewayUrl
+                  .replace("wss://", "")
+                  .replace(".discord.gg", "")
+                  .split(".")[0];
                 gatewayInfo += ` | 🔗 ${serverName}`;
               }
             }

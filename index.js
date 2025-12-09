@@ -246,35 +246,49 @@ for (const file of eventFiles) {
 }
 
 // Gateway event monitoring (EXCEEDS WICK)
+// Note: Discord.js WebSocketShard events, not WebSocketManager
 client.ws.on("shardReady", (shardId) => {
+  logger.info("GatewayManager", `[DEBUG] shardReady event fired for shard ${shardId}`);
   client.gatewayManager.initializeShard(shardId);
   client.gatewayManager.onReady(shardId);
 });
 
 client.ws.on("shardResume", (shardId, replayedEvents) => {
+  logger.info("GatewayManager", `[DEBUG] shardResume event fired for shard ${shardId}`);
   client.gatewayManager.onResume(shardId, replayedEvents);
 });
 
 client.ws.on("shardDisconnect", (event, shardId) => {
+  logger.info("GatewayManager", `[DEBUG] shardDisconnect event fired for shard ${shardId}`);
   client.gatewayManager.onDisconnect(shardId, event.code, event.reason);
 });
 
 client.ws.on("shardReconnecting", (shardId) => {
+  logger.info("GatewayManager", `[DEBUG] shardReconnecting event fired for shard ${shardId}`);
   client.gatewayManager.onReconnecting(shardId);
 });
 
 client.ws.on("shardError", (error, shardId) => {
+  logger.info("GatewayManager", `[DEBUG] shardError event fired for shard ${shardId}`);
   client.gatewayManager.onError(shardId, error);
 });
 
 // Start gateway health monitoring and initialize existing shards
 client.once("ready", () => {
+  logger.info("GatewayManager", "[DEBUG] Bot ready, initializing existing shards...");
+  
   // Initialize all existing shards
+  let initializedCount = 0;
   client.ws.shards.forEach((shard) => {
+    logger.info("GatewayManager", `[DEBUG] Manually initializing shard ${shard.id}`);
     client.gatewayManager.initializeShard(shard.id);
     client.gatewayManager.onReady(shard.id);
+    // Manually trigger an identify event for stats
+    client.gatewayManager.onIdentify(shard.id, shard.sessionId || `session-${shard.id}`);
+    initializedCount++;
   });
   
+  logger.success("GatewayManager", `Initialized ${initializedCount} shards manually`);
   client.gatewayManager.startHealthMonitoring(60000); // Check every minute
   logger.success("GatewayManager", "Gateway health monitoring active");
 });
