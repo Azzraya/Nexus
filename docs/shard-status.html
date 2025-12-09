@@ -714,16 +714,6 @@
             `
                   : ""
             }
-            ${
-              data.gatewayUrl
-                ? `
-              <div style="background: rgba(102, 126, 234, 0.1); padding: 8px; border-radius: 4px; margin-top: 4px;">
-                <div style="font-weight: 600; margin-bottom: 4px; color: #c4b5fd;">🔗 Gateway Server</div>
-                <div style="font-size: 0.85em; color: #c4b5fd; font-weight: 500; word-break: break-all; line-height: 1.4;">${data.gatewayUrl.replace("wss://", "").replace(".discord.gg", "")}</div>
-              </div>
-            `
-                : ""
-            }
           </div>
           <div class="tooltip-arrow"></div>
         `;

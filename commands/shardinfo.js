@@ -60,14 +60,6 @@ module.exports = {
             );
             if (gwShard) {
               gatewayInfo = ` | 🌐 ${gwShard.connectionQuality}% quality`;
-              // Add gateway server name if available
-              if (gwShard.gatewayUrl) {
-                const serverName = gwShard.gatewayUrl
-                  .replace("wss://", "")
-                  .replace(".discord.gg", "")
-                  .split(".")[0];
-                gatewayInfo += ` | 🔗 ${serverName}`;
-              }
             }
           }
           return `**${shardName}:** ${shard.guilds} guilds, ${shard.users} users, ${shard.ping}ms ping${gatewayInfo}`;
