@@ -6,6 +6,7 @@ const {
 const ShardManager = require("../utils/shardManager");
 const Owner = require("../utils/owner");
 const ErrorMessages = require("../utils/errorMessages");
+const { getShardDisplay } = require("../utils/shardNames");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -29,7 +30,7 @@ module.exports = {
     const embed = new EmbedBuilder()
       .setTitle("⚡ Shard Information")
       .addFields(
-        { name: "Current Shard", value: `${shardInfo.shardId}`, inline: true },
+        { name: "Current Shard", value: getShardDisplay(shardInfo.shardId), inline: true },
         {
           name: "Total Shards",
           value: `${shardInfo.shardCount}`,
@@ -47,6 +48,7 @@ module.exports = {
     if (stats.shards) {
       const shardList = stats.shards
         .map((shard) => {
+          const shardName = getShardDisplay(shard.id);
           let gatewayInfo = "";
           if (gatewayStats && gatewayStats.shards) {
             const gwShard = gatewayStats.shards.find(
@@ -61,7 +63,7 @@ module.exports = {
               }
             }
           }
-          return `**Shard ${shard.id}:** ${shard.guilds} guilds, ${shard.users} users, ${shard.ping}ms ping${gatewayInfo}`;
+          return `**${shardName}:** ${shard.guilds} guilds, ${shard.users} users, ${shard.ping}ms ping${gatewayInfo}`;
         })
         .join("\n");
 
