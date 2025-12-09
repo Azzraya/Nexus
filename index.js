@@ -285,10 +285,27 @@ client.once("ready", () => {
     client.gatewayManager.onReady(shard.id);
     // Manually trigger an identify event for stats
     client.gatewayManager.onIdentify(shard.id, shard.sessionId || `session-${shard.id}`);
+    
+    // Track current ping as initial latency
+    if (shard.ping >= 0) {
+      client.gatewayManager.onHeartbeatAck(shard.id, shard.ping);
+      logger.info("GatewayManager", `[DEBUG] Initial ping for shard ${shard.id}: ${shard.ping}ms`);
+    }
+    
     initializedCount++;
   });
   
   logger.success("GatewayManager", `Initialized ${initializedCount} shards manually`);
+  
+  // Set up interval to track heartbeat latency every 30 seconds
+  setInterval(() => {
+    client.ws.shards.forEach((shard) => {
+      if (shard.ping >= 0) {
+        client.gatewayManager.onHeartbeatAck(shard.id, shard.ping);
+      }
+    });
+  }, 30000);
+  
   client.gatewayManager.startHealthMonitoring(60000); // Check every minute
   logger.success("GatewayManager", "Gateway health monitoring active");
 });
