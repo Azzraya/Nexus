@@ -1821,6 +1821,58 @@ class DashboardServer {
       }
     });
 
+    // Get gateway stats (EXCEEDS WICK - Enterprise gateway monitoring)
+    this.app.get("/api/gateway", async (req, res) => {
+      try {
+        if (!this.client.gatewayManager) {
+          return res
+            .status(503)
+            .json({ error: "Gateway manager not initialized" });
+        }
+
+        const stats = this.client.gatewayManager.getAllStats();
+        const health = this.client.gatewayManager.getHealthReport();
+
+        res.json({
+          ...stats,
+          health,
+          timestamp: Date.now(),
+        });
+      } catch (error) {
+        logger.error("API", "Gateway endpoint error", error);
+        res.status(500).json({ error: error.message });
+      }
+    });
+
+    // Get gateway stats for specific shard
+    this.app.get("/api/gateway/:shardId", async (req, res) => {
+      try {
+        if (!this.client.gatewayManager) {
+          return res
+            .status(503)
+            .json({ error: "Gateway manager not initialized" });
+        }
+
+        const shardId = parseInt(req.params.shardId);
+        if (isNaN(shardId)) {
+          return res.status(400).json({ error: "Invalid shard ID" });
+        }
+
+        const stats = this.client.gatewayManager.getShardStats(shardId);
+        if (!stats) {
+          return res.status(404).json({ error: "Shard not found" });
+        }
+
+        res.json({
+          shard: stats,
+          timestamp: Date.now(),
+        });
+      } catch (error) {
+        logger.error("API", "Gateway shard endpoint error", error);
+        res.status(500).json({ error: error.message });
+      }
+    });
+
     // Get recent global security events (public endpoint)
     this.app.get("/api/security/recent", async (req, res) => {
       try {

@@ -98,6 +98,10 @@ client.setupWizard = new SetupWizard(client);
 const CommandAnalytics = require("./utils/commandAnalytics");
 client.commandAnalytics = new CommandAnalytics(client);
 
+// Gateway Manager (EXCEEDS WICK - Enterprise-grade gateway monitoring)
+const GatewayManager = require("./utils/gatewayManager");
+client.gatewayManager = new GatewayManager(client);
+
 const SecurityChallenges = require("./utils/securityChallenges");
 client.securityChallenges = new SecurityChallenges(client);
 
@@ -240,6 +244,34 @@ for (const file of eventFiles) {
     client.on(event.name, (...args) => event.execute(...args, client));
   }
 }
+
+// Gateway event monitoring (EXCEEDS WICK)
+client.ws.on("shardReady", (shardId) => {
+  client.gatewayManager.initializeShard(shardId);
+  client.gatewayManager.onReady(shardId);
+});
+
+client.ws.on("shardResume", (shardId, replayedEvents) => {
+  client.gatewayManager.onResume(shardId, replayedEvents);
+});
+
+client.ws.on("shardDisconnect", (event, shardId) => {
+  client.gatewayManager.onDisconnect(shardId, event.code, event.reason);
+});
+
+client.ws.on("shardReconnecting", (shardId) => {
+  client.gatewayManager.onReconnecting(shardId);
+});
+
+client.ws.on("shardError", (error, shardId) => {
+  client.gatewayManager.onError(shardId, error);
+});
+
+// Start gateway health monitoring
+client.once("ready", () => {
+  client.gatewayManager.startHealthMonitoring(60000); // Check every minute
+  logger.success("GatewayManager", "Gateway health monitoring active");
+});
 
 // Anti-raid detection
 client.checkAntiRaid = async (guild, member) => {

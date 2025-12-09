@@ -482,6 +482,36 @@
         </div>
       </div>
 
+      <div class="summary" id="gatewayStats" style="display: none">
+        <h2>🌐 Gateway Health (Enterprise Monitoring)</h2>
+        <div class="summary-stats">
+          <div class="summary-stat">
+            <span class="summary-stat-label">Gateway Quality</span>
+            <span class="summary-stat-value" id="gatewayQuality">-</span>
+          </div>
+          <div class="summary-stat">
+            <span class="summary-stat-label">Avg Latency</span>
+            <span class="summary-stat-value" id="gatewayLatency">-</span>
+          </div>
+          <div class="summary-stat">
+            <span class="summary-stat-label">Total Identifies</span>
+            <span class="summary-stat-value" id="gatewayIdentifies">-</span>
+          </div>
+          <div class="summary-stat">
+            <span class="summary-stat-label">Total Resumes</span>
+            <span class="summary-stat-value" id="gatewayResumes">-</span>
+          </div>
+          <div class="summary-stat">
+            <span class="summary-stat-label">Reconnects</span>
+            <span class="summary-stat-value" id="gatewayReconnects">-</span>
+          </div>
+          <div class="summary-stat">
+            <span class="summary-stat-label">Health Status</span>
+            <span class="summary-stat-value" id="gatewayHealth">-</span>
+          </div>
+        </div>
+      </div>
+
       <div class="refresh-controls">
         <button class="refresh-btn" onclick="loadStatus()" id="refreshBtn">
           🔄 Refresh
@@ -516,23 +546,51 @@
 
       // Custom Shard & Cluster Names (matching backend)
       const SHARD_NAMES = [
-        "⚡ Zeus", "🌊 Poseidon", "⚔️ Ares", "🏹 Artemis", "☀️ Apollo",
-        "🛡️ Athena", "🔱 Hades", "💘 Aphrodite", "⚒️ Hephaestus", "🍇 Dionysus",
-        "📨 Hermes", "🌾 Demeter", "🔥 Hestia", "🌙 Selene", "🌟 Helios",
-        "⭐ Aether", "🌑 Nyx", "⚡ Kronos", "🏔️ Atlas", "🌊 Oceanus"
+        "⚡ Zeus",
+        "🌊 Poseidon",
+        "⚔️ Ares",
+        "🏹 Artemis",
+        "☀️ Apollo",
+        "🛡️ Athena",
+        "🔱 Hades",
+        "💘 Aphrodite",
+        "⚒️ Hephaestus",
+        "🍇 Dionysus",
+        "📨 Hermes",
+        "🌾 Demeter",
+        "🔥 Hestia",
+        "🌙 Selene",
+        "🌟 Helios",
+        "⭐ Aether",
+        "🌑 Nyx",
+        "⚡ Kronos",
+        "🏔️ Atlas",
+        "🌊 Oceanus",
       ];
 
       const CLUSTER_NAMES = [
-        "🐉 Dragon", "🦅 Phoenix", "🦁 Sphinx", "🦄 Unicorn", "🐺 Cerberus",
-        "🦂 Hydra", "🦇 Basilisk", "🐍 Leviathan", "🦉 Griffin", "🐲 Wyvern"
+        "🐉 Dragon",
+        "🦅 Phoenix",
+        "🦁 Sphinx",
+        "🦄 Unicorn",
+        "🐺 Cerberus",
+        "🦂 Hydra",
+        "🦇 Basilisk",
+        "🐍 Leviathan",
+        "🦉 Griffin",
+        "🐲 Wyvern",
       ];
 
       function getShardName(shardId) {
-        return shardId < SHARD_NAMES.length ? SHARD_NAMES[shardId] : `⚡ Shard-${shardId}`;
+        return shardId < SHARD_NAMES.length
+          ? SHARD_NAMES[shardId]
+          : `⚡ Shard-${shardId}`;
       }
 
       function getClusterName(clusterId) {
-        return clusterId < CLUSTER_NAMES.length ? CLUSTER_NAMES[clusterId] : `🔥 Cluster-${clusterId}`;
+        return clusterId < CLUSTER_NAMES.length
+          ? CLUSTER_NAMES[clusterId]
+          : `🔥 Cluster-${clusterId}`;
       }
 
       function getShardDisplay(shardId) {
@@ -629,6 +687,26 @@
             `
                 : ""
             }
+            ${
+              data.gatewayQuality !== undefined
+                ? `
+              <div class="tooltip-row">
+                <span class="tooltip-label">Gateway Quality:</span>
+                <span class="tooltip-value ${data.gatewayQuality < 30 ? "error" : data.gatewayQuality < 70 ? "warning" : ""}">${data.gatewayQuality}%</span>
+              </div>
+            `
+                : ""
+            }
+            ${
+              data.sessionId
+                ? `
+              <div class="tooltip-row">
+                <span class="tooltip-label">Session:</span>
+                <span class="tooltip-value">${data.sessionId.substring(0, 8)}...</span>
+              </div>
+            `
+                : ""
+            }
           </div>
           <div class="tooltip-arrow"></div>
         `;
@@ -694,8 +772,13 @@
           currentHighlightedShard?.classList.contains("flashing");
 
         try {
-          const response = await window.apiCall("/api/shards");
-          const data = response;
+          // Load both shard stats and gateway stats
+          const [shardData, gatewayData] = await Promise.all([
+            window.apiCall("/api/shards").catch(() => null),
+            window.apiCall("/api/gateway").catch(() => null),
+          ]);
+
+          const data = shardData;
 
           // Update summary stats
           const shards = data.shards || [];
@@ -716,6 +799,54 @@
           document.getElementById("totalUsers").textContent = (
             data.totalUsers || 0
           ).toLocaleString();
+
+          // Update gateway stats if available
+          if (gatewayData && gatewayData.global) {
+            document.getElementById("gatewayStats").style.display = "block";
+
+            const quality = Math.round(gatewayData.global.averageQuality || 0);
+            const qualityEl = document.getElementById("gatewayQuality");
+            qualityEl.textContent = `${quality}%`;
+            qualityEl.className = "summary-stat-value";
+            if (quality < 30) qualityEl.classList.add("critical");
+            else if (quality < 70) qualityEl.classList.add("problem");
+
+            const latency = Math.round(gatewayData.global.averageLatency || 0);
+            const latencyEl = document.getElementById("gatewayLatency");
+            latencyEl.textContent = `${latency}ms`;
+            latencyEl.className = "summary-stat-value";
+            if (latency > 500) latencyEl.classList.add("problem");
+
+            document.getElementById("gatewayIdentifies").textContent =
+              gatewayData.global.totalIdentifies || 0;
+            document.getElementById("gatewayResumes").textContent =
+              gatewayData.global.totalResumes || 0;
+            document.getElementById("gatewayReconnects").textContent =
+              gatewayData.global.totalReconnects || 0;
+
+            const healthEl = document.getElementById("gatewayHealth");
+            if (gatewayData.health && gatewayData.health.healthy) {
+              healthEl.textContent = "✅ Healthy";
+              healthEl.className = "summary-stat-value";
+            } else {
+              healthEl.textContent = `⚠️ ${gatewayData.health.issues.length} Issues`;
+              healthEl.className = "summary-stat-value problem";
+            }
+
+            // Merge gateway data into shard data for tooltips
+            if (gatewayData.shards && shards) {
+              shards.forEach((shard) => {
+                const gatewayShard = gatewayData.shards.find(
+                  (g) => g.shardId === shard.id
+                );
+                if (gatewayShard) {
+                  shard.gatewayQuality = gatewayShard.connectionQuality;
+                  shard.sessionId = gatewayShard.sessionId;
+                  shard.resumes = gatewayShard.resumes;
+                }
+              });
+            }
+          }
 
           // Handle clusters
           if (data.clusters && data.clusters.clusters) {

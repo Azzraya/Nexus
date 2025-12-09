@@ -20,6 +20,12 @@ module.exports = {
     const shardInfo = ShardManager.getShardInfo(interaction.client);
     const stats = await ShardManager.getShardStats(interaction.client);
 
+    // Get gateway stats if available (EXCEEDS WICK)
+    let gatewayStats = null;
+    if (interaction.client.gatewayManager) {
+      gatewayStats = interaction.client.gatewayManager.getAllStats();
+    }
+
     const embed = new EmbedBuilder()
       .setTitle("⚡ Shard Information")
       .addFields(
@@ -40,10 +46,16 @@ module.exports = {
 
     if (stats.shards) {
       const shardList = stats.shards
-        .map(
-          (shard) =>
-            `**Shard ${shard.id}:** ${shard.guilds} guilds, ${shard.users} users, ${shard.ping}ms ping`
-        )
+        .map((shard) => {
+          let gatewayInfo = "";
+          if (gatewayStats && gatewayStats.shards) {
+            const gwShard = gatewayStats.shards.find(g => g.shardId === shard.id);
+            if (gwShard) {
+              gatewayInfo = ` | 🌐 ${gwShard.connectionQuality}% quality`;
+            }
+          }
+          return `**Shard ${shard.id}:** ${shard.guilds} guilds, ${shard.users} users, ${shard.ping}ms ping${gatewayInfo}`;
+        })
         .join("\n");
 
       embed.addFields({
@@ -58,6 +70,23 @@ module.exports = {
           { name: "Total Users", value: `${stats.totalUsers}`, inline: true }
         );
       }
+    }
+
+    // Add gateway stats if available (EXCEEDS WICK - Enterprise monitoring)
+    if (gatewayStats && gatewayStats.global) {
+      const g = gatewayStats.global;
+      embed.addFields({
+        name: "🌐 Gateway Health (Enterprise)",
+        value: [
+          `**Quality:** ${Math.round(g.averageQuality)}% avg`,
+          `**Latency:** ${Math.round(g.averageLatency)}ms avg`,
+          `**Identifies:** ${g.totalIdentifies}`,
+          `**Resumes:** ${g.totalResumes}`,
+          `**Reconnects:** ${g.totalReconnects}`,
+          `**Health:** ${g.healthyShards}/${g.totalShards} healthy`
+        ].join("\n"),
+        inline: false
+      });
     }
 
     await interaction.reply({ embeds: [embed] });
