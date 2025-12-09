@@ -154,7 +154,7 @@
 
       .shards-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
         gap: 8px;
         background: #161b22;
         border: 1px solid #30363d;
@@ -174,9 +174,12 @@
         cursor: pointer;
         transition: all 0.2s;
         position: relative;
-        font-size: 0.85rem;
+        font-size: 0.75rem;
         font-weight: 500;
         color: #a78bfa;
+        text-align: center;
+        padding: 4px;
+        line-height: 1.2;
       }
 
       .shard-item:hover,
@@ -404,14 +407,14 @@
 
       @media (max-width: 768px) {
         .shards-grid {
-          grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+          grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
           gap: 6px;
           padding: 15px;
         }
 
         .shard-item,
         .cluster-item {
-          font-size: 0.75rem;
+          font-size: 0.65rem;
         }
 
         .tooltip {
@@ -511,6 +514,35 @@
       let refreshInterval = null;
       let tooltip = null;
 
+      // Custom Shard & Cluster Names (matching backend)
+      const SHARD_NAMES = [
+        "⚡ Zeus", "🌊 Poseidon", "⚔️ Ares", "🏹 Artemis", "☀️ Apollo",
+        "🛡️ Athena", "🔱 Hades", "💘 Aphrodite", "⚒️ Hephaestus", "🍇 Dionysus",
+        "📨 Hermes", "🌾 Demeter", "🔥 Hestia", "🌙 Selene", "🌟 Helios",
+        "⭐ Aether", "🌑 Nyx", "⚡ Kronos", "🏔️ Atlas", "🌊 Oceanus"
+      ];
+
+      const CLUSTER_NAMES = [
+        "🐉 Dragon", "🦅 Phoenix", "🦁 Sphinx", "🦄 Unicorn", "🐺 Cerberus",
+        "🦂 Hydra", "🦇 Basilisk", "🐍 Leviathan", "🦉 Griffin", "🐲 Wyvern"
+      ];
+
+      function getShardName(shardId) {
+        return shardId < SHARD_NAMES.length ? SHARD_NAMES[shardId] : `⚡ Shard-${shardId}`;
+      }
+
+      function getClusterName(clusterId) {
+        return clusterId < CLUSTER_NAMES.length ? CLUSTER_NAMES[clusterId] : `🔥 Cluster-${clusterId}`;
+      }
+
+      function getShardDisplay(shardId) {
+        return `${getShardName(shardId)} (#${shardId})`;
+      }
+
+      function getClusterDisplay(clusterId) {
+        return `${getClusterName(clusterId)} (#${clusterId})`;
+      }
+
       function getStatusClass(status, ping, uptime) {
         // Status 0 = READY
         if (status === 0 && ping < 200 && uptime > 0) {
@@ -555,7 +587,7 @@
         tooltip = document.createElement("div");
         tooltip.className = "tooltip";
         tooltip.innerHTML = `
-          <div class="tooltip-title">${isCluster ? `Cluster ${data.id}` : `Shard ${data.id}`}</div>
+          <div class="tooltip-title">${isCluster ? getClusterDisplay(data.id) : getShardDisplay(data.id)}</div>
           <div class="tooltip-info">
             ${
               isCluster
@@ -711,7 +743,8 @@
                   cluster.ping,
                   cluster.uptime
                 );
-                return `<div class="cluster-item ${statusClass}" data-cluster-id="${cluster.clusterId}">${cluster.clusterId}</div>`;
+                const clusterName = getClusterName(cluster.clusterId);
+                return `<div class="cluster-item ${statusClass}" data-cluster-id="${cluster.clusterId}" title="${getClusterDisplay(cluster.clusterId)}">${clusterName}</div>`;
               })
               .join("");
 
@@ -742,7 +775,8 @@
                   shard.ping,
                   shard.uptime
                 );
-                return `<div class="shard-item ${statusClass}" data-shard-id="${shard.id}">${shard.id}</div>`;
+                const shardName = getShardName(shard.id);
+                return `<div class="shard-item ${statusClass}" data-shard-id="${shard.id}" title="${getShardDisplay(shard.id)}">${shardName}</div>`;
               })
               .join("");
 
