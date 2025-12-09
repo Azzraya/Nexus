@@ -267,8 +267,14 @@ client.ws.on("shardError", (error, shardId) => {
   client.gatewayManager.onError(shardId, error);
 });
 
-// Start gateway health monitoring
+// Start gateway health monitoring and initialize existing shards
 client.once("ready", () => {
+  // Initialize all existing shards
+  client.ws.shards.forEach((shard) => {
+    client.gatewayManager.initializeShard(shard.id);
+    client.gatewayManager.onReady(shard.id);
+  });
+  
   client.gatewayManager.startHealthMonitoring(60000); // Check every minute
   logger.success("GatewayManager", "Gateway health monitoring active");
 });
