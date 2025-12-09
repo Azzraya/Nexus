@@ -962,6 +962,10 @@ async function bulkToggle(setting, value) {
 }
 // Anti-Nuke Settings Page
 async function loadAntiNukePage() {
+  if (!currentServer) {
+    console.error("loadAntiNukePage called without currentServer set");
+    return;
+  }
   const contentArea = document.getElementById("contentArea");
   const response = await fetch(`/api/server/${currentServer}`);
   const server = await response.json();
@@ -1021,6 +1025,10 @@ async function loadAntiNukePage() {
 
 // Anti-Raid Settings Page
 async function loadAntiRaidPage() {
+  if (!currentServer) {
+    console.error("loadAntiRaidPage called without currentServer set");
+    return;
+  }
   const contentArea = document.getElementById("contentArea");
   const response = await fetch(`/api/server/${currentServer}`);
   const server = await response.json();
@@ -2601,10 +2609,24 @@ async function loadLeaderboard() {
 async function loadServerComparison() {
   const contentArea = document.getElementById("contentArea");
 
+  // Safety check - prevent API calls with undefined guild ID
+  if (!currentServer) {
+    contentArea.innerHTML = `
+      <div style="text-align: center; padding: 60px;">
+        <h2>⚠️ No Server Selected</h2>
+        <p style="opacity: 0.7; margin: 20px 0;">Please select a server first to view comparison data.</p>
+        <button onclick="window.location.href='/dashboard'" style="padding: 12px 24px; background: var(--accent-primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem;">
+          Select Server
+        </button>
+      </div>
+    `;
+    return;
+  }
+
   contentArea.innerHTML = `
     <h2>📊 Server Comparison</h2>
     <p style="opacity: 0.8; margin-bottom: 20px;">See how your security compares to other servers</p>
-    
+
     <div id="comparisonData">
       <div style="text-align: center; padding: 40px;">
         <div class="spinner"></div>
@@ -3042,6 +3064,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Workflows Management
   window.loadWorkflows = async function () {
+    if (!currentServer) {
+      console.error("loadWorkflows called without currentServer set");
+      return;
+    }
     const contentArea = document.getElementById("contentArea");
 
     contentArea.innerHTML = `

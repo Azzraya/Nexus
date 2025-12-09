@@ -61,7 +61,7 @@ class DashboardServer {
       res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
       res.setHeader(
         "Content-Security-Policy",
-        "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' " +
+        "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://cdn.jsdelivr.net https://cdn.discordapp.com " +
           (process.env.DASHBOARD_URL || "") +
           " https://azzraya.github.io;"
       );
@@ -6362,6 +6362,18 @@ class DashboardServer {
     this.app.get("/api/comparison", this.checkAuth, async (req, res) => {
       try {
         const { guild } = req.query;
+
+        // Validate guild ID
+        if (!guild || guild === "undefined" || guild === "null") {
+          return res.status(400).json({ error: "Invalid guild ID" });
+        }
+
+        // Check if bot is in the guild
+        const guildObj = this.client.guilds.cache.get(guild);
+        if (!guildObj) {
+          return res.status(404).json({ error: "Server not found or bot not in server" });
+        }
+
         const ServerComparison = require("../utils/serverComparison");
         const comparison = new ServerComparison(this.client);
 
@@ -6369,7 +6381,8 @@ class DashboardServer {
 
         res.json(report);
       } catch (error) {
-        res.status(500).json({ error: error.message });
+        logger.error(`[API] Comparison error:`, error);
+        res.status(500).json({ error: error.message || "Failed to generate comparison" });
       }
     });
 

@@ -18,6 +18,17 @@ self.addEventListener("install", (event) => {
 
 // Cache and return requests
 self.addEventListener("fetch", (event) => {
+  // Skip caching for chrome extensions, external CDNs, and Discord CDN
+  const url = event.request.url;
+  if (
+    url.startsWith("chrome-extension://") ||
+    url.includes("cdn.jsdelivr.net") ||
+    url.includes("cdn.discordapp.com") ||
+    url.includes("sessions.bugsnag.com")
+  ) {
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request).then((response) => {
       // Cache hit - return response
@@ -39,6 +50,10 @@ self.addEventListener("fetch", (event) => {
         });
 
         return response;
+      }).catch((error) => {
+        // If fetch fails, just return the error silently
+        console.log("Fetch failed for:", event.request.url);
+        return new Response("Network error", { status: 408 });
       });
     })
   );

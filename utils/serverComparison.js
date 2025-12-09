@@ -90,14 +90,27 @@ class ServerComparison {
   async getPercentileRanking(guildId) {
     const { score } = await this.calculateSecurityScore(guildId);
 
-    // Get all server scores
-    const allServers = this.client.guilds.cache.map((g) => g.id);
+    // Get SAMPLE of server scores (max 50 servers to avoid timeout)
+    // In production, this would query a database of historical scores
+    const allServers = this.client.guilds.cache
+      .map((g) => g.id)
+      .filter((id) => id !== guildId)
+      .slice(0, 49); // Max 49 others + current = 50 total
+
     const scores = await Promise.all(
       allServers.map(async (id) => {
-        const { score } = await this.calculateSecurityScore(id);
-        return score;
+        try {
+          const { score } = await this.calculateSecurityScore(id);
+          return score;
+        } catch (error) {
+          logger.error(`[ServerComparison] Error calculating score for ${id}:`, error);
+          return 0;
+        }
       })
     );
+
+    // Add current server's score
+    scores.push(score);
 
     // Calculate percentile
     const betterThan = scores.filter((s) => score > s).length;
@@ -107,7 +120,8 @@ class ServerComparison {
       yourScore: score,
       maxScore: 100,
       percentile: Math.round(percentile),
-      totalServers: scores.length,
+      totalServers: this.client.guilds.cache.size,
+      sampleSize: scores.length,
       betterThan: betterThan,
       worseThan: scores.length - betterThan,
     };
@@ -131,32 +145,46 @@ class ServerComparison {
   }
 
   /**
-   * Get average scores across all servers
+   * Get average scores across all servers (sampled for performance)
    */
   async getAverageScores() {
-    const allServers = this.client.guilds.cache.map((g) => g.id);
+    // Sample max 50 servers to avoid timeout
+    const allServers = this.client.guilds.cache
+      .map((g) => g.id)
+      .slice(0, 50);
+
     const scores = await Promise.all(
       allServers.map(async (id) => {
-        const { score, breakdown } = await this.calculateSecurityScore(id);
-        return { score, breakdown };
+        try {
+          const { score, breakdown } = await this.calculateSecurityScore(id);
+          return { score, breakdown };
+        } catch (error) {
+          logger.error(`[ServerComparison] Error calculating score for ${id}:`, error);
+          return { score: 0, breakdown: {} };
+        }
       })
     );
 
-    const avg = scores.reduce((sum, s) => sum + s.score, 0) / scores.length;
+    const validScores = scores.filter((s) => s.score > 0);
+    if (validScores.length === 0) {
+      return { overall: 50, antiRaid: 10, antiNuke: 12, autoMod: 8 };
+    }
+
+    const avg = validScores.reduce((sum, s) => sum + s.score, 0) / validScores.length;
 
     return {
       overall: Math.round(avg),
       antiRaid: Math.round(
-        scores.reduce((sum, s) => sum + (s.breakdown.antiRaid || 0), 0) /
-          scores.length
+        validScores.reduce((sum, s) => sum + (s.breakdown.antiRaid || 0), 0) /
+          validScores.length
       ),
       antiNuke: Math.round(
-        scores.reduce((sum, s) => sum + (s.breakdown.antiNuke || 0), 0) /
-          scores.length
+        validScores.reduce((sum, s) => sum + (s.breakdown.antiNuke || 0), 0) /
+          validScores.length
       ),
       autoMod: Math.round(
-        scores.reduce((sum, s) => sum + (s.breakdown.autoMod || 0), 0) /
-          scores.length
+        validScores.reduce((sum, s) => sum + (s.breakdown.autoMod || 0), 0) /
+          validScores.length
       ),
     };
   }
