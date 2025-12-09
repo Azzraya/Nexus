@@ -1,5 +1,8 @@
 node_modules/
+
+# Environment files (but allow .env.example)
 .env
+!.env.example
 .env.local
 .env.production
 data/*.db
