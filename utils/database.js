@@ -4310,7 +4310,7 @@ class Database {
     return new Promise((resolve, reject) => {
       const now = Date.now();
       this.db.run(
-        "INSERT INTO invite_sources (source, description, created_at, updated_at) VALUES (?, ?, ?, ?)",
+        "INSERT OR IGNORE INTO invite_sources (source, description, created_at, updated_at) VALUES (?, ?, ?, ?)",
         [source, description, now, now],
         function (err) {
           if (err) reject(err);
