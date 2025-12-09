@@ -5,7 +5,6 @@ const {
   ButtonBuilder,
   ButtonStyle,
 } = require("discord.js");
-const config = require("../utils/config");
 
 const DEV_USER_ID = "1392165977793368124";
 const DEV_TIMEZONE_HINT = "Dev is usually online 2PM-4AM GMT";
@@ -108,8 +107,8 @@ module.exports = {
         {
           name: "🔗 Quick Links",
           value: [
-            `• [Official Website](${config.WEBSITE_URL})`,
-            `• [Support Server](${config.SUPPORT_SERVER})`,
+            "• [Official Website](https://azzraya.github.io/Nexus/)",
+            "• [Support Server](https://discord.gg/warmA4BsPP)",
             "• [GitHub Repository](https://github.com/Azzraya/Nexus)",
             "• [Privacy Policy](https://github.com/Azzraya/Nexus/blob/main/PRIVACY_POLICY.md)",
             "• [Terms of Service](https://github.com/Azzraya/Nexus/blob/main/TERMS_OF_SERVICE.md)",
@@ -134,12 +133,12 @@ module.exports = {
 
     const websiteButton = new ButtonBuilder()
       .setLabel("Visit Website")
-      .setURL(config.WEBSITE_URL)
+      .setURL("https://azzraya.github.io/Nexus/")
       .setStyle(ButtonStyle.Link);
 
     const supportButton = new ButtonBuilder()
       .setLabel("Support Server")
-      .setURL(config.SUPPORT_SERVER)
+      .setURL("https://discord.gg/warmA4BsPP")
       .setStyle(ButtonStyle.Link);
 
     const githubButton = new ButtonBuilder()
@@ -149,14 +148,12 @@ module.exports = {
 
     const inviteButton = new ButtonBuilder()
       .setLabel("Invite Bot")
-      .setURL(config.getInviteUrl("discord-bot"))
+      .setURL(`https://azzraya.github.io/Nexus/invite.html?source=discord-bot`)
       .setStyle(ButtonStyle.Link);
 
     const dashboardButton = new ButtonBuilder()
       .setLabel("🎛️ Dashboard")
-      .setURL(
-        config.DASHBOARD_URL || "https://regular-puma-clearly.ngrok-free.app"
-      )
+      .setURL("https://regular-puma-clearly.ngrok-free.app")
       .setStyle(ButtonStyle.Link);
 
     const row = new ActionRowBuilder().addComponents(

@@ -132,7 +132,7 @@ module.exports = {
         new ButtonBuilder()
           .setLabel("🌐 Website")
           .setStyle(ButtonStyle.Link)
-          .setURL(config.WEBSITE_URL)
+          .setURL("https://azzraya.github.io/Nexus/")
       );
 
       // Check if this is a button interaction (update) or command (reply)

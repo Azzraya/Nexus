@@ -133,7 +133,7 @@ module.exports = {
         new ButtonBuilder()
           .setLabel("View All Suggestions")
           .setStyle(ButtonStyle.Link)
-          .setURL(config.getVoteFeaturesUrl())
+          .setURL("https://azzraya.github.io/Nexus/vote-features.html")
       );
 
       await modalInteraction.reply({
