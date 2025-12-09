@@ -95,9 +95,12 @@ class SnapshotScheduler {
       await Promise.allSettled(
         batch.map(async (guild) => {
           try {
-            // Check if guild has auto-recovery enabled
+            // Create snapshot for all guilds (auto-recovery enabled by default)
+            // Only skip if explicitly disabled (auto_recovery_enabled = 0)
             const config = await db.getServerConfig(guild.id);
-            if (config && config.auto_recovery_enabled !== 0) {
+            const isDisabled = config && config.auto_recovery_enabled === 0;
+            
+            if (!isDisabled) {
               await AutoRecovery.createSnapshot(
                 guild,
                 "full",
