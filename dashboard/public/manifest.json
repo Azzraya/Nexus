@@ -6,11 +6,66 @@
   "display": "standalone",
   "background_color": "#1a1a2e",
   "theme_color": "#9333ea",
-  "orientation": "portrait-primary",
-  "icons": [],
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "https://cdn.discordapp.com/avatars/1444739230679957646/32f2d77d44c2f3989fecd858be53f396.webp?size=192",
+      "sizes": "192x192",
+      "type": "image/webp",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://cdn.discordapp.com/avatars/1444739230679957646/32f2d77d44c2f3989fecd858be53f396.webp?size=512",
+      "sizes": "512x512",
+      "type": "image/webp",
+      "purpose": "any maskable"
+    }
+  ],
   "categories": ["utilities", "productivity", "security"],
-  "screenshots": [],
-  "shortcuts": [],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "View server dashboard",
+      "url": "/dashboard",
+      "icons": [
+        {
+          "src": "https://cdn.discordapp.com/avatars/1444739230679957646/32f2d77d44c2f3989fecd858be53f396.webp?size=96",
+          "sizes": "96x96",
+          "type": "image/webp"
+        }
+      ]
+    },
+    {
+      "name": "Alerts",
+      "short_name": "Alerts",
+      "description": "View security alerts",
+      "url": "/dashboard/alerts",
+      "icons": [
+        {
+          "src": "https://cdn.discordapp.com/avatars/1444739230679957646/32f2d77d44c2f3989fecd858be53f396.webp?size=96",
+          "sizes": "96x96",
+          "type": "image/webp"
+        }
+      ]
+    },
+    {
+      "name": "Logs",
+      "short_name": "Logs",
+      "description": "View moderation logs",
+      "url": "/dashboard/logs",
+      "icons": [
+        {
+          "src": "https://cdn.discordapp.com/avatars/1444739230679957646/32f2d77d44c2f3989fecd858be53f396.webp?size=96",
+          "sizes": "96x96",
+          "type": "image/webp"
+        }
+      ]
+    }
+  ],
   "related_applications": [],
-  "prefer_related_applications": false
+  "prefer_related_applications": false,
+  "scope": "/",
+  "lang": "en-US",
+  "dir": "ltr"
 }

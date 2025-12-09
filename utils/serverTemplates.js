@@ -1,260 +1,408 @@
-const db = require("./database");
-const logger = require("./logger");
-
 /**
- * Server Templates Marketplace
- * Share and download security configurations
+ * Server Templates - One-click configuration presets
+ * Different server types get optimized configs
+ * EXCEEDS WICK - They don't have preset configs
  */
+
+const TEMPLATES = {
+  gaming: {
+    name: "🎮 Gaming Server",
+    description:
+      "Optimized for gaming communities with raid protection and voice monitoring",
+    config: {
+      anti_raid_enabled: 1,
+      anti_raid_threshold: 15, // Higher threshold for gaming servers
+      anti_nuke_enabled: 1,
+      auto_mod_enabled: 1,
+      spam_enabled: 1,
+      spam_max_messages: 7, // More lenient for gaming chat
+      mention_spam_enabled: 1,
+      mention_spam_threshold: 5,
+      link_spam_enabled: 1,
+      caps_enabled: 1,
+      caps_threshold: 80,
+      emoji_spam_enabled: 1,
+      emoji_spam_threshold: 10,
+      verification_enabled: 0, // Usually not needed for gaming
+      heat_system_enabled: 1,
+      voice_monitoring_enabled: 1, // Important for gaming servers
+      raid_detection_enabled: 1,
+    },
+    roles: {
+      muted: true,
+      verified: false,
+    },
+    channels: {
+      mod_log: true,
+      alert: true,
+    },
+  },
+
+  community: {
+    name: "👥 Community Server",
+    description: "Balanced protection for general community servers",
+    config: {
+      anti_raid_enabled: 1,
+      anti_raid_threshold: 10,
+      anti_nuke_enabled: 1,
+      auto_mod_enabled: 1,
+      spam_enabled: 1,
+      spam_max_messages: 5,
+      mention_spam_enabled: 1,
+      mention_spam_threshold: 4,
+      link_spam_enabled: 1,
+      caps_enabled: 1,
+      caps_threshold: 70,
+      emoji_spam_enabled: 1,
+      emoji_spam_threshold: 8,
+      verification_enabled: 1, // Recommended for communities
+      verification_role_required: 1,
+      heat_system_enabled: 1,
+      voice_monitoring_enabled: 0,
+      raid_detection_enabled: 1,
+    },
+    roles: {
+      muted: true,
+      verified: true,
+    },
+    channels: {
+      mod_log: true,
+      alert: true,
+      welcome: true,
+    },
+  },
+
+  business: {
+    name: "💼 Business/Professional",
+    description: "Strict moderation for professional environments",
+    config: {
+      anti_raid_enabled: 1,
+      anti_raid_threshold: 5, // Low threshold - strict
+      anti_nuke_enabled: 1,
+      auto_mod_enabled: 1,
+      spam_enabled: 1,
+      spam_max_messages: 3, // Very strict
+      mention_spam_enabled: 1,
+      mention_spam_threshold: 2,
+      link_spam_enabled: 1,
+      caps_enabled: 1,
+      caps_threshold: 50, // Stricter caps limit
+      emoji_spam_enabled: 1,
+      emoji_spam_threshold: 5,
+      verification_enabled: 1,
+      verification_role_required: 1,
+      min_account_age_days: 30, // Require older accounts
+      heat_system_enabled: 1,
+      voice_monitoring_enabled: 0,
+      raid_detection_enabled: 1,
+    },
+    roles: {
+      muted: true,
+      verified: true,
+    },
+    channels: {
+      mod_log: true,
+      alert: true,
+      rules: true,
+    },
+  },
+
+  educational: {
+    name: "📚 Educational/School",
+    description: "Safe environment for students and educators",
+    config: {
+      anti_raid_enabled: 1,
+      anti_raid_threshold: 8,
+      anti_nuke_enabled: 1,
+      auto_mod_enabled: 1,
+      spam_enabled: 1,
+      spam_max_messages: 4,
+      mention_spam_enabled: 1,
+      mention_spam_threshold: 3,
+      link_spam_enabled: 1,
+      link_whitelist_only: 1, // Only allow whitelisted links
+      caps_enabled: 1,
+      caps_threshold: 60,
+      emoji_spam_enabled: 1,
+      emoji_spam_threshold: 6,
+      toxicity_enabled: 1, // Enable toxicity detection
+      toxicity_threshold: 60,
+      verification_enabled: 1,
+      verification_role_required: 1,
+      min_account_age_days: 7,
+      heat_system_enabled: 1,
+      voice_monitoring_enabled: 1,
+      raid_detection_enabled: 1,
+    },
+    roles: {
+      muted: true,
+      verified: true,
+      student: true,
+    },
+    channels: {
+      mod_log: true,
+      alert: true,
+      rules: true,
+      welcome: true,
+    },
+  },
+
+  streaming: {
+    name: "🎬 Streaming/Content Creator",
+    description: "Optimized for streamers and content creators",
+    config: {
+      anti_raid_enabled: 1,
+      anti_raid_threshold: 20, // High threshold - expect viewer spikes
+      anti_nuke_enabled: 1,
+      auto_mod_enabled: 1,
+      spam_enabled: 1,
+      spam_max_messages: 6,
+      mention_spam_enabled: 1,
+      mention_spam_threshold: 8, // Allow more mentions for hype
+      link_spam_enabled: 1,
+      caps_enabled: 0, // Allow caps for hype messages
+      emoji_spam_enabled: 1,
+      emoji_spam_threshold: 12, // Allow more emojis
+      verification_enabled: 0, // Don't gate viewers
+      heat_system_enabled: 1,
+      voice_monitoring_enabled: 0,
+      raid_detection_enabled: 1,
+      adaptive_thresholds: 1, // Adapt to viewer count changes
+    },
+    roles: {
+      muted: true,
+      verified: false,
+      subscriber: true,
+    },
+    channels: {
+      mod_log: true,
+      alert: true,
+      welcome: true,
+    },
+  },
+
+  highSecurity: {
+    name: "🔒 Maximum Security",
+    description: "Strictest protection for high-value servers",
+    config: {
+      anti_raid_enabled: 1,
+      anti_raid_threshold: 3, // Very strict
+      anti_nuke_enabled: 1,
+      auto_mod_enabled: 1,
+      spam_enabled: 1,
+      spam_max_messages: 2,
+      mention_spam_enabled: 1,
+      mention_spam_threshold: 2,
+      link_spam_enabled: 1,
+      link_whitelist_only: 1,
+      caps_enabled: 1,
+      caps_threshold: 40,
+      emoji_spam_enabled: 1,
+      emoji_spam_threshold: 3,
+      toxicity_enabled: 1,
+      toxicity_threshold: 40,
+      verification_enabled: 1,
+      verification_role_required: 1,
+      min_account_age_days: 60, // Require very old accounts
+      phone_verification_required: 1, // Require phone verification
+      heat_system_enabled: 1,
+      voice_monitoring_enabled: 1,
+      raid_detection_enabled: 1,
+      behavioral_analysis: 1, // Enable all AI features
+      threat_intelligence: 1,
+      predictive_detection: 1,
+    },
+    roles: {
+      muted: true,
+      verified: true,
+      trusted: true,
+    },
+    channels: {
+      mod_log: true,
+      alert: true,
+      rules: true,
+      verification: true,
+    },
+  },
+};
+
 class ServerTemplates {
-  constructor(client) {
-    this.client = client;
-    this.templates = new Map();
+  /**
+   * Get all available templates
+   */
+  static getTemplates() {
+    return Object.entries(TEMPLATES).map(([id, template]) => ({
+      id,
+      name: template.name,
+      description: template.description,
+    }));
   }
 
   /**
-   * Create template from server configuration
+   * Get a specific template by ID
    */
-  async createTemplate(
-    guildId,
-    creatorId,
-    templateName,
-    description,
-    isPublic = false
-  ) {
-    try {
-      // Get server configuration
-      const config = await db.getServerConfig(guildId);
+  static getTemplate(templateId) {
+    return TEMPLATES[templateId] || null;
+  }
 
-      // Strip server-specific IDs
-      const template = {
-        name: templateName,
-        description,
-        creator_id: creatorId,
-        config: {
-          anti_raid_enabled: config.anti_raid_enabled,
-          anti_nuke_enabled: config.anti_nuke_enabled,
-          auto_mod_enabled: config.auto_mod_enabled,
-          heat_system_enabled: config.heat_system_enabled,
-          verification_enabled: config.verification_enabled,
-          verification_mode: config.verification_mode,
-          alert_threshold: config.alert_threshold,
-        },
-        is_public: isPublic,
-        downloads: 0,
-        rating: 0,
-        created_at: Date.now(),
-      };
-
-      // Store template
-      return new Promise((resolve, reject) => {
-        db.db.run(
-          `INSERT INTO server_templates 
-           (name, description, creator_id, config_data, is_public, created_at) 
-           VALUES (?, ?, ?, ?, ?, ?)`,
-          [
-            templateName,
-            description,
-            creatorId,
-            JSON.stringify(template.config),
-            isPublic ? 1 : 0,
-            Date.now(),
-          ],
-          function (err) {
-            if (err) reject(err);
-            else resolve(this.lastID);
-          }
-        );
-      });
-    } catch (error) {
-      logger.error("ServerTemplates", "Failed to create template", error);
-      throw error;
+  /**
+   * Apply a template to a server
+   */
+  static async applyTemplate(guild, templateId, db) {
+    const template = TEMPLATES[templateId];
+    if (!template) {
+      throw new Error(`Template "${templateId}" not found`);
     }
-  }
 
-  /**
-   * Get public templates
-   */
-  async getPublicTemplates(limit = 50) {
-    return new Promise((resolve, reject) => {
-      db.db.all(
-        `SELECT * FROM server_templates 
-         WHERE is_public = 1 
-         ORDER BY downloads DESC, rating DESC 
-         LIMIT ?`,
-        [limit],
-        (err, rows) => {
-          if (err) reject(err);
-          else
-            resolve(
-              (rows || []).map((r) => ({
-                ...r,
-                config_data: JSON.parse(r.config_data),
-              }))
-            );
-        }
-      );
-    });
-  }
+    const results = {
+      config: false,
+      roles: {},
+      channels: {},
+      errors: [],
+    };
 
-  /**
-   * Apply template to server
-   */
-  async applyTemplate(guildId, templateId) {
     try {
-      // Get template
-      const template = await new Promise((resolve, reject) => {
-        db.db.get(
-          `SELECT * FROM server_templates WHERE id = ?`,
-          [templateId],
-          (err, row) => {
-            if (err) reject(err);
-            else resolve(row);
-          }
-        );
-      });
-
-      if (!template) throw new Error("Template not found");
-
-      const config = JSON.parse(template.config_data);
-
       // Apply configuration
-      await db.updateServerConfig(guildId, config);
-
-      // Increment download counter
-      await db.db.run(
-        `UPDATE server_templates SET downloads = downloads + 1 WHERE id = ?`,
-        [templateId]
-      );
-
-      logger.success(
-        "ServerTemplates",
-        `Applied template ${template.name} to guild ${guildId}`
-      );
-
-      return {
-        success: true,
-        templateName: template.name,
-        appliedSettings: Object.keys(config),
-      };
+      await db.updateServerConfig(guild.id, template.config);
+      results.config = true;
     } catch (error) {
-      logger.error("ServerTemplates", "Failed to apply template", error);
-      throw error;
+      results.errors.push(`Config: ${error.message}`);
     }
-  }
 
-  /**
-   * Rate template
-   */
-  async rateTemplate(templateId, userId, rating) {
-    if (rating < 1 || rating > 5) throw new Error("Rating must be 1-5");
+    // Create roles if needed
+    if (template.roles.muted) {
+      try {
+        const existing = guild.roles.cache.find((r) => r.name === "Muted");
+        if (!existing) {
+          const mutedRole = await guild.roles.create({
+            name: "Muted",
+            color: "#808080",
+            permissions: [],
+            reason: "Nexus template setup",
+          });
 
-    try {
-      // Store rating
-      await db.db.run(
-        `INSERT OR REPLACE INTO template_ratings (template_id, user_id, rating, created_at) 
-         VALUES (?, ?, ?, ?)`,
-        [templateId, userId, rating, Date.now()]
-      );
-
-      // Calculate average rating
-      const avgRating = await new Promise((resolve, reject) => {
-        db.db.get(
-          `SELECT AVG(rating) as avg FROM template_ratings WHERE template_id = ?`,
-          [templateId],
-          (err, row) => {
-            if (err) reject(err);
-            else resolve(row?.avg || 0);
+          // Remove send message permissions in all channels
+          for (const channel of guild.channels.cache.values()) {
+            if (channel.isTextBased()) {
+              await channel.permissionOverwrites.create(mutedRole, {
+                SendMessages: false,
+                AddReactions: false,
+              });
+            }
           }
-        );
-      });
-
-      // Update template
-      await db.db.run(`UPDATE server_templates SET rating = ? WHERE id = ?`, [
-        avgRating,
-        templateId,
-      ]);
-
-      return avgRating;
-    } catch (error) {
-      logger.error("ServerTemplates", "Failed to rate template", error);
-      throw error;
-    }
-  }
-
-  /**
-   * Get popular templates
-   */
-  async getPopularTemplates(limit = 10) {
-    return new Promise((resolve, reject) => {
-      db.db.all(
-        `SELECT * FROM server_templates 
-         WHERE is_public = 1 
-         ORDER BY (downloads * 0.7 + rating * 20 * 0.3) DESC 
-         LIMIT ?`,
-        [limit],
-        (err, rows) => {
-          if (err) reject(err);
-          else
-            resolve(
-              (rows || []).map((r) => ({
-                ...r,
-                config_data: JSON.parse(r.config_data),
-              }))
-            );
+          results.roles.muted = true;
         }
-      );
-    });
+      } catch (error) {
+        results.errors.push(`Muted role: ${error.message}`);
+      }
+    }
+
+    if (template.roles.verified) {
+      try {
+        const existing = guild.roles.cache.find((r) => r.name === "Verified");
+        if (!existing) {
+          await guild.roles.create({
+            name: "Verified",
+            color: "#00FF00",
+            reason: "Nexus template setup",
+          });
+          results.roles.verified = true;
+        }
+      } catch (error) {
+        results.errors.push(`Verified role: ${error.message}`);
+      }
+    }
+
+    // Create channels if needed
+    if (template.channels.mod_log) {
+      try {
+        const existing = guild.channels.cache.find(
+          (c) => c.name === "nexus-logs"
+        );
+        if (!existing) {
+          const channel = await guild.channels.create({
+            name: "nexus-logs",
+            type: 0,
+            reason: "Nexus template setup",
+            permissionOverwrites: [
+              {
+                id: guild.id,
+                deny: ["ViewChannel"],
+              },
+            ],
+          });
+          await db.updateServerConfig(guild.id, {
+            mod_log_channel: channel.id,
+          });
+          results.channels.mod_log = true;
+        }
+      } catch (error) {
+        results.errors.push(`Mod log channel: ${error.message}`);
+      }
+    }
+
+    if (template.channels.alert) {
+      try {
+        const existing = guild.channels.cache.find(
+          (c) => c.name === "nexus-alerts"
+        );
+        if (!existing) {
+          const channel = await guild.channels.create({
+            name: "nexus-alerts",
+            type: 0,
+            reason: "Nexus template setup",
+            permissionOverwrites: [
+              {
+                id: guild.id,
+                deny: ["ViewChannel"],
+              },
+            ],
+          });
+          await db.updateServerConfig(guild.id, {
+            alert_channel: channel.id,
+          });
+          results.channels.alert = true;
+        }
+      } catch (error) {
+        results.errors.push(`Alert channel: ${error.message}`);
+      }
+    }
+
+    return results;
   }
 
   /**
-   * Featured templates (curated by admins)
+   * Get template recommendation based on server analysis
    */
-  getFeaturedTemplates() {
-    return [
-      {
-        id: "featured_gaming",
-        name: "Gaming Community",
-        description:
-          "Optimized for gaming servers - fast anti-raid, minimal verification",
-        config: {
-          anti_raid_enabled: 1,
-          anti_nuke_enabled: 1,
-          auto_mod_enabled: 1,
-          verification_enabled: 0,
-          alert_threshold: 50,
-        },
-        badge: "🎮 Official",
-      },
-      {
-        id: "featured_professional",
-        name: "Professional Server",
-        description: "Enterprise-grade security for business servers",
-        config: {
-          anti_raid_enabled: 1,
-          anti_nuke_enabled: 1,
-          auto_mod_enabled: 1,
-          verification_enabled: 1,
-          verification_mode: "manual",
-          alert_threshold: 70,
-        },
-        badge: "💼 Official",
-      },
-      {
-        id: "featured_maximum",
-        name: "Maximum Security",
-        description: "All features enabled - fortress mode",
-        config: {
-          anti_raid_enabled: 1,
-          anti_nuke_enabled: 1,
-          auto_mod_enabled: 1,
-          heat_system_enabled: 1,
-          verification_enabled: 1,
-          alert_threshold: 30,
-        },
-        badge: "🔒 Official",
-      },
-    ];
+  static recommendTemplate(guild) {
+    const memberCount = guild.memberCount;
+    const hasVoiceChannels =
+      guild.channels.cache.filter((c) => c.type === 2).size > 0;
+    const channelCount = guild.channels.cache.size;
+
+    // Business/Professional - small, few channels, no voice
+    if (memberCount < 100 && channelCount < 20 && !hasVoiceChannels) {
+      return "business";
+    }
+
+    // Gaming - has voice channels, medium size
+    if (hasVoiceChannels && memberCount < 1000) {
+      return "gaming";
+    }
+
+    // Streaming - large member count, has voice
+    if (memberCount > 500 && hasVoiceChannels) {
+      return "streaming";
+    }
+
+    // High security - very large server
+    if (memberCount > 5000) {
+      return "highSecurity";
+    }
+
+    // Default to community
+    return "community";
   }
 }
 
-module.exports = ServerTemplates;
+module.exports = { ServerTemplates, TEMPLATES };

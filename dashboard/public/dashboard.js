@@ -1,7 +1,122 @@
+// PWA Install Prompt & Service Worker
+let deferredPrompt;
 let currentServer = null;
 let userData = null;
 let currentPage = "overview";
 let refreshInterval = null;
+
+// PWA Install Prompt Handler
+window.addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  showInstallPromotion();
+});
+
+function showInstallPromotion() {
+  // Don't show if already dismissed
+  if (localStorage.getItem("pwa-dismissed")) return;
+
+  const installBanner = document.createElement("div");
+  installBanner.id = "pwa-install-banner";
+  installBanner.style.cssText = `
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 15px 25px;
+    border-radius: 50px;
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    max-width: 90%;
+  `;
+  installBanner.innerHTML = `
+    <span style="font-size: 24px;">📱</span>
+    <div>
+      <div style="font-weight: bold;">Install Nexus Dashboard</div>
+      <div style="font-size: 0.85rem; opacity: 0.9;">Moderate your server on the go!</div>
+    </div>
+    <button id="pwa-install-btn" style="background: white; color: #667eea; border: none; padding: 8px 20px; border-radius: 20px; font-weight: bold; cursor: pointer;">Install</button>
+    <button id="pwa-dismiss" style="background: rgba(255,255,255,0.2); color: white; border: none; padding: 8px 15px; border-radius: 20px; cursor: pointer;">✕</button>
+  `;
+
+  document.body.appendChild(installBanner);
+
+  document
+    .getElementById("pwa-install-btn")
+    .addEventListener("click", async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        console.log(`[PWA] Install prompt outcome: ${outcome}`);
+        deferredPrompt = null;
+        installBanner.remove();
+      }
+    });
+
+  document.getElementById("pwa-dismiss").addEventListener("click", () => {
+    localStorage.setItem("pwa-dismissed", "true");
+    installBanner.remove();
+  });
+}
+
+// Service Worker Registration with Update Handling
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker
+    .register("/service-worker.js")
+    .then((registration) => {
+      console.log("[PWA] Service Worker registered");
+
+      // Check for updates every 5 minutes
+      setInterval(
+        () => {
+          registration.update();
+        },
+        5 * 60 * 1000
+      );
+
+      // Handle updates
+      registration.addEventListener("updatefound", () => {
+        const newWorker = registration.installing;
+        newWorker.addEventListener("statechange", () => {
+          if (
+            newWorker.state === "installed" &&
+            navigator.serviceWorker.controller
+          ) {
+            showUpdateNotification();
+          }
+        });
+      });
+    })
+    .catch((error) => {
+      console.error("[PWA] Service Worker registration failed:", error);
+    });
+}
+
+function showUpdateNotification() {
+  const updateBanner = document.createElement("div");
+  updateBanner.style.cssText = `
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #48bb78;
+    color: white;
+    padding: 15px 25px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(72, 187, 120, 0.4);
+    z-index: 10000;
+  `;
+  updateBanner.innerHTML = `
+    <div style="font-weight: bold; margin-bottom: 5px;">🎉 Update Available!</div>
+    <div style="font-size: 0.9rem; margin-bottom: 10px;">A new version of the dashboard is ready.</div>
+    <button onclick="window.location.reload()" style="background: white; color: #48bb78; border: none; padding: 8px 20px; border-radius: 5px; font-weight: bold; cursor: pointer;">Update Now</button>
+  `;
+  document.body.appendChild(updateBanner);
+}
 
 // Load user data
 async function loadUser() {
