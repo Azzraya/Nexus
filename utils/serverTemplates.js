@@ -263,7 +263,7 @@ class ServerTemplates {
 
     try {
       // Apply configuration
-      await db.updateServerConfig(guild.id, template.config);
+      await db.setServerConfig(guild.id, template.config);
       results.config = true;
     } catch (error) {
       results.errors.push(`Config: ${error.message}`);
@@ -331,7 +331,7 @@ class ServerTemplates {
               },
             ],
           });
-          await db.updateServerConfig(guild.id, {
+          await db.setServerConfig(guild.id, {
             mod_log_channel: channel.id,
           });
           results.channels.mod_log = true;
@@ -358,7 +358,7 @@ class ServerTemplates {
               },
             ],
           });
-          await db.updateServerConfig(guild.id, {
+          await db.setServerConfig(guild.id, {
             alert_channel: channel.id,
           });
           results.channels.alert = true;
