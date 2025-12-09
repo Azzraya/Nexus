@@ -456,27 +456,30 @@ if (process.env.BOTSONDICORD_TOKEN) {
 // Initialize Top.gg webhook server (runs once, not per shard)
 // The webhook server will be started in index.js when shard 0 is ready
 
+const { getShardDisplay } = require("./utils/shardNames");
+
 manager.on("shardCreate", (shard) => {
-  console.log(`✅ Launched shard ${shard.id}`);
+  const shardName = getShardDisplay(shard.id);
+  console.log(`✅ Launched ${shardName}`);
 
   shard.on("clientReady", () => {
-    console.log(`🟢 Shard ${shard.id} is ready!`);
+    console.log(`🟢 ${shardName} is ready!`);
   });
 
   shard.on("disconnect", () => {
-    console.log(`🔴 Shard ${shard.id} disconnected`);
+    console.log(`🔴 ${shardName} disconnected`);
   });
 
   shard.on("reconnecting", () => {
-    console.log(`🟡 Shard ${shard.id} reconnecting...`);
+    console.log(`🟡 ${shardName} reconnecting...`);
   });
 
   shard.on("death", () => {
-    console.log(`💀 Shard ${shard.id} died, respawning...`);
+    console.log(`💀 ${shardName} died, respawning...`);
   });
 
   shard.on("error", (error) => {
-    console.error(`❌ Shard ${shard.id} error:`, error);
+    console.error(`❌ ${shardName} error:`, error);
   });
 });
 

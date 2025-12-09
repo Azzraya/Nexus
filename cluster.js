@@ -21,28 +21,31 @@ const manager = new ClusterManager(path.join(__dirname, "shard.js"), {
   execArgv: process.execArgv,
 });
 
+const { getClusterDisplay } = require("./utils/shardNames");
+
 // Cluster events
 manager.on("clusterCreate", (cluster) => {
-  logger.info("Cluster", `✅ Launched Cluster ${cluster.id}`);
+  const clusterName = getClusterDisplay(cluster.id);
+  logger.info("Cluster", `✅ Launched ${clusterName}`);
 
   cluster.on("clientReady", () => {
-    logger.success("Cluster", `🟢 Cluster ${cluster.id} is ready!`);
+    logger.success("Cluster", `🟢 ${clusterName} is ready!`);
   });
 
   cluster.on("disconnect", () => {
-    logger.warn("Cluster", `🔴 Cluster ${cluster.id} disconnected`);
+    logger.warn("Cluster", `🔴 ${clusterName} disconnected`);
   });
 
   cluster.on("reconnecting", () => {
-    logger.info("Cluster", `🟡 Cluster ${cluster.id} reconnecting...`);
+    logger.info("Cluster", `🟡 ${clusterName} reconnecting...`);
   });
 
   cluster.on("death", () => {
-    logger.error("Cluster", `💀 Cluster ${cluster.id} died, respawning...`);
+    logger.error("Cluster", `💀 ${clusterName} died, respawning...`);
   });
 
   cluster.on("error", (error) => {
-    console.error(`❌ Cluster ${cluster.id} error:`, error);
+    console.error(`❌ ${clusterName} error:`, error);
 
     // Track error
     const clusterErrorTracker = require("./utils/clusterErrorTracker");
@@ -55,7 +58,7 @@ manager.on("clusterCreate", (cluster) => {
     // Handle inter-cluster communication
     if (message._type === "stats") {
       console.log(
-        `📊 Cluster ${cluster.id} - ${message.guilds} guilds, ${message.users} users`
+        `📊 ${clusterName} - ${message.guilds} guilds, ${message.users} users`
       );
     }
   });
