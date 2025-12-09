@@ -84,8 +84,34 @@
 
       <div class="content-section">
         <div class="changelog-entry">
-          <h2>Version 4.0.0 - December 8, 2025</h2>
+          <h2>Version 4.0.1 - December 9, 2025</h2>
           <span class="version-badge">Latest</span>
+          <h3>🐛 BUG FIXES</h3>
+          <p>Critical stability improvements for database operations and multi-server networking.</p>
+          <ul>
+            <li>
+              🔧 <strong>Database UNIQUE Constraint Protection:</strong> Added <code>OR IGNORE</code> to all INSERT statements that could trigger UNIQUE constraint violations
+              <ul>
+                <li>Fixed network_guilds duplicate join crashes</li>
+                <li>Fixed reaction_roles duplicate role crashes</li>
+                <li>Fixed network_whitelist duplicate user crashes</li>
+                <li>Fixed invite_sources duplicate source crashes</li>
+                <li>All commands now gracefully handle duplicate data</li>
+              </ul>
+            </li>
+            <li>
+              🌐 <strong>Network Broadcast Fix:</strong> Fixed <code>/network broadcast</code> command crash when network doesn't exist or announcements are disabled
+              <ul>
+                <li>Now properly returns results object instead of undefined</li>
+                <li>Better error messages for disabled features</li>
+              </ul>
+            </li>
+          </ul>
+          <p><strong>Impact:</strong> These fixes prevent all command crashes related to duplicate database entries and undefined return values.</p>
+        </div>
+
+        <div class="changelog-entry">
+          <h2>Version 4.0.0 - December 8, 2025</h2>
           <h3>🎉 MAJOR RELEASE - PRODUCTION INFRASTRUCTURE OVERHAUL</h3>
           <p>
             <strong>Major version bump</strong> consolidating all 3.x features
