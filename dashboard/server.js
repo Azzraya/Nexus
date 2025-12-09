@@ -98,7 +98,7 @@ class DashboardServer {
 
     // IP whitelist for protected assets (add your IP here)
     this.allowedIPs = [
-      process.env.ALLOWED_IP || "78.148.9.253", // Your public IP
+      process.env.ALLOWED_IP || "unknown", // Your public IP
       "127.0.0.1", // Localhost
       "::1", // IPv6 localhost
       "::ffff:127.0.0.1", // IPv4 mapped to IPv6
@@ -224,7 +224,7 @@ class DashboardServer {
     this.app.use(
       session({
         secret:
-          "UaX@Q!3WEUGrEdYNATe*QbEWdtzevt9&3saDtZ0T4s^w@jpjvSx8tCwBh6M6xqDF",
+          process.env.SESSION_SECRET || "unknown",
         resave: false,
         saveUninitialized: false,
         cookie: { maxAge: 7 * 24 * 60 * 60 * 1000 }, // 7 days
