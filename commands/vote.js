@@ -510,7 +510,7 @@ module.exports = {
       // Add botlist
       await new Promise((resolve, reject) => {
         db.db.run(
-          "INSERT INTO botlist_links (name, url, added_by, added_at) VALUES (?, ?, ?, ?)",
+          "INSERT OR IGNORE INTO botlist_links (name, url, added_by, added_at) VALUES (?, ?, ?, ?)",
           [name, url, interaction.user.id, Date.now()],
           (err) => {
             if (err) reject(err);

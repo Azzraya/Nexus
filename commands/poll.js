@@ -354,7 +354,7 @@ module.exports = {
   async storePoll(pollData) {
     return new Promise((resolve, reject) => {
       db.db.run(
-        `INSERT INTO polls (message_id, channel_id, guild_id, question, options, creator_id, duration, anonymous, multiple_choice, end_time, active)
+        `INSERT OR IGNORE INTO polls (message_id, channel_id, guild_id, question, options, creator_id, duration, anonymous, multiple_choice, end_time, active)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           pollData.messageId,

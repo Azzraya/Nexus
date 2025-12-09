@@ -2652,7 +2652,7 @@ class Database {
   async addReactionRole(guildId, messageId, emoji, roleId) {
     return new Promise((resolve, reject) => {
       this.db.run(
-        "INSERT INTO reaction_roles (guild_id, message_id, emoji, role_id) VALUES (?, ?, ?, ?)",
+        "INSERT OR IGNORE INTO reaction_roles (guild_id, message_id, emoji, role_id) VALUES (?, ?, ?, ?)",
         [guildId, messageId, emoji, roleId],
         (err) => {
           if (err) reject(err);
@@ -5015,7 +5015,7 @@ class Database {
   addToNetworkWhitelist(networkId, userId, addedBy, reason) {
     return new Promise((resolve, reject) => {
       this.db.run(
-        `INSERT INTO network_whitelist (network_id, user_id, added_by, reason) VALUES (?, ?, ?, ?)`,
+        `INSERT OR IGNORE INTO network_whitelist (network_id, user_id, added_by, reason) VALUES (?, ?, ?, ?)`,
         [networkId, userId, addedBy, reason],
         (err) => {
           if (err) reject(err);
