@@ -29,7 +29,8 @@ assets/
 COMPETITORS.txt
 competitorMonitor.js
 competitorData.json
-generate-docs.js
-jest.config.js
-jest.setup.js
-jest.config.js
+
+# Test outputs (not the test files themselves!)
+coverage/
+*.test.log
+.jest-cache/
