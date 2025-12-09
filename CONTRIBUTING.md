@@ -79,10 +79,7 @@ cp .env.example .env
 # Edit .env with your bot token and configuration
 nano .env
 
-# Initialize database
-npm run db:init
-
-# Start development
+# Start development (database auto-initializes on first run)
 npm run dev
 ```
 
