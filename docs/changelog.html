@@ -84,8 +84,181 @@
 
       <div class="content-section">
         <div class="changelog-entry">
-          <h2>Version 4.2.0 - December 5, 2025</h2>
+          <h2>Version 4.3.0 - December 5, 2025</h2>
           <span class="version-badge">Latest</span>
+          <h3>🏗️ ENTERPRISE INFRASTRUCTURE UPGRADE</h3>
+          <p>
+            Massive infrastructure improvements bringing enterprise-grade
+            reliability, monitoring, and performance!
+          </p>
+
+          <h4>🔄 Automatic Backup System</h4>
+          <ul>
+            <li>
+              <strong>Multi-Tier Backups:</strong> Hourly (24 retained), Daily
+              (7 retained), Weekly (4 retained)
+            </li>
+            <li>
+              <strong>Scheduled Automation:</strong> Hourly backups every hour,
+              daily at 3 AM, weekly on Sundays
+            </li>
+            <li>
+              <strong>Metadata Tracking:</strong> Size, duration, verification
+              status for each backup
+            </li>
+            <li>
+              <strong>Smart Cleanup:</strong> Automatic retention policy
+              enforcement
+            </li>
+            <li>
+              <strong>Quick Restore:</strong> One-command database restoration
+            </li>
+          </ul>
+
+          <h4>📊 Prometheus Metrics Collection</h4>
+          <ul>
+            <li>
+              <strong>Real-Time Metrics:</strong> Commands executed, threats
+              blocked, performance data
+            </li>
+            <li>
+              <strong>Grafana Integration:</strong> Full Prometheus format for
+              Grafana Cloud dashboards
+            </li>
+            <li>
+              <strong>Performance Tracking:</strong> Command latency, database
+              query time, cache hit rates
+            </li>
+            <li>
+              <strong>Security Metrics:</strong> Rate limit hits, failed auth
+              attempts, suspicious activities
+            </li>
+            <li>
+              <strong>System Monitoring:</strong> Memory usage, guild count,
+              user count, uptime
+            </li>
+            <li>
+              <strong>API Analytics:</strong> Endpoint-specific request counts
+              and latencies
+            </li>
+          </ul>
+
+          <h4>🛡️ Advanced Rate Limiting</h4>
+          <ul>
+            <li>
+              <strong>Redis-Backed:</strong> Distributed rate limiting across
+              shards with automatic fallback
+            </li>
+            <li>
+              <strong>Multi-Layer Protection:</strong> API endpoints, commands,
+              webhooks, login attempts
+            </li>
+            <li>
+              <strong>Sliding Window Algorithm:</strong> More accurate rate
+              limiting than fixed windows
+            </li>
+            <li>
+              <strong>Adaptive Limits:</strong> Larger servers get more lenient
+              rate limits automatically
+            </li>
+            <li>
+              <strong>Whitelist System:</strong> Exempt trusted users/guilds
+              from rate limits
+            </li>
+            <li>
+              <strong>Detailed Headers:</strong> X-RateLimit-* headers for
+              transparent limit info
+            </li>
+          </ul>
+
+          <h4>🏥 Health Check System</h4>
+          <ul>
+            <li>
+              <strong>Comprehensive Checks:</strong> Bot, WebSocket, database,
+              Redis, memory, disk
+            </li>
+            <li>
+              <strong>UptimeRobot Ready:</strong> Dedicated endpoints for
+              external monitoring
+            </li>
+            <li>
+              <strong>Status Levels:</strong> Healthy, degraded, unhealthy with
+              detailed diagnostics
+            </li>
+            <li>
+              <strong>Auto-Monitoring:</strong> Runs every 30 seconds, stores
+              last 100 checks
+            </li>
+            <li>
+              <strong>Quick Ping:</strong> Fast endpoint for basic uptime checks
+            </li>
+          </ul>
+
+          <h4>🌐 New API Endpoints</h4>
+          <ul>
+            <li><code>/health</code> - Detailed system health check</li>
+            <li><code>/ping</code> - Quick uptime verification</li>
+            <li><code>/metrics</code> - Prometheus metrics (text format)</li>
+            <li>
+              <code>/api/stats/infrastructure</code> - Human-readable stats
+            </li>
+          </ul>
+
+          <h4>📚 Infrastructure Setup Guide</h4>
+          <ul>
+            <li>
+              <strong>Complete Documentation:</strong> Step-by-step guide for
+              Redis, UptimeRobot, Grafana
+            </li>
+            <li>
+              <strong>Free Tier Recommendations:</strong> Upstash Redis, Grafana
+              Cloud, UptimeRobot (all free!)
+            </li>
+            <li>
+              <strong>Configuration Examples:</strong> Ready-to-use config files
+              for Prometheus
+            </li>
+            <li>
+              <strong>Troubleshooting Section:</strong> Common issues and
+              solutions
+            </li>
+          </ul>
+
+          <h4>💪 Why This Matters</h4>
+          <ul>
+            <li>
+              <strong>Zero Downtime Goals:</strong> Know about issues before
+              users report them
+            </li>
+            <li>
+              <strong>Data Protection:</strong> Never lose data with automated
+              backups
+            </li>
+            <li>
+              <strong>Performance Insights:</strong> Identify bottlenecks and
+              optimize
+            </li>
+            <li>
+              <strong>Abuse Prevention:</strong> Sophisticated rate limiting
+              stops attacks
+            </li>
+            <li>
+              <strong>Professional Grade:</strong> Infrastructure that scales
+              from 50 to 50,000 servers
+            </li>
+          </ul>
+
+          <h4>💰 Best Part: It's All FREE!</h4>
+          <p>
+            Entire infrastructure upgrade uses free tiers: Upstash Redis (10K
+            commands/day), Grafana Cloud (10K series), UptimeRobot (50
+            monitors). Total cost: <strong>$0/month</strong>!
+          </p>
+        </div>
+
+        <div class="changelog-entry">
+          <h2>Version 4.2.0 - December 5, 2025</h2>
+          <span class="version-badge">Previous</span>
           <h3>🚀 MAJOR NEW FEATURES</h3>
           <p>
             Mobile-first PWA dashboard and one-click server templates for

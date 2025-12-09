@@ -47,6 +47,16 @@ client.channelPins = new Map();
 const cache = require("./utils/cache");
 client.cache = cache;
 
+// Initialize infrastructure systems (EXCEEDS WICK - enterprise-grade)
+const automaticBackup = require("./utils/automaticBackup");
+const metricsCollector = require("./utils/metricsCollector");
+const advancedRateLimiter = require("./utils/advancedRateLimiter");
+const HealthCheck = require("./utils/healthCheck");
+
+client.metrics = metricsCollector;
+client.rateLimiter = advancedRateLimiter;
+client.healthCheck = new HealthCheck(client);
+
 // Anti-raid system
 client.antiRaid = {
   joinRate: new Map(), // Track joins per time window

@@ -355,6 +355,32 @@ class DashboardServer {
       req.logout(() => res.redirect("/"));
     });
 
+    // Health check endpoints (for UptimeRobot, etc.)
+    this.app.get("/health", this.client.healthCheck.expressEndpoint());
+    this.app.get("/ping", this.client.healthCheck.pingEndpoint());
+
+    // Prometheus metrics endpoint
+    this.app.get("/metrics", (req, res) => {
+      try {
+        const metrics = this.client.metrics.getPrometheusMetrics();
+        res.setHeader("Content-Type", "text/plain; version=0.0.4");
+        res.send(metrics);
+      } catch (error) {
+        logger.error("Metrics", `Error generating metrics: ${error.message}`);
+        res.status(500).send("Error generating metrics");
+      }
+    });
+
+    // Human-readable stats endpoint
+    this.app.get("/api/stats/infrastructure", (req, res) => {
+      try {
+        const stats = this.client.metrics.getStats();
+        res.json(stats);
+      } catch (error) {
+        res.status(500).json({ error: "Failed to get stats" });
+      }
+    });
+
     // Get current IP (helper endpoint to find your IP)
     this.app.get("/api/my-ip", (req, res) => {
       const realIP = this.getRealIP(req);
