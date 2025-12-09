@@ -1817,11 +1817,15 @@ class Database {
     );
 
     // Migration: Copy existing response data to response_content for backwards compatibility
+    // Only runs on databases that have existing data (skips on fresh databases)
     this.db.run(
       `UPDATE custom_commands SET response_content = response WHERE response_content IS NULL AND response IS NOT NULL`,
       (err) => {
         if (err) {
-          logger.error("Error migrating response to response_content:", err);
+          // Suppress error on fresh databases (no data to migrate)
+          if (!err.message.includes("no such column")) {
+            logger.error("Error migrating response to response_content:", err);
+          }
         } else {
           logger.info(
             "[Migration] Migrated old custom_commands.response to response_content"
