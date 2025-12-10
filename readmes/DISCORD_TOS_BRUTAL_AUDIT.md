@@ -370,6 +370,7 @@ this.messageHistory.set(key, history);
    ```
 
 2. **Add Data Retention Cleanup** (1 hour)
+
    ```javascript
    // Add to utils/database.js or create utils/dataRetention.js
    cron.schedule("0 0 * * *", async () => {

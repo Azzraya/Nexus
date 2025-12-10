@@ -53,6 +53,7 @@ class DataRetention {
         modLogs: 0,
         analyticsData: 0,
         oauthLogs: 0,
+        activityStats: 0,
       };
 
       // 1. Cleanup automod violations (90 days)
@@ -70,7 +71,10 @@ class DataRetention {
       // 5. Cleanup OAuth login logs (90 days)
       stats.oauthLogs = await this.cleanupOAuthLogs(90);
 
-      // 6. Cleanup threat intelligence (30 days - already has cleanup)
+      // 6. Cleanup activity stats (90 days)
+      stats.activityStats = await this.cleanupActivityStats(90);
+
+      // 7. Cleanup threat intelligence (30 days - already has cleanup)
       // This is handled by the threat intelligence system itself
 
       const duration = Date.now() - startTime;
@@ -85,11 +89,7 @@ class DataRetention {
       // Log to database for auditing
       await this.logCleanup(stats, duration);
     } catch (error) {
-      logger.error(
-        "DataRetention",
-        `Cleanup failed: ${error.message}`,
-        error
-      );
+      logger.error("DataRetention", `Cleanup failed: ${error.message}`, error);
     }
   }
 
@@ -105,7 +105,11 @@ class DataRetention {
         [cutoff],
         function (err) {
           if (err) {
-            logger.error("DataRetention", "Failed to cleanup automod violations", err);
+            logger.error(
+              "DataRetention",
+              "Failed to cleanup automod violations",
+              err
+            );
             resolve(0);
           } else {
             logger.info(
@@ -131,7 +135,11 @@ class DataRetention {
         [cutoff],
         function (err) {
           if (err) {
-            logger.error("DataRetention", "Failed to cleanup behavioral data", err);
+            logger.error(
+              "DataRetention",
+              "Failed to cleanup behavioral data",
+              err
+            );
             resolve(0);
           } else {
             logger.info(
@@ -158,7 +166,10 @@ class DataRetention {
         function (err) {
           if (err) {
             // Table might not exist in all databases
-            logger.debug("DataRetention", "Failed to cleanup moderation logs (table may not exist)");
+            logger.debug(
+              "DataRetention",
+              "Failed to cleanup moderation logs (table may not exist)"
+            );
             resolve(0);
           } else {
             logger.info(
@@ -184,7 +195,10 @@ class DataRetention {
         [cutoff],
         function (err) {
           if (err) {
-            logger.debug("DataRetention", "Failed to cleanup analytics (table may not exist)");
+            logger.debug(
+              "DataRetention",
+              "Failed to cleanup analytics (table may not exist)"
+            );
             resolve(0);
           } else {
             logger.info(
@@ -210,12 +224,45 @@ class DataRetention {
         [cutoff],
         function (err) {
           if (err) {
-            logger.debug("DataRetention", "Failed to cleanup OAuth logs (table may not exist)");
+            logger.debug(
+              "DataRetention",
+              "Failed to cleanup OAuth logs (table may not exist)"
+            );
             resolve(0);
           } else {
             logger.info(
               "DataRetention",
               `Deleted ${this.changes} OAuth login records (>${days} days old)`
+            );
+            resolve(this.changes);
+          }
+        }
+      );
+    });
+  }
+
+  /**
+   * Cleanup activity statistics older than specified days
+   */
+  async cleanupActivityStats(days) {
+    const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
+    const dateCutoff = Math.floor(cutoff / (24 * 60 * 60 * 1000));
+
+    return new Promise((resolve, reject) => {
+      db.db.run(
+        "DELETE FROM activity_stats WHERE date < ?",
+        [dateCutoff],
+        function (err) {
+          if (err) {
+            logger.debug(
+              "DataRetention",
+              "Failed to cleanup activity stats (table may not exist)"
+            );
+            resolve(0);
+          } else {
+            logger.info(
+              "DataRetention",
+              `Deleted ${this.changes} activity stat records (>${days} days old)`
             );
             resolve(this.changes);
           }
@@ -232,11 +279,19 @@ class DataRetention {
       db.db.run(
         `INSERT OR IGNORE INTO data_retention_log (timestamp, records_deleted, duration_ms, details)
          VALUES (?, ?, ?, ?)`,
-        [Date.now(), Object.values(stats).reduce((a, b) => a + b, 0), duration, JSON.stringify(stats)],
+        [
+          Date.now(),
+          Object.values(stats).reduce((a, b) => a + b, 0),
+          duration,
+          JSON.stringify(stats),
+        ],
         (err) => {
           if (err) {
             // Table might not exist, that's okay
-            logger.debug("DataRetention", "Failed to log cleanup (table may not exist)");
+            logger.debug(
+              "DataRetention",
+              "Failed to log cleanup (table may not exist)"
+            );
           }
           resolve();
         }

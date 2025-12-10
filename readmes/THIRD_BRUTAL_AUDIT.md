@@ -29,12 +29,14 @@ CREATE TABLE IF NOT EXISTS presence_changes (
 ```
 
 **The Problem:**
+
 - You're storing **per-user presence change timestamps** for EVERY user
 - **NO CLEANUP CODE EXISTS** - This data is kept **FOREVER**
 - You're tracking when each user last changed their presence
 - This is **surveillance** - not disclosed in privacy policy
 
 **Why This is Bad:**
+
 - ❌ **Indefinite user tracking** - Building permanent presence history
 - ❌ **Not disclosed** - Privacy policy doesn't mention presence change tracking
 - ❌ **GDPR risk** - Storing personal data (presence activity) indefinitely
@@ -42,8 +44,9 @@ CREATE TABLE IF NOT EXISTS presence_changes (
 
 **What you're doing:**
 Every time ANY user changes their presence (online → offline, gaming → idle), you're storing:
+
 - Their user ID
-- Guild ID  
+- Guild ID
 - Timestamp of change
 - Status
 
@@ -52,6 +55,7 @@ Every time ANY user changes their presence (online → offline, gaming → idle)
 **Severity:** 🟠 **SERIOUS - Privacy violation, not disclosed**
 
 **Fix:**
+
 ```javascript
 // Add to dataRetention.js
 async cleanupPresenceChanges(days) {
@@ -89,12 +93,14 @@ CREATE TABLE IF NOT EXISTS suspicious_accounts (
 ```
 
 **The Problem:**
+
 - You're flagging users as "suspicious" based on presence patterns
 - **NO CLEANUP CODE EXISTS** - Flags are kept **FOREVER**
 - Not disclosed in privacy policy
 - Could be used to build a "blacklist" of users
 
 **Why This is Questionable:**
+
 - ⚠️ **Permanent user flags** - No expiration or review process
 - ⚠️ **False positives** - Legitimate users who don't change presence often get flagged
 - ⚠️ **Not disclosed** - Privacy policy doesn't mention suspicious account tracking
@@ -103,6 +109,7 @@ CREATE TABLE IF NOT EXISTS suspicious_accounts (
 **Severity:** 🟠 **SERIOUS - Privacy risk, potential discrimination**
 
 **Fix:**
+
 ```javascript
 // Add to dataRetention.js
 async cleanupSuspiciousAccounts(days) {
@@ -134,12 +141,14 @@ const statusRoles = config?.status_roles || {};
 ```
 
 **The Problem:**
+
 - Code references `config.status_roles` (object with `gaming_role`, `streaming_role`)
 - **This field doesn't exist in `server_config` table**
 - The feature **CANNOT WORK** - will always be empty object
 - Status role assignments will **NEVER WORK**
 
 **Why This is Bad:**
+
 - ❌ **Broken feature** - Claims to work, but doesn't
 - ❌ **Wasted resources** - Checking for roles that can never be set
 - ❌ **False advertising** - Feature exists in code but can't be configured
@@ -148,11 +157,13 @@ const statusRoles = config?.status_roles || {};
 
 **Fix:**
 Add to `server_config` table:
+
 ```sql
 status_roles TEXT DEFAULT '{}'  -- JSON string: {"gaming_role": "123", "streaming_role": "456"}
 ```
 
 Or create separate table:
+
 ```sql
 CREATE TABLE IF NOT EXISTS status_roles (
     guild_id TEXT,
@@ -170,11 +181,13 @@ CREATE TABLE IF NOT EXISTS status_roles (
 **Table:** `activity_stats`
 
 **The Problem:**
+
 - Aggregate stats are good (not per-user)
 - But **NO CLEANUP** - Stats accumulate forever
 - Could grow large over time
 
 **Why This is Minor:**
+
 - ✅ Aggregate (not per-user) - Good!
 - ⚠️ No retention limit - Could grow indefinitely
 - ⚠️ Not disclosed in privacy policy
@@ -182,6 +195,7 @@ CREATE TABLE IF NOT EXISTS status_roles (
 **Severity:** 🟡 **MODERATE - Minor privacy concern**
 
 **Fix:**
+
 ```javascript
 // Add to dataRetention.js
 async cleanupActivityStats(days) {
@@ -217,6 +231,7 @@ You're tracking **every user's presence changes** and storing it **forever**. Th
 Presence data should be used for **user-facing features**, not for **surveillance/tracking**.
 
 **Your usage:**
+
 - ✅ Presence verification - User-facing (GOOD)
 - ✅ Status roles - User-facing (GOOD)
 - ❌ **Bot detection tracking** - Surveillance (BAD)
@@ -266,12 +281,14 @@ If they audit your code, they'll see:
 ### **Option 1: Remove Bot Detection Feature (RECOMMENDED)**
 
 **Remove:**
+
 - `handleBotDetection()` function
 - `presence_changes` table tracking
 - `suspicious_accounts` table (or only use for other detection methods)
 - `bot_detection_enabled` config
 
 **Keep:**
+
 - Presence verification ✅
 - Status roles ✅ (fix the config first)
 - Activity analytics ✅ (add cleanup)
@@ -283,6 +300,7 @@ If they audit your code, they'll see:
 ### **Option 2: Fix Bot Detection (Make It Compliant)**
 
 **Changes needed:**
+
 1. **Make it opt-in** - Users must explicitly enable bot detection
 2. **Add disclosure** - Privacy policy must clearly state presence tracking
 3. **Add cleanup** - Delete presence_changes after 30 days
@@ -310,6 +328,7 @@ I fixed the broken functions, but I created **NEW PRIVACY VIOLATIONS**:
 3. **Not disclosed** - Privacy policy doesn't mention it
 
 **The bot detection feature is the problem.** It's tracking individual users' presence patterns, which is:
+
 - ❌ Not user-facing
 - ❌ Surveillance
 - ❌ Not disclosed

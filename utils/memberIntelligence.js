@@ -251,15 +251,16 @@ class MemberIntelligence {
   async getTopRiskyMembers(guild, limit = 10) {
     try {
       // Only fetch recently joined members (last 30 days) instead of ALL members
-      const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
+      const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
       await guild.members.fetch({ limit: 1000, cache: true }); // Limit to 1000 most recent
-      
+
       const riskScores = [];
 
       for (const [id, member] of guild.members.cache) {
         if (member.user.bot) continue; // Skip bots
         // Focus on recent joins for risk assessment
-        if (member.joinedTimestamp && member.joinedTimestamp < thirtyDaysAgo) continue;
+        if (member.joinedTimestamp && member.joinedTimestamp < thirtyDaysAgo)
+          continue;
 
         const risk = await this.calculateRiskScore(member);
         riskScores.push({

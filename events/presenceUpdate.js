@@ -26,13 +26,7 @@ module.exports = {
         await handleStatusRoles(member, oldPresence, newPresence);
       }
 
-      // Feature 3: Bot detection (suspicious patterns)
-      // Track accounts that never change presence (bot accounts)
-      if (config?.bot_detection_enabled) {
-        await handleBotDetection(member, oldPresence, newPresence);
-      }
-
-      // Feature 4: Activity analytics (optional, for server insights)
+      // Feature 3: Activity analytics (optional, for server insights)
       // Track general server activity patterns (not per-user surveillance)
       if (config?.activity_analytics_enabled) {
         await handleActivityAnalytics(member.guild.id, newPresence);
@@ -90,8 +84,8 @@ async function handlePresenceVerification(member, oldPresence, newPresence) {
  */
 async function handleStatusRoles(member, oldPresence, newPresence) {
   try {
-    const config = await db.getServerConfig(member.guild.id);
-    const statusRoles = config?.status_roles || {};
+    // Get status roles from database
+    const statusRoles = await db.getStatusRoles(member.guild.id);
 
     const oldStatus = oldPresence?.status;
     const newStatus = newPresence?.status;
@@ -121,41 +115,6 @@ async function handleStatusRoles(member, oldPresence, newPresence) {
     }
   } catch (error) {
     logger.debug("[StatusRoles] Error:", error);
-  }
-}
-
-/**
- * Bot detection via presence patterns
- * Detect suspicious accounts that never change presence
- */
-async function handleBotDetection(member, oldPresence, newPresence) {
-  try {
-    // Track last presence change
-    const now = Date.now();
-    const lastChange = await db.getLastPresenceChange(
-      member.guild.id,
-      member.id
-    );
-
-    // If account has been online for 7+ days with no presence change, flag it
-    if (lastChange && now - lastChange > 7 * 24 * 60 * 60 * 1000) {
-      // Always online/offline = suspicious
-      if (newPresence.status === "online" && oldPresence?.status === "online") {
-        await db.flagSuspiciousAccount(
-          member.guild.id,
-          member.id,
-          "no_presence_change_7d"
-        );
-        logger.warn(
-          `[BotDetection] User ${member.user.tag} has no presence change in 7+ days`
-        );
-      }
-    }
-
-    // Update last presence change
-    await db.updateLastPresenceChange(member.guild.id, member.id, now);
-  } catch (error) {
-    logger.debug("[BotDetection] Error:", error);
   }
 }
 

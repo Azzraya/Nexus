@@ -33,7 +33,8 @@ Nexus Bot ("we", "our", "us") is committed to protecting your privacy. This Priv
 - **Vote history** (bot voting records, vote streaks, timestamps)
 - **Achievement data** (unlocked achievements, progress tracking, timestamps)
 - **Behavioral analysis data** (message patterns, activity patterns for threat detection - automatically deleted after 90 days)
-- **Presence data** (used only for presence-based verification, status role assignments, and bot detection - not stored long-term)
+- **Presence data** (used only for presence-based verification and status role assignments - not stored long-term, only processed in real-time)
+- **Activity statistics** (aggregate server activity patterns by hour/status - automatically deleted after 90 days, no per-user tracking)
 - **Spam detection cache** (last 10 messages per user stored temporarily in memory for spam pattern detection - cleared on bot restart)
 
 ### Technical Information
@@ -101,10 +102,12 @@ When you log in to the Nexus Bot dashboard, we collect:
 - **Automod violations** (including message content): 90 days (automatically deleted via daily cleanup)
 - **Behavioral data**: 90 days (automatically deleted via daily cleanup)
 - **Recovery snapshots**: 90 days (automatically created periodically and before/after security incidents)
+- **Activity statistics**: 90 days (aggregate stats only, automatically deleted via daily cleanup)
 - Analytics: 1 year (anonymized after 90 days)
 - Threat intelligence: 30 days (automatically deleted)
 - OAuth login logs: 90 days (automatically deleted)
 - **Spam detection cache**: Temporary (in-memory only, cleared on restart)
+- **Presence data**: Not stored (only processed in real-time for verification/role assignments)
 - **Performance metrics**: 90 days (command times, query performance, memory usage)
 - Message content: Not stored permanently (only processed in real-time for moderation)
 - **Message edit/delete events**: 90 days (logged for moderation and security purposes, includes message content at time of edit/delete)

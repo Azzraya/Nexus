@@ -86,8 +86,8 @@ class Database {
                 alert_threshold INTEGER DEFAULT 60,
                 presence_verification_enabled INTEGER DEFAULT 0,
                 status_roles_enabled INTEGER DEFAULT 0,
-                bot_detection_enabled INTEGER DEFAULT 0,
-                activity_analytics_enabled INTEGER DEFAULT 0
+                activity_analytics_enabled INTEGER DEFAULT 0,
+                status_roles TEXT DEFAULT '{}'
             )
         `);
 
@@ -1415,27 +1415,14 @@ class Database {
             )
         `);
 
-    // Presence change tracking (for bot detection)
+    // Status roles configuration
     this.db.run(`
-            CREATE TABLE IF NOT EXISTS presence_changes (
+            CREATE TABLE IF NOT EXISTS status_roles (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 guild_id TEXT,
-                user_id TEXT,
-                last_change INTEGER,
-                status TEXT,
-                UNIQUE(guild_id, user_id)
-            )
-        `);
-
-    // Suspicious accounts (flagged by bot detection)
-    this.db.run(`
-            CREATE TABLE IF NOT EXISTS suspicious_accounts (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                guild_id TEXT,
-                user_id TEXT,
-                reason TEXT,
-                flagged_at INTEGER,
-                UNIQUE(guild_id, user_id)
+                activity_type TEXT,
+                role_id TEXT,
+                UNIQUE(guild_id, activity_type)
             )
         `);
 
@@ -5627,6 +5614,61 @@ class Database {
       this.db.run(
         "INSERT INTO activity_stats (guild_id, hour, status, count, date) VALUES (?, ?, ?, 1, ?) ON CONFLICT(guild_id, hour, status, date) DO UPDATE SET count = count + 1",
         [guildId, hour, status, today],
+        (err) => {
+          if (err) reject(err);
+          else resolve();
+        }
+      );
+    });
+  }
+
+  /**
+   * Get status roles configuration for a guild
+   */
+  async getStatusRoles(guildId) {
+    return new Promise((resolve, reject) => {
+      this.db.all(
+        "SELECT activity_type, role_id FROM status_roles WHERE guild_id = ?",
+        [guildId],
+        (err, rows) => {
+          if (err) {
+            reject(err);
+          } else {
+            const roles = {};
+            rows.forEach((row) => {
+              roles[`${row.activity_type}_role`] = row.role_id;
+            });
+            resolve(roles);
+          }
+        }
+      );
+    });
+  }
+
+  /**
+   * Set status role for a guild
+   */
+  async setStatusRole(guildId, activityType, roleId) {
+    return new Promise((resolve, reject) => {
+      this.db.run(
+        "INSERT OR REPLACE INTO status_roles (guild_id, activity_type, role_id) VALUES (?, ?, ?)",
+        [guildId, activityType, roleId],
+        (err) => {
+          if (err) reject(err);
+          else resolve();
+        }
+      );
+    });
+  }
+
+  /**
+   * Remove status role for a guild
+   */
+  async removeStatusRole(guildId, activityType) {
+    return new Promise((resolve, reject) => {
+      this.db.run(
+        "DELETE FROM status_roles WHERE guild_id = ? AND activity_type = ?",
+        [guildId, activityType],
         (err) => {
           if (err) reject(err);
           else resolve();
