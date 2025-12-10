@@ -459,9 +459,37 @@ module.exports = {
     for (const autoRole of autoRoles) {
       try {
         const role = member.guild.roles.cache.get(autoRole.role_id);
-        if (role) {
-          await member.roles.add(role);
+        if (!role) continue; // Role doesn't exist anymore
+
+        // Check if bot has Manage Roles permission
+        const botMember = member.guild.members.me;
+        if (!botMember.permissions.has("ManageRoles")) {
+          logger.warn(
+            "GuildMemberAdd",
+            `Cannot assign auto-role: Missing ManageRoles permission in ${member.guild.name}`
+          );
+          continue;
         }
+
+        // Check if bot's role is high enough
+        if (botMember.roles.highest.position <= role.position) {
+          logger.warn(
+            "GuildMemberAdd",
+            `Cannot assign role ${role.name}: Bot's role is too low in hierarchy`
+          );
+          continue;
+        }
+
+        // Check if role is manageable (not managed by integration)
+        if (role.managed) {
+          logger.warn(
+            "GuildMemberAdd",
+            `Cannot assign role ${role.name}: Role is managed by integration`
+          );
+          continue;
+        }
+
+        await member.roles.add(role);
       } catch (error) {
         ErrorHandler.logError(
           error,
