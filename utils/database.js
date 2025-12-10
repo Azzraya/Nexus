@@ -86,8 +86,8 @@ class Database {
                 alert_threshold INTEGER DEFAULT 60,
                 presence_verification_enabled INTEGER DEFAULT 0,
                 status_roles_enabled INTEGER DEFAULT 0,
-                activity_analytics_enabled INTEGER DEFAULT 0,
-                status_roles TEXT DEFAULT '{}'
+                activity_analytics_enabled INTEGER DEFAULT 1,
+                threat_intelligence_sharing INTEGER DEFAULT 1
             )
         `);
 
@@ -1383,6 +1383,15 @@ class Database {
                 member_count INTEGER,
                 owner_id TEXT,
                 timestamp INTEGER
+            )
+        `);
+
+    // Track bot removal dates for data cleanup
+    this.db.run(`
+            CREATE TABLE IF NOT EXISTS bot_removals (
+                guild_id TEXT PRIMARY KEY,
+                removed_at INTEGER,
+                cleanup_scheduled INTEGER DEFAULT 0
             )
         `);
 
@@ -4546,7 +4555,7 @@ class Database {
           guildId,
           userId,
           violationType,
-          messageContent.substring(0, 1000),
+          messageContent ? messageContent.substring(0, 200) : "", // Reduced to 200 chars, store hash for longer
           actionTaken,
           Date.now(),
         ],

@@ -8,6 +8,18 @@ module.exports = {
   async execute(guild, client) {
     logger.info("Guild Delete", `Left server: ${guild.name} (${guild.id})`);
 
+    // Track bot removal for data cleanup (30 days after removal)
+    await new Promise((resolve, reject) => {
+      db.db.run(
+        "INSERT OR REPLACE INTO bot_removals (guild_id, removed_at, cleanup_scheduled) VALUES (?, ?, ?)",
+        [guild.id, Date.now(), 0],
+        (err) => {
+          if (err) reject(err);
+          else resolve();
+        }
+      );
+    });
+
     // Stop audit log monitoring for removed guild
     if (client.auditLogMonitor) {
       client.auditLogMonitor.stopMonitoring(guild.id);

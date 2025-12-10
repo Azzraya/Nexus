@@ -12,8 +12,15 @@ class ThreatIntelligence {
     severity,
     sourceGuildId
   ) {
-    // Check if threat already exists
-    const existing = await db.getThreatIntelligence(userId);
+    // Check if cross-server sharing is enabled for this server
+    const config = await db.getServerConfig(sourceGuildId);
+    const sharingEnabled = config?.threat_intelligence_sharing !== 0; // Default ON for existing, can be disabled
+
+    // Check if threat already exists (only within same server if sharing disabled)
+    const existing = sharingEnabled
+      ? await db.getThreatIntelligence(userId)
+      : await db.getThreatIntelligenceForGuild(userId, sourceGuildId);
+    
     const similarThreat = existing.find(
       (t) =>
         t.threat_type === threatType && Date.now() - t.reported_at < 86400000 // Within 24 hours
@@ -23,8 +30,10 @@ class ThreatIntelligence {
       // Verify existing threat
       await db.verifyThreat(similarThreat.id);
 
-      // Enhanced: Detect cross-server patterns when threat is verified
-      await this.detectCrossServerPattern(userId, threatType, sourceGuildId);
+      // Enhanced: Detect cross-server patterns when threat is verified (only if sharing enabled)
+      if (sharingEnabled) {
+        await this.detectCrossServerPattern(userId, threatType, sourceGuildId);
+      }
 
       return { id: similarThreat.id, verified: true };
     }
@@ -38,8 +47,10 @@ class ThreatIntelligence {
       sourceGuildId
     );
 
-    // Enhanced: Immediately check for cross-server patterns
-    await this.detectCrossServerPattern(userId, threatType, sourceGuildId);
+    // Enhanced: Immediately check for cross-server patterns (only if sharing enabled)
+    if (sharingEnabled) {
+      await this.detectCrossServerPattern(userId, threatType, sourceGuildId);
+    }
 
     return { id: threatId, verified: false };
   }
@@ -158,7 +169,22 @@ class ThreatIntelligence {
    * Enhanced threat checking with cross-server analytics (EXCEEDS WICK - better intelligence)
    */
   static async checkThreat(userId, guildId = null) {
-    const threats = await db.getThreatIntelligence(userId);
+    // If guildId provided, check if cross-server sharing is enabled
+    let threats;
+    if (guildId) {
+      const config = await db.getServerConfig(guildId);
+      const sharingEnabled = config?.threat_intelligence_sharing !== 0;
+      
+      if (sharingEnabled) {
+        threats = await db.getThreatIntelligence(userId);
+      } else {
+        // Only check threats from this server
+        threats = await db.getThreatIntelligenceForGuild(userId, guildId);
+      }
+    } else {
+      // No guild context - get all (for admin/global checks)
+      threats = await db.getThreatIntelligence(userId);
+    }
 
     if (threats.length === 0) {
       return {

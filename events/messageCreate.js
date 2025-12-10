@@ -11,16 +11,19 @@ module.exports = {
     if (message.system) return; // System messages
     if (!message.guild) return; // DM messages
 
-    // Track behavioral patterns
+    // Track behavioral patterns (metadata only, no content)
     if (client.behavioralFP) {
       client.behavioralFP.trackBehavior(
         message.author.id,
         message.guild.id,
         "message",
         {
-          length: message.content.length,
+          length: message.content?.length || 0,
+          wordCount: message.content?.split(/\s+/).length || 0,
           hasAttachments: message.attachments.size > 0,
           hasMentions: message.mentions.users.size > 0,
+          hasLinks: /https?:\/\//.test(message.content || ""),
+          // NO content stored - only metadata
         }
       );
     }

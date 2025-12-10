@@ -54,6 +54,7 @@ class DataRetention {
         analyticsData: 0,
         oauthLogs: 0,
         activityStats: 0,
+        userData: 0,
       };
 
       // 1. Cleanup automod violations (90 days)
@@ -74,7 +75,10 @@ class DataRetention {
       // 6. Cleanup activity stats (90 days)
       stats.activityStats = await this.cleanupActivityStats(90);
 
-      // 7. Cleanup threat intelligence (30 days - already has cleanup)
+      // 7. Cleanup user data 30 days after bot removal
+      stats.userData = await this.cleanupUserDataAfterRemoval(30);
+
+      // 8. Cleanup threat intelligence (30 days - already has cleanup)
       // This is handled by the threat intelligence system itself
 
       const duration = Date.now() - startTime;
@@ -269,6 +273,99 @@ class DataRetention {
         }
       );
     });
+  }
+
+  /**
+   * Cleanup user data 30 days after bot removal
+   */
+  async cleanupUserDataAfterRemoval(days) {
+    const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
+    let totalDeleted = 0;
+
+    // Get all guilds where bot was removed more than 30 days ago
+    const removedGuilds = await new Promise((resolve, reject) => {
+      db.db.all(
+        "SELECT guild_id FROM bot_removals WHERE removed_at < ? AND cleanup_scheduled = 0",
+        [cutoff],
+        (err, rows) => {
+          if (err) reject(err);
+          else resolve(rows || []);
+        }
+      );
+    });
+
+    for (const removal of removedGuilds) {
+      const guildId = removal.guild_id;
+
+      // Delete user data for this guild
+      const deletions = await Promise.all([
+        // User XP
+        new Promise((resolve) => {
+          db.db.run(
+            "DELETE FROM user_xp WHERE guild_id = ?",
+            [guildId],
+            function (err) {
+              if (err) {
+                logger.debug("DataRetention", `Failed to cleanup user_xp for ${guildId}`);
+                resolve(0);
+              } else {
+                resolve(this.changes);
+              }
+            }
+          );
+        }),
+        // User stats
+        new Promise((resolve) => {
+          db.db.run(
+            "DELETE FROM user_stats WHERE guild_id = ?",
+            [guildId],
+            function (err) {
+              if (err) {
+                logger.debug("DataRetention", `Failed to cleanup user_stats for ${guildId}`);
+                resolve(0);
+              } else {
+                resolve(this.changes);
+              }
+            }
+          );
+        }),
+        // User achievements
+        new Promise((resolve) => {
+          db.db.run(
+            "DELETE FROM user_achievements WHERE guild_id = ?",
+            [guildId],
+            function (err) {
+              if (err) {
+                logger.debug("DataRetention", `Failed to cleanup user_achievements for ${guildId}`);
+                resolve(0);
+              } else {
+                resolve(this.changes);
+              }
+            }
+          );
+        }),
+      ]);
+
+      totalDeleted += deletions.reduce((a, b) => a + b, 0);
+
+      // Mark as cleanup scheduled
+      await new Promise((resolve) => {
+        db.db.run(
+          "UPDATE bot_removals SET cleanup_scheduled = 1 WHERE guild_id = ?",
+          [guildId],
+          () => resolve()
+        );
+      });
+    }
+
+    if (totalDeleted > 0) {
+      logger.info(
+        "DataRetention",
+        `Deleted ${totalDeleted} user data records from ${removedGuilds.length} removed servers (>${days} days)`
+      );
+    }
+
+    return totalDeleted;
   }
 
   /**

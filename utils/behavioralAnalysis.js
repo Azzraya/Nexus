@@ -60,9 +60,10 @@ class BehavioralAnalysis {
               return "";
             }
           }
-          // If data is an object, extract content
+          // If data is an object, extract metadata only (not content)
           if (typeof data === "object" && data !== null) {
-            return data.content || "";
+            // Store only metadata: length, word count, etc. - NOT full content
+            return data.length ? `${data.length} chars` : "";
           }
           return "";
         } catch (error) {

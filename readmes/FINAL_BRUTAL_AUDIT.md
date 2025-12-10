@@ -27,23 +27,27 @@ const allThreats = await db.getThreatIntelligence(userId);
 ```
 
 **The Problem:**
+
 - You're sharing user threat data across **ALL servers** using your bot
 - **NO OPT-OUT** - Users can't disable this
 - **NO CLEAR DISCLOSURE** - Privacy policy mentions it but doesn't make it obvious
 - Creates a **cross-server tracking network**
 
 **Why This is BAD:**
+
 - ❌ **Cross-context tracking** without explicit consent
 - ❌ **Data sharing** between independent server owners
 - ❌ **Potential GDPR violation** - Sharing personal data across contexts
 - ❌ **Discord might see this as surveillance network**
 
 **What Discord Will Say:**
+
 > "You're building a cross-server user tracking network. This is concerning. Make it opt-in with clear disclosure, or remove it."
 
 **Severity:** 🔴 **CRITICAL - Could prevent verification**
 
 **Fix:**
+
 1. Make it **opt-in** per server (default OFF)
 2. Add **BOLD WARNING** in privacy policy
 3. Allow users to **opt-out** of cross-server sharing
@@ -55,6 +59,7 @@ const allThreats = await db.getThreatIntelligence(userId);
 
 **Files:** `utils/database.js`  
 **Tables:**
+
 - `user_xp` - XP and leveling data
 - `user_profiles` - User reputation, badges, cross-server stats
 - `user_stats` - Messages sent, commands used, activity
@@ -62,16 +67,19 @@ const allThreats = await db.getThreatIntelligence(userId);
 - `user_referrals` - Referral codes and history
 
 **The Problem:**
+
 - These tables store user data **INDEFINITELY**
 - **NO CLEANUP CODE EXISTS** for these tables
 - Privacy policy says "deleted 30 days after bot removal" but **NO CODE ENFORCES THIS**
 
 **Privacy Policy Claims:**
+
 > "XP and leveling data: Retained while bot is in server, deleted 30 days after bot removal"
 
 **Reality:** No deletion code. Data stored **FOREVER**.
 
 **Why This is BAD:**
+
 - ❌ **GDPR violation** - Not honoring data deletion promises
 - ❌ **Privacy policy breach** - Lying about data retention
 - ❌ **Indefinite user profiling** - Building permanent user profiles
@@ -80,6 +88,7 @@ const allThreats = await db.getThreatIntelligence(userId);
 
 **Fix:**
 Add cleanup to `dataRetention.js`:
+
 ```javascript
 // Cleanup user data 30 days after bot removal
 // This requires tracking when bot was removed per server
@@ -105,12 +114,14 @@ const auditLogs = await guild.fetchAuditLogs({
 ```
 
 **The Problem:**
+
 - With 54 servers, you're fetching **5,400 audit log entries every 10 minutes**
 - That's **32,400 entries per hour**
 - **777,600 entries per day**
 - Each fetch is an API call
 
 **Why This is Questionable:**
+
 - ⚠️ **High API usage** - Even at 10 minutes, this is a lot
 - ⚠️ **Fetching ALL types** - Not targeted, just grabbing everything
 - ⚠️ **Could trigger rate limits** if you scale to 100+ servers
@@ -121,6 +132,7 @@ They prefer targeted audit log fetching (specific types, specific users) over bu
 **Severity:** 🟠 **SERIOUS - API abuse risk**
 
 **Fix:**
+
 1. Only fetch specific audit log types you need
 2. Increase interval to 15-20 minutes
 3. Or only fetch on-demand when events trigger
@@ -138,11 +150,13 @@ VALUES (..., messageContent.substring(0, 1000), ...)
 ```
 
 **The Problem:**
+
 - You're storing message content (up to 1000 chars)
 - Cleanup exists (90 days) ✅
 - **BUT** - Privacy policy says "90 days" and you're storing it
 
 **Why This is Questionable:**
+
 - ⚠️ **Message content storage** is heavily scrutinized
 - ⚠️ Discord prefers **minimal message content storage**
 - ⚠️ You're storing full content, not just hashes/metadata
@@ -166,11 +180,13 @@ await guild.members.fetch({ limit: 1000 }); // Still fetching 1000 members
 ```
 
 **The Problem:**
+
 - You're fetching 1000 members at once
 - For large servers (10k+), this is still a lot
 - Could be seen as member scraping
 
 **Why This is Minor:**
+
 - ✅ You added limits (good!)
 - ⚠️ But 1000 is still high for some operations
 - ⚠️ Could be more targeted
@@ -199,12 +215,14 @@ CREATE TABLE IF NOT EXISTS user_profiles (
 ```
 
 **The Problem:**
+
 - User profiles are **NOT guild-specific** - they're **global**
 - You're tracking users **across all servers**
 - `total_servers` - You're counting how many servers a user is in
 - `threats_detected` - Cross-server threat count
 
 **Why This is Questionable:**
+
 - ⚠️ **Cross-server user profiling** - Building global user profiles
 - ⚠️ **Not disclosed clearly** - Privacy policy doesn't mention global profiles
 - ⚠️ **Could be seen as surveillance** - Tracking users across independent servers
@@ -212,6 +230,7 @@ CREATE TABLE IF NOT EXISTS user_profiles (
 **Severity:** 🟠 **SERIOUS - Privacy risk**
 
 **Fix:**
+
 1. Make profiles guild-specific (add `guild_id`)
 2. Or clearly disclose global profiling in privacy policy
 3. Or remove cross-server stats
@@ -226,16 +245,18 @@ CREATE TABLE IF NOT EXISTS user_profiles (
 ```javascript
 // Data can include message content
 if (typeof data === "object" && data !== null) {
-  return data.content || "";  // ⚠️ Message content!
+  return data.content || ""; // ⚠️ Message content!
 }
 ```
 
 **The Problem:**
+
 - Behavioral data can include message content
 - Cleanup exists (90 days) ✅
 - But you're storing content in behavioral profiles
 
 **Why This is Questionable:**
+
 - ⚠️ **Message content in behavioral data** - More content storage
 - ⚠️ **Profiling with content** - Building user behavior profiles with message content
 
@@ -258,11 +279,13 @@ GatewayIntentBits.DirectMessages, // For DM auto-reply
 ```
 
 **The Problem:**
+
 - Comment says "For DM auto-reply"
 - But you **removed** DM auto-reply feature
 - Intent is still there, but comment is misleading
 
 **Why This is Minor:**
+
 - ✅ Intent is still used (for verification, warnings, etc.)
 - ⚠️ Comment is outdated/misleading
 
@@ -278,11 +301,13 @@ Update comment to reflect actual usage.
 **File:** `index.js`, `events/presenceUpdate.js`
 
 **The Problem:**
+
 - You have presence features (verification, status roles, analytics)
 - But they're **all disabled by default**
 - If no servers enable them, you're using the intent for nothing
 
 **Why This is Questionable:**
+
 - ⚠️ **Intent must be actively used** - Can't just have it "in case"
 - ⚠️ If features aren't enabled, you're wasting the intent
 - ⚠️ Discord might ask "How many servers use these features?"
@@ -290,6 +315,7 @@ Update comment to reflect actual usage.
 **Severity:** 🟡 **MODERATE - Could be questioned**
 
 **Fix:**
+
 1. Enable at least one feature by default (like activity analytics)
 2. Or remove the intent if features aren't being used
 
@@ -305,23 +331,24 @@ Update comment to reflect actual usage.
 
 ### **Risk Breakdown:**
 
-| Issue | Risk of Rejection | Risk of Ban | Easy Fix? |
-|-------|------------------|-------------|-----------|
-| Cross-Server Threat Sharing | 🔴 **HIGH** | 🟠 Medium | 🟠 Maybe (complex) |
-| User Data No Cleanup | 🔴 **HIGH** | 🟡 Low | ✅ Yes (add cleanup) |
-| Audit Log Fetching | 🟠 Medium | 🟡 Low | ✅ Yes (reduce/optimize) |
-| Message Content Storage | 🟡 Low | 🟢 Very Low | ✅ Yes (hash instead) |
-| Member Fetching | 🟡 Low | 🟢 Very Low | ✅ Yes (reduce limits) |
-| User Profiles Global | 🟠 Medium | 🟡 Low | 🟠 Maybe (refactor) |
-| Behavioral Content | 🟡 Low | 🟢 Very Low | ✅ Yes (metadata only) |
-| DM Intent Comment | 🟢 Very Low | 🟢 Very Low | ✅ Yes (update comment) |
-| GuildPresences Usage | 🟡 Low | 🟢 Very Low | ✅ Yes (enable default) |
+| Issue                       | Risk of Rejection | Risk of Ban | Easy Fix?                |
+| --------------------------- | ----------------- | ----------- | ------------------------ |
+| Cross-Server Threat Sharing | 🔴 **HIGH**       | 🟠 Medium   | 🟠 Maybe (complex)       |
+| User Data No Cleanup        | 🔴 **HIGH**       | 🟡 Low      | ✅ Yes (add cleanup)     |
+| Audit Log Fetching          | 🟠 Medium         | 🟡 Low      | ✅ Yes (reduce/optimize) |
+| Message Content Storage     | 🟡 Low            | 🟢 Very Low | ✅ Yes (hash instead)    |
+| Member Fetching             | 🟡 Low            | 🟢 Very Low | ✅ Yes (reduce limits)   |
+| User Profiles Global        | 🟠 Medium         | 🟡 Low      | 🟠 Maybe (refactor)      |
+| Behavioral Content          | 🟡 Low            | 🟢 Very Low | ✅ Yes (metadata only)   |
+| DM Intent Comment           | 🟢 Very Low       | 🟢 Very Low | ✅ Yes (update comment)  |
+| GuildPresences Usage        | 🟡 Low            | 🟢 Very Low | ✅ Yes (enable default)  |
 
 ---
 
 ## 🔥 **WHAT DISCORD REVIEWERS WILL ASK**
 
 ### 1. **Cross-Server Threat Sharing**
+
 **They'll ask:** "Are you sharing user data across servers?"
 
 **Your answer:** "Yes, threat intelligence is shared across all servers for security"
@@ -331,6 +358,7 @@ Update comment to reflect actual usage.
 ---
 
 ### 2. **User Data Retention**
+
 **They'll ask:** "How long do you store user data?"
 
 **Your answer:** "90 days for most data, 30 days for threat data"
@@ -344,6 +372,7 @@ Update comment to reflect actual usage.
 ---
 
 ### 3. **GuildPresences Intent**
+
 **They'll ask:** "How many servers use presence features?"
 
 **Your answer:** "Features are available but disabled by default"
@@ -406,6 +435,7 @@ Update comment to reflect actual usage.
 **Estimated Time to Fix:** 6-8 hours
 
 **Biggest Risks:**
+
 1. Cross-server threat sharing (no opt-out)
 2. User data stored indefinitely (no cleanup)
 3. Audit log fetching still aggressive
@@ -423,16 +453,19 @@ You asked for brutal honesty. Here it is:
 3. **Aggressive API usage** - Could trigger rate limits at scale
 
 **The good news:**
+
 - Most issues are fixable
 - Your core bot is solid
 - You're not doing anything intentionally malicious
 
 **The bad news:**
+
 - These issues WILL come up in verification review
 - Cross-server sharing is heavily scrutinized
 - User data cleanup is a legal requirement (GDPR)
 
 **What would I do?**
+
 1. Fix user data cleanup (2 hours) - **CRITICAL**
 2. Make threat sharing opt-in (3 hours) - **CRITICAL**
 3. Optimize audit logs (1 hour) - **HIGH PRIORITY**

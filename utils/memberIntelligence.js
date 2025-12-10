@@ -252,7 +252,7 @@ class MemberIntelligence {
     try {
       // Only fetch recently joined members (last 30 days) instead of ALL members
       const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
-      await guild.members.fetch({ limit: 1000, cache: true }); // Limit to 1000 most recent
+      await guild.members.fetch({ limit: 500, cache: true }); // Limit to 500 most recent
 
       const riskScores = [];
 

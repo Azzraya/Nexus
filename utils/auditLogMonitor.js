@@ -11,7 +11,7 @@ class AuditLogMonitor {
     this.suspiciousPatterns = new Map(); // guildId -> Map<userId, patternData>
     this.permissionTestCache = new Map(); // userId-guildId -> {changes: [], timestamps: []}
     this.coordinatedAttackCache = new Map(); // guildId -> {users: Set, actions: [], window}
-    this.checkInterval = 600000; // Check every 10 minutes (increased from 30s to prevent rate limiting)
+    this.checkInterval = 900000; // Check every 15 minutes (optimized to prevent rate limiting)
     this.patternWindow = 60000; // 1 minute window for pattern detection
     this.maxConsecutiveErrors = 5; // Stop monitoring after 5 consecutive errors
   }
@@ -239,9 +239,32 @@ class AuditLogMonitor {
           return null;
         }
 
+        // Only fetch specific audit log types we need for security monitoring
         const auditLogs = await guild.fetchAuditLogs({
-          limit: 100,
-          type: null, // Get all types
+          limit: 50, // Reduced from 100
+          type: [
+            10, // CHANNEL_CREATE
+            11, // CHANNEL_UPDATE
+            12, // CHANNEL_DELETE
+            20, // MEMBER_KICK
+            22, // MEMBER_BAN_ADD
+            23, // MEMBER_BAN_REMOVE
+            24, // MEMBER_UPDATE
+            25, // MEMBER_ROLE_UPDATE
+            26, // MEMBER_MOVE
+            27, // MEMBER_DISCONNECT
+            28, // BOT_ADD
+            30, // ROLE_CREATE
+            31, // ROLE_UPDATE
+            32, // ROLE_DELETE
+            40, // INVITE_CREATE
+            41, // INVITE_UPDATE
+            42, // INVITE_DELETE
+            50, // WEBHOOK_CREATE
+            51, // WEBHOOK_UPDATE
+            52, // WEBHOOK_DELETE
+            72, // MESSAGE_DELETE
+          ],
         });
         return auditLogs;
       } catch (error) {

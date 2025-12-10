@@ -27,7 +27,7 @@ const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.DirectMessages, // For DM auto-reply
+    GatewayIntentBits.DirectMessages, // For verification, warnings, and notifications
     GatewayIntentBits.MessageContent,
     GatewayIntentBits.GuildMembers,
     GatewayIntentBits.GuildModeration,
