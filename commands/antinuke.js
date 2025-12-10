@@ -88,6 +88,9 @@ module.exports = {
   },
 
   async handleEnable(interaction) {
+    // Defer first to avoid timeout
+    await interaction.deferReply();
+
     await db.setServerConfig(interaction.guild.id, {
       anti_nuke_enabled: 1,
     });
@@ -111,10 +114,13 @@ module.exports = {
       .setColor(0x00ff88)
       .setTimestamp();
 
-    await interaction.reply({ embeds: [embed] });
+    await interaction.editReply({ embeds: [embed] });
   },
 
   async handleDisable(interaction) {
+    // Defer first to avoid timeout
+    await interaction.deferReply({ ephemeral: true });
+
     await db.setServerConfig(interaction.guild.id, {
       anti_nuke_enabled: 0,
     });
@@ -132,7 +138,7 @@ module.exports = {
       .setColor(0xff0000)
       .setTimestamp();
 
-    await interaction.reply({ embeds: [embed], ephemeral: true });
+    await interaction.editReply({ embeds: [embed] });
   },
 
   async handleStatus(interaction) {
