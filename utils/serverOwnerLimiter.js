@@ -13,8 +13,8 @@ class ServerOwnerLimiter {
     this.maxServersPerOwner = 5;
     // Whitelisted owner IDs who can have 5+ servers
     this.whitelist = new Set([
-      // Add whitelisted owner IDs here
-      // Example: "123456789012345678",
+      "1392165977793368124", // Bot owner (you!)
+      // Add more whitelisted owner IDs here if needed
     ]);
   }
 
