@@ -83,7 +83,11 @@ class Database {
                 verification_message TEXT,
                 webhook_url TEXT,
                 alert_channel TEXT,
-                alert_threshold INTEGER DEFAULT 60
+                alert_threshold INTEGER DEFAULT 60,
+                presence_verification_enabled INTEGER DEFAULT 0,
+                status_roles_enabled INTEGER DEFAULT 0,
+                bot_detection_enabled INTEGER DEFAULT 0,
+                activity_analytics_enabled INTEGER DEFAULT 0
             )
         `);
 
@@ -1392,6 +1396,59 @@ class Database {
                 user_tag TEXT,
                 command_name TEXT,
                 timestamp INTEGER
+            )
+        `);
+
+    // Presence verification (for presence-based verification)
+    this.db.run(`
+            CREATE TABLE IF NOT EXISTS presence_verifications (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                guild_id TEXT,
+                user_id TEXT,
+                verification_code TEXT,
+                verified_role_id TEXT,
+                type TEXT DEFAULT 'presence',
+                created_at INTEGER,
+                expires_at INTEGER,
+                completed INTEGER DEFAULT 0,
+                UNIQUE(guild_id, user_id)
+            )
+        `);
+
+    // Presence change tracking (for bot detection)
+    this.db.run(`
+            CREATE TABLE IF NOT EXISTS presence_changes (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                guild_id TEXT,
+                user_id TEXT,
+                last_change INTEGER,
+                status TEXT,
+                UNIQUE(guild_id, user_id)
+            )
+        `);
+
+    // Suspicious accounts (flagged by bot detection)
+    this.db.run(`
+            CREATE TABLE IF NOT EXISTS suspicious_accounts (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                guild_id TEXT,
+                user_id TEXT,
+                reason TEXT,
+                flagged_at INTEGER,
+                UNIQUE(guild_id, user_id)
+            )
+        `);
+
+    // Activity statistics (aggregate stats, not per-user)
+    this.db.run(`
+            CREATE TABLE IF NOT EXISTS activity_stats (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                guild_id TEXT,
+                hour INTEGER,
+                status TEXT,
+                count INTEGER DEFAULT 1,
+                date INTEGER,
+                UNIQUE(guild_id, hour, status, date)
             )
         `);
 
@@ -5479,6 +5536,103 @@ class Database {
     }
 
     return stats;
+  }
+
+  /**
+   * Get pending verification for a user (presence-based)
+   */
+  async getPendingVerification(guildId, userId) {
+    return new Promise((resolve, reject) => {
+      this.db.get(
+        "SELECT * FROM presence_verifications WHERE guild_id = ? AND user_id = ? AND completed = 0 AND expires_at > ?",
+        [guildId, userId, Date.now()],
+        (err, row) => {
+          if (err) reject(err);
+          else resolve(row || null);
+        }
+      );
+    });
+  }
+
+  /**
+   * Complete a presence verification
+   */
+  async completeVerification(guildId, userId) {
+    return new Promise((resolve, reject) => {
+      this.db.run(
+        "UPDATE presence_verifications SET completed = 1 WHERE guild_id = ? AND user_id = ?",
+        [guildId, userId],
+        function (err) {
+          if (err) reject(err);
+          else resolve(this.changes > 0);
+        }
+      );
+    });
+  }
+
+  /**
+   * Get last presence change timestamp
+   */
+  async getLastPresenceChange(guildId, userId) {
+    return new Promise((resolve, reject) => {
+      this.db.get(
+        "SELECT last_change FROM presence_changes WHERE guild_id = ? AND user_id = ?",
+        [guildId, userId],
+        (err, row) => {
+          if (err) reject(err);
+          else resolve(row ? row.last_change : null);
+        }
+      );
+    });
+  }
+
+  /**
+   * Update last presence change timestamp
+   */
+  async updateLastPresenceChange(guildId, userId, timestamp) {
+    return new Promise((resolve, reject) => {
+      this.db.run(
+        "INSERT OR REPLACE INTO presence_changes (guild_id, user_id, last_change, status) VALUES (?, ?, ?, ?)",
+        [guildId, userId, timestamp, "changed"],
+        (err) => {
+          if (err) reject(err);
+          else resolve();
+        }
+      );
+    });
+  }
+
+  /**
+   * Flag a suspicious account
+   */
+  async flagSuspiciousAccount(guildId, userId, reason) {
+    return new Promise((resolve, reject) => {
+      this.db.run(
+        "INSERT OR REPLACE INTO suspicious_accounts (guild_id, user_id, reason, flagged_at) VALUES (?, ?, ?, ?)",
+        [guildId, userId, reason, Date.now()],
+        (err) => {
+          if (err) reject(err);
+          else resolve();
+        }
+      );
+    });
+  }
+
+  /**
+   * Increment activity statistics (aggregate, not per-user)
+   */
+  async incrementActivityStat(guildId, hour, status) {
+    const today = Math.floor(Date.now() / (24 * 60 * 60 * 1000)); // Days since epoch
+    return new Promise((resolve, reject) => {
+      this.db.run(
+        "INSERT INTO activity_stats (guild_id, hour, status, count, date) VALUES (?, ?, ?, 1, ?) ON CONFLICT(guild_id, hour, status, date) DO UPDATE SET count = count + 1",
+        [guildId, hour, status, today],
+        (err) => {
+          if (err) reject(err);
+          else resolve();
+        }
+      );
+    });
   }
 }
 
