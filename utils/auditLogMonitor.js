@@ -11,7 +11,7 @@ class AuditLogMonitor {
     this.suspiciousPatterns = new Map(); // guildId -> Map<userId, patternData>
     this.permissionTestCache = new Map(); // userId-guildId -> {changes: [], timestamps: []}
     this.coordinatedAttackCache = new Map(); // guildId -> {users: Set, actions: [], window}
-    this.checkInterval = 30000; // Check every 30 seconds
+    this.checkInterval = 600000; // Check every 10 minutes (increased from 30s to prevent rate limiting)
     this.patternWindow = 60000; // 1 minute window for pattern detection
     this.maxConsecutiveErrors = 5; // Stop monitoring after 5 consecutive errors
   }
