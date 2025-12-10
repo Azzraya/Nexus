@@ -199,11 +199,12 @@ module.exports = {
       client.dashboardServer &&
       (!shardInfo.isSharded || shardInfo.shardId === 0)
     ) {
-      client.dashboardServer.start(3000);
-      logger.info("Ready", "🌐 Dashboard server started on port 3000");
+      const port = process.env.PORT || 3000;
+      client.dashboardServer.start(port);
+      logger.info("Ready", `🌐 Dashboard server started on port ${port}`);
       logger.info(
         "Ready",
-        `🔗 Access at: ${process.env.DASHBOARD_URL || "http://localhost:3000"}`
+        `🔗 Access at: ${process.env.DASHBOARD_URL || `http://localhost:${port}`}`
       );
     }
 
