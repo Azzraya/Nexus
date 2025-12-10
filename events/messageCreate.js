@@ -8,7 +8,8 @@ module.exports = {
     // PERFORMANCE: Early returns to avoid unnecessary processing
     if (message.author.bot) return;
 
-    if (message.channel.type === "DM" && !message.author.bot) {
+    if (message.channel.type === 1 && !message.author.bot) {
+      // 1 === DM in djs v14
       message.reply(
         "Hi! For support, please join our Discord server: https://discord.gg/warmA4BsPP\n" +
           "Or check our docs: https://azzraya.github.io/Nexus/docs.html"
