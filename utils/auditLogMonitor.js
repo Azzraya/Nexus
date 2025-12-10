@@ -1,5 +1,6 @@
 // Real-Time Audit Log Monitoring System
 // EXCEEDS WICK - Continuous monitoring of audit logs for suspicious patterns
+const { AuditLogEvent } = require("discord.js");
 const db = require("./database");
 const logger = require("./logger");
 const ErrorHandler = require("./errorHandler");
@@ -240,30 +241,31 @@ class AuditLogMonitor {
         }
 
         // Only fetch specific audit log types we need for security monitoring
+        // Using AuditLogEvent enum to ensure proper type conversion
         const auditLogs = await guild.fetchAuditLogs({
           limit: 50, // Reduced from 100
           type: [
-            10, // CHANNEL_CREATE
-            11, // CHANNEL_UPDATE
-            12, // CHANNEL_DELETE
-            20, // MEMBER_KICK
-            22, // MEMBER_BAN_ADD
-            23, // MEMBER_BAN_REMOVE
-            24, // MEMBER_UPDATE
-            25, // MEMBER_ROLE_UPDATE
-            26, // MEMBER_MOVE
-            27, // MEMBER_DISCONNECT
-            28, // BOT_ADD
-            30, // ROLE_CREATE
-            31, // ROLE_UPDATE
-            32, // ROLE_DELETE
-            40, // INVITE_CREATE
-            41, // INVITE_UPDATE
-            42, // INVITE_DELETE
-            50, // WEBHOOK_CREATE
-            51, // WEBHOOK_UPDATE
-            52, // WEBHOOK_DELETE
-            72, // MESSAGE_DELETE
+            AuditLogEvent.ChannelCreate,
+            AuditLogEvent.ChannelUpdate,
+            AuditLogEvent.ChannelDelete,
+            AuditLogEvent.MemberKick,
+            AuditLogEvent.MemberBanAdd,
+            AuditLogEvent.MemberBanRemove,
+            AuditLogEvent.MemberUpdate,
+            AuditLogEvent.MemberRoleUpdate,
+            AuditLogEvent.MemberMove,
+            AuditLogEvent.MemberDisconnect,
+            AuditLogEvent.BotAdd,
+            AuditLogEvent.RoleCreate,
+            AuditLogEvent.RoleUpdate,
+            AuditLogEvent.RoleDelete,
+            AuditLogEvent.InviteCreate,
+            AuditLogEvent.InviteUpdate,
+            AuditLogEvent.InviteDelete,
+            AuditLogEvent.WebhookCreate,
+            AuditLogEvent.WebhookUpdate,
+            AuditLogEvent.WebhookDelete,
+            AuditLogEvent.MessageDelete,
           ],
         });
         return auditLogs;
