@@ -240,35 +240,11 @@ class AuditLogMonitor {
           return null;
         }
 
-        // Only fetch specific audit log types we need for security monitoring
-        // Explicitly convert enum values to numbers to ensure proper API format
-        const auditLogTypes = [
-          AuditLogEvent.ChannelCreate,
-          AuditLogEvent.ChannelUpdate,
-          AuditLogEvent.ChannelDelete,
-          AuditLogEvent.MemberKick,
-          AuditLogEvent.MemberBanAdd,
-          AuditLogEvent.MemberBanRemove,
-          AuditLogEvent.MemberUpdate,
-          AuditLogEvent.MemberRoleUpdate,
-          AuditLogEvent.MemberMove,
-          AuditLogEvent.MemberDisconnect,
-          AuditLogEvent.BotAdd,
-          AuditLogEvent.RoleCreate,
-          AuditLogEvent.RoleUpdate,
-          AuditLogEvent.RoleDelete,
-          AuditLogEvent.InviteCreate,
-          AuditLogEvent.InviteUpdate,
-          AuditLogEvent.InviteDelete,
-          AuditLogEvent.WebhookCreate,
-          AuditLogEvent.WebhookUpdate,
-          AuditLogEvent.WebhookDelete,
-          AuditLogEvent.MessageDelete,
-        ].map((val) => Number(val)); // Ensure all values are numbers
-
+        // Fetch all audit logs (Discord.js doesn't support array for type parameter)
+        // We'll filter by action type in our analysis functions
         const auditLogs = await guild.fetchAuditLogs({
           limit: 50, // Reduced from 100
-          type: auditLogTypes,
+          // No type filter - fetch all types and filter in code
         });
         return auditLogs;
       } catch (error) {
