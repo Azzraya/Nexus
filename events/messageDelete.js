@@ -10,6 +10,7 @@ module.exports = {
     if (message.author?.bot) return;
     if (!message.guild) return;
     if (message.system) return;
+    if (!message.author) return; // Skip partial messages without author data
 
     // Enhanced logging
     const EnhancedLogging = require("../utils/enhancedLogging");
