@@ -2,6 +2,9 @@ const AutoMod = require("../utils/automod");
 const db = require("../utils/database");
 const logger = require("../utils/logger");
 
+// Track users who have received DM auto-reply (24 hour cooldown)
+const dmReplyCooldowns = new Map();
+
 module.exports = {
   name: "messageCreate",
   async execute(message, client) {
@@ -11,6 +14,23 @@ module.exports = {
     // Handle DMs
     if (!message.guild) {
       // This is a DM
+      const userId = message.author.id;
+      const now = Date.now();
+      const cooldownTime = 24 * 60 * 60 * 1000; // 24 hours
+
+      // Check if user already received reply recently
+      if (dmReplyCooldowns.has(userId)) {
+        const lastReply = dmReplyCooldowns.get(userId);
+        if (now - lastReply < cooldownTime) {
+          // User already received reply within 24 hours, skip
+          console.log(
+            `[DM] ${message.author.tag} already received reply (cooldown active)`
+          );
+          return;
+        }
+      }
+
+      // Send auto-reply
       console.log(
         `[DM] Received DM from ${message.author.tag}: ${message.content}`
       );
@@ -20,6 +40,16 @@ module.exports = {
             "Or check our docs: https://azzraya.github.io/Nexus/docs.html"
         );
         console.log(`[DM] Replied to ${message.author.tag}`);
+
+        // Set cooldown
+        dmReplyCooldowns.set(userId, now);
+
+        // Cleanup old cooldowns (older than 48 hours)
+        for (const [id, timestamp] of dmReplyCooldowns.entries()) {
+          if (now - timestamp > cooldownTime * 2) {
+            dmReplyCooldowns.delete(id);
+          }
+        }
       } catch (error) {
         console.error(`[DM] Failed to reply:`, error);
       }
