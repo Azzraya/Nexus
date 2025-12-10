@@ -173,35 +173,6 @@ module.exports = {
       logger.info("Ready", "⚙️ Workflows loaded");
     }
 
-    // Check for owner limit violations on startup (only on shard 0 or non-sharded)
-    const shouldRunOwnerAudit = !shardInfo.isSharded || shardInfo.shardId === 0;
-    if (shouldRunOwnerAudit) {
-      try {
-        const ServerOwnerLimiter = require("../utils/serverOwnerLimiter");
-        if (!client.ownerLimiter) {
-          client.ownerLimiter = new ServerOwnerLimiter(client);
-        }
-
-        const violations = await client.ownerLimiter.auditCurrentServers();
-        if (violations.length > 0) {
-          logger.warn(
-            "Ready",
-            `🚨 Found ${violations.length} owner(s) with 5+ servers`
-          );
-          for (const violation of violations) {
-            logger.warn(
-              "Ready",
-              `  ⚠️ Owner ${violation.ownerId}: ${violation.serverCount} servers`
-            );
-          }
-        } else {
-          logger.info("Ready", "✅ Owner limit audit passed - no violations");
-        }
-      } catch (error) {
-        logger.error("Ready", "Owner limiter audit failed:", error);
-      }
-    }
-
     // Start automatic snapshot scheduler (EXCEEDS WICK - point-in-time recovery)
     if (
       client.snapshotScheduler &&

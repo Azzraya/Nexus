@@ -4,7 +4,6 @@ const logger = require("../utils/logger");
 const growthTracker = require("../utils/growthTracker");
 const contentFilter = require("../utils/contentFilter");
 const { version } = require("../package.json");
-const ServerOwnerLimiter = require("../utils/serverOwnerLimiter");
 
 module.exports = {
   name: "guildCreate",
@@ -17,19 +16,6 @@ module.exports = {
         `🚫 Auto-left offensive server (ID: ${guild.id})`
       );
       return; // Stop processing this guild join
-    }
-
-    // Check owner server limit (prevent server count inflation)
-    if (!client.ownerLimiter) {
-      client.ownerLimiter = new ServerOwnerLimiter(client);
-    }
-    const ownerCheck = await client.ownerLimiter.checkOwnerLimit(guild);
-    if (!ownerCheck.allowed) {
-      logger.warn(
-        "Guild Create",
-        `🚫 Owner has too many servers, left ${guild.name}`
-      );
-      return; // Bot already left the server
     }
 
     // Sanitize guild name for logs
