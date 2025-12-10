@@ -3323,7 +3323,7 @@ class Database {
           }));
           resolve(behaviors);
         }
-      }      );
+      });
     });
   }
 
@@ -3696,7 +3696,7 @@ class Database {
           }));
           resolve(behaviors);
         }
-      }      );
+      });
     });
   }
 
