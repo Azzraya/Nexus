@@ -23,17 +23,19 @@ const db = require("./utils/database");
 // API removed - not needed for local use
 
 // Initialize client with all necessary intents
+// NOTE: GuildMembers and GuildPresences are PRIVILEGED intents
+// They MUST be enabled in Discord Developer Portal → Bot → Privileged Gateway Intents
 const client = new Client({
   intents: [
-    GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.Guilds, // Required for all guild events
+    GatewayIntentBits.GuildMessages, // Required for message events
     GatewayIntentBits.DirectMessages, // For verification, warnings, and notifications
-    GatewayIntentBits.MessageContent,
-    GatewayIntentBits.GuildMembers,
-    GatewayIntentBits.GuildModeration,
-    GatewayIntentBits.GuildInvites,
-    GatewayIntentBits.GuildVoiceStates,
-    GatewayIntentBits.GuildPresences,
+    GatewayIntentBits.MessageContent, // Required to read message content
+    GatewayIntentBits.GuildMembers, // PRIVILEGED - Required for guildMemberAdd/Remove events
+    GatewayIntentBits.GuildModeration, // Required for ban/kick/timeout events
+    GatewayIntentBits.GuildInvites, // Required for invite tracking
+    GatewayIntentBits.GuildVoiceStates, // Required for voice channel monitoring
+    GatewayIntentBits.GuildPresences, // PRIVILEGED - Required for presence updates
   ],
   partials: [
     Partials.Channel, // Required for DMs

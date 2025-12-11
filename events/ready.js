@@ -13,6 +13,34 @@ module.exports = {
   once: true,
   async execute(client) {
     const shardInfo = ShardManager.getShardInfo(client);
+    
+    // Verify privileged intents are enabled
+    const intents = client.options.intents;
+    const hasGuildMembers = intents.has(GatewayIntentBits.GuildMembers);
+    const hasGuildPresences = intents.has(GatewayIntentBits.GuildPresences);
+    
+    if (!hasGuildMembers) {
+      logger.error(
+        "Ready",
+        "❌ CRITICAL: GuildMembers intent is NOT enabled! guildMemberAdd events will NOT work!"
+      );
+      logger.error(
+        "Ready",
+        "⚠️ Enable it in Discord Developer Portal → Your Bot → Privileged Gateway Intents → Server Members Intent"
+      );
+      console.error("❌ CRITICAL: GuildMembers intent is NOT enabled!");
+    } else {
+      logger.info("Ready", "✅ GuildMembers intent is enabled");
+    }
+    
+    if (!hasGuildPresences) {
+      logger.warn(
+        "Ready",
+        "⚠️ GuildPresences intent is NOT enabled (presence updates won't work)"
+      );
+    } else {
+      logger.info("Ready", "✅ GuildPresences intent is enabled");
+    }
 
     // Initialize dev tracking for support command
     client.devTracking = {
