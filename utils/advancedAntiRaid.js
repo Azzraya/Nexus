@@ -381,8 +381,20 @@ class AdvancedAntiRaid {
 
     if (isWhitelisted) return false; // Skip detection for whitelisted users
 
-    // Get join history
-    const joinData = await this.getJoinHistory(guild.id);
+    // Use in-memory cache for rapid joins (avoids DB race conditions when 73 members join in 2 seconds)
+    // Get or create cache entry for this guild
+    if (!this.joinCache.has(guild.id)) {
+      // Load from DB if cache doesn't exist
+      const dbData = await this.getJoinHistory(guild.id);
+      this.joinCache.set(guild.id, {
+        joins: dbData.joins || [],
+        lastCleanup: Date.now(),
+      });
+    }
+
+    const cacheEntry = this.joinCache.get(guild.id);
+    const joinData = { joins: [...cacheEntry.joins] }; // Copy to avoid mutations
+
     const memberData = {
       id: member.id,
       username: member.user.username,
@@ -394,6 +406,9 @@ class AdvancedAntiRaid {
     };
 
     joinData.joins.push(memberData);
+    
+    // Update cache immediately (synchronous, no DB delay)
+    cacheEntry.joins = joinData.joins;
 
     // Log every join for debugging
     logger.info(
@@ -530,6 +545,10 @@ class AdvancedAntiRaid {
           `[Anti-Raid] Handling raid: ${joinsToBan.length} members to ban in ${guild.name}`
         );
 
+        // Clear cache and save to DB before handling raid
+        await this.saveJoinHistory(guild.id, joinData);
+        cacheEntry.lastCleanup = Date.now();
+        
         await this.handleRaid(
           guild,
           joinsToBan,
@@ -537,6 +556,10 @@ class AdvancedAntiRaid {
           results,
           finalMultiplier
         );
+        
+        // Clear cache after raid is handled
+        this.joinCache.delete(guild.id);
+        
         return true;
       } else {
         logger.warn(
