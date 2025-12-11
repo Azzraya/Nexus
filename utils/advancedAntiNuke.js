@@ -277,7 +277,7 @@ class AdvancedAntiNuke {
       return;
     }
 
-    // Check whitelist first (EXCEEDS WICK)
+    // Check whitelist first 
     if (await this.isWhitelisted(guild.id, userId)) {
       logger.warn(
         `[Anti-Nuke] User ${userId} is WHITELISTED in ${guild.name} - skipping monitoring for ${actionType}`
@@ -377,7 +377,7 @@ class AdvancedAntiNuke {
       }
     }
 
-    // Predictive threat detection (EXCEEDS WICK)
+    // Predictive threat detection 
     const isHighThreat = await this.detectPredictiveThreat(
       guild,
       userId,
@@ -1440,7 +1440,7 @@ class AdvancedAntiNuke {
         }
       }
 
-      // Delete spam channels in parallel batches with rate limit protection (EXCEEDS WICK)
+      // Delete spam channels in parallel batches with rate limit protection 
       const spamBatchSize = 5; // Process 5 at a time to avoid rate limits
       for (let i = 0; i < spamChannelIds.length; i += spamBatchSize) {
         const batch = spamChannelIds.slice(i, i + spamBatchSize);
@@ -1454,7 +1454,7 @@ class AdvancedAntiNuke {
                 await channel
                   .delete("Anti-Nuke: Spam channel cleanup during lockdown")
                   .catch((error) => {
-                    // Handle rate limits gracefully (EXCEEDS WICK)
+                    // Handle rate limits gracefully 
                     if (error.code === 429 || error.status === 429) {
                       logger.warn(
                         `[Anti-Nuke] Rate limited while deleting spam channel ${channelId}, will retry`
@@ -1502,7 +1502,7 @@ class AdvancedAntiNuke {
         }
       );
 
-      // Delete in parallel batches with rate limit protection (EXCEEDS WICK)
+      // Delete in parallel batches with rate limit protection 
       const channelBatchSize = 5; // Process 5 at a time to avoid rate limits
       const channelArray = Array.from(allChannels);
       for (let i = 0; i < channelArray.length; i += channelBatchSize) {
@@ -1515,7 +1515,7 @@ class AdvancedAntiNuke {
               await channel
                 .delete("Anti-Nuke: Recent channel cleanup")
                 .catch((error) => {
-                  // Handle rate limits gracefully (EXCEEDS WICK)
+                  // Handle rate limits gracefully 
                   if (error.code === 429 || error.status === 429) {
                     logger.warn(
                       `[Anti-Nuke] Rate limited while deleting channel ${channel.id}`
@@ -2120,7 +2120,7 @@ class AdvancedAntiNuke {
         adminMembers.set(owner.id, owner);
       }
 
-      // Send DMs in parallel batches with rate limit protection (EXCEEDS WICK)
+      // Send DMs in parallel batches with rate limit protection 
       const adminArray = Array.from(adminMembers.values());
       const dmBatchSize = 3; // Process 3 DMs at a time to avoid rate limits
       for (let i = 0; i < adminArray.length; i += dmBatchSize) {
@@ -2129,7 +2129,7 @@ class AdvancedAntiNuke {
           batch.map(async (admin) => {
             try {
               await admin.send({ embeds: [dmEmbed] }).catch((error) => {
-                // Handle rate limits gracefully (EXCEEDS WICK)
+                // Handle rate limits gracefully 
                 if (error.code === 429 || error.status === 429) {
                   logger.warn(
                     `[Anti-Nuke] Rate limited while sending DM to ${admin.id}`

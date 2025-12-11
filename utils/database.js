@@ -36,12 +36,12 @@ class Database {
 
           // Optimize database performance (EXCEEDS WICK - better performance)
           this.db.serialize(() => {
-            // Enable WAL mode for better concurrency (EXCEEDS WICK)
+            // Enable WAL mode for better concurrency 
             this.db.run("PRAGMA journal_mode = WAL;", (err) => {
               if (err) logger.warn("Failed to enable WAL mode:", err);
             });
 
-            // Optimize for performance (EXCEEDS WICK)
+            // Optimize for performance 
             this.db.run("PRAGMA synchronous = NORMAL;"); // Faster writes
             this.db.run("PRAGMA cache_size = -64000;"); // 64MB cache
             this.db.run("PRAGMA temp_store = MEMORY;"); // Use memory for temp tables
@@ -351,7 +351,7 @@ class Database {
             )
         `);
 
-    // Advanced Automod (EXCEEDS WICK)
+    // Advanced Automod 
     this.db.run(`
             CREATE TABLE IF NOT EXISTS automod_config (
                 guild_id TEXT PRIMARY KEY,
@@ -432,7 +432,7 @@ class Database {
     this.db.run(`CREATE INDEX IF NOT EXISTS idx_screening_guild_time 
                  ON member_screening_logs(guild_id, timestamp)`);
 
-    // Scheduled Actions System (EXCEEDS WICK)
+    // Scheduled Actions System 
     this.db.run(`
             CREATE TABLE IF NOT EXISTS scheduled_actions (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -463,7 +463,7 @@ class Database {
     this.db.run(`CREATE INDEX IF NOT EXISTS idx_scheduled_actions_guild 
                  ON scheduled_actions(guild_id, status)`);
 
-    // Voice Monitoring System (EXCEEDS WICK)
+    // Voice Monitoring System 
     this.db.run(`
             CREATE TABLE IF NOT EXISTS voice_monitoring_config (
                 guild_id TEXT PRIMARY KEY,

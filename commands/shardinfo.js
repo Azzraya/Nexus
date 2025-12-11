@@ -21,7 +21,7 @@ module.exports = {
     const shardInfo = ShardManager.getShardInfo(interaction.client);
     const stats = await ShardManager.getShardStats(interaction.client);
 
-    // Get gateway stats if available (EXCEEDS WICK)
+    // Get gateway stats if available 
     let gatewayStats = null;
     if (interaction.client.gatewayManager) {
       gatewayStats = interaction.client.gatewayManager.getAllStats();

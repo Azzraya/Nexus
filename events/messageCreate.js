@@ -28,7 +28,7 @@ module.exports = {
       );
     }
 
-    // Run security checks in parallel for better performance (EXCEEDS WICK)
+    // Run security checks in parallel for better performance 
     const securityChecks = [];
     if (client.advancedAntiNuke && message.channel) {
       securityChecks.push(

@@ -40,7 +40,7 @@ module.exports = {
       guildId: member.guild.id,
       userId: member.id,
     });
-    // Run initial checks in parallel for better performance (EXCEEDS WICK)
+    // Run initial checks in parallel for better performance 
     const ThreatIntelligence = require("../utils/threatIntelligence");
     const initialChecks = await Promise.all([
       ThreatIntelligence.checkThreat(member.user.id).catch(() => ({
@@ -76,7 +76,7 @@ module.exports = {
     const joinGateCheck = initialChecks[1];
     const screeningResult = initialChecks[2];
 
-    // Handle member screening first (EXCEEDS WICK)
+    // Handle member screening first 
     if (screeningResult && !screeningResult.passed) {
       const screeningConfig = await db.getMemberScreeningConfig(
         member.guild.id

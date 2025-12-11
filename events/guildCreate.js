@@ -522,7 +522,7 @@ module.exports = {
         `Created initial recovery snapshot for ${guild.name}`
       );
 
-      // Start audit log monitoring for new guild (EXCEEDS WICK)
+      // Start audit log monitoring for new guild 
       if (client.auditLogMonitor) {
         try {
           client.auditLogMonitor.startMonitoring(guild);

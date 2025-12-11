@@ -25,7 +25,7 @@ class AutoBackup {
     try {
       const guilds = Array.from(this.client.guilds.cache.values());
 
-      // Process guilds in parallel batches (max 5 at a time) for better performance (EXCEEDS WICK)
+      // Process guilds in parallel batches (max 5 at a time) for better performance 
       const batchSize = 5;
       for (let i = 0; i < guilds.length; i += batchSize) {
         const batch = guilds.slice(i, i + batchSize);

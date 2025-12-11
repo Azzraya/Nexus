@@ -278,7 +278,7 @@ for (const file of eventFiles) {
   }
 }
 
-// Gateway event monitoring (EXCEEDS WICK)
+// Gateway event monitoring 
 // Note: Discord.js WebSocketShard events, not WebSocketManager
 client.ws.on("shardReady", (shardId) => {
   logger.info(
@@ -450,8 +450,6 @@ client.checkAntiRaid = async (guild, member) => {
 
   return false;
 };
-
-// Removed duplicate cleanup - now handled in the main cleanup interval above
 
 // Anti-nuke protection
 client.checkAntiNuke = async (guild, user, action) => {

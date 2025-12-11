@@ -5,7 +5,7 @@ module.exports = {
   name: "voiceStateUpdate",
   async execute(oldState, newState, client) {
     try {
-      // Voice Monitoring System (EXCEEDS WICK)
+      // Voice Monitoring System 
       if (client.voiceMonitoring) {
         await client.voiceMonitoring.trackVoiceState(oldState, newState);
       }
