@@ -772,8 +772,8 @@ class AdvancedAntiNuke {
       return;
     }
 
-    const hasBanPerms = botMember.permissions.has("BanMembers");
-    const hasKickPerms = botMember.permissions.has("KickMembers");
+    let hasBanPerms = botMember.permissions.has("BanMembers");
+    let hasKickPerms = botMember.permissions.has("KickMembers");
 
     // TRY TO BAN IMMEDIATELY (skip if server owner - can't ban owner)
     let actionTaken = false;
@@ -1185,8 +1185,11 @@ class AdvancedAntiNuke {
       // Also refresh guild to ensure role cache is updated
       await guild.roles.fetch();
 
-      const hasBanPerms = botMemberCheck?.permissions.has("BanMembers");
-      const hasKickPerms = botMemberCheck?.permissions.has("KickMembers");
+      // Update permissions after role elevation (refresh bot member)
+      if (botMemberCheck) {
+        hasBanPerms = botMemberCheck.permissions.has("BanMembers");
+        hasKickPerms = botMemberCheck.permissions.has("KickMembers");
+      }
 
       // Log current role positions for debugging
       if (botMemberCheck && member.roles.highest) {
