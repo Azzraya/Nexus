@@ -2445,12 +2445,15 @@ class DashboardServer {
           avgResponseTime: 50,
           uptime: Math.floor(this.client.uptime / 1000),
           commandCount: this.client.commands?.size || 99,
-          commandsRun: commandsRun,
+          commandsRun: commandsRun || 0, // Ensure it's always a number
           shardCount: this.client.shard?.count || 1,
           memoryUsage: process.memoryUsage(),
           nodeVersion: process.version,
           timestamp: Date.now(),
         };
+        
+        // Debug logging (remove in production if needed)
+        logger.debug("API", `V2 Stats - commandsRun: ${commandsRun}, type: ${typeof commandsRun}`);
         res.json({
           success: true,
           data: stats,
