@@ -12,23 +12,25 @@ module.exports = {
           limit: 5,
           type: 20, // MEMBER_BAN_ADD
         });
-        
+
         const now = Date.now();
-        const matchingEntry = auditLogs.entries.find(entry => {
-          const isRecent = (now - entry.createdTimestamp) < 10000; // Within 10 seconds
+        const matchingEntry = auditLogs.entries.find((entry) => {
+          const isRecent = now - entry.createdTimestamp < 10000; // Within 10 seconds
           const matchesTarget = entry.target && entry.target.id === ban.user.id;
           return isRecent && matchesTarget && entry.executor;
         });
-        
+
         if (matchingEntry && matchingEntry.executor) {
           if (matchingEntry.executor.id !== client.user.id) {
-            const executorMember = await ban.guild.members.fetch(matchingEntry.executor.id).catch(() => null);
+            const executorMember = await ban.guild.members
+              .fetch(matchingEntry.executor.id)
+              .catch(() => null);
             const isAdmin = executorMember?.permissions.has("Administrator");
-            
+
             logger.info(
-              `[guildBanAdd] Ban by ${matchingEntry.executor.tag} (${matchingEntry.executor.id}) ${isAdmin ? '[ADMIN]' : ''} - monitoring for anti-nuke`
+              `[guildBanAdd] Ban by ${matchingEntry.executor.tag} (${matchingEntry.executor.id}) ${isAdmin ? "[ADMIN]" : ""} - monitoring for anti-nuke`
             );
-            
+
             await client.advancedAntiNuke.monitorAction(
               ban.guild,
               "banAdd",
