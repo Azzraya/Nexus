@@ -398,8 +398,11 @@ class AdvancedAntiRaid {
     // Run all detection algorithms with server-size-aware thresholds
     // Use a more reasonable threshold - don't scale too aggressively
     const baseMaxJoins = config.anti_raid_max_joins || 5;
-    const scaledMaxJoins = Math.max(3, Math.ceil(baseMaxJoins * Math.min(finalMultiplier, 2.0))); // Cap multiplier at 2.0
-    
+    const scaledMaxJoins = Math.max(
+      3,
+      Math.ceil(baseMaxJoins * Math.min(finalMultiplier, 2.0))
+    ); // Cap multiplier at 2.0
+
     const timeWindow = config.anti_raid_time_window || 10000;
     const results = {
       rateBased: this.detectionAlgorithms.rateBased(
@@ -476,14 +479,14 @@ class AdvancedAntiRaid {
     const recentJoinsCount = joinData.joins.filter(
       (j) => Date.now() - j.timestamp < timeWindow
     ).length;
-    
+
     // Trigger if:
     // 1. Rate-based detection triggers (joins within time window exceed threshold)
     // 2. Total joins exceed a reasonable threshold (e.g., 10+ joins = likely raid)
     // 3. Recent joins (within time window) exceed threshold
     const isRaid =
-      (totalJoins >= 10) || // 10+ total joins = definitely a raid
-      (recentJoinsCount >= scaledMaxJoins) || // Joins within time window exceed threshold
+      totalJoins >= 10 || // 10+ total joins = definitely a raid
+      recentJoinsCount >= scaledMaxJoins || // Joins within time window exceed threshold
       (totalJoins >= 5 && results.rateBased) || // 5+ joins and rate-based triggers
       (results.rateBased && results.patternBased) || // Both rate and pattern
       (results.rateBased && results.behavioral) || // Rate + behavioral
@@ -517,7 +520,6 @@ class AdvancedAntiRaid {
 
     // Clean old joins (older than time window + buffer to allow detection)
     // Keep joins for at least 2x the time window to allow for detection
-    const timeWindow = config.anti_raid_time_window || 10000;
     const cleanupWindow = Math.max(timeWindow * 2, 30000); // At least 30 seconds
     joinData.joins = joinData.joins.filter(
       (j) => Date.now() - j.timestamp < cleanupWindow
