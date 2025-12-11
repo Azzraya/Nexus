@@ -629,22 +629,50 @@ class AdvancedAntiNuke {
       return;
     }
 
-    // Check if user is owner - we can't ban/kick them, but we can still take other actions
-    const isOwner = member.id === guild.ownerId;
+    // Check if user is owner - fetch owner explicitly to ensure accuracy
+    let isOwner = false;
+    let ownerId = null;
+    let ownerTag = null;
+    try {
+      const owner = await guild.fetchOwner().catch(() => null);
+      if (owner) {
+        ownerId = owner.id;
+        ownerTag = owner.user.tag;
+        isOwner = member.id === owner.id;
+        logger.warn(
+          `[Anti-Nuke] Fetched owner: ${ownerTag} (${ownerId}), comparing with member: ${member.user.tag} (${member.id})`
+        );
+      } else {
+        // Fallback to guild.ownerId
+        ownerId = guild.ownerId;
+        isOwner = member.id === guild.ownerId;
+        logger.warn(
+          `[Anti-Nuke] fetchOwner() returned null, using guild.ownerId: ${guild.ownerId}`
+        );
+      }
+    } catch (error) {
+      // Fallback to guild.ownerId if fetchOwner fails
+      ownerId = guild.ownerId;
+      isOwner = member.id === guild.ownerId;
+      logger.error(
+        `[Anti-Nuke] Could not fetch owner, using guild.ownerId fallback: ${error.message}`
+      );
+    }
+    
     const isAdmin = member.permissions.has("Administrator");
 
     // Log detailed info for debugging
     logger.warn(
       `[Anti-Nuke] 🚨 CRITICAL THREAT: ${threatType} by ${userId} (${member.user.tag}) in ${guild.id}`
     );
-    try {
-      const owner = await guild.fetchOwner().catch(() => null);
-      logger.warn(
-        `[Anti-Nuke] User details - isOwner: ${isOwner}, isAdmin: ${isAdmin}, actualOwnerId: ${owner?.id || guild.ownerId}, member.id: ${member.id}`
-      );
-    } catch (error) {
-      logger.warn(
-        `[Anti-Nuke] User details - isOwner: ${isOwner}, isAdmin: ${isAdmin}, guild.ownerId: ${guild.ownerId}, member.id: ${member.id}`
+    logger.warn(
+      `[Anti-Nuke] Owner check - isOwner: ${isOwner}, isAdmin: ${isAdmin}, ownerId: ${ownerId} (${ownerTag || 'unknown'}), member.id: ${member.id} (${member.user.tag}), guild.ownerId: ${guild.ownerId}`
+    );
+    
+    // If ownerId matches member but user insists it's not the owner, log a warning
+    if (isOwner && ownerId === member.id) {
+      logger.error(
+        `[Anti-Nuke] ⚠️ WARNING: Member ${member.user.tag} (${member.id}) is detected as server owner (ownerId: ${ownerId}). If this is incorrect, the server ownership may have been transferred or there's a Discord API issue.`
       );
     }
 
