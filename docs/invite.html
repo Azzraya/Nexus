@@ -139,7 +139,6 @@
       </p>
     </div>
 
-    <script src="invite-tracker.js"></script>
     <script>
       // Discord OAuth URL
       const BOT_CLIENT_ID = "1444739230679957646";
@@ -149,6 +148,37 @@
       // Get source parameter
       const urlParams = new URLSearchParams(window.location.search);
       const source = urlParams.get("source") || "direct";
+
+      // Track invite source (only called after validation passes)
+      function trackInviteSource(sourceParam) {
+        if (!sourceParam || sourceParam === "direct") {
+          return; // Don't track "direct"
+        }
+
+        // Store the invite source
+        localStorage.setItem("nexus_invite_source", sourceParam);
+        localStorage.setItem("nexus_invite_source_timestamp", Date.now());
+        console.log(`[Nexus] Tracked invite source: ${sourceParam}`);
+
+        // Send to API
+        try {
+          fetch(`${API_URL}/api/track-invite-click`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "ngrok-skip-browser-warning": "true",
+            },
+            body: JSON.stringify({
+              source: sourceParam,
+              timestamp: Date.now(),
+              referrer: document.referrer,
+              userAgent: navigator.userAgent,
+            }),
+          }).catch(() => {}); // Silent fail
+        } catch (e) {
+          console.error("[Invite] Failed to track source:", e);
+        }
+      }
 
       // Validate source before proceeding
       async function validateSource(sourceParam) {
@@ -205,6 +235,9 @@
         }
 
         // Valid source - proceed with normal flow
+        // Track the source (only after validation passes)
+        trackInviteSource(source);
+
         // Display source info
         if (source && source !== "direct") {
           document.getElementById("sourceInfo").innerHTML = `
@@ -214,14 +247,13 @@
           `;
         }
 
-        // The invite-tracker.js script will handle storing the source
         // Now redirect to Discord
         const finalUrl = DISCORD_INVITE_URL;
 
         // Set manual link
         document.getElementById("manualLink").href = finalUrl;
 
-        // Auto-redirect after 2 seconds (gives time for tracking script to run)
+        // Auto-redirect after 2 seconds (gives time for tracking to complete)
         setTimeout(() => {
           window.location.href = finalUrl;
         }, 2000);
