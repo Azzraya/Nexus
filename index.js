@@ -139,8 +139,9 @@ const IntegrationSystem = require("./utils/integrations");
 client.integrations = new IntegrationSystem(client);
 
 // Real-Time Audit Log Monitor (EXCEEDS WICK - continuous audit log analysis)
-const AuditLogMonitor = require("./utils/auditLogMonitor");
-client.auditLogMonitor = new AuditLogMonitor(client);
+// Event-Based Action Tracker (replaces audit log monitor - no rate limits!)
+const EventActionTracker = require("./utils/eventActionTracker");
+client.eventActionTracker = new EventActionTracker(client);
 
 // Zero-Day Attack Detection (EXCEEDS WICK - detects unknown attack patterns)
 const ZeroDayDetection = require("./utils/zeroDayDetection");

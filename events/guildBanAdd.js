@@ -24,6 +24,16 @@ module.exports = {
             `[guildBanAdd] Ban by ${banData.executorTag} (${banData.executorId}) ${isAdmin ? "[ADMIN]" : ""} - monitoring for anti-nuke (from cache)`
           );
 
+          // Track in event-based tracker
+          if (client.eventActionTracker) {
+            client.eventActionTracker.trackAction(
+              ban.guild.id,
+              "MEMBER_BAN_ADD",
+              banData.executorId,
+              { bannedUserId: ban.user.id }
+            );
+          }
+          
           await client.advancedAntiNuke.monitorAction(
             ban.guild,
             "banAdd",
@@ -68,6 +78,16 @@ module.exports = {
                 `[guildBanAdd] Ban by ${matchingEntry.executor.tag} (${matchingEntry.executor.id}) ${isAdmin ? "[ADMIN]" : ""} - monitoring for anti-nuke (cached for future)`
               );
 
+              // Track in event-based tracker
+              if (client.eventActionTracker) {
+                client.eventActionTracker.trackAction(
+                  ban.guild.id,
+                  "MEMBER_BAN_ADD",
+                  matchingEntry.executor.id,
+                  { bannedUserId: ban.user.id }
+                );
+              }
+              
               await client.advancedAntiNuke.monitorAction(
                 ban.guild,
                 "banAdd",

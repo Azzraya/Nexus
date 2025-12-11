@@ -30,6 +30,20 @@ module.exports = {
           client.advancedAntiNuke &&
           (addedPerms.length > 0 || hasAdminChange)
         ) {
+          // Track in event-based tracker
+          if (client.eventActionTracker) {
+            client.eventActionTracker.trackAction(
+              newRole.guild.id,
+              "ROLE_UPDATE",
+              executor.id,
+              {
+                roleId: newRole.id,
+                targetType: hasAdminChange ? "admin" : "normal",
+                addedPerms,
+              }
+            );
+          }
+          
           await client.advancedAntiNuke.monitorAction(
             newRole.guild,
             "role_update",

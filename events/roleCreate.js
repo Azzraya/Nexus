@@ -6,7 +6,7 @@ const logger = require("../utils/logger");
 module.exports = {
   name: "roleCreate",
   async execute(role, client) {
-    // Advanced anti-nuke monitoring
+    // Advanced anti-nuke monitoring + event-based tracking
     if (client.advancedAntiNuke) {
       try {
         const auditLogs = await role.guild.fetchAuditLogs({
@@ -15,6 +15,16 @@ module.exports = {
         });
         const entry = auditLogs.entries.first();
         if (entry && entry.executor) {
+          // Track in event-based tracker (replaces audit log monitor)
+          if (client.eventActionTracker) {
+            client.eventActionTracker.trackAction(
+              role.guild.id,
+              "ROLE_CREATE",
+              entry.executor.id,
+              { roleId: role.id, roleName: role.name }
+            );
+          }
+          
           await client.advancedAntiNuke.monitorAction(
             role.guild,
             "roleCreate",

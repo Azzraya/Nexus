@@ -29,6 +29,19 @@ module.exports = {
             JSON.stringify([...newOverwrites.keys()])
         ) {
           if (client.advancedAntiNuke) {
+            // Track in event-based tracker
+            if (client.eventActionTracker) {
+              client.eventActionTracker.trackAction(
+                newChannel.guild.id,
+                "CHANNEL_UPDATE",
+                executor.id,
+                {
+                  channelId: newChannel.id,
+                  targetType: "channel",
+                }
+              );
+            }
+            
             await client.advancedAntiNuke.monitorAction(
               newChannel.guild,
               "channel_permission_update",

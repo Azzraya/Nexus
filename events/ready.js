@@ -274,40 +274,21 @@ module.exports = {
       }
     });
 
-    // Start audit log monitoring for all servers (EXCEEDS WICK)
-    if (client.auditLogMonitor) {
-      // Stagger audit log monitoring to prevent rate limit bursts
-      const guilds = Array.from(client.guilds.cache.values());
-      let staggerDelay = 0;
-      
-      guilds.forEach((guild) => {
-        try {
-          // Only start monitoring if guild exists and bot is in it
-          if (guild && client.guilds.cache.has(guild.id)) {
-            client.auditLogMonitor.startMonitoring(guild, staggerDelay);
-            // Stagger each guild by 5 seconds to avoid bursts
-            staggerDelay += 5000;
-          }
-        } catch (error) {
-          logger.debug(
-            "Ready",
-            `Could not start audit log monitoring for ${guild?.name || guild?.id || "unknown"}: ${error.message}`
-          );
-        }
-      });
+    // Event-based action tracking (replaces audit log monitor - no rate limits!)
+    if (client.eventActionTracker) {
       logger.info(
         "Ready",
-        `Started audit log monitoring for ${guilds.length} servers (staggered to prevent rate limits)`
+        `Event-based action tracking initialized (no periodic polling - uses Discord events)`
       );
 
-      // Set up periodic cleanup for stale guilds (every 5 minutes)
+      // Set up periodic cleanup for action cache (every 10 minutes)
       setInterval(
         () => {
-          if (client.auditLogMonitor) {
-            client.auditLogMonitor.cleanupStaleGuilds();
+          if (client.eventActionTracker) {
+            client.eventActionTracker.cleanup();
           }
         },
-        5 * 60 * 1000
+        10 * 60 * 1000
       );
     }
 

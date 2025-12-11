@@ -29,7 +29,7 @@ module.exports = {
       }
     }
 
-    // Advanced anti-nuke monitoring
+    // Advanced anti-nuke monitoring + event-based tracking
     if (client.advancedAntiNuke) {
       try {
         const auditLogs = await channel.guild.fetchAuditLogs({
@@ -38,6 +38,16 @@ module.exports = {
         });
         const entry = auditLogs.entries.first();
         if (entry && entry.executor) {
+          // Track in event-based tracker (replaces audit log monitor)
+          if (client.eventActionTracker) {
+            client.eventActionTracker.trackAction(
+              channel.guild.id,
+              "CHANNEL_CREATE",
+              entry.executor.id,
+              { channelId: channel.id, channelName: channel.name }
+            );
+          }
+          
           await client.advancedAntiNuke.monitorAction(
             channel.guild,
             "channelCreate",

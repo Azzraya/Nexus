@@ -6,16 +6,26 @@ const ErrorHandler = require("../utils/errorHandler");
 module.exports = {
   name: "channelDelete",
   async execute(channel, client) {
-    // Advanced anti-nuke monitoring
+    // Advanced anti-nuke monitoring + event-based tracking
     if (client.advancedAntiNuke) {
       try {
-        // Try to get the user who deleted (from audit log)
+        // Try to get the user who deleted (from audit log - on-demand, not periodic)
         const auditLogs = await channel.guild.fetchAuditLogs({
           limit: 1,
           type: 12, // CHANNEL_DELETE
         });
         const entry = auditLogs.entries.first();
         if (entry && entry.executor) {
+          // Track in event-based tracker (replaces audit log monitor)
+          if (client.eventActionTracker) {
+            client.eventActionTracker.trackAction(
+              channel.guild.id,
+              "CHANNEL_DELETE",
+              entry.executor.id,
+              { channelId: channel.id, channelName: channel.name }
+            );
+          }
+          
           await client.advancedAntiNuke.monitorAction(
             channel.guild,
             "channelDelete",

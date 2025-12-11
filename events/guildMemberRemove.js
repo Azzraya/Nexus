@@ -27,6 +27,16 @@ module.exports = {
           entry.executor &&
           Date.now() - entry.createdTimestamp < 5000
         ) {
+          // Track in event-based tracker
+          if (client.eventActionTracker) {
+            client.eventActionTracker.trackAction(
+              member.guild.id,
+              "MEMBER_KICK",
+              entry.executor.id,
+              { kickedUserId: member.id }
+            );
+          }
+          
           await client.advancedAntiNuke.monitorAction(
             member.guild,
             "memberRemove",
