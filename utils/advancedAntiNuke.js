@@ -626,6 +626,17 @@ class AdvancedAntiNuke {
     }
 
     const isAdmin = member.permissions.has("Administrator");
+    
+    // Check if we should skip admins (configurable via database)
+    const config = await db.getServerConfig(guild.id);
+    const skipAdmins = config?.anti_nuke_skip_admins !== 0; // Default to true (skip admins)
+    
+    if (isAdmin && skipAdmins) {
+      logger.warn(
+        `[Anti-Nuke] ⚠️ THREAT DETECTED from ADMIN ${userId} (${threatType}) in ${guild.id} - SKIPPING ACTION (admins are exempt)`
+      );
+      return; // Exit early - skip admins if configured
+    }
 
     logger.warn(
       `[Anti-Nuke] 🚨 CRITICAL THREAT: ${threatType} by ${userId} (${
