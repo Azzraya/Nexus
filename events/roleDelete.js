@@ -24,7 +24,7 @@ module.exports = {
               { roleId: role.id, roleName: role.name }
             );
           }
-          
+
           await client.advancedAntiNuke.monitorAction(
             role.guild,
             "roleDelete",

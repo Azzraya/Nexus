@@ -36,7 +36,7 @@ module.exports = {
               { kickedUserId: member.id }
             );
           }
-          
+
           await client.advancedAntiNuke.monitorAction(
             member.guild,
             "memberRemove",

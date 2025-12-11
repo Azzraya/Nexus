@@ -43,7 +43,7 @@ module.exports = {
               }
             );
           }
-          
+
           await client.advancedAntiNuke.monitorAction(
             newRole.guild,
             "role_update",

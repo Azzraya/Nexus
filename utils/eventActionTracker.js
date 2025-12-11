@@ -44,7 +44,10 @@ class EventActionTracker {
 
     // Run pattern detection on recent actions
     this.detectPatterns(guildId, actions).catch((err) => {
-      logger.debug("EventActionTracker", `Pattern detection error: ${err.message}`);
+      logger.debug(
+        "EventActionTracker",
+        `Pattern detection error: ${err.message}`
+      );
     });
   }
 

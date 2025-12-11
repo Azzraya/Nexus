@@ -33,7 +33,7 @@ module.exports = {
               { bannedUserId: ban.user.id }
             );
           }
-          
+
           await client.advancedAntiNuke.monitorAction(
             ban.guild,
             "banAdd",
@@ -87,7 +87,7 @@ module.exports = {
                   { bannedUserId: ban.user.id }
                 );
               }
-              
+
               await client.advancedAntiNuke.monitorAction(
                 ban.guild,
                 "banAdd",

@@ -84,8 +84,72 @@
 
       <div class="content-section">
         <div class="changelog-entry">
-          <h2>Version 4.3.4 - December 11, 2025</h2>
+          <h2>Version 4.3.5 - December 11, 2025</h2>
           <span class="version-badge">Latest</span>
+          <h3>⚡ Performance & Rate Limit Fixes</h3>
+          <p>
+            Replaced periodic audit log polling with event-based action
+            tracking, eliminating rate limit issues and improving performance.
+          </p>
+
+          <h4>✨ New Features</h4>
+          <ul>
+            <li>
+              <strong>Event-Based Action Tracker:</strong> New system tracks
+              actions from Discord events instead of polling audit logs
+            </li>
+            <li>
+              <strong>Real-Time Pattern Detection:</strong> Detects suspicious
+              patterns immediately when events fire, not on a schedule
+            </li>
+          </ul>
+
+          <h4>🔧 Technical Improvements</h4>
+          <ul>
+            <li>
+              Removed <code>AuditLogMonitor</code> - no more periodic polling
+              every 30 minutes for all guilds
+            </li>
+            <li>
+              Added <code>EventActionTracker</code> - tracks actions in-memory
+              from Discord events
+            </li>
+            <li>
+              All pattern detection preserved (permission testing, coordinated
+              attacks, rapid escalation, etc.)
+            </li>
+            <li>
+              Audit logs only fetched on-demand when events fire (not periodic)
+            </li>
+            <li>Staggered audit log monitoring removed (no longer needed)</li>
+            <li>Limited bulk member fetches to 1000 to prevent rate limits</li>
+          </ul>
+
+          <h4>📊 Performance Benefits</h4>
+          <ul>
+            <li>
+              Eliminated 108+ audit log API calls per hour (54 guilds × 2
+              checks/hour)
+            </li>
+            <li>Zero periodic API calls - only on-demand when events fire</li>
+            <li>
+              Real-time tracking - actions detected immediately, not delayed
+            </li>
+            <li>In-memory cache is faster than database queries</li>
+            <li>Should completely eliminate global rate limit hits</li>
+          </ul>
+
+          <h4>🐛 Bug Fixes</h4>
+          <ul>
+            <li>
+              Fixed rate limit issues from audit log monitor polling all guilds
+            </li>
+            <li>Fixed bulk member fetch in role command causing rate limits</li>
+          </ul>
+        </div>
+
+        <div class="changelog-entry">
+          <h2>Version 4.3.4 - December 11, 2025</h2>
           <h3>🔒 Security & Invite Source Validation</h3>
           <p>
             Fixed critical security vulnerability where invite sources could be

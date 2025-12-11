@@ -41,7 +41,7 @@ module.exports = {
                 }
               );
             }
-            
+
             await client.advancedAntiNuke.monitorAction(
               newChannel.guild,
               "channel_permission_update",

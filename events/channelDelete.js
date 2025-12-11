@@ -25,7 +25,7 @@ module.exports = {
               { channelId: channel.id, channelName: channel.name }
             );
           }
-          
+
           await client.advancedAntiNuke.monitorAction(
             channel.guild,
             "channelDelete",

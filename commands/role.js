@@ -114,8 +114,8 @@ module.exports = {
 
       await interaction.deferReply();
 
-      // Fetch members with the role instead of ALL members
-      const members = await interaction.guild.members.fetch();
+      // Fetch members with limit to prevent rate limits (max 1000)
+      const members = await interaction.guild.members.fetch({ limit: 1000 });
       let success = 0;
       let failed = 0;
 
