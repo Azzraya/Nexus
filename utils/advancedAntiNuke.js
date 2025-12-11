@@ -244,7 +244,7 @@ class AdvancedAntiNuke {
       );
       return; // Whitelisted users are exempt
     }
-    
+
     // Log that we're monitoring (especially for admins)
     try {
       const member = await guild.members.fetch(userId).catch(() => null);
@@ -629,10 +629,21 @@ class AdvancedAntiNuke {
       return;
     }
 
-    // Check if user is owner - we can't ban/kick them, but we can still take other actions
-    const isOwner = member.id === guild.ownerId;
-    const isAdmin = member.permissions.has("Administrator");
+    // Check if user is owner - fetch owner explicitly to ensure accuracy
+    let isOwner = false;
+    try {
+      const owner = await guild.fetchOwner().catch(() => null);
+      isOwner = owner ? member.id === owner.id : member.id === guild.ownerId; // Fallback to guild.ownerId if fetch fails
+    } catch (error) {
+      // Fallback to guild.ownerId if fetchOwner fails
+      isOwner = member.id === guild.ownerId;
+      logger.warn(
+        `[Anti-Nuke] Could not fetch owner, using guild.ownerId fallback: ${error.message}`
+      );
+    }
     
+    const isAdmin = member.permissions.has("Administrator");
+
     // Log detailed info for debugging
     logger.warn(
       `[Anti-Nuke] 🚨 CRITICAL THREAT: ${threatType} by ${userId} (${member.user.tag}) in ${guild.id}`
@@ -640,7 +651,7 @@ class AdvancedAntiNuke {
     logger.warn(
       `[Anti-Nuke] User details - isOwner: ${isOwner}, isAdmin: ${isAdmin}, guild.ownerId: ${guild.ownerId}, member.id: ${member.id}`
     );
-    
+
     if (isOwner) {
       logger.warn(
         `[Anti-Nuke] ⚠️ THREAT DETECTED from SERVER OWNER ${userId} (${threatType}) in ${guild.id} - Cannot ban/kick owner, but will attempt to remove permissions/roles`
@@ -945,11 +956,13 @@ class AdvancedAntiNuke {
 
         // Reduced wait time (EXCEEDS WICK - faster response)
         await new Promise((resolve) => setTimeout(resolve, 500));
-        
+
         // After removing admin, refresh member and try to ban again
         if (adminRemoved && !isOwner) {
           try {
-            const refreshedMember = await guild.members.fetch(userId).catch(() => null);
+            const refreshedMember = await guild.members
+              .fetch(userId)
+              .catch(() => null);
             if (refreshedMember && hasBanPerms) {
               logger.warn(
                 `[Anti-Nuke] Admin removed - attempting to ban ${userId} now`
@@ -961,7 +974,7 @@ class AdvancedAntiNuke {
               logger.success(
                 `[Anti-Nuke] ✅ BANNED ${userId} after removing admin permissions`
               );
-              
+
               // Trigger recovery
               this.attemptRecovery(guild, threatType, counts, userId).catch(
                 (error) => {
@@ -1039,9 +1052,13 @@ class AdvancedAntiNuke {
               "Administrator"
             )}`
           );
-          
+
           // After removing all roles, try to ban again (roles removed = should be able to ban now)
-          if (!isOwner && hasBanPerms && !member.permissions.has("Administrator")) {
+          if (
+            !isOwner &&
+            hasBanPerms &&
+            !member.permissions.has("Administrator")
+          ) {
             try {
               logger.warn(
                 `[Anti-Nuke] All roles removed - attempting to ban ${userId} now`
@@ -1053,7 +1070,7 @@ class AdvancedAntiNuke {
               logger.success(
                 `[Anti-Nuke] ✅ BANNED ${userId} after removing all roles`
               );
-              
+
               // Trigger recovery
               this.attemptRecovery(guild, threatType, counts, userId).catch(
                 (error) => {
@@ -1101,7 +1118,7 @@ class AdvancedAntiNuke {
         );
         return;
       }
-      
+
       // Log if admin is being banned (for debugging)
       const isAdmin = member.permissions.has("Administrator");
       if (isAdmin) {
