@@ -629,28 +629,24 @@ class AdvancedAntiNuke {
       return;
     }
 
-    // Check if user is owner - fetch owner explicitly to ensure accuracy
-    let isOwner = false;
-    try {
-      const owner = await guild.fetchOwner().catch(() => null);
-      isOwner = owner ? member.id === owner.id : member.id === guild.ownerId; // Fallback to guild.ownerId if fetch fails
-    } catch (error) {
-      // Fallback to guild.ownerId if fetchOwner fails
-      isOwner = member.id === guild.ownerId;
-      logger.warn(
-        `[Anti-Nuke] Could not fetch owner, using guild.ownerId fallback: ${error.message}`
-      );
-    }
-    
+    // Check if user is owner - we can't ban/kick them, but we can still take other actions
+    const isOwner = member.id === guild.ownerId;
     const isAdmin = member.permissions.has("Administrator");
 
     // Log detailed info for debugging
     logger.warn(
       `[Anti-Nuke] 🚨 CRITICAL THREAT: ${threatType} by ${userId} (${member.user.tag}) in ${guild.id}`
     );
-    logger.warn(
-      `[Anti-Nuke] User details - isOwner: ${isOwner}, isAdmin: ${isAdmin}, guild.ownerId: ${guild.ownerId}, member.id: ${member.id}`
-    );
+    try {
+      const owner = await guild.fetchOwner().catch(() => null);
+      logger.warn(
+        `[Anti-Nuke] User details - isOwner: ${isOwner}, isAdmin: ${isAdmin}, actualOwnerId: ${owner?.id || guild.ownerId}, member.id: ${member.id}`
+      );
+    } catch (error) {
+      logger.warn(
+        `[Anti-Nuke] User details - isOwner: ${isOwner}, isAdmin: ${isAdmin}, guild.ownerId: ${guild.ownerId}, member.id: ${member.id}`
+      );
+    }
 
     if (isOwner) {
       logger.warn(
@@ -1112,7 +1108,16 @@ class AdvancedAntiNuke {
 
       // Skip if user is server owner (cannot ban/kick owner)
       // But admins should still be banned!
-      if (member.id === guild.ownerId) {
+      // Fetch owner explicitly to ensure accuracy
+      let isOwnerCheck = false;
+      try {
+        const owner = await guild.fetchOwner().catch(() => null);
+        isOwnerCheck = owner ? member.id === owner.id : member.id === guild.ownerId;
+      } catch (error) {
+        isOwnerCheck = member.id === guild.ownerId; // Fallback
+      }
+      
+      if (isOwnerCheck) {
         logger.warn(
           `[Anti-Nuke] Skipping ban/kick attempt on server owner ${userId} in ${guild.id} (owner cannot be banned)`
         );
