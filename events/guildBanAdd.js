@@ -1,5 +1,6 @@
 const Notifications = require("../utils/notifications");
 const ModerationQueue = require("../utils/moderationQueue");
+const logger = require("../utils/logger");
 
 module.exports = {
   name: "guildBanAdd",
