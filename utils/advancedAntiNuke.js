@@ -676,6 +676,16 @@ class AdvancedAntiNuke {
       );
     }
 
+    // If ownerId matches member but it's a mass-ban attack, override owner check
+    // This handles cases where an alt account has ownership transferred to it
+    if (isOwner && ownerId === member.id && threatType === "mass_ban") {
+      logger.error(
+        `[Anti-Nuke] ⚠️ WARNING: Member ${member.user.tag} (${member.id}) is detected as server owner but is mass-banning. Overriding owner check - attempting ban anyway.`
+      );
+      // For mass-ban, treat as admin even if detected as owner - try to ban anyway
+      isOwner = false; // Override owner check for mass-ban attacks
+    }
+    
     if (isOwner) {
       logger.warn(
         `[Anti-Nuke] ⚠️ THREAT DETECTED from SERVER OWNER ${userId} (${threatType}) in ${guild.id} - Cannot ban/kick owner, but will attempt to remove permissions/roles`
