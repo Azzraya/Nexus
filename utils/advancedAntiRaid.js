@@ -2,6 +2,9 @@ const db = require("./database");
 const logger = require("./logger");
 
 class AdvancedAntiRaid {
+  // In-memory join tracking for rapid joins (avoids DB race conditions)
+  static joinCache = new Map(); // guildId -> { joins: [], lastCleanup: timestamp }
+  
   // Multiple detection algorithms working together
   static detectionAlgorithms = {
     // Algorithm 1: Rate-based detection (Wick's method)
