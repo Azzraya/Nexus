@@ -2420,6 +2420,52 @@ class DashboardServer {
       try {
         addRateLimitHeaders(req, res);
 
+        // Get security stats from database
+        const raidsBlocked = await new Promise((resolve, reject) => {
+          db.db.get(
+            "SELECT COUNT(*) as count FROM anti_raid_logs",
+            [],
+            (err, row) => {
+              if (err) {
+                logger.error("API", "Failed to get raidsBlocked count (v2)", err);
+                resolve(0);
+              } else {
+                resolve(row?.count ? Number(row.count) : 0);
+              }
+            }
+          );
+        });
+
+        const nukesBlocked = await new Promise((resolve, reject) => {
+          db.db.get(
+            "SELECT COUNT(*) as count FROM anti_nuke_logs WHERE action_taken = 1",
+            [],
+            (err, row) => {
+              if (err) {
+                logger.error("API", "Failed to get nukesBlocked count (v2)", err);
+                resolve(0);
+              } else {
+                resolve(row?.count ? Number(row.count) : 0);
+              }
+            }
+          );
+        });
+
+        const threatsDetected = await new Promise((resolve, reject) => {
+          db.db.get(
+            "SELECT COUNT(*) as count FROM security_logs WHERE threat_score >= 60",
+            [],
+            (err, row) => {
+              if (err) {
+                logger.error("API", "Failed to get threatsDetected count (v2)", err);
+                resolve(0);
+              } else {
+                resolve(row?.count ? Number(row.count) : 0);
+              }
+            }
+          );
+        });
+
         // Get commands run count from command_usage_log
         const commandsRun = await new Promise((resolve, reject) => {
           db.db.get(
@@ -2448,6 +2494,9 @@ class DashboardServer {
           uptime: Math.floor(this.client.uptime / 1000),
           commandCount: this.client.commands?.size || 99,
           commandsRun: commandsRun || 0, // Ensure it's always a number
+          raidsBlocked: raidsBlocked || 0,
+          nukesBlocked: nukesBlocked || 0,
+          threatsDetected: threatsDetected || 0,
           shardCount: this.client.shard?.count || 1,
           memoryUsage: process.memoryUsage(),
           nodeVersion: process.version,
@@ -2455,7 +2504,7 @@ class DashboardServer {
         };
         
         // Debug logging (remove in production if needed)
-        logger.debug("API", `V2 Stats - commandsRun: ${commandsRun}, type: ${typeof commandsRun}`);
+        logger.debug("API", `V2 Stats - commandsRun: ${commandsRun}, raidsBlocked: ${raidsBlocked}, nukesBlocked: ${nukesBlocked}, threatsDetected: ${threatsDetected}`);
         res.json({
           success: true,
           data: stats,
