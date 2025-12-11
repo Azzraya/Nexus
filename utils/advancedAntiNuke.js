@@ -10,14 +10,14 @@ class AdvancedAntiNuke {
     this.guildConfigCache = new Map(); // PERFORMANCE: Cache guild configs to avoid repeated fetches
     this.baseThresholds = {
       channelsDeleted: 2, // 2+ channels deleted in SHORT TIME = nuke (AGGRESSIVE)
-      channelsCreated: 4, // 4+ channels created in 5 seconds = spam creation
+      channelsCreated: 2, // 2+ channels created in 5 seconds = spam creation (lowered from 4)
       rolesDeleted: 2, // 2+ roles deleted in 5 seconds = potential threat
-      rolesCreated: 3, // 3+ roles created in 5 seconds
-      membersBanned: 3, // 3+ bans in 5 seconds
-      membersKicked: 4, // 4+ kicks in 5 seconds
-      webhooksCreated: 3, // 3+ webhooks in 5 seconds
-      emojisDeleted: 3, // 3+ emojis deleted in 5 seconds
-      emojisCreated: 6, // 6+ emojis created in 5 seconds (spam)
+      rolesCreated: 2, // 2+ roles created in 5 seconds (lowered from 3)
+      membersBanned: 2, // 2+ bans in 5 seconds (lowered from 3)
+      membersKicked: 2, // 2+ kicks in 5 seconds (lowered from 4)
+      webhooksCreated: 2, // 2+ webhooks in 5 seconds (lowered from 3)
+      emojisDeleted: 2, // 2+ emojis deleted in 5 seconds (lowered from 3)
+      emojisCreated: 2, // 2+ emojis created in 5 seconds (lowered from 6)
       voiceRaid: 75, // 75+ voice joins in 10 seconds (increased for large events)
     };
     this.thresholds = { ...this.baseThresholds }; // Will be adapted per server
