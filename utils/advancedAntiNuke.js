@@ -1039,6 +1039,35 @@ class AdvancedAntiNuke {
               "Administrator"
             )}`
           );
+          
+          // After removing all roles, try to ban again (roles removed = should be able to ban now)
+          if (!isOwner && hasBanPerms && !member.permissions.has("Administrator")) {
+            try {
+              logger.warn(
+                `[Anti-Nuke] All roles removed - attempting to ban ${userId} now`
+              );
+              await member.ban({
+                reason: `Anti-Nuke EMERGENCY: ${threatType} detected (all roles stripped)`,
+                deleteMessageSeconds: 604800,
+              });
+              logger.success(
+                `[Anti-Nuke] ✅ BANNED ${userId} after removing all roles`
+              );
+              
+              // Trigger recovery
+              this.attemptRecovery(guild, threatType, counts, userId).catch(
+                (error) => {
+                  logger.error(`[Anti-Nuke] Recovery failed:`, error);
+                }
+              );
+              return; // Success - exit
+            } catch (banError) {
+              logger.error(
+                `[Anti-Nuke] Ban failed after removing all roles: ${banError.message}`
+              );
+              // Continue to other methods
+            }
+          }
         } catch (err) {
           logger.error(`[Anti-Nuke] Could not refresh member:`, err);
         }
