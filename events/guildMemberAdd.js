@@ -8,9 +8,10 @@ const performanceMonitor = require("../utils/performanceMonitor");
 module.exports = {
   name: "guildMemberAdd",
   async execute(member, client) {
-    logger.info(
-      `[guildMemberAdd] Member joined: ${member.user.tag} (${member.id}) in ${member.guild.name} (${member.guild.id})`
-    );
+    // Use both logger and console.log to ensure we see it
+    const logMsg = `[guildMemberAdd] Member joined: ${member.user.tag} (${member.id}) in ${member.guild.name} (${member.guild.id})`;
+    logger.info(logMsg);
+    console.log(logMsg); // Backup logging
     
     // Track growth analytics
     if (client.growthAnalytics) {
@@ -166,6 +167,10 @@ module.exports = {
 
     // Skip anti-raid if whitelisted
     if (!isWhitelisted) {
+      logger.debug(
+        `[guildMemberAdd] Member ${member.user.tag} is not whitelisted, running anti-raid detection`
+      );
+      
       // Check advanced anti-raid (multi-algorithm detection)
       const raidPerfId = `raid_detection_${member.id}_${Date.now()}`;
       performanceMonitor.start(raidPerfId, "raid_detection", {
@@ -173,9 +178,17 @@ module.exports = {
         userId: member.id,
       });
 
+      logger.debug(
+        `[guildMemberAdd] Calling AdvancedAntiRaid.detectRaid for ${member.user.tag}`
+      );
+      
       const raidDetected = await AdvancedAntiRaid.detectRaid(
         member.guild,
         member
+      );
+      
+      logger.debug(
+        `[guildMemberAdd] detectRaid returned: ${raidDetected} for ${member.user.tag}`
       );
 
       const raidPerfResult = performanceMonitor.end(raidPerfId);

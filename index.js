@@ -259,9 +259,19 @@ const eventFiles = fs
 for (const file of eventFiles) {
   const event = require(`./events/${file}`);
   if (event.once) {
-    client.once(event.name, (...args) => event.execute(...args, client));
+    client.once(event.name, (...args) => {
+      event.execute(...args, client).catch((error) => {
+        logger.error(`[Event Error] ${event.name}:`, error);
+        console.error(`[Event Error] ${event.name}:`, error);
+      });
+    });
   } else {
-    client.on(event.name, (...args) => event.execute(...args, client));
+    client.on(event.name, (...args) => {
+      event.execute(...args, client).catch((error) => {
+        logger.error(`[Event Error] ${event.name}:`, error);
+        console.error(`[Event Error] ${event.name}:`, error);
+      });
+    });
   }
 }
 
