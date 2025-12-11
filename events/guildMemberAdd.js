@@ -12,7 +12,7 @@ module.exports = {
     const logMsg = `[guildMemberAdd] Member joined: ${member.user.tag} (${member.id}) in ${member.guild.name} (${member.guild.id})`;
     logger.info(logMsg);
     console.log(logMsg); // Backup logging
-    
+
     // Track growth analytics
     if (client.growthAnalytics) {
       client.growthAnalytics.trackJoin(
@@ -170,7 +170,7 @@ module.exports = {
       logger.debug(
         `[guildMemberAdd] Member ${member.user.tag} is not whitelisted, running anti-raid detection`
       );
-      
+
       // Check advanced anti-raid (multi-algorithm detection)
       const raidPerfId = `raid_detection_${member.id}_${Date.now()}`;
       performanceMonitor.start(raidPerfId, "raid_detection", {
@@ -181,12 +181,12 @@ module.exports = {
       logger.debug(
         `[guildMemberAdd] Calling AdvancedAntiRaid.detectRaid for ${member.user.tag}`
       );
-      
+
       const raidDetected = await AdvancedAntiRaid.detectRaid(
         member.guild,
         member
       );
-      
+
       logger.debug(
         `[guildMemberAdd] detectRaid returned: ${raidDetected} for ${member.user.tag}`
       );

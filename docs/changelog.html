@@ -84,8 +84,58 @@
 
       <div class="content-section">
         <div class="changelog-entry">
-          <h2>Version 4.3.2 - December 10, 2025</h2>
+          <h2>Version 4.3.3 - December 11, 2025</h2>
           <span class="version-badge">Latest</span>
+          <h3>⚡ Performance & API Optimization</h3>
+          <p>
+            Replaced audit log fetching with intelligent ban caching system to
+            reduce API calls and improve reliability.
+          </p>
+
+          <h4>✨ New Features</h4>
+          <ul>
+            <li>
+              <strong>Ban Cache System:</strong> New in-memory cache tracks ban
+              executors to eliminate repeated audit log API calls
+            </li>
+            <li>
+              <strong>Automatic Caching:</strong> Ban commands automatically
+              cache executor data for instant anti-nuke monitoring
+            </li>
+          </ul>
+
+          <h4>🔧 Technical Improvements</h4>
+          <ul>
+            <li>
+              Removed retry logic and complex audit log fetching from ban
+              monitoring
+            </li>
+            <li>
+              Cache-based ban tracking reduces Discord API calls significantly
+            </li>
+            <li>
+              Fallback audit log lookup only when cache miss occurs (one-time
+              per ban)
+            </li>
+            <li>
+              Auto-cleanup of cache entries older than 5 minutes to prevent
+              memory leaks
+            </li>
+          </ul>
+
+          <h4>📊 Performance Benefits</h4>
+          <ul>
+            <li>Eliminated redundant audit log API calls</li>
+            <li>Faster ban monitoring with instant cache lookups</li>
+            <li>
+              More reliable ban tracking without audit log propagation delays
+            </li>
+            <li>Reduced rate limit risk from excessive audit log fetching</li>
+          </ul>
+        </div>
+
+        <div class="changelog-entry">
+          <h2>Version 4.3.2 - December 10, 2025</h2>
           <h3>🔧 Database Improvements</h3>
           <p>
             Added guild-specific threat intelligence function for improved

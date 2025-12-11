@@ -2024,7 +2024,11 @@ class DashboardServer {
             [],
             (err, row) => {
               if (err) {
-                logger.error("API", "Failed to get raidsBlocked count (v1)", err);
+                logger.error(
+                  "API",
+                  "Failed to get raidsBlocked count (v1)",
+                  err
+                );
                 resolve(0);
               } else {
                 resolve(row?.count ? Number(row.count) : 0);
@@ -2039,7 +2043,11 @@ class DashboardServer {
             [],
             (err, row) => {
               if (err) {
-                logger.error("API", "Failed to get nukesBlocked count (v1)", err);
+                logger.error(
+                  "API",
+                  "Failed to get nukesBlocked count (v1)",
+                  err
+                );
                 resolve(0);
               } else {
                 resolve(row?.count ? Number(row.count) : 0);
@@ -2054,7 +2062,11 @@ class DashboardServer {
             [],
             (err, row) => {
               if (err) {
-                logger.error("API", "Failed to get threatsDetected count (v1)", err);
+                logger.error(
+                  "API",
+                  "Failed to get threatsDetected count (v1)",
+                  err
+                );
                 resolve(0);
               } else {
                 resolve(row?.count ? Number(row.count) : 0);
@@ -2069,7 +2081,11 @@ class DashboardServer {
             [],
             (err, row) => {
               if (err) {
-                logger.error("API", "Failed to get commandsRun count (v1)", err);
+                logger.error(
+                  "API",
+                  "Failed to get commandsRun count (v1)",
+                  err
+                );
                 resolve(0);
               } else {
                 // Ensure it's a number (SQLite COUNT returns integer)
@@ -2448,7 +2464,11 @@ class DashboardServer {
             [],
             (err, row) => {
               if (err) {
-                logger.error("API", "Failed to get raidsBlocked count (v2)", err);
+                logger.error(
+                  "API",
+                  "Failed to get raidsBlocked count (v2)",
+                  err
+                );
                 resolve(0);
               } else {
                 resolve(row?.count ? Number(row.count) : 0);
@@ -2463,7 +2483,11 @@ class DashboardServer {
             [],
             (err, row) => {
               if (err) {
-                logger.error("API", "Failed to get nukesBlocked count (v2)", err);
+                logger.error(
+                  "API",
+                  "Failed to get nukesBlocked count (v2)",
+                  err
+                );
                 resolve(0);
               } else {
                 resolve(row?.count ? Number(row.count) : 0);
@@ -2478,7 +2502,11 @@ class DashboardServer {
             [],
             (err, row) => {
               if (err) {
-                logger.error("API", "Failed to get threatsDetected count (v2)", err);
+                logger.error(
+                  "API",
+                  "Failed to get threatsDetected count (v2)",
+                  err
+                );
                 resolve(0);
               } else {
                 resolve(row?.count ? Number(row.count) : 0);
@@ -2494,7 +2522,11 @@ class DashboardServer {
             [],
             (err, row) => {
               if (err) {
-                logger.error("API", "Failed to get commandsRun count (v2)", err);
+                logger.error(
+                  "API",
+                  "Failed to get commandsRun count (v2)",
+                  err
+                );
                 resolve(0);
               } else {
                 // Ensure it's a number (SQLite COUNT returns integer)
@@ -2523,9 +2555,12 @@ class DashboardServer {
           nodeVersion: process.version,
           timestamp: Date.now(),
         };
-        
+
         // Debug logging (remove in production if needed)
-        logger.debug("API", `V2 Stats - commandsRun: ${commandsRun}, raidsBlocked: ${raidsBlocked}, nukesBlocked: ${nukesBlocked}, threatsDetected: ${threatsDetected}`);
+        logger.debug(
+          "API",
+          `V2 Stats - commandsRun: ${commandsRun}, raidsBlocked: ${raidsBlocked}, nukesBlocked: ${nukesBlocked}, threatsDetected: ${threatsDetected}`
+        );
         res.json({
           success: true,
           data: stats,

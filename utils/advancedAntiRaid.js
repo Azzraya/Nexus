@@ -4,7 +4,7 @@ const logger = require("./logger");
 class AdvancedAntiRaid {
   // In-memory join tracking for rapid joins (avoids DB race conditions)
   static joinCache = new Map(); // guildId -> { joins: [], lastCleanup: timestamp }
-  
+
   // Multiple detection algorithms working together
   static detectionAlgorithms = {
     // Algorithm 1: Rate-based detection (Wick's method)
@@ -356,7 +356,7 @@ class AdvancedAntiRaid {
     logger.info(
       `[Anti-Raid] detectRaid called for ${member.user.tag} (${member.id}) in ${guild.name} (${guild.id})`
     );
-    
+
     const config = await db.getServerConfig(guild.id);
     if (!config) {
       logger.warn(
@@ -364,14 +364,14 @@ class AdvancedAntiRaid {
       );
       return false;
     }
-    
+
     if (!config.anti_raid_enabled) {
       logger.debug(
         `[Anti-Raid] Anti-raid is disabled for ${guild.name} (${guild.id}) - skipping detection`
       );
       return false;
     }
-    
+
     logger.debug(
       `[Anti-Raid] Anti-raid is ENABLED for ${guild.name} (${guild.id}), proceeding with detection`
     );

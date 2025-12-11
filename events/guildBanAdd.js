@@ -9,10 +9,15 @@ module.exports = {
     if (client.advancedAntiNuke) {
       try {
         // Get executor from cache (set when ban command is used or from previous lookup)
-        const banData = client.advancedAntiNuke.getBanExecutor(ban.guild.id, ban.user.id);
-        
+        const banData = client.advancedAntiNuke.getBanExecutor(
+          ban.guild.id,
+          ban.user.id
+        );
+
         if (banData && banData.executorId !== client.user.id) {
-          const executorMember = await ban.guild.members.fetch(banData.executorId).catch(() => null);
+          const executorMember = await ban.guild.members
+            .fetch(banData.executorId)
+            .catch(() => null);
           const isAdmin = executorMember?.permissions.has("Administrator");
 
           logger.info(
@@ -32,15 +37,20 @@ module.exports = {
               limit: 10,
               type: 20, // MEMBER_BAN_ADD
             });
-            
+
             const now = Date.now();
-            const matchingEntry = auditLogs.entries.find(entry => {
-              const isRecent = (now - entry.createdTimestamp) < 30000;
-              const matchesTarget = entry.target && entry.target.id === ban.user.id;
+            const matchingEntry = auditLogs.entries.find((entry) => {
+              const isRecent = now - entry.createdTimestamp < 30000;
+              const matchesTarget =
+                entry.target && entry.target.id === ban.user.id;
               return isRecent && matchesTarget && entry.executor;
             });
-            
-            if (matchingEntry && matchingEntry.executor && matchingEntry.executor.id !== client.user.id) {
+
+            if (
+              matchingEntry &&
+              matchingEntry.executor &&
+              matchingEntry.executor.id !== client.user.id
+            ) {
               // Cache it for future use (no more audit log calls for this ban)
               client.advancedAntiNuke.cacheBan(
                 ban.guild.id,
@@ -48,8 +58,10 @@ module.exports = {
                 matchingEntry.executor.id,
                 matchingEntry.executor.tag
               );
-              
-              const executorMember = await ban.guild.members.fetch(matchingEntry.executor.id).catch(() => null);
+
+              const executorMember = await ban.guild.members
+                .fetch(matchingEntry.executor.id)
+                .catch(() => null);
               const isAdmin = executorMember?.permissions.has("Administrator");
 
               logger.info(

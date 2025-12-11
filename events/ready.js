@@ -13,12 +13,12 @@ module.exports = {
   once: true,
   async execute(client) {
     const shardInfo = ShardManager.getShardInfo(client);
-    
+
     // Verify privileged intents are enabled
     const intents = client.options.intents;
     const hasGuildMembers = intents.has(GatewayIntentBits.GuildMembers);
     const hasGuildPresences = intents.has(GatewayIntentBits.GuildPresences);
-    
+
     if (!hasGuildMembers) {
       logger.error(
         "Ready",
@@ -32,7 +32,7 @@ module.exports = {
     } else {
       logger.info("Ready", "✅ GuildMembers intent is enabled");
     }
-    
+
     if (!hasGuildPresences) {
       logger.warn(
         "Ready",

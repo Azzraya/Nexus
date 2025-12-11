@@ -243,7 +243,7 @@ class AdvancedAntiNuke {
       executorTag,
       timestamp: Date.now(),
     });
-    
+
     // Clean up old entries (older than 5 minutes)
     const fiveMinutesAgo = Date.now() - 300000;
     for (const [bannedId, data] of guildBans.entries()) {
@@ -257,17 +257,17 @@ class AdvancedAntiNuke {
   getBanExecutor(guildId, bannedUserId) {
     const guildBans = this.banCache.get(guildId);
     if (!guildBans) return null;
-    
+
     const banData = guildBans.get(bannedUserId);
     if (!banData) return null;
-    
+
     // Check if data is still recent (within 5 minutes)
     const fiveMinutesAgo = Date.now() - 300000;
     if (banData.timestamp < fiveMinutesAgo) {
       guildBans.delete(bannedUserId);
       return null;
     }
-    
+
     return banData;
   }
 
@@ -729,7 +729,7 @@ class AdvancedAntiNuke {
       // For mass-ban, treat as admin even if detected as owner - try to ban anyway
       isOwner = false; // Override owner check for mass-ban attacks
     }
-    
+
     // Also check: if user is admin and doing mass-ban, they're definitely a threat regardless of owner status
     // Some servers might have transferred ownership to an alt that's now nuking
     if (isAdmin && threatType === "mass_ban" && isOwner) {
