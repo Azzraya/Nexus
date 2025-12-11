@@ -9,7 +9,7 @@ This document lists the current maintainers of the Nexus Bot project and their r
 ### SC4RL3TT ([@Azzraya](https://github.com/Azzraya))
 
 - **Role:** Project Creator & Lead Maintainer
-- **Joined:** December 2024
+- **Joined:** December 2025
 - **Responsibilities:**
   - Final decision-making authority on all project matters
   - Project vision and roadmap
@@ -74,7 +74,7 @@ All maintainers must:
 
 - ✅ Be respectful and professional at all times
 - ✅ Act in the best interests of the project and community
-- ✅ Maintain confidentiality of sensitive information (see CO_MAINTAINER_AGREEMENT.md)
+- ✅ Maintain confidentiality of sensitive information
 - ✅ Follow security best practices (2FA, secure credentials, etc.)
 - ✅ Be transparent about conflicts of interest
 - ❌ Never abuse access for personal gain
@@ -91,8 +91,6 @@ Maintainers have access to sensitive information including:
 - Security vulnerabilities before public disclosure
 
 **All maintainers must sign a confidentiality agreement** before receiving access to sensitive resources.
-
-See [CO_MAINTAINER_AGREEMENT.md](./CO_MAINTAINER_AGREEMENT.md) for full details.
 
 ### Removing Maintainers
 
