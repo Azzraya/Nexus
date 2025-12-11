@@ -633,18 +633,24 @@ class AdvancedAntiNuke {
     const isOwner = member.id === guild.ownerId;
     const isAdmin = member.permissions.has("Administrator");
     
+    // Log detailed info for debugging
+    logger.warn(
+      `[Anti-Nuke] 🚨 CRITICAL THREAT: ${threatType} by ${userId} (${member.user.tag}) in ${guild.id}`
+    );
+    logger.warn(
+      `[Anti-Nuke] User details - isOwner: ${isOwner}, isAdmin: ${isAdmin}, guild.ownerId: ${guild.ownerId}, member.id: ${member.id}`
+    );
+    
     if (isOwner) {
       logger.warn(
         `[Anti-Nuke] ⚠️ THREAT DETECTED from SERVER OWNER ${userId} (${threatType}) in ${guild.id} - Cannot ban/kick owner, but will attempt to remove permissions/roles`
       );
       // Don't return - continue to try removing permissions/roles even if we can't ban
+    } else if (isAdmin) {
+      logger.warn(
+        `[Anti-Nuke] ⚠️ THREAT DETECTED from ADMIN ${userId} (${threatType}) in ${guild.id} - Admin is NOT exempt, proceeding with action`
+      );
     }
-
-    logger.warn(
-      `[Anti-Nuke] 🚨 CRITICAL THREAT: ${threatType} by ${userId} (${
-        isAdmin ? "ADMIN" : "USER"
-      }) in ${guild.id}`
-    );
 
     // Get config
     const config = await db.getServerConfig(guild.id);
@@ -1025,11 +1031,20 @@ class AdvancedAntiNuke {
       let removed = false;
 
       // Skip if user is server owner (cannot ban/kick owner)
+      // But admins should still be banned!
       if (member.id === guild.ownerId) {
         logger.warn(
-          `[Anti-Nuke] Skipping ban/kick attempt on server owner ${userId} in ${guild.id}`
+          `[Anti-Nuke] Skipping ban/kick attempt on server owner ${userId} in ${guild.id} (owner cannot be banned)`
         );
         return;
+      }
+      
+      // Log if admin is being banned (for debugging)
+      const isAdmin = member.permissions.has("Administrator");
+      if (isAdmin) {
+        logger.warn(
+          `[Anti-Nuke] Attempting to ban ADMIN ${userId} (${member.user.tag}) - admins are NOT exempt`
+        );
       }
 
       if (hasBanPerms) {
