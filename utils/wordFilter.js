@@ -165,6 +165,13 @@ class WordFilter {
     // Remove zero-width characters
     text = text.replace(/[\u200B-\u200D\uFEFF\u2060]/g, "");
 
+    // Remove combining diacritical marks FIRST (before font normalization)
+    // These can interfere with character detection
+    text = text.replace(
+      /[\u0300-\u036F\u1AB0-\u1AFF\u1DC0-\u1DFF\u20D0-\u20FF\uFE20-\uFE2F]/g,
+      ""
+    );
+
     // Normalize Unicode font variations to ASCII (this also removes emojis/decorative chars)
     text = this.normalizeFonts(text);
 
@@ -295,6 +302,10 @@ class WordFilter {
 
     // Remove dingbats (U+2700-27BF)
     normalized = normalized.replace(/[\u2700-\u27BF]/g, "");
+
+    // Remove combining enclosing marks and other combining marks that might interfere
+    normalized = normalized.replace(/[\u20D0-\u20FF]/g, ""); // Combining Diacritical Marks for Symbols
+    normalized = normalized.replace(/[\uFE20-\uFE2F]/g, ""); // Combining Half Marks
 
     // Normalize Latin Extended-A characters (diacritics) to base ASCII
     // Handles characters like Ğ (U+011E) -> G, ğ (U+011F) -> g
@@ -636,12 +647,12 @@ class WordFilter {
     });
 
     // Mathematical Bold (U+1D400-1D433 uppercase, U+1D41A-1D433 lowercase)
-    // Handle surrogate pairs correctly - match high surrogate then low surrogate range
+    // Actually: U+1D400-1D419 uppercase, U+1D41A-1D433 lowercase
     normalized = normalized.replace(/[\uD835][\uDC00-\uDC33]/g, (match) => {
       const high = match.charCodeAt(0);
       const low = match.charCodeAt(1);
       const code = ((high - 0xd800) << 10) + (low - 0xdc00) + 0x10000;
-      if (code >= 0x1d400 && code <= 0x1d433) {
+      if (code >= 0x1d400 && code <= 0x1d419) {
         return String.fromCharCode(code - 0x1d400 + 65); // A-Z
       } else if (code >= 0x1d41a && code <= 0x1d433) {
         return String.fromCharCode(code - 0x1d41a + 97); // a-z
@@ -693,103 +704,349 @@ class WordFilter {
       return match;
     });
 
-    normalized = normalized.replace(/[\uD835][\uDC9C-\uDD03]/g, (match) => {
+    // Mathematical Script - handle all Script variations in one place
+    // U+1D4C0-1D4DB (Script lowercase a-z), U+1D49C-1D4CF (Script uppercase), U+1D4D0-1D503 (Script lowercase), U+1D4E2-1D4FB (Script Italic)
+    // Surrogate pairs: \uD835\uDC80-\uDC9B (U+1D4C0-1D4DB), \uD835\uDC9C-\uDCCF (U+1D49C-1D4CF), \uD835\uDCD0-\uDD03 (U+1D4D0-1D503), \uD835\uDCE2-\uDCFB (U+1D4E2-1D4FB)
+    normalized = normalized.replace(/[\uD835][\uDC80-\uDCFB]/g, (match) => {
       const high = match.charCodeAt(0);
       const low = match.charCodeAt(1);
       const code = ((high - 0xd800) << 10) + (low - 0xdc00) + 0x10000;
-      // Complete explicit mapping for Mathematical Script
-      // Based on Unicode standard: these map sequentially but U+1D4C3 is 'n' visually
-      const scriptLowerMap = {
-        0x1d4c0: "a",
-        0x1d4c1: "b",
-        0x1d4c2: "c",
-        0x1d4c3: "n", // Special case: U+1D4C3 is 'n'
-        0x1d4c4: "o",
-        0x1d4c5: "p",
-        0x1d4c6: "q",
-        0x1d4c7: "r",
-        0x1d4c8: "s",
-        0x1d4c9: "t",
-        0x1d4ca: "u",
-        0x1d4cb: "v",
-        0x1d4cc: "w",
-        0x1d4cd: "x",
-        0x1d4ce: "y",
-        0x1d4cf: "z",
-        0x1d4d0: "a",
-        0x1d4d1: "b",
-        0x1d4d2: "c",
-        0x1d4d3: "d",
-        0x1d4d4: "e",
-        0x1d4d5: "f",
-        0x1d4d6: "g",
-        0x1d4d7: "h",
-        0x1d4d8: "i",
-        0x1d4d9: "j",
-        0x1d4da: "k",
-        0x1d4db: "l",
-        0x1d4dc: "m",
-        0x1d4dd: "n",
-        0x1d4de: "o",
-        0x1d4df: "p",
-        0x1d4e0: "q",
-        0x1d4e1: "r",
-        0x1d4e2: "s",
-        0x1d4e3: "t",
-        0x1d4e4: "u",
-        0x1d4e5: "v",
-        0x1d4e6: "w",
-        0x1d4e7: "x",
-        0x1d4e8: "y",
-        0x1d4e9: "z",
+      // Check Script Italic FIRST (U+1D4E2-1D4FB) before other Script ranges
+      // Mathematical Script Italic (U+1D4E2-1D4FB) - explicit mapping
+      if (code >= 0x1d4e2 && code <= 0x1d4fb) {
+        const scriptItalicMap = {
+          0x1d4e2: "A",
+          0x1d4e3: "B",
+          0x1d4e4: "C",
+          0x1d4e5: "D",
+          0x1d4e6: "E",
+          0x1d4e7: "F",
+          0x1d4e8: "G",
+          0x1d4e9: "H",
+          0x1d4ea: "a", // 𝓪
+          0x1d4eb: "B",
+          0x1d4ec: "C",
+          0x1d4ed: "D",
+          0x1d4ee: "E",
+          0x1d4ef: "F",
+          0x1d4f0: "g", // 𝓰
+          0x1d4f1: "H",
+          0x1d4f2: "i", // 𝓲
+          0x1d4f3: "J",
+          0x1d4f4: "K",
+          0x1d4f5: "L",
+          0x1d4f6: "M",
+          0x1d4f7: "n", // 𝓷
+          0x1d4f8: "O",
+          0x1d4f9: "P",
+          0x1d4fa: "Q",
+          0x1d4fb: "R",
+        };
+        const mapped = scriptItalicMap[code];
+        if (mapped) {
+          return mapped.toLowerCase(); // Always lowercase for detection
+        }
+        // Fallback: sequential mapping
+        return String.fromCharCode(code - 0x1d4e2 + 97).toLowerCase();
+      }
+      // Mathematical Script lowercase (U+1D4C0-1D4D9) - NOT sequential! Need explicit mapping
+      // U+1D4C0=a, U+1D4C1=b, U+1D4C2=c, U+1D4C3=n (not d!), U+1D4C4=o, etc.
+      if (code >= 0x1d4c0 && code <= 0x1d4d9) {
+        const scriptLowerMap = {
+          0x1d4c0: "a",
+          0x1d4c1: "b",
+          0x1d4c2: "c",
+          0x1d4c3: "n", // 𝓃 - NOT 'd'!
+          0x1d4c4: "o",
+          0x1d4c5: "p",
+          0x1d4c6: "q",
+          0x1d4c7: "r",
+          0x1d4c8: "s",
+          0x1d4c9: "t",
+          0x1d4ca: "u",
+          0x1d4cb: "v",
+          0x1d4cc: "w",
+          0x1d4cd: "x",
+          0x1d4ce: "y",
+          0x1d4cf: "z",
+          0x1d4d0: "a",
+          0x1d4d1: "b",
+          0x1d4d2: "c",
+          0x1d4d3: "d",
+          0x1d4d4: "e",
+          0x1d4d5: "f",
+          0x1d4d6: "g",
+          0x1d4d7: "h",
+          0x1d4d8: "i",
+          0x1d4d9: "j",
+        };
+        if (scriptLowerMap[code]) {
+          return scriptLowerMap[code];
+        }
+        // Fallback for unmapped codes in this range
+        return String.fromCharCode(code - 0x1d4c0 + 97);
+      }
+      // Additional Script uppercase A-Z (U+1D49C-1D4CF) - explicit mapping
+      const scriptUpperMap = {
+        0x1d49c: "A",
+        0x1d49e: "B",
+        0x1d49f: "C",
+        0x1d4a2: "D",
+        0x1d4a5: "E",
+        0x1d4a6: "F",
+        0x1d4a9: "G",
+        0x1d4aa: "H",
+        0x1d4ab: "I",
+        0x1d4ac: "J",
+        0x1d4ae: "K",
+        0x1d4af: "L",
+        0x1d4b0: "M",
+        0x1d4b1: "N",
+        0x1d4b2: "O",
+        0x1d4b3: "P",
+        0x1d4b4: "Q",
+        0x1d4b5: "R",
+        0x1d4b6: "a", // 𝒶 - Script lowercase a (not uppercase S!)
+        0x1d4b7: "T",
+        0x1d4b8: "U",
+        0x1d4b9: "V",
+        0x1d4bb: "W",
+        0x1d4bd: "X",
+        0x1d4be: "i", // 𝒾 - Script Italic lowercase i (not uppercase Y!)
+        0x1d4bf: "Z",
       };
-      if (scriptLowerMap[code]) {
-        return scriptLowerMap[code];
+      if (scriptUpperMap[code]) {
+        return scriptUpperMap[code].toLowerCase(); // Always lowercase for detection
       }
-      // Uppercase fallback
-      if (code >= 0x1d49c && code <= 0x1d4bf) {
-        return String.fromCharCode(code - 0x1d49c + 65); // A-Z
+      // Lowercase fallback for U+1D4D0-1D503
+      if (code >= 0x1d4d0 && code <= 0x1d503) {
+        return String.fromCharCode(code - 0x1d4d0 + 97); // a-z
       }
-      return match;
+      // If we get here and it's in the Script range but not handled, try to map it
+      // Don't return match - convert it to avoid it being removed later
+      if (code >= 0x1d49c && code <= 0x1d4fb) {
+        // Try to extract a letter - use modulo or other heuristic
+        return "x"; // Fallback to 'x' if we can't determine
+      }
+      return match; // Only return match if it's not a Script character
     });
 
-    // Mathematical Fraktur (U+1D504-1D537 uppercase, U+1D538-1D56B lowercase)
-    normalized = normalized.replace(/[\uD835][\uDD04-\uDD6B]/g, (match) => {
+    // Mathematical Fraktur (U+1D504-1D537 uppercase, U+1D51E-1D537 lowercase)
+    // Actually lowercase is U+1D51E-1D537, uppercase is U+1D504-1D51D
+    normalized = normalized.replace(/[\uD835][\uDD04-\uDD37]/g, (match) => {
       const high = match.charCodeAt(0);
       const low = match.charCodeAt(1);
       const code = ((high - 0xd800) << 10) + (low - 0xdc00) + 0x10000;
-      if (code >= 0x1d504 && code <= 0x1d537) {
+      if (code >= 0x1d504 && code <= 0x1d51d) {
         return String.fromCharCode(code - 0x1d504 + 65); // A-Z
-      } else if (code >= 0x1d538 && code <= 0x1d56b) {
-        return String.fromCharCode(code - 0x1d538 + 97); // a-z
+      } else if (code >= 0x1d51e && code <= 0x1d537) {
+        return String.fromCharCode(code - 0x1d51e + 97); // a-z
       }
       return match;
     });
 
-    // Double-struck (U+1D538-1D56B uppercase, U+1D552-1D585 lowercase)
+    // Double-struck (U+1D538-1D551 uppercase, U+1D552-1D56B lowercase)
     normalized = normalized.replace(/[\uD835][\uDD38-\uDD6B]/g, (match) => {
       const high = match.charCodeAt(0);
       const low = match.charCodeAt(1);
       const code = ((high - 0xd800) << 10) + (low - 0xdc00) + 0x10000;
-      if (code >= 0x1d538 && code <= 0x1d56b) {
+      if (code >= 0x1d538 && code <= 0x1d551) {
         return String.fromCharCode(code - 0x1d538 + 65); // A-Z
-      } else if (code >= 0x1d552 && code <= 0x1d585) {
+      } else if (code >= 0x1d552 && code <= 0x1d56b) {
         return String.fromCharCode(code - 0x1d552 + 97); // a-z
       }
       return match;
     });
 
     // Mathematical Bold Fraktur (U+1D56C-1D59F uppercase, U+1D5A0-1D5D3 lowercase)
+    // These do NOT map sequentially - need explicit mapping
     normalized = normalized.replace(/[\uD835][\uDD6C-\uDDD3]/g, (match) => {
       const high = match.charCodeAt(0);
       const low = match.charCodeAt(1);
       const code = ((high - 0xd800) << 10) + (low - 0xdc00) + 0x10000;
+      // Explicit mapping for Bold Fraktur (these have gaps, not sequential)
+      const boldFrakturMap = {
+        // Uppercase (used as lowercase visually): A=0x1D56C, B=0x1D56D, C=0x1D56E, D=0x1D56F,
+        // E=0x1D570, F=0x1D571, G=0x1D572, H=0x1D573, I=0x1D574, J=0x1D575, K=0x1D576,
+        // L=0x1D577, M=0x1D578, N=0x1D579, O=0x1D57A, P=0x1D57B, Q=0x1D57C, R=0x1D57D,
+        // S=0x1D57E, T=0x1D57F, U=0x1D580, V=0x1D581, W=0x1D582, X=0x1D583, Y=0x1D584, Z=0x1D585
+        // But some are used as lowercase: a=0x1D586, b=0x1D587, ..., n=0x1D593, i=0x1D58E, g=0x1D58C
+        0x1d586: "a", // 𝖆
+        0x1d58c: "g", // 𝖌
+        0x1d58e: "i", // 𝖎
+        0x1d593: "n", // 𝖓
+      };
+      if (boldFrakturMap[code]) {
+        return boldFrakturMap[code];
+      }
+      // Try sequential mapping for uppercase
       if (code >= 0x1d56c && code <= 0x1d59f) {
-        return String.fromCharCode(code - 0x1d56c + 65); // A-Z
-      } else if (code >= 0x1d5a0 && code <= 0x1d5d3) {
-        return String.fromCharCode(code - 0x1d5a0 + 97); // a-z
+        return String.fromCharCode(code - 0x1d56c + 65).toLowerCase();
+      }
+      // Try sequential mapping for lowercase
+      if (code >= 0x1d5a0 && code <= 0x1d5d3) {
+        return String.fromCharCode(code - 0x1d5a0 + 97);
       }
       return match;
+    });
+
+    // Mathematical Sans-serif (U+1D5A4-1D5D7 uppercase, U+1D5D8-1D60B lowercase)
+    normalized = normalized.replace(/[\uD835][\uDDD4-\uDE0B]/g, (match) => {
+      const high = match.charCodeAt(0);
+      const low = match.charCodeAt(1);
+      const code = ((high - 0xd800) << 10) + (low - 0xdc00) + 0x10000;
+      if (code >= 0x1d5a4 && code <= 0x1d5d7) {
+        return String.fromCharCode(code - 0x1d5a4 + 65); // A-Z
+      } else if (code >= 0x1d5d8 && code <= 0x1d60b) {
+        return String.fromCharCode(code - 0x1d5d8 + 97); // a-z
+      }
+      return match;
+    });
+
+    // Mathematical Sans-serif Bold (U+1D5D8-1D5EB uppercase, U+1D5EE-1D621 lowercase)
+    // Sequential: A=U+1D5D8, B=U+1D5D9, ..., Z=U+1D5F1, a=U+1D5EE, b=U+1D5EF, ..., n=U+1D5FB, ..., z=U+1D607
+    normalized = normalized.replace(/[\uD835][\uDDD8-\uDE21]/g, (match) => {
+      const high = match.charCodeAt(0);
+      const low = match.charCodeAt(1);
+      const code = ((high - 0xd800) << 10) + (low - 0xdc00) + 0x10000;
+      if (code >= 0x1d5d8 && code <= 0x1d5eb) {
+        // Uppercase: A=0x1D5D8, B=0x1D5D9, ..., Z=0x1D5F1
+        return String.fromCharCode(code - 0x1d5d8 + 65).toLowerCase(); // A-Z -> lowercase
+      } else if (code >= 0x1d5ee && code <= 0x1d621) {
+        // Lowercase: a=0x1D5EE, b=0x1D5EF, ..., i=0x1D5F6, ..., n=0x1D5FB, ..., z=0x1D607
+        return String.fromCharCode(code - 0x1d5ee + 97); // a-z
+      }
+      return match;
+    });
+
+    // Mathematical Sans-serif Italic (U+1D622-1D645 uppercase, U+1D622-1D63B is actually mixed)
+    // U+1D622-1D63B uppercase, U+1D63C-1D64F lowercase
+    normalized = normalized.replace(/[\uD835][\uDE22-\uDE4F]/g, (match) => {
+      const high = match.charCodeAt(0);
+      const low = match.charCodeAt(1);
+      const code = ((high - 0xd800) << 10) + (low - 0xdc00) + 0x10000;
+      if (code >= 0x1d622 && code <= 0x1d63b) {
+        return String.fromCharCode(code - 0x1d622 + 65); // A-Z
+      } else if (code >= 0x1d63c && code <= 0x1d64f) {
+        return String.fromCharCode(code - 0x1d63c + 97); // a-z
+      }
+      return match;
+    });
+
+    // Mathematical Monospace (U+1D68A-1D6A5 uppercase, U+1D6A6-1D6B9 lowercase)
+    // Handle BEFORE Sans-serif Bold Italic to avoid conflicts (U+1D68A is in both ranges)
+    // Sequential: A=U+1D68A, B=U+1D68B, ..., N=U+1D697, ..., Z=U+1D6A3, a=U+1D6A6, b=U+1D6A7, ..., z=U+1D6BF
+    normalized = normalized.replace(/[\uD835][\uDE8A-\uDEB9]/g, (match) => {
+      const high = match.charCodeAt(0);
+      const low = match.charCodeAt(1);
+      const code = ((high - 0xd800) << 10) + (low - 0xdc00) + 0x10000;
+      if (code >= 0x1d68a && code <= 0x1d6a5) {
+        // Uppercase: A=0x1D68A, B=0x1D68B, ..., N=0x1D697, ..., Z=0x1D6A3
+        return String.fromCharCode(code - 0x1d68a + 65).toLowerCase(); // A-Z -> lowercase
+      } else if (code >= 0x1d6a6 && code <= 0x1d6b9) {
+        // Lowercase: a=0x1D6A6, b=0x1D6A7, ..., z=0x1D6BF
+        return String.fromCharCode(code - 0x1d6a6 + 97); // a-z
+      }
+      return match;
+    });
+
+    // IPA Extensions - Small Capitals (U+1D00-1D7F, but also U+026A, U+0274, etc.)
+    // Map IPA small capitals to regular letters
+    normalized = normalized.replace(/[\u026A\u0274\u0262\u1D00]/g, (char) => {
+      const ipaMap = {
+        0x026a: "i", // ɪ - small capital i
+        0x0274: "n", // ɴ - small capital n
+        0x0262: "g", // ɢ - small capital g
+        0x1d00: "a", // ᴀ - small capital a
+      };
+      return ipaMap[char.charCodeAt(0)] || char;
+    });
+    // Also handle other IPA characters that might be used
+    normalized = normalized.replace(/[\u0260\u0261]/g, (char) => {
+      const code = char.charCodeAt(0);
+      if (code === 0x0260) return "g"; // ɠ
+      if (code === 0x0261) return "g"; // ɡ
+      return char;
+    });
+
+    // Subscript (U+2090-209C for a-z, U+2080-2089 for 0-9)
+    // U+2099 = ₙ (n), U+2090 = ₐ (a), U+1D62 = ᵢ (i)
+    normalized = normalized.replace(/[\u2090-\u209C\u1D62]/g, (char) => {
+      const code = char.charCodeAt(0);
+      const subscriptMap = {
+        0x2090: "a", // ₐ
+        0x2099: "n", // ₙ
+        0x1d62: "i", // ᵢ (this is actually superscript, but used as subscript)
+      };
+      if (subscriptMap[code]) {
+        return subscriptMap[code];
+      }
+      if (code >= 0x2090 && code <= 0x209c) {
+        return String.fromCharCode(code - 0x2090 + 97); // a-z
+      }
+      return char;
+    });
+
+    // Superscript (U+2070-207F, U+1D2C-1D7F)
+    // U+207F = ⁿ, U+2071 = ⁱ, U+1D4D = ᵍ, U+1D43 = ᵃ
+    normalized = normalized.replace(/[\u2070-\u207F\u1D2C-\u1D7F]/g, (char) => {
+      const code = char.charCodeAt(0);
+      const superscriptMap = {
+        0x2070: "0",
+        0x00b9: "1",
+        0x00b2: "2",
+        0x00b3: "3",
+        0x2074: "4",
+        0x2075: "5",
+        0x2076: "6",
+        0x2077: "7",
+        0x2078: "8",
+        0x2079: "9",
+        0x207a: "+",
+        0x207b: "-",
+        0x207c: "=",
+        0x207d: "(",
+        0x207e: ")",
+        0x207f: "n", // ⁿ
+        0x2071: "i", // ⁱ
+        0x1d43: "a", // ᵃ
+        0x1d47: "b",
+        0x1d48: "d",
+        0x1d49: "e",
+        0x1d4d: "g", // ᵍ
+        0x1d4f: "h",
+        0x1d50: "j",
+        0x1d52: "k",
+        0x1d56: "l",
+        0x1d57: "m",
+        0x1d58: "n",
+        0x1d5b: "o",
+        0x1d5d: "p",
+        0x1d5e: "r",
+        0x1d5f: "s",
+        0x1d60: "t",
+        0x1d61: "u",
+        0x1d62: "i", // ᵢ (also used as subscript)
+        0x1d63: "r",
+        0x1d64: "u",
+        0x1d65: "v",
+        0x1d66: "x",
+      };
+      if (superscriptMap[code]) {
+        return superscriptMap[code];
+      }
+      // Fallback for other superscript letters in U+1D2C-1D7F
+      if (code >= 0x1d2c && code <= 0x1d7f) {
+        // Try to extract base character using NFD normalization
+        const normalizedChar = String.fromCodePoint(code)
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .toLowerCase();
+        if (/^[a-z]$/.test(normalizedChar)) {
+          return normalizedChar;
+        }
+      }
+      return char;
     });
 
     // Small Capitals (U+1D00-1D7F) - Phonetic Extensions
