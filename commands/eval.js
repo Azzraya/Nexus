@@ -324,6 +324,29 @@ module.exports = {
     const user = interaction.user;
     const member = interaction.member;
 
+    // Create a message-like object for convenience (since slash commands don't have message)
+    const message = {
+      channel: channel,
+      author: user,
+      member: member,
+      guild: guild,
+      client: client,
+      content: interaction.options.getString("code") || "",
+      reply: async (content) => {
+        if (interaction.deferred || interaction.replied) {
+          return interaction.editReply(content);
+        }
+        return interaction.reply(content);
+      },
+      send: async (content) => {
+        return channel.send(content);
+      },
+      delete: async () => {
+        // Can't delete slash command interactions, but can delete follow-up messages
+        return Promise.resolve();
+      },
+    };
+
     // Track eval usage for analytics (will be updated after execution with timing)
     const analyticsStartTime = Date.now();
 
@@ -435,11 +458,11 @@ module.exports = {
         trimmedCode.length > 0;
 
       // Wrap code in an async IIFE that provides all context variables
-      // This allows the evaluated code to use: client, channel, guild, user, member, interaction
+      // This allows the evaluated code to use: client, channel, guild, user, member, interaction, message
       // If it's a simple expression, automatically return it; otherwise execute as-is
       // Note: process.env is replaced with sanitizedEnv, client is replaced with sanitizedClient
       // Block access to require, fs, child_process, vm, etc.
-      const wrappedCode = `(async function(client, channel, guild, user, member, interaction, sanitizedEnv) {
+      const wrappedCode = `(async function(client, channel, guild, user, member, interaction, message, sanitizedEnv) {
         // Block dangerous requires
         const originalRequire = require;
         require = function(module) {
@@ -519,6 +542,7 @@ module.exports = {
             user,
             member,
             interaction,
+            message,
             { env: sanitizedEnv }
           ),
           new Promise((_, reject) =>
