@@ -155,24 +155,30 @@ class DashboardServer {
 
     // Structured request logging middleware
     this.app.use((req, res, next) => {
-      // Skip logging for static assets and health checks
+      // Skip logging for:
+      // - Static assets
+      // - Health checks
+      // - OPTIONS requests (CORS preflight - too noisy)
+      // - Successful GET requests to API (only log errors and non-GET)
       if (
         req.path.match(
           /\.(css|js|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$/
         ) ||
         req.path === "/health" ||
-        req.path === "/ping"
+        req.path === "/ping" ||
+        req.method === "OPTIONS" ||
+        (req.method === "GET" && req.path.startsWith("/api"))
       ) {
         return next();
       }
 
+      // Only log non-GET requests and errors
       const ip = this.getRealIP(req);
       logger.info("Dashboard", {
         requestId: req.id,
         method: req.method,
         path: req.path,
         ip: ip,
-        userAgent: req.headers["user-agent"]?.substring(0, 100),
         userId: req.user?.id || null,
       });
       next();
