@@ -1051,31 +1051,15 @@ class WordFilter {
       }
 
       // Method 1.5: Fuzzy match - check if normalized text is similar to word (for cases where non-Latin chars were removed)
-      // This handles cases like "ngga" vs "nigga" where a character was removed
-      if (
-        normalizedWord.length >= 4 &&
-        normalizedText.length >= normalizedWord.length - 1
-      ) {
-        // Check if removing one character from normalizedText makes it match
-        for (let i = 0; i < normalizedText.length; i++) {
-          const withCharRemoved =
-            normalizedText.slice(0, i) + normalizedText.slice(i + 1);
-          if (withCharRemoved.includes(normalizedWord)) {
-            return {
-              detected: true,
-              word: word,
-              method: "fuzzy_match",
-              isDefault: isDefault,
-            };
-          }
-        }
-        // Also check if adding one character would match (for cases where a char was inserted)
-        for (let i = 0; i <= normalizedWord.length; i++) {
-          for (let charCode = 97; charCode <= 122; charCode++) {
-            const char = String.fromCharCode(charCode);
-            const withCharAdded =
-              normalizedWord.slice(0, i) + char + normalizedWord.slice(i);
-            if (normalizedText.includes(withCharAdded)) {
+      // This handles cases like "ngga" vs "nigga" where a character was removed from the input
+      if (normalizedWord.length >= 4) {
+        // Check if normalizedText matches word with one character removed from word
+        // e.g., "ngga" should match "nigga" (missing 'i')
+        if (normalizedText.length === normalizedWord.length - 1) {
+          for (let i = 0; i < normalizedWord.length; i++) {
+            const wordWithCharRemoved =
+              normalizedWord.slice(0, i) + normalizedWord.slice(i + 1);
+            if (normalizedText === wordWithCharRemoved) {
               return {
                 detected: true,
                 word: word,
@@ -1084,6 +1068,34 @@ class WordFilter {
               };
             }
           }
+        }
+        // Check if normalizedText matches word with one character added to text
+        // e.g., "nngga" should match "nigga"
+        if (normalizedText.length === normalizedWord.length + 1) {
+          for (let i = 0; i < normalizedText.length; i++) {
+            const textWithCharRemoved =
+              normalizedText.slice(0, i) + normalizedText.slice(i + 1);
+            if (textWithCharRemoved === normalizedWord) {
+              return {
+                detected: true,
+                word: word,
+                method: "fuzzy_match",
+                isDefault: isDefault,
+              };
+            }
+          }
+        }
+        // Check if word contains normalizedText as substring (for partial matches)
+        if (
+          normalizedText.length >= 3 &&
+          normalizedWord.includes(normalizedText)
+        ) {
+          return {
+            detected: true,
+            word: word,
+            method: "fuzzy_match",
+            isDefault: isDefault,
+          };
         }
       }
 
