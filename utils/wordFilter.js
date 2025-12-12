@@ -660,15 +660,62 @@ class WordFilter {
       return match;
     });
 
-    // Mathematical Script (U+1D49C-1D4CF uppercase, U+1D4D0-1D503 lowercase)
     normalized = normalized.replace(/[\uD835][\uDC9C-\uDD03]/g, (match) => {
       const high = match.charCodeAt(0);
       const low = match.charCodeAt(1);
       const code = ((high - 0xd800) << 10) + (low - 0xdc00) + 0x10000;
-      if (code >= 0x1d49c && code <= 0x1d4cf) {
+      // Complete explicit mapping for Mathematical Script
+      // Based on Unicode standard: these map sequentially but U+1D4C3 is 'n' visually
+      const scriptLowerMap = {
+        0x1d4c0: "a",
+        0x1d4c1: "b",
+        0x1d4c2: "c",
+        0x1d4c3: "n", // Special case: U+1D4C3 is 'n'
+        0x1d4c4: "o",
+        0x1d4c5: "p",
+        0x1d4c6: "q",
+        0x1d4c7: "r",
+        0x1d4c8: "s",
+        0x1d4c9: "t",
+        0x1d4ca: "u",
+        0x1d4cb: "v",
+        0x1d4cc: "w",
+        0x1d4cd: "x",
+        0x1d4ce: "y",
+        0x1d4cf: "z",
+        0x1d4d0: "a",
+        0x1d4d1: "b",
+        0x1d4d2: "c",
+        0x1d4d3: "d",
+        0x1d4d4: "e",
+        0x1d4d5: "f",
+        0x1d4d6: "g",
+        0x1d4d7: "h",
+        0x1d4d8: "i",
+        0x1d4d9: "j",
+        0x1d4da: "k",
+        0x1d4db: "l",
+        0x1d4dc: "m",
+        0x1d4dd: "n",
+        0x1d4de: "o",
+        0x1d4df: "p",
+        0x1d4e0: "q",
+        0x1d4e1: "r",
+        0x1d4e2: "s",
+        0x1d4e3: "t",
+        0x1d4e4: "u",
+        0x1d4e5: "v",
+        0x1d4e6: "w",
+        0x1d4e7: "x",
+        0x1d4e8: "y",
+        0x1d4e9: "z",
+      };
+      if (scriptLowerMap[code]) {
+        return scriptLowerMap[code];
+      }
+      // Uppercase fallback
+      if (code >= 0x1d49c && code <= 0x1d4bf) {
         return String.fromCharCode(code - 0x1d49c + 65); // A-Z
-      } else if (code >= 0x1d4d0 && code <= 0x1d503) {
-        return String.fromCharCode(code - 0x1d4d0 + 97); // a-z
       }
       return match;
     });
@@ -1001,6 +1048,43 @@ class WordFilter {
           method: "normalized_match",
           isDefault: isDefault,
         };
+      }
+
+      // Method 1.5: Fuzzy match - check if normalized text is similar to word (for cases where non-Latin chars were removed)
+      // This handles cases like "ngga" vs "nigga" where a character was removed
+      if (
+        normalizedWord.length >= 4 &&
+        normalizedText.length >= normalizedWord.length - 1
+      ) {
+        // Check if removing one character from normalizedText makes it match
+        for (let i = 0; i < normalizedText.length; i++) {
+          const withCharRemoved =
+            normalizedText.slice(0, i) + normalizedText.slice(i + 1);
+          if (withCharRemoved.includes(normalizedWord)) {
+            return {
+              detected: true,
+              word: word,
+              method: "fuzzy_match",
+              isDefault: isDefault,
+            };
+          }
+        }
+        // Also check if adding one character would match (for cases where a char was inserted)
+        for (let i = 0; i <= normalizedWord.length; i++) {
+          for (let charCode = 97; charCode <= 122; charCode++) {
+            const char = String.fromCharCode(charCode);
+            const withCharAdded =
+              normalizedWord.slice(0, i) + char + normalizedWord.slice(i);
+            if (normalizedText.includes(withCharAdded)) {
+              return {
+                detected: true,
+                word: word,
+                method: "fuzzy_match",
+                isDefault: isDefault,
+              };
+            }
+          }
+        }
       }
 
       // Method 2: Check original text with case variations
