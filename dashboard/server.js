@@ -77,7 +77,7 @@ class DashboardServer {
       res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
       res.setHeader(
         "Content-Security-Policy",
-        "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://cdn.jsdelivr.net https://cdn.discordapp.com " +
+        "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdn.ngrok.com; style-src 'self' 'unsafe-inline' https://cdn.ngrok.com; img-src 'self' data: https:; font-src 'self' data: https://assets.ngrok.com; connect-src 'self' https://cdn.jsdelivr.net https://cdn.discordapp.com https://assets.ngrok.com https://cdn.ngrok.com " +
           (process.env.DASHBOARD_URL || "") +
           " https://azzraya.github.io;"
       );
@@ -116,8 +116,17 @@ class DashboardServer {
     this.app.use((req, res, next) => {
       const startTime = Date.now();
       res.on("finish", () => {
+        // Check if headers are already sent before trying to set them
+        if (res.headersSent) {
+          return;
+        }
         const duration = Date.now() - startTime;
-        res.setHeader("X-Response-Time", `${duration}ms`);
+        try {
+          res.setHeader("X-Response-Time", `${duration}ms`);
+        } catch (error) {
+          // Headers already sent, ignore
+          return;
+        }
         // Log slow requests (>1s)
         if (duration > 1000) {
           logger.warn(
