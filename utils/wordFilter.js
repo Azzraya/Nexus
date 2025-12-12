@@ -226,8 +226,41 @@ class WordFilter {
     normalized = normalized.replace(/[\u30A0-\u30FF]/g, ""); // Katakana
     normalized = normalized.replace(/[\u0600-\u06FF]/g, ""); // Arabic
     normalized = normalized.replace(/[\u0590-\u05FF]/g, ""); // Hebrew
-    normalized = normalized.replace(/[\u0400-\u04FF]/g, ""); // Cyrillic (unless we want to map these)
-    normalized = normalized.replace(/[\u0370-\u03FF]/g, ""); // Greek (unless we want to map these)
+    normalized = normalized.replace(/[\u0400-\u04FF]/g, ""); // Cyrillic
+    normalized = normalized.replace(/[\u0370-\u03FF]/g, ""); // Greek
+    normalized = normalized.replace(/[\u0B00-\u0B7F]/g, ""); // Odia (Oriya)
+    normalized = normalized.replace(/[\u0D00-\u0D7F]/g, ""); // Malayalam
+    normalized = normalized.replace(/[\uA500-\uA63F]/g, ""); // Vai
+    // Egyptian Hieroglyphs (U+13000-1342F) - supplementary plane, need surrogate pair handling
+    normalized = normalized.replace(/[\uD80C][\uDC00-\uDFFF]/g, ""); // Egyptian Hieroglyphs (approximate)
+    // Remove all other non-Latin scripts more broadly
+    normalized = normalized.replace(/[\u0080-\u00FF]/g, (char) => {
+      const code = char.charCodeAt(0);
+      // Keep Latin-1 Supplement letters (à-ÿ, À-ß) for now, remove others
+      if (
+        (code >= 0x00c0 && code <= 0x00ff) ||
+        (code >= 0x00a0 && code <= 0x00bf)
+      ) {
+        return char; // Keep some Latin extended
+      }
+      return ""; // Remove other Latin-1 Supplement
+    });
+    // Remove other Indic scripts (Devanagari, Bengali, Tamil, Telugu, Kannada, Gujarati, etc.)
+    normalized = normalized.replace(/[\u0900-\u097F]/g, ""); // Devanagari
+    normalized = normalized.replace(/[\u0980-\u09FF]/g, ""); // Bengali
+    normalized = normalized.replace(/[\u0A00-\u0A7F]/g, ""); // Gurmukhi
+    normalized = normalized.replace(/[\u0A80-\u0AFF]/g, ""); // Gujarati
+    normalized = normalized.replace(/[\u0B80-\u0BFF]/g, ""); // Tamil
+    normalized = normalized.replace(/[\u0C00-\u0C7F]/g, ""); // Telugu
+    normalized = normalized.replace(/[\u0C80-\u0CFF]/g, ""); // Kannada
+    normalized = normalized.replace(/[\u0C00-\u0C7F]/g, ""); // Malayalam (already covered but being explicit)
+    // Remove other African scripts
+    normalized = normalized.replace(/[\uA600-\uA6FF]/g, ""); // Bamum
+    normalized = normalized.replace(/[\uA700-\uA71F]/g, ""); // Modifier Tone Letters
+    // Remove other scripts commonly used for obfuscation
+    normalized = normalized.replace(/[\u2000-\u206F]/g, ""); // General Punctuation (keep some, but remove most)
+    // Remove Egyptian Hieroglyphs more comprehensively (U+13000-1342F)
+    normalized = normalized.replace(/[\uD80C-\uD80D][\uDC00-\uDFFF]/g, "");
 
     // Remove emojis (before any normalization) to prevent interference
     // Most emojis are in the range U+1F300-1F9FF (D83C-D83E high surrogates)
@@ -1006,17 +1039,45 @@ class WordFilter {
     // Normalize the input text
     const normalizedText = this.normalizeText(text);
     const originalLower = text.toLowerCase();
+    const originalLength = text.replace(/\s+/g, "").length; // Length without spaces
 
     // Debug: Log normalization for problematic strings (use INFO so it always shows)
     if (
       text.includes("Ğ") ||
       text.includes("ᵃ") ||
       text.includes("ı") ||
-      text.toLowerCase().includes("nig")
+      text.toLowerCase().includes("nig") ||
+      normalizedText.length === 0
     ) {
       logger.info(
-        `[WordFilter] Input: "${text}" → Normalized: "${normalizedText}"`
+        `[WordFilter] Input: "${text}" → Normalized: "${normalizedText}" (original length: ${originalLength})`
       );
+    }
+
+    // Special case: If normalized text is empty but original had content,
+    // check if original length matches any blacklisted word (suspicious obfuscation)
+    if (normalizedText.length === 0 && originalLength > 0) {
+      for (const word of combinedBlacklist) {
+        if (!word || typeof word !== "string") continue;
+        const normalizedWord = word.toLowerCase().trim();
+        if (!normalizedWord) continue;
+        // If original length is similar to word length (within 2 characters), flag as suspicious
+        if (
+          Math.abs(originalLength - normalizedWord.length) <= 2 &&
+          originalLength >= 3
+        ) {
+          const isDefault = this.defaultBlacklist.includes(word);
+          logger.info(
+            `[WordFilter] SUSPICIOUS: Empty normalization but length matches "${word}" (${originalLength} vs ${normalizedWord.length})`
+          );
+          return {
+            detected: true,
+            word: word,
+            method: "suspicious_obfuscation",
+            isDefault: isDefault,
+          };
+        }
+      }
     }
 
     // Check each blacklisted word
