@@ -4,6 +4,8 @@ const urlsToCache = ["/dashboard.css", "/dashboard.js", "/manifest.json"];
 
 // Install service worker
 self.addEventListener("install", (event) => {
+  // Force activation of new service worker immediately
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       console.log("Opened cache");

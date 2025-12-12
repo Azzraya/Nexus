@@ -178,9 +178,21 @@
     <script>
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", () => {
+          // Unregister all old service workers first to force update
+          navigator.serviceWorker.getRegistrations().then((registrations) => {
+            registrations.forEach((registration) => {
+              registration.unregister();
+            });
+          });
+
+          // Register new service worker with cache busting
           navigator.serviceWorker
-            .register("/service-worker.js")
-            .then((reg) => console.log("Service Worker registered", reg))
+            .register("/service-worker.js?v=3")
+            .then((reg) => {
+              console.log("Service Worker registered", reg);
+              // Force update
+              reg.update();
+            })
             .catch((err) =>
               console.log("Service Worker registration failed", err)
             );
