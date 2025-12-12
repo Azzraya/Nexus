@@ -1206,12 +1206,19 @@ async function loadAntiRaidPage() {
   `;
 
   // Load raid stats
-  fetch(`/api/server/${currentServer}/antiraid`)
-    .then((r) => r.json())
-    .then((data) => {
-      document.getElementById("raidsBlocked").textContent =
-        data.raidsBlocked || 0;
-    });
+  if (currentServer) {
+    fetch(`/api/server/${currentServer}/antiraid`)
+      .then((r) => r.json())
+      .then((data) => {
+        const raidsBlockedEl = document.getElementById("raidsBlocked");
+        if (raidsBlockedEl) {
+          raidsBlockedEl.textContent = data.raidsBlocked || 0;
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to load raid stats:", err);
+      });
+  }
 }
 
 // Auto-Mod Settings Page
@@ -3197,6 +3204,10 @@ document.addEventListener("DOMContentLoaded", () => {
     `;
 
     try {
+      if (!currentServer) {
+        console.error("Cannot load workflows: currentServer is not set");
+        return;
+      }
       const response = await fetch(
         `/api/dashboard/workflows?guild=${currentServer}`
       );

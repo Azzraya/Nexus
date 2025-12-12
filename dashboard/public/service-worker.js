@@ -39,10 +39,12 @@ self.addEventListener("fetch", (event) => {
       return fetch(event.request)
         .then((response) => {
           // Check if we received a valid response
+          // Don't cache POST, PUT, DELETE, PATCH requests (Cache API doesn't support them)
           if (
             !response ||
             response.status !== 200 ||
-            response.type !== "basic"
+            response.type !== "basic" ||
+            event.request.method !== "GET"
           ) {
             return response;
           }

@@ -8,6 +8,7 @@
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#9333ea" />
+    <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta
       name="apple-mobile-web-app-status-bar-style"
@@ -208,19 +209,8 @@
           imageObserver.observe(img);
         });
 
-        // Prefetch critical resources
-        if ("requestIdleCallback" in window) {
-          requestIdleCallback(() => {
-            // Prefetch dashboard pages
-            const pages = ["anti-nuke", "anti-raid", "workflows"];
-            pages.forEach((page) => {
-              const link = document.createElement("link");
-              link.rel = "prefetch";
-              link.href = `/api/server/${window.currentServer}/${page}`;
-              document.head.appendChild(link);
-            });
-          });
-        }
+        // Prefetch disabled - causes 404 errors when currentServer is undefined
+        // Prefetch will be handled by dashboard.js after server selection
 
         // Performance monitoring
         if ("PerformanceObserver" in window) {
