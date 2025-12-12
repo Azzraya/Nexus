@@ -931,6 +931,17 @@ class WordFilter {
       : blacklist || [];
 
     if (!text || combinedBlacklist.length === 0) {
+      if (
+        text &&
+        (text.includes("Ğ") ||
+          text.includes("ᵃ") ||
+          text.includes("ı") ||
+          text.toLowerCase().includes("nig"))
+      ) {
+        logger.info(
+          `[WordFilter] No blacklist to check against for: "${text}"`
+        );
+      }
       return { detected: false, word: null, method: null, isDefault: false };
     }
 
@@ -938,9 +949,14 @@ class WordFilter {
     const normalizedText = this.normalizeText(text);
     const originalLower = text.toLowerCase();
 
-    // Debug: Log normalization for problematic strings
-    if (text.includes("Ğ") || text.includes("ᵃ")) {
-      logger.debug(
+    // Debug: Log normalization for problematic strings (use INFO so it always shows)
+    if (
+      text.includes("Ğ") ||
+      text.includes("ᵃ") ||
+      text.includes("ı") ||
+      text.toLowerCase().includes("nig")
+    ) {
+      logger.info(
         `[WordFilter] Input: "${text}" → Normalized: "${normalizedText}"`
       );
     }
@@ -957,6 +973,17 @@ class WordFilter {
 
       // Method 1: Direct match in normalized text
       if (normalizedText.includes(normalizedWord)) {
+        // Log detection
+        if (
+          text.includes("Ğ") ||
+          text.includes("ᵃ") ||
+          text.includes("ı") ||
+          text.toLowerCase().includes("nig")
+        ) {
+          logger.info(
+            `[WordFilter] DETECTED: "${word}" in "${text}" (normalized: "${normalizedText}") via ${"normalized_match"}`
+          );
+        }
         return {
           detected: true,
           word: word,
