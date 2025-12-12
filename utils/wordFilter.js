@@ -217,6 +217,40 @@ class WordFilter {
 
     let normalized = text;
 
+    // Remove emojis FIRST (before any normalization) to prevent interference
+    // Most emojis are in the range U+1F300-1F9FF (D83C-D83E high surrogates)
+    // Pattern: Match any high surrogate (D800-DFFF) followed by low surrogate (DC00-DFFF)
+    normalized = normalized.replace(
+      /[\uD800-\uDFFF][\uDC00-\uDFFF]/g,
+      (match) => {
+        const high = match.charCodeAt(0);
+        const low = match.charCodeAt(1);
+        const code = ((high - 0xd800) << 10) + (low - 0xdc00) + 0x10000;
+        // Check if it's in emoji ranges (U+1F300-1F9FF, U+1FA00-1FAFF, etc.)
+        if (
+          (code >= 0x1f300 && code <= 0x1f9ff) || // Emoticons, Symbols, Pictographs
+          (code >= 0x1fa00 && code <= 0x1faff) || // Symbols Extended-A
+          (code >= 0x1fab0 && code <= 0x1faff) || // Symbols Extended-B/C
+          (high >= 0xd83c && high <= 0xd83e) // Common emoji high surrogates
+        ) {
+          return ""; // Remove emoji
+        }
+        // For other supplementary plane chars, check if they're decorative
+        // Keep mathematical/symbol characters that we handle separately
+        if (code >= 0x1d400 && code <= 0x1d7ff) {
+          return match; // Keep mathematical symbols (handled elsewhere)
+        }
+        // Remove other decorative/symbol characters
+        return "";
+      }
+    );
+
+    // Remove miscellaneous symbols (U+2600-26FF) - emojis, symbols
+    normalized = normalized.replace(/[\u2600-\u26FF]/g, "");
+
+    // Remove dingbats (U+2700-27BF)
+    normalized = normalized.replace(/[\u2700-\u27BF]/g, "");
+
     // Normalize Latin Extended-A characters (diacritics) to base ASCII
     // Handles characters like Ğ (U+011E) -> G, ğ (U+011F) -> g
     normalized = normalized.replace(/[\u0100-\u017F]/g, (char) => {
@@ -764,6 +798,36 @@ class WordFilter {
 
     // Remove dingbats (U+2700-27BF)
     normalized = normalized.replace(/[\u2700-\u27BF]/g, "");
+
+    // Remove emojis (supplementary plane - requires surrogate pairs)
+    // Most emojis are in the range U+1F300-1F9FF (D83C-D83E high surrogates)
+    // Pattern: Match any high surrogate (D800-DFFF) followed by low surrogate (DC00-DFFF)
+    // This catches all supplementary plane characters including emojis
+    normalized = normalized.replace(
+      /[\uD800-\uDFFF][\uDC00-\uDFFF]/g,
+      (match) => {
+        const high = match.charCodeAt(0);
+        const low = match.charCodeAt(1);
+        const code = ((high - 0xd800) << 10) + (low - 0xdc00) + 0x10000;
+        // Check if it's in emoji ranges (U+1F300-1F9FF, U+1FA00-1FAFF, etc.)
+        // Or just remove all supplementary plane characters to be safe
+        if (
+          (code >= 0x1f300 && code <= 0x1f9ff) || // Emoticons, Symbols, Pictographs
+          (code >= 0x1fa00 && code <= 0x1faff) || // Symbols Extended-A
+          (code >= 0x1fab0 && code <= 0x1faff) || // Symbols Extended-B/C
+          (high >= 0xd83c && high <= 0xd83e) // Common emoji high surrogates
+        ) {
+          return ""; // Remove emoji
+        }
+        // For other supplementary plane chars, check if they're decorative
+        // Keep mathematical/symbol characters that we handle separately
+        if (code >= 0x1d400 && code <= 0x1d7ff) {
+          return match; // Keep mathematical symbols (handled elsewhere)
+        }
+        // Remove other decorative/symbol characters
+        return "";
+      }
+    );
 
     // Remove enclosed alphanumerics (circled, parenthesized, etc.) - U+2460-24FF
     // We already handle some, but remove others
