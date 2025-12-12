@@ -440,14 +440,6 @@ class GatewayManager extends EventEmitter {
           });
         }
       }
-
-      // Log stats every hour
-      if (Date.now() - this.globalStats.startTime > 3600000) {
-        logger.info(
-          "GatewayManager",
-          `Gateway Stats - Identifies: ${this.globalStats.totalIdentifies}, Resumes: ${this.globalStats.totalResumes}, Reconnects: ${this.globalStats.totalReconnects}`
-        );
-      }
     }, interval);
 
     logger.info("GatewayManager", "Gateway health monitoring started");
