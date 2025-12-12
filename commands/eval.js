@@ -39,6 +39,90 @@ module.exports = {
     return text;
   },
 
+  /**
+   * Sanitize output to remove any potential token leaks
+   */
+  sanitizeOutput(output) {
+    if (typeof output !== "string") {
+      output = String(output);
+    }
+
+    // Get token from env (we'll redact it)
+    const token = process.env.DISCORD_TOKEN;
+    if (token) {
+      // Redact the actual token
+      output = output.replace(
+        new RegExp(token.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi"),
+        "[TOKEN_REDACTED]"
+      );
+      // Also redact partial matches (first/last parts)
+      if (token.length > 10) {
+        const firstPart = token.substring(0, 10);
+        const lastPart = token.substring(token.length - 10);
+        output = output.replace(
+          new RegExp(firstPart.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi"),
+          "[TOKEN_START_REDACTED]"
+        );
+        output = output.replace(
+          new RegExp(lastPart.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi"),
+          "[TOKEN_END_REDACTED]"
+        );
+      }
+    }
+
+    // Redact common token patterns (Discord bot tokens)
+    output = output.replace(
+      /[MN][A-Za-z\d]{23}\.[A-Za-z\d-_]{6}\.[A-Za-z\d-_]{27}/g,
+      "[TOKEN_REDACTED]"
+    );
+    // Redact other sensitive env vars
+    const sensitiveKeys = [
+      "DISCORD_TOKEN",
+      "TOPGG_TOKEN",
+      "DISCORDBOTLIST_TOKEN",
+      "VOIDBOTS_TOKEN",
+      "CLIENT_SECRET",
+      "ADMIN_PASSWORD",
+      "SESSION_SECRET",
+    ];
+    sensitiveKeys.forEach((key) => {
+      const value = process.env[key];
+      if (value) {
+        output = output.replace(
+          new RegExp(value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi"),
+          `[${key}_REDACTED]`
+        );
+      }
+    });
+
+    return output;
+  },
+
+  /**
+   * Check if code attempts to access sensitive information
+   */
+  checkForSensitiveAccess(code) {
+    const sensitivePatterns = [
+      /process\.env\s*\[?\s*['"]DISCORD_TOKEN['"]\s*\]?/i,
+      /process\.env\.DISCORD_TOKEN/i,
+      /client\.token/i,
+      /\.token\s*[=:]/i,
+      /process\.env\s*\[?\s*['"]TOPGG_TOKEN['"]\s*\]?/i,
+      /process\.env\s*\[?\s*['"]CLIENT_SECRET['"]\s*\]?/i,
+      /process\.env\s*\[?\s*['"]ADMIN_PASSWORD['"]\s*\]?/i,
+      /require\(['"]\.env['"]\)/i,
+      /require\(['"]dotenv['"]\)/i,
+      /\.config\(\)/i, // dotenv.config()
+    ];
+
+    for (const pattern of sensitivePatterns) {
+      if (pattern.test(code)) {
+        return true;
+      }
+    }
+    return false;
+  },
+
   async execute(interaction) {
     // Owner check
     if (!Owner.isOwner(interaction.user.id)) {
@@ -48,12 +132,82 @@ module.exports = {
     const code = interaction.options.getString("code");
     const silent = interaction.options.getBoolean("silent") ?? false;
 
+    // Check for sensitive access attempts
+    if (this.checkForSensitiveAccess(code)) {
+      return interaction.reply({
+        content:
+          "❌ **Security Blocked:** Access to sensitive information (tokens, secrets) is not allowed in eval.",
+        flags: MessageFlags.Ephemeral,
+      });
+    }
+
     // Extract variables for eval context (outside try block so they're accessible in catch)
     const client = interaction.client;
     const channel = interaction.channel;
     const guild = interaction.guild;
     const user = interaction.user;
     const member = interaction.member;
+
+    // Create a sanitized process.env proxy that blocks sensitive keys
+    const sanitizedEnv = new Proxy(process.env, {
+      get(target, prop) {
+        const sensitiveKeys = [
+          "DISCORD_TOKEN",
+          "TOPGG_TOKEN",
+          "DISCORDBOTLIST_TOKEN",
+          "VOIDBOTS_TOKEN",
+          "CLIENT_SECRET",
+          "ADMIN_PASSWORD",
+          "SESSION_SECRET",
+          "ADMIN_WEBHOOK_URL",
+          "VOTE_WEBHOOK_URL",
+        ];
+        if (sensitiveKeys.includes(prop)) {
+          return "[REDACTED]";
+        }
+        return target[prop];
+      },
+      has(target, prop) {
+        return prop in target;
+      },
+      ownKeys(target) {
+        return Object.keys(target).filter((key) => {
+          const sensitiveKeys = [
+            "DISCORD_TOKEN",
+            "TOPGG_TOKEN",
+            "DISCORDBOTLIST_TOKEN",
+            "VOIDBOTS_TOKEN",
+            "CLIENT_SECRET",
+            "ADMIN_PASSWORD",
+            "SESSION_SECRET",
+            "ADMIN_WEBHOOK_URL",
+            "VOTE_WEBHOOK_URL",
+          ];
+          return !sensitiveKeys.includes(key);
+        });
+      },
+    });
+
+    // Create a sanitized client object without token access
+    const sanitizedClient = new Proxy(client, {
+      get(target, prop) {
+        if (prop === "token") {
+          return "[REDACTED]";
+        }
+        // Block access to token through other means
+        if (prop === "options" && target.options) {
+          return new Proxy(target.options, {
+            get(optTarget, optProp) {
+              if (optProp === "token") {
+                return "[REDACTED]";
+              }
+              return optTarget[optProp];
+            },
+          });
+        }
+        return target[prop];
+      },
+    });
 
     // Defer reply if not silent
     if (!silent) {
@@ -75,19 +229,29 @@ module.exports = {
       // Wrap code in an async IIFE that provides all context variables
       // This allows the evaluated code to use: client, channel, guild, user, member, interaction
       // If it's a simple expression, automatically return it; otherwise execute as-is
-      const wrappedCode = `(async function(client, channel, guild, user, member, interaction) {
-        ${isSimpleExpression ? `return ${code}` : code}
+      // Note: process.env is replaced with sanitizedEnv, client is replaced with sanitizedClient
+      const wrappedCode = `(async function(client, channel, guild, user, member, interaction, process) {
+        // Override process.env with sanitized version
+        const originalEnv = process.env;
+        process.env = arguments[6].env;
+        try {
+          ${isSimpleExpression ? `return ${code}` : code}
+        } finally {
+          process.env = originalEnv;
+        }
       })`;
 
       // Create and execute function with context variables
+      // Pass sanitized client and process with sanitized env
       const evalFunction = eval(wrappedCode);
       let result = await evalFunction(
-        client,
+        sanitizedClient,
         channel,
         guild,
         user,
         member,
-        interaction
+        interaction,
+        { env: sanitizedEnv }
       );
 
       // Convert result to string, handling circular references and depth limits
@@ -103,6 +267,9 @@ module.exports = {
               breakLength: 60,
               showHidden: false,
             });
+
+      // Sanitize output to remove any token leaks
+      output = this.sanitizeOutput(output);
 
       // Limit output and code display lengths
       output = this.ensureFieldLength(output, 990);
@@ -165,6 +332,9 @@ module.exports = {
       if (error.stack) {
         errorOutput = error.stack;
       }
+
+      // Sanitize error output to remove any token leaks
+      errorOutput = this.sanitizeOutput(errorOutput);
 
       // Limit error output and code display lengths
       errorOutput = this.ensureFieldLength(errorOutput, 990);
