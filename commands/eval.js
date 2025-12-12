@@ -539,6 +539,7 @@ module.exports = {
         
         // Block Object.getOwnPropertyDescriptor on client and sensitive objects
         const originalGetOwnPropertyDescriptor = Object.getOwnPropertyDescriptor;
+        let originalReflectGetOwnPropertyDescriptor = null;
         Object.getOwnPropertyDescriptor = function(obj, prop) {
           // Block if trying to get descriptor from client or message.client
           if (obj === client || obj === message?.client || obj?.constructor?.name === 'Client') {
@@ -551,7 +552,7 @@ module.exports = {
         
         // Block Reflect.getOwnPropertyDescriptor similarly
         if (Reflect && Reflect.getOwnPropertyDescriptor) {
-          const originalReflectGetOwnPropertyDescriptor = Reflect.getOwnPropertyDescriptor;
+          originalReflectGetOwnPropertyDescriptor = Reflect.getOwnPropertyDescriptor;
           Reflect.getOwnPropertyDescriptor = function(obj, prop) {
             if (obj === client || obj === message?.client || obj?.constructor?.name === 'Client') {
               if (prop === 'token' || prop === 'options') {
