@@ -146,36 +146,31 @@ class WordFilter {
       return char;
     });
 
-    // Mathematical Bold (U+1D400-1D433 uppercase, U+1D434-1D467 lowercase)
-    normalized = normalized.replace(/[\uD835\uDC00-\uD835\uDC33]/g, (char) => {
-      const code = char.codePointAt(0);
+    // Mathematical Bold (U+1D400-1D433 uppercase, U+1D41A-1D433 lowercase)
+    // Handle surrogate pairs correctly - match high surrogate then low surrogate range
+    normalized = normalized.replace(/[\uD835][\uDC00-\uDC33]/g, (match) => {
+      const high = match.charCodeAt(0);
+      const low = match.charCodeAt(1);
+      const code = ((high - 0xd800) << 10) + (low - 0xdc00) + 0x10000;
       if (code >= 0x1d400 && code <= 0x1d433) {
         return String.fromCharCode(code - 0x1d400 + 65); // A-Z
-      }
-      return char;
-    });
-    normalized = normalized.replace(/[\uD835\uDC1A-\uD835\uDC33]/g, (char) => {
-      const code = char.codePointAt(0);
-      if (code >= 0x1d41a && code <= 0x1d433) {
+      } else if (code >= 0x1d41a && code <= 0x1d433) {
         return String.fromCharCode(code - 0x1d41a + 97); // a-z
       }
-      return char;
+      return match;
     });
 
-    // Mathematical Italic (U+1D434-1D467 uppercase, U+1D468-1D49B lowercase)
-    normalized = normalized.replace(/[\uD835\uDC34-\uD835\uDC4D]/g, (char) => {
-      const code = char.codePointAt(0);
+    // Mathematical Italic (U+1D434-1D44D uppercase, U+1D44E-1D467 lowercase)
+    normalized = normalized.replace(/[\uD835][\uDC34-\uDC67]/g, (match) => {
+      const high = match.charCodeAt(0);
+      const low = match.charCodeAt(1);
+      const code = ((high - 0xd800) << 10) + (low - 0xdc00) + 0x10000;
       if (code >= 0x1d434 && code <= 0x1d44d) {
         return String.fromCharCode(code - 0x1d434 + 65); // A-Z
-      }
-      return char;
-    });
-    normalized = normalized.replace(/[\uD835\uDC4E-\uD835\uDC67]/g, (char) => {
-      const code = char.codePointAt(0);
-      if (code >= 0x1d44e && code <= 0x1d467) {
+      } else if (code >= 0x1d44e && code <= 0x1d467) {
         return String.fromCharCode(code - 0x1d44e + 97); // a-z
       }
-      return char;
+      return match;
     });
 
     // Circled Latin (U+24B6-24E9 for A-Z, a-z)
@@ -199,57 +194,53 @@ class WordFilter {
     });
 
     // Squared Latin (U+1F130-1F149 for A-Z) - These are surrogate pairs
-    normalized = normalized.replace(/[\uD83C\uDD30-\uD83C\uDD49]/g, (char) => {
+    normalized = normalized.replace(/\uD83C[\uDD30-\uDD49]/g, (match) => {
       // Handle surrogate pairs for squared characters
-      const high = char.charCodeAt(0);
-      const low = char.charCodeAt(1);
+      const high = match.charCodeAt(0);
+      const low = match.charCodeAt(1);
       if (high === 0xd83c && low >= 0xdd30 && low <= 0xdd49) {
         return String.fromCharCode(low - 0xdd30 + 65); // A-Z
       }
-      return char;
+      return match;
     });
 
     // Mathematical Script (U+1D49C-1D4CF uppercase, U+1D4D0-1D503 lowercase)
-    normalized = normalized.replace(/[\uD835\uDC9C-\uD835\uDCCF]/g, (char) => {
-      const code = char.codePointAt(0);
+    normalized = normalized.replace(/[\uD835][\uDC9C-\uDD03]/g, (match) => {
+      const high = match.charCodeAt(0);
+      const low = match.charCodeAt(1);
+      const code = ((high - 0xd800) << 10) + (low - 0xdc00) + 0x10000;
       if (code >= 0x1d49c && code <= 0x1d4cf) {
         return String.fromCharCode(code - 0x1d49c + 65); // A-Z
-      }
-      return char;
-    });
-    normalized = normalized.replace(/[\uD835\uDCD0-\uD835\uDD03]/g, (char) => {
-      const code = char.codePointAt(0);
-      if (code >= 0x1d4d0 && code <= 0x1d503) {
+      } else if (code >= 0x1d4d0 && code <= 0x1d503) {
         return String.fromCharCode(code - 0x1d4d0 + 97); // a-z
       }
-      return char;
+      return match;
     });
 
     // Mathematical Fraktur (U+1D504-1D537 uppercase, U+1D538-1D56B lowercase)
-    normalized = normalized.replace(/[\uD835\uDD04-\uD835\uDD37]/g, (char) => {
-      const code = char.codePointAt(0);
+    normalized = normalized.replace(/[\uD835][\uDD04-\uDD6B]/g, (match) => {
+      const high = match.charCodeAt(0);
+      const low = match.charCodeAt(1);
+      const code = ((high - 0xd800) << 10) + (low - 0xdc00) + 0x10000;
       if (code >= 0x1d504 && code <= 0x1d537) {
         return String.fromCharCode(code - 0x1d504 + 65); // A-Z
-      }
-      return char;
-    });
-    normalized = normalized.replace(/[\uD835\uDD38-\uD835\uDD6B]/g, (char) => {
-      const code = char.codePointAt(0);
-      if (code >= 0x1d538 && code <= 0x1d56b) {
+      } else if (code >= 0x1d538 && code <= 0x1d56b) {
         return String.fromCharCode(code - 0x1d538 + 97); // a-z
       }
-      return char;
+      return match;
     });
 
     // Double-struck (U+1D538-1D56B uppercase, U+1D552-1D585 lowercase)
-    normalized = normalized.replace(/[\uD835\uDD38-\uD835\uDD6B]/g, (char) => {
-      const code = char.codePointAt(0);
+    normalized = normalized.replace(/[\uD835][\uDD38-\uDD6B]/g, (match) => {
+      const high = match.charCodeAt(0);
+      const low = match.charCodeAt(1);
+      const code = ((high - 0xd800) << 10) + (low - 0xdc00) + 0x10000;
       if (code >= 0x1d538 && code <= 0x1d56b) {
         return String.fromCharCode(code - 0x1d538 + 65); // A-Z
       } else if (code >= 0x1d552 && code <= 0x1d585) {
         return String.fromCharCode(code - 0x1d552 + 97); // a-z
       }
-      return char;
+      return match;
     });
 
     return normalized;
