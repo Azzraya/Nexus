@@ -230,14 +230,23 @@ module.exports = {
       // This allows the evaluated code to use: client, channel, guild, user, member, interaction
       // If it's a simple expression, automatically return it; otherwise execute as-is
       // Note: process.env is replaced with sanitizedEnv, client is replaced with sanitizedClient
-      const wrappedCode = `(async function(client, channel, guild, user, member, interaction, process) {
+      const wrappedCode = `(async function(client, channel, guild, user, member, interaction, sanitizedEnv) {
         // Override process.env with sanitized version
         const originalEnv = process.env;
-        process.env = arguments[6].env;
+        Object.defineProperty(process, 'env', {
+          value: sanitizedEnv,
+          writable: false,
+          configurable: false
+        });
         try {
           ${isSimpleExpression ? `return ${code}` : code}
         } finally {
-          process.env = originalEnv;
+          // Restore original env (though it shouldn't be needed)
+          Object.defineProperty(process, 'env', {
+            value: originalEnv,
+            writable: false,
+            configurable: false
+          });
         }
       })`;
 
