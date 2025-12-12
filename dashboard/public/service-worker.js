@@ -1,4 +1,4 @@
-const CACHE_NAME = "nexus-dashboard-v1";
+const CACHE_NAME = "nexus-dashboard-v2";
 const urlsToCache = [
   "/dashboard",
   "/dashboard.css",
@@ -69,16 +69,19 @@ self.addEventListener("fetch", (event) => {
 
 // Update service worker
 self.addEventListener("activate", (event) => {
-  const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
     caches.keys().then((cacheNames) => {
+      // Delete ALL old caches to ensure fresh content
       return Promise.all(
         cacheNames.map((cacheName) => {
-          if (cacheWhitelist.indexOf(cacheName) === -1) {
+          if (cacheName !== CACHE_NAME) {
+            console.log("Deleting old cache:", cacheName);
             return caches.delete(cacheName);
           }
         })
       );
     })
   );
+  // Take control of all pages immediately
+  return self.clients.claim();
 });
