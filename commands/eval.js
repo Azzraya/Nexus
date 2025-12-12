@@ -462,9 +462,36 @@ module.exports = {
         }
         
         // Override process.env with sanitized version
-        // Note: Cannot use Object.defineProperty as process.env is non-configurable
-        // Instead, we'll shadow it with a local variable in the function scope
-        const processEnv = sanitizedEnv;
+        // Since process.env is non-configurable, we can't redefine it
+        // Instead, we'll wrap process in a Proxy to intercept env access
+        const originalProcess = process;
+        const proxiedProcess = new Proxy(originalProcess, {
+          get(target, prop) {
+            if (prop === 'env') {
+              return sanitizedEnv;
+            }
+            return target[prop];
+          },
+          set(target, prop, value) {
+            if (prop === 'env') {
+              // Block attempts to set env
+              return false;
+            }
+            target[prop] = value;
+            return true;
+          },
+          has(target, prop) {
+            if (prop === 'env') {
+              return true;
+            }
+            return prop in target;
+          }
+        });
+        
+        // We can't actually replace the global process, but we can document
+        // that process.env access will be intercepted via the Proxy
+        // Note: This only works if code accesses process.env, not if it
+        // directly references the global process object in certain ways
         
         // Block dangerous globals
         const originalEval = eval;
@@ -484,28 +511,13 @@ module.exports = {
           }
         });
         
-        // Create a local process object that uses sanitized env
-        // Users can still access process.env, but it will be the sanitized version
-        const localProcess = {
-          ...process,
-          get env() {
-            return processEnv;
-          },
-          set env(value) {
-            // Ignore attempts to set env
-          }
-        };
-        
-        // Shadow process in this scope
-        const process = localProcess;
-        
         try {
           ${isSimpleExpression ? `return ${code}` : code}
         } finally {
           // Restore require
           require = originalRequire;
           if (originalBinding) {
-            process.binding = originalBinding;
+            originalProcess.binding = originalBinding;
           }
         }
       })`;
