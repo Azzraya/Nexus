@@ -462,12 +462,9 @@ module.exports = {
         }
         
         // Override process.env with sanitized version
-        const originalEnv = process.env;
-        Object.defineProperty(process, 'env', {
-          value: sanitizedEnv,
-          writable: false,
-          configurable: false
-        });
+        // Note: Cannot use Object.defineProperty as process.env is non-configurable
+        // Instead, we'll shadow it with a local variable in the function scope
+        const processEnv = sanitizedEnv;
         
         // Block dangerous globals
         const originalEval = eval;
@@ -487,15 +484,25 @@ module.exports = {
           }
         });
         
+        // Create a local process object that uses sanitized env
+        // Users can still access process.env, but it will be the sanitized version
+        const localProcess = {
+          ...process,
+          get env() {
+            return processEnv;
+          },
+          set env(value) {
+            // Ignore attempts to set env
+          }
+        };
+        
+        // Shadow process in this scope
+        const process = localProcess;
+        
         try {
           ${isSimpleExpression ? `return ${code}` : code}
         } finally {
-          // Restore original env
-          Object.defineProperty(process, 'env', {
-            value: originalEnv,
-            writable: false,
-            configurable: false
-          });
+          // Restore require
           require = originalRequire;
           if (originalBinding) {
             process.binding = originalBinding;
