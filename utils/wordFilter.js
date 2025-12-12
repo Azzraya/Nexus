@@ -99,9 +99,6 @@ class WordFilter {
       "heshe",
       "he she",
       "heshe",
-      "it",
-      "it's",
-      "its",
       "attack helicopter",
       "attackhelicopter",
       "attack helicopter",
@@ -1313,26 +1310,42 @@ class WordFilter {
 
     // Special case: If normalized text is empty but original had content,
     // check if original length matches any blacklisted word (suspicious obfuscation)
+    // Only flag if the text contains actual obfuscation characters (not just emojis)
     if (normalizedText.length === 0 && originalLength > 0) {
-      for (const word of combinedBlacklist) {
-        if (!word || typeof word !== "string") continue;
-        const normalizedWord = word.toLowerCase().trim();
-        if (!normalizedWord) continue;
-        // If original length is similar to word length (within 2 characters), flag as suspicious
-        if (
-          Math.abs(originalLength - normalizedWord.length) <= 2 &&
-          originalLength >= 3
-        ) {
-          const isDefault = this.defaultBlacklist.includes(word);
-          logger.info(
-            `[WordFilter] SUSPICIOUS: Empty normalization but length matches "${word}" (${originalLength} vs ${normalizedWord.length})`
-          );
-          return {
-            detected: true,
-            word: word,
-            method: "suspicious_obfuscation",
-            isDefault: isDefault,
-          };
+      // Check if text contains suspicious obfuscation characters (not just emojis)
+      // Look for zero-width characters, font variations, or other obfuscation techniques
+      const hasSuspiciousChars =
+        /[\u200B-\u200D\uFEFF\u2060]/.test(text) || // Zero-width characters
+        /[\u0250-\u02AF]/.test(text) || // Upside-down characters
+        /[\u1D00-\u1D7F]/.test(text) || // Phonetic extensions / small capitals
+        /[\u02B0-\u02FF]/.test(text) || // Modifier letters
+        /[\uD835]/.test(text) || // Mathematical alphanumeric symbols (surrogate pairs)
+        /[\u0100-\u017F]/.test(text) || // Latin Extended-A (diacritics used for obfuscation)
+        /[\uFF00-\uFFEF]/.test(text); // Fullwidth characters
+
+      // Only proceed if there are actual suspicious characters (not just emojis/whitespace)
+      if (hasSuspiciousChars) {
+        for (const word of combinedBlacklist) {
+          if (!word || typeof word !== "string") continue;
+          const normalizedWord = word.toLowerCase().trim();
+          if (!normalizedWord) continue;
+          // Only flag if length matches exactly or is within 1 character
+          // Also require original length to be at least 4
+          if (
+            Math.abs(originalLength - normalizedWord.length) <= 1 &&
+            originalLength >= 4
+          ) {
+            const isDefault = this.defaultBlacklist.includes(word);
+            logger.info(
+              `[WordFilter] SUSPICIOUS: Empty normalization but length matches "${word}" (${originalLength} vs ${normalizedWord.length})`
+            );
+            return {
+              detected: true,
+              word: word,
+              method: "suspicious_obfuscation",
+              isDefault: isDefault,
+            };
+          }
         }
       }
     }
@@ -1370,7 +1383,8 @@ class WordFilter {
 
       // Method 1.5: Fuzzy match - check if normalized text is similar to word (for cases where non-Latin chars were removed)
       // This handles cases like "ngga" vs "nigga" where a character was removed from the input
-      if (normalizedWord.length >= 4) {
+      // Only perform fuzzy matching if normalized text is substantial (at least 3 chars) to avoid false positives
+      if (normalizedWord.length >= 4 && normalizedText.length >= 3) {
         // Check if normalizedText matches word with one character removed from word
         // e.g., "ngga" should match "nigga" (missing 'i')
         if (normalizedText.length === normalizedWord.length - 1) {
@@ -1389,7 +1403,8 @@ class WordFilter {
         }
         // Check if normalizedText matches word with one character added to text
         // e.g., "nngga" should match "nigga"
-        if (normalizedText.length === normalizedWord.length + 1) {
+        // Only check if normalized text is at least 3 chars to avoid false positives
+        if (normalizedText.length >= 3 && normalizedText.length === normalizedWord.length + 1) {
           for (let i = 0; i < normalizedText.length; i++) {
             const textWithCharRemoved =
               normalizedText.slice(0, i) + normalizedText.slice(i + 1);
@@ -1403,18 +1418,9 @@ class WordFilter {
             }
           }
         }
-        // Check if word contains normalizedText as substring (for partial matches)
-        if (
-          normalizedText.length >= 3 &&
-          normalizedWord.includes(normalizedText)
-        ) {
-          return {
-            detected: true,
-            word: word,
-            method: "fuzzy_match",
-            isDefault: isDefault,
-          };
-        }
+        // REMOVED: Check if word contains normalizedText as substring
+        // This was causing false positives (e.g., "nig" from "night" matching "nigger")
+        // The substring check is too permissive and flags innocent words
       }
 
       // Method 2: Check original text with case variations

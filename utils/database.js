@@ -3316,8 +3316,10 @@ class Database {
   // Behavioral data
   async recordBehavior(guildId, userId, behaviorType, data, timestamp) {
     return new Promise((resolve, reject) => {
+      // Use INSERT OR IGNORE to handle duplicate timestamps gracefully
+      // If multiple behaviors occur at the exact same millisecond, we'll only keep one
       this.db.run(
-        "INSERT INTO behavioral_data (guild_id, user_id, behavior_type, data, timestamp, confidence) VALUES (?, ?, ?, ?, ?, ?)",
+        "INSERT OR IGNORE INTO behavioral_data (guild_id, user_id, behavior_type, data, timestamp, confidence) VALUES (?, ?, ?, ?, ?, ?)",
         [guildId, userId, behaviorType, JSON.stringify(data), timestamp, 0.5],
         (err) => {
           if (err) reject(err);
@@ -3689,8 +3691,10 @@ class Database {
   // Behavioral data
   async recordBehavior(guildId, userId, behaviorType, data, timestamp) {
     return new Promise((resolve, reject) => {
+      // Use INSERT OR IGNORE to handle duplicate timestamps gracefully
+      // If multiple behaviors occur at the exact same millisecond, we'll only keep one
       this.db.run(
-        "INSERT INTO behavioral_data (guild_id, user_id, behavior_type, data, timestamp, confidence) VALUES (?, ?, ?, ?, ?, ?)",
+        "INSERT OR IGNORE INTO behavioral_data (guild_id, user_id, behavior_type, data, timestamp, confidence) VALUES (?, ?, ?, ?, ?, ?)",
         [guildId, userId, behaviorType, JSON.stringify(data), timestamp, 0.5],
         (err) => {
           if (err) reject(err);
