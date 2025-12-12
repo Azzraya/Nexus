@@ -2425,6 +2425,13 @@ class Database {
         created_at INTEGER NOT NULL
       )
     `);
+
+    this.db.run(`
+      CREATE TABLE IF NOT EXISTS verification_reminders (
+        milestone INTEGER PRIMARY KEY,
+        sent_at INTEGER NOT NULL
+      )
+    `);
   }
 
   // Server config methods

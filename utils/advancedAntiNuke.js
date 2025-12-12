@@ -669,7 +669,9 @@ class AdvancedAntiNuke {
   async handleThreat(guild, userId, threatType, counts) {
     // Check if guild still exists
     if (!guild || !guild.available) {
-      logger.warn(`[Anti-Nuke] Guild ${guild?.id || "unknown"} is not available, skipping threat handling`);
+      logger.warn(
+        `[Anti-Nuke] Guild ${guild?.id || "unknown"} is not available, skipping threat handling`
+      );
       return;
     }
 
@@ -679,7 +681,9 @@ class AdvancedAntiNuke {
     } catch (error) {
       if (error.code === 10004) {
         // Unknown Guild - bot was removed or guild deleted
-        logger.warn(`[Anti-Nuke] Guild ${guild.id} no longer exists, skipping threat handling`);
+        logger.warn(
+          `[Anti-Nuke] Guild ${guild.id} no longer exists, skipping threat handling`
+        );
         return;
       }
       // Re-throw other errors
@@ -1210,7 +1214,9 @@ class AdvancedAntiNuke {
         } catch (err) {
           if (err.code === 10004) {
             // Unknown Guild - bot was removed or guild deleted
-            logger.warn(`[Anti-Nuke] Guild ${guild.id} no longer exists, cannot refresh member`);
+            logger.warn(
+              `[Anti-Nuke] Guild ${guild.id} no longer exists, cannot refresh member`
+            );
             return; // Exit early
           }
           logger.error(`[Anti-Nuke] Could not refresh member:`, err);
@@ -1226,7 +1232,9 @@ class AdvancedAntiNuke {
       await guild.roles.fetch().catch((err) => {
         if (err.code === 10004) {
           // Unknown Guild - bot was removed or guild deleted
-          logger.warn(`[Anti-Nuke] Guild ${guild.id} no longer exists, cannot fetch roles`);
+          logger.warn(
+            `[Anti-Nuke] Guild ${guild.id} no longer exists, cannot fetch roles`
+          );
           throw err; // Re-throw to exit early
         }
         throw err;
@@ -1462,7 +1470,9 @@ class AdvancedAntiNuke {
     } catch (error) {
       if (error.code === 10004) {
         // Unknown Guild - bot was removed or guild deleted
-        logger.warn(`[Anti-Nuke] Guild ${guild.id} no longer exists during threat handling`);
+        logger.warn(
+          `[Anti-Nuke] Guild ${guild.id} no longer exists during threat handling`
+        );
         return; // Exit early, don't log as error
       }
       logger.error(`[Anti-Nuke] Error handling threat:`, error);
