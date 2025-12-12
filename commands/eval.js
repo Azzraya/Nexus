@@ -454,8 +454,9 @@ module.exports = {
         // in pre-execution check via checkForSensitiveAccess()
         
         // Block process.binding
+        let originalBinding = null;
         if (process.binding) {
-          const originalBinding = process.binding;
+          originalBinding = process.binding;
           process.binding = function() {
             throw new Error('process.binding is blocked for security');
           };
