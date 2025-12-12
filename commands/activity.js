@@ -52,17 +52,19 @@ module.exports = {
             .setRequired(false)
         )
     )
-    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
+    .setDescription(
+      "View bot activity logs (server joins/leaves and command usage) (OWNER ONLY)"
+    ),
 
   async execute(interaction) {
+    // Owner-only command
+    if (!Owner.isOwner(interaction.user.id)) {
+      return interaction.reply(ErrorMessages.ownerOnly());
+    }
+
     const subcommand = interaction.options.getSubcommand();
 
     if (subcommand === "servers") {
-      // Owner-only for security
-      if (!Owner.isOwner(interaction.user.id)) {
-        return interaction.reply(ErrorMessages.ownerOnly());
-      }
-
       const limit = interaction.options.getInteger("limit") || 20;
 
       const logs = await new Promise((resolve, reject) => {
@@ -114,11 +116,6 @@ module.exports = {
 
       await interaction.reply({ embeds: [embed] });
     } else if (subcommand === "commands") {
-      // Owner-only for security
-      if (!Owner.isOwner(interaction.user.id)) {
-        return interaction.reply(ErrorMessages.ownerOnly());
-      }
-
       const serverId = interaction.options.getString("server");
       const commandName = interaction.options.getString("command");
       const limit = interaction.options.getInteger("limit") || 20;
