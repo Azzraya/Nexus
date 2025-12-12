@@ -2503,6 +2503,9 @@ class Database {
       "verification_mode",
       "alert_threshold",
       "webhook_url",
+      "word_filter_enabled",
+      "word_filter_action",
+      "blacklisted_words",
     ];
 
     // Filter data to only allowed keys
