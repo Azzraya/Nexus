@@ -1015,6 +1015,7 @@ class WordFilter {
       }
 
       // Method 6: Check leetspeak variations
+      // Check both original text and normalized text for leetspeak patterns
       const leetPatterns = [
         normalizedWord.replace(/a/g, "[4@]"),
         normalizedWord.replace(/e/g, "[3]"),
@@ -1027,7 +1028,8 @@ class WordFilter {
       for (const pattern of leetPatterns) {
         try {
           const leetRegex = new RegExp(pattern, "i");
-          if (leetRegex.test(text)) {
+          // Check both original and normalized text
+          if (leetRegex.test(text) || leetRegex.test(normalizedText)) {
             return {
               detected: true,
               word: word,
