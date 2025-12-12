@@ -10,13 +10,29 @@ const compression = require("compression");
 // Ensure logger is loaded first to prevent initialization errors
 const logger = require("../utils/logger");
 const db = require("../utils/database");
+const redisCache = require("../utils/redisCache");
+const InputValidator = require("../utils/inputValidator");
 
 class DashboardServer {
   constructor(client) {
     this.client = client;
     this.app = express();
     this.rateLimitStore = new Map(); // IP -> { count, resetTime }
+    this.endpointRateLimitStore = new Map(); // path -> IP -> { count, resetTime }
     this.adminTokens = new Map(); // token -> { created, expires }
+
+    // Per-endpoint rate limit configuration
+    this.endpointRateLimits = {
+      // Admin endpoints - stricter limits
+      "/api/admin": { maxRequests: 30, windowMs: 60000 }, // 30/min
+      "/api/v1": { maxRequests: 60, windowMs: 60000 }, // 60/min
+      "/api/v2": { maxRequests: 100, windowMs: 60000 }, // 100/min
+      // Auth endpoints - moderate limits
+      "/login": { maxRequests: 5, windowMs: 60000 }, // 5/min
+      "/callback": { maxRequests: 10, windowMs: 60000 }, // 10/min
+      // Default for other endpoints
+      default: { maxRequests: 100, windowMs: 60000 }, // 100/min
+    };
 
     // Helper function to get real client IP (handles ngrok, proxies, etc.)
     this.getRealIP = (req) => {
@@ -85,7 +101,73 @@ class DashboardServer {
       next();
     });
 
-    this.app.use(express.json());
+    // Request body size limits (prevent DoS)
+    this.app.use(express.json({ limit: "10mb" })); // 10MB max JSON payload
+    this.app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+
+    // Request ID tracking middleware (for debugging)
+    this.app.use((req, res, next) => {
+      req.id = crypto.randomUUID();
+      res.setHeader("X-Request-ID", req.id);
+      next();
+    });
+
+    // Response time tracking middleware
+    this.app.use((req, res, next) => {
+      const startTime = Date.now();
+      res.on("finish", () => {
+        const duration = Date.now() - startTime;
+        res.setHeader("X-Response-Time", `${duration}ms`);
+        // Log slow requests (>1s)
+        if (duration > 1000) {
+          logger.warn(
+            "Dashboard",
+            `Slow request: ${req.method} ${req.path} took ${duration}ms [${req.id}]`
+          );
+        }
+      });
+      next();
+    });
+
+    // Request timeout middleware (30s default)
+    this.app.use((req, res, next) => {
+      const timeout = 30000; // 30 seconds
+      req.setTimeout(timeout, () => {
+        if (!res.headersSent) {
+          res.status(408).json({
+            error: "Request timeout",
+            message: "Request took too long to process",
+            requestId: req.id,
+          });
+        }
+      });
+      next();
+    });
+
+    // Structured request logging middleware
+    this.app.use((req, res, next) => {
+      // Skip logging for static assets and health checks
+      if (
+        req.path.match(
+          /\.(css|js|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$/
+        ) ||
+        req.path === "/health" ||
+        req.path === "/ping"
+      ) {
+        return next();
+      }
+
+      const ip = this.getRealIP(req);
+      logger.info("Dashboard", {
+        requestId: req.id,
+        method: req.method,
+        path: req.path,
+        ip: ip,
+        userAgent: req.headers["user-agent"]?.substring(0, 100),
+        userId: req.user?.id || null,
+      });
+      next();
+    });
 
     // Static files with caching
     this.app.use(
@@ -140,9 +222,9 @@ class DashboardServer {
       next();
     });
 
-    // Rate Limiting Middleware (BEFORE IP logging)
+    // Global Rate Limiting Middleware (BEFORE IP logging)
     this.app.use((req, res, next) => {
-      // Skip rate limiting for authenticated users
+      // Skip rate limiting for authenticated users (they have per-endpoint limits)
       if (req.user) {
         return next();
       }
@@ -184,6 +266,63 @@ class DashboardServer {
           error: "Too many requests",
           message: "Rate limit exceeded. Try again in 1 minute.",
           retryAfter: Math.ceil((record.resetTime - now) / 1000),
+        });
+      }
+
+      // Increment counter
+      record.count++;
+      next();
+    });
+
+    // Per-endpoint rate limiting middleware
+    this.app.use((req, res, next) => {
+      // Find matching rate limit config
+      let config = this.endpointRateLimits.default;
+      for (const [path, limitConfig] of Object.entries(
+        this.endpointRateLimits
+      )) {
+        if (path !== "default" && req.path.startsWith(path)) {
+          config = limitConfig;
+          break;
+        }
+      }
+
+      // Skip if no limit configured or user is authenticated (they have higher limits)
+      if (!config || req.user) {
+        return next();
+      }
+
+      const ip = this.getRealIP(req);
+      const cleanIP = ip?.replace("::ffff:", "") || "unknown";
+      const cacheKey = `${req.path}:${cleanIP}`;
+      const now = Date.now();
+
+      if (!this.endpointRateLimitStore.has(cacheKey)) {
+        this.endpointRateLimitStore.set(cacheKey, {
+          count: 1,
+          resetTime: now + config.windowMs,
+        });
+        return next();
+      }
+
+      const record = this.endpointRateLimitStore.get(cacheKey);
+
+      // Reset if window expired
+      if (now > record.resetTime) {
+        record.count = 1;
+        record.resetTime = now + config.windowMs;
+        return next();
+      }
+
+      // Check if over limit
+      if (record.count >= config.maxRequests) {
+        return res.status(429).json({
+          error: "Too many requests",
+          message: `Rate limit exceeded for ${req.path}. Try again in ${Math.ceil(
+            (record.resetTime - now) / 1000
+          )} seconds.`,
+          retryAfter: Math.ceil((record.resetTime - now) / 1000),
+          requestId: req.id,
         });
       }
 
@@ -234,8 +373,152 @@ class DashboardServer {
     this.app.use(passport.initialize());
     this.app.use(passport.session());
 
+    // Input validation middleware for API endpoints
+    this.app.use("/api", (req, res, next) => {
+      // Sanitize query parameters
+      if (req.query) {
+        for (const [key, value] of Object.entries(req.query)) {
+          if (typeof value === "string") {
+            try {
+              req.query[key] = InputValidator.sanitizeString(value, 500);
+            } catch (error) {
+              return res.status(400).json({
+                error: "Invalid input",
+                message: `Invalid value for parameter '${key}': ${error.message}`,
+                requestId: req.id,
+              });
+            }
+          }
+        }
+      }
+
+      // Sanitize body parameters
+      if (req.body && typeof req.body === "object") {
+        for (const [key, value] of Object.entries(req.body)) {
+          if (typeof value === "string") {
+            try {
+              req.body[key] = InputValidator.sanitizeString(value, 10000);
+              // Check for suspicious patterns
+              if (InputValidator.containsSuspiciousPatterns(req.body[key])) {
+                logger.warn("Dashboard", {
+                  requestId: req.id,
+                  path: req.path,
+                  suspiciousInput: key,
+                  ip: this.getRealIP(req),
+                });
+                return res.status(400).json({
+                  error: "Invalid input",
+                  message: "Input contains potentially malicious content",
+                  requestId: req.id,
+                });
+              }
+            } catch (error) {
+              return res.status(400).json({
+                error: "Invalid input",
+                message: `Invalid value for field '${key}': ${error.message}`,
+                requestId: req.id,
+              });
+            }
+          }
+        }
+      }
+
+      // Validate Discord IDs in params (check all params that look like IDs)
+      for (const [key, value] of Object.entries(req.params)) {
+        if (
+          (key === "id" || key.includes("Id") || key.includes("_id")) &&
+          typeof value === "string" &&
+          value.length > 10 &&
+          !InputValidator.isValidDiscordId(value)
+        ) {
+          return res.status(400).json({
+            error: "Invalid Discord ID",
+            message: `The provided ${key} is not a valid Discord snowflake`,
+            requestId: req.id,
+          });
+        }
+      }
+
+      next();
+    });
+
+    // Redis caching middleware for GET requests
+    this.app.use("/api", async (req, res, next) => {
+      // Only cache GET requests
+      if (req.method !== "GET") {
+        return next();
+      }
+
+      // Skip caching for authenticated endpoints that need fresh data
+      if (
+        req.path.includes("/user") ||
+        req.path.includes("/servers") ||
+        req.path.includes("/events/stream") ||
+        req.path.includes("/admin")
+      ) {
+        return next();
+      }
+
+      const cacheKey = `dashboard:${req.path}:${JSON.stringify(req.query)}`;
+      const cached = await redisCache.get(cacheKey);
+
+      if (cached !== null) {
+        res.setHeader("X-Cache", "HIT");
+        return res.json(cached);
+      }
+
+      // Store original json method
+      const originalJson = res.json.bind(res);
+      res.json = (data) => {
+        // Cache successful responses (status 200)
+        if (res.statusCode === 200) {
+          // Different TTL based on endpoint type
+          let ttl = 300; // 5 minutes default
+          if (req.path.includes("/stats") || req.path.includes("/metrics")) {
+            ttl = 60; // 1 minute for stats
+          } else if (
+            req.path.includes("/shards") ||
+            req.path.includes("/gateway")
+          ) {
+            ttl = 30; // 30 seconds for real-time data
+          } else if (req.path.includes("/v2")) {
+            ttl = 600; // 10 minutes for v2 API
+          }
+
+          redisCache.set(cacheKey, data, ttl).catch((err) => {
+            logger.debug("Dashboard", `Cache set error: ${err.message}`);
+          });
+        }
+        res.setHeader("X-Cache", "MISS");
+        return originalJson(data);
+      };
+
+      next();
+    });
+
     this.setupAuth();
     this.setupRoutes();
+
+    // Global error handler (must be last)
+    this.app.use((err, req, res, next) => {
+      const requestId = req.id || "unknown";
+      logger.error("Dashboard", {
+        requestId,
+        error: err.message,
+        stack: err.stack,
+        path: req.path,
+        method: req.method,
+      });
+
+      // Don't leak error details in production
+      const isDevelopment = process.env.NODE_ENV === "development";
+
+      res.status(err.status || 500).json({
+        error: err.message || "Internal server error",
+        requestId,
+        ...(isDevelopment && { stack: err.stack }),
+      });
+    });
   }
 
   setupAuth() {
@@ -6750,24 +7033,102 @@ class DashboardServer {
     this.setupPublicAPI();
 
     // Clean up old rate limit entries every 5 minutes
-    setInterval(() => {
+    this.rateLimitCleanupInterval = setInterval(() => {
       const now = Date.now();
+      // Clean up global rate limit store
       for (const [ip, record] of this.rateLimitStore.entries()) {
         if (now > record.resetTime + 300000) {
           // 5 minutes after reset
           this.rateLimitStore.delete(ip);
         }
       }
+      // Clean up endpoint rate limit store
+      for (const [key, record] of this.endpointRateLimitStore.entries()) {
+        if (now > record.resetTime + 300000) {
+          // 5 minutes after reset
+          this.endpointRateLimitStore.delete(key);
+        }
+      }
     }, 300000);
 
-    this.app.listen(port, () => {
-      console.log(`[Dashboard] Running on http://localhost:${port}`);
-      console.log(
-        `[Dashboard] Ngrok URL: ${
+    // Store server instance for graceful shutdown
+    this.server = this.app.listen(port, () => {
+      logger.info(
+        "Dashboard",
+        `🚀 Dashboard server running on http://localhost:${port}`
+      );
+      logger.info(
+        "Dashboard",
+        `🌐 Ngrok URL: ${
           process.env.DASHBOARD_URL || "Set DASHBOARD_URL in .env"
         }`
       );
-      console.log("[Rate Limit] IP rate limiting active (100 req/min)");
+      logger.info("Dashboard", "🛡️ Rate limiting active (100 req/min per IP)");
+      logger.info(
+        "Dashboard",
+        "✅ Input validation, Redis caching, and per-endpoint rate limiting enabled"
+      );
+    });
+
+    // Graceful shutdown handler
+    this.setupGracefulShutdown();
+  }
+
+  setupGracefulShutdown() {
+    const shutdown = async (signal) => {
+      logger.info(
+        "Dashboard",
+        `Received ${signal}, shutting down gracefully...`
+      );
+
+      // Stop accepting new connections
+      if (this.server) {
+        this.server.close(() => {
+          logger.info("Dashboard", "HTTP server closed");
+        });
+      }
+
+      // Clear intervals
+      if (this.rateLimitCleanupInterval) {
+        clearInterval(this.rateLimitCleanupInterval);
+      }
+
+      // Close SSE connections
+      if (this.sseClients) {
+        this.sseClients.forEach((client) => {
+          try {
+            client.write(
+              `data: ${JSON.stringify({ type: "shutdown", timestamp: Date.now() })}\n\n`
+            );
+            client.end();
+          } catch (error) {
+            // Client already closed
+          }
+        });
+        this.sseClients.clear();
+      }
+
+      // Give connections time to close (10 seconds)
+      setTimeout(() => {
+        logger.info("Dashboard", "Graceful shutdown complete");
+        process.exit(0);
+      }, 10000);
+    };
+
+    // Handle shutdown signals
+    process.on("SIGTERM", () => shutdown("SIGTERM"));
+    process.on("SIGINT", () => shutdown("SIGINT"));
+
+    // Handle uncaught exceptions
+    process.on("uncaughtException", (error) => {
+      logger.error("Dashboard", "Uncaught exception:", error);
+      shutdown("uncaughtException");
+    });
+
+    // Handle unhandled promise rejections
+    process.on("unhandledRejection", (reason, promise) => {
+      logger.error("Dashboard", "Unhandled rejection:", reason);
+      shutdown("unhandledRejection");
     });
   }
 }
