@@ -326,11 +326,7 @@ class EventActionTracker {
       }
     }
 
-    logger.warn(
-      "EventActionTracker",
-      `🚨 Suspicious pattern detected: ${patternType} by ${userId} in ${guild.name} (${guild.id})`,
-      data
-    );
+    // Suspicious pattern detected (no console logging - handled by anti-nuke system)
 
     // Store pattern
     if (!this.suspiciousPatterns.has(guild.id)) {
