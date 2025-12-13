@@ -37,25 +37,6 @@ module.exports = {
       }
     }
 
-    // Enhanced logging (silent - no console output)
-    const EnhancedLogging = require("../utils/enhancedLogging");
-    await EnhancedLogging.log(role.guild.id, "role_create", "role", {
-      userId: null,
-      moderatorId: null,
-      action: "role_created",
-      details: `Role created: ${role.name}`,
-      metadata: {
-        roleId: role.id,
-        roleName: role.name,
-        color: role.color,
-        permissions: role.permissions.bitfield.toString(),
-        position: role.position,
-        mentionable: role.mentionable,
-        hoist: role.hoist,
-      },
-      severity: "info",
-    }).catch(() => {}); // Silently fail if logging fails
-
     // Check for mod log channel
     const config = await db.getServerConfig(role.guild.id);
     if (config && config.mod_log_channel) {

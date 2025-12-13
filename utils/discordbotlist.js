@@ -107,7 +107,13 @@ class DiscordBotList {
 
       return vote || null;
     } catch (error) {
-      logger.error("[Discord Bot List] Error checking vote status:", error);
+      // Handle rate limit errors gracefully (429) - these are expected
+      if (error.response?.status === 429 || error.status === 429) {
+        // Rate limited - silently return null (no need to log)
+        return null;
+      }
+      // Only log actual errors (not rate limits)
+      logger.debug("[Discord Bot List] Error checking vote status:", error.message || error);
       return null;
     }
   }
