@@ -348,15 +348,8 @@ class AdvancedAntiRaid {
   }
 
   static async detectRaid(guild, member) {
-    logger.info(
-      `[Anti-Raid] detectRaid called for ${member.user.tag} (${member.id}) in ${guild.name} (${guild.id})`
-    );
-
     const config = await db.getServerConfig(guild.id);
     if (!config) {
-      logger.warn(
-        `[Anti-Raid] No config found for ${guild.name} (${guild.id}) - skipping detection`
-      );
       return false;
     }
 
