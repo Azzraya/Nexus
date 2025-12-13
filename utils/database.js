@@ -5361,13 +5361,21 @@ class Database {
         (err) => {
           if (err) {
             // If table doesn't exist, try old structure (achievements table)
-            if (err.message && err.message.includes("no such table") || 
-                err.message && err.message.includes("no such column")) {
+            if (
+              (err.message && err.message.includes("no such table")) ||
+              (err.message && err.message.includes("no such column"))
+            ) {
               // Old structure: insert directly into achievements table
               this.db.run(
                 `INSERT OR IGNORE INTO achievements (guild_id, user_id, achievement_type, achievement_data, unlocked_at)
                  VALUES (?, ?, ?, ?, ?)`,
-                [guildId, userId, achievementId, JSON.stringify({}), Date.now()],
+                [
+                  guildId,
+                  userId,
+                  achievementId,
+                  JSON.stringify({}),
+                  Date.now(),
+                ],
                 (err2) => {
                   if (err2) reject(err2);
                   else resolve();
@@ -5386,33 +5394,48 @@ class Database {
 
   async getUserAchievements(guildId, userId) {
     return new Promise((resolve, reject) => {
-      // First check if user_achievements table exists, if not, use old structure
+      // First check achievements table structure
       this.db.all(
-        `SELECT name FROM sqlite_master WHERE type='table' AND name='user_achievements'`,
+        `PRAGMA table_info(achievements)`,
         [],
-        (tableErr, tableRows) => {
-          if (tableErr || !tableRows || tableRows.length === 0) {
-            // user_achievements table doesn't exist, use old structure
+        (pragmaErr, pragmaRows) => {
+          if (pragmaErr) {
+            reject(pragmaErr);
+            return;
+          }
+
+          const hasAchievementId = pragmaRows.some(
+            (col) => col.name === "achievement_id"
+          );
+          const hasAchievementType = pragmaRows.some(
+            (col) => col.name === "achievement_type"
+          );
+          const hasGuildId = pragmaRows.some((col) => col.name === "guild_id");
+          const hasUserId = pragmaRows.some((col) => col.name === "user_id");
+
+          if (!hasAchievementId && hasAchievementType && hasGuildId && hasUserId) {
+            // Old structure - query directly from achievements table
             this.db.all(
               `SELECT id, achievement_type as achievement_id, achievement_data, unlocked_at
                FROM achievements
                WHERE guild_id = ? AND user_id = ?
                ORDER BY unlocked_at DESC`,
               [guildId, userId],
-              (err2, rows2) => {
-                if (err2) {
-                  // If old structure also fails, return empty array
-                  if (err2.message && err2.message.includes("no such column")) {
+              (err, rows) => {
+                if (err) {
+                  if (err.message && err.message.includes("no such column")) {
                     resolve([]);
                   } else {
-                    reject(err2);
+                    reject(err);
                   }
                 } else {
                   // Transform old structure to match new structure format
-                  const transformed = (rows2 || []).map((row) => {
+                  const transformed = (rows || []).map((row) => {
                     let achievementData = {};
                     try {
-                      achievementData = JSON.parse(row.achievement_data || "{}");
+                      achievementData = JSON.parse(
+                        row.achievement_data || "{}"
+                      );
                     } catch (e) {
                       achievementData = {};
                     }
@@ -5435,74 +5458,42 @@ class Database {
                 }
               }
             );
-            return;
-          }
-
-          // user_achievements table exists, try new structure first
-          this.db.all(
-            `SELECT a.id, a.achievement_id, a.name, a.description, a.icon, 
-                    a.requirement_type, a.requirement_value, a.reward_xp, a.reward_role,
-                    a.rarity, a.seasonal, ua.unlocked_at 
-             FROM user_achievements ua
-             JOIN achievements a ON ua.achievement_id = a.achievement_id
-             WHERE ua.guild_id = ? AND ua.user_id = ?
-             ORDER BY ua.unlocked_at DESC`,
-            [guildId, userId],
-            (err, rows) => {
-              if (err) {
-                // If column doesn't exist, try old structure
-                if (err.message && (err.message.includes("no such column") || err.message.includes("achievement_id"))) {
-                  // Old structure: achievements table has guild_id, user_id, achievement_type directly
-                  this.db.all(
-                    `SELECT id, achievement_type as achievement_id, achievement_data, unlocked_at
-                     FROM achievements
-                     WHERE guild_id = ? AND user_id = ?
-                     ORDER BY unlocked_at DESC`,
-                    [guildId, userId],
-                    (err2, rows2) => {
-                      if (err2) {
-                        // If old structure also fails, return empty array
-                        if (err2.message && err2.message.includes("no such column")) {
-                          resolve([]);
-                        } else {
-                          reject(err2);
-                        }
-                      } else {
-                        // Transform old structure to match new structure format
-                        const transformed = (rows2 || []).map((row) => {
-                          let achievementData = {};
-                          try {
-                            achievementData = JSON.parse(row.achievement_data || "{}");
-                          } catch (e) {
-                            achievementData = {};
-                          }
-                          return {
-                            id: row.id,
-                            achievement_id: row.achievement_id,
-                            name: achievementData.name || row.achievement_id,
-                            description: achievementData.description || "",
-                            icon: achievementData.icon || "🏆",
-                            requirement_type: achievementData.type || "",
-                            requirement_value: achievementData.value || 0,
-                            reward_xp: achievementData.xp || 0,
-                            reward_role: null,
-                            rarity: achievementData.rarity || "common",
-                            seasonal: 0,
-                            unlocked_at: row.unlocked_at,
-                          };
-                        });
-                        resolve(transformed);
-                      }
-                    }
-                  );
-                } else {
-                  reject(err);
+          } else if (hasAchievementId) {
+            // New structure - check if user_achievements table exists
+            this.db.all(
+              `SELECT name FROM sqlite_master WHERE type='table' AND name='user_achievements'`,
+              [],
+              (tableErr, tableRows) => {
+                if (tableErr || !tableRows || tableRows.length === 0) {
+                  // user_achievements doesn't exist, return empty (new structure requires it)
+                  resolve([]);
+                  return;
                 }
-              } else {
-                resolve(rows || []);
+
+                // New structure - use JOIN
+                this.db.all(
+                  `SELECT a.id, a.achievement_id, a.name, a.description, a.icon, 
+                          a.requirement_type, a.requirement_value, a.reward_xp, a.reward_role,
+                          a.rarity, a.seasonal, ua.unlocked_at 
+                   FROM user_achievements ua
+                   JOIN achievements a ON ua.achievement_id = a.achievement_id
+                   WHERE ua.guild_id = ? AND ua.user_id = ?
+                   ORDER BY ua.unlocked_at DESC`,
+                  [guildId, userId],
+                  (err, rows) => {
+                    if (err) {
+                      reject(err);
+                    } else {
+                      resolve(rows || []);
+                    }
+                  }
+                );
               }
-            }
-          );
+            );
+          } else {
+            // Unknown structure - return empty array
+            resolve([]);
+          }
         }
       );
     });
@@ -5521,10 +5512,14 @@ class Database {
           }
 
           // Check if achievement_id column exists
-          const hasAchievementId = pragmaRows.some(col => col.name === 'achievement_id');
-          const hasAchievementType = pragmaRows.some(col => col.name === 'achievement_type');
-          const hasName = pragmaRows.some(col => col.name === 'name');
-          const hasRarity = pragmaRows.some(col => col.name === 'rarity');
+          const hasAchievementId = pragmaRows.some(
+            (col) => col.name === "achievement_id"
+          );
+          const hasAchievementType = pragmaRows.some(
+            (col) => col.name === "achievement_type"
+          );
+          const hasName = pragmaRows.some((col) => col.name === "name");
+          const hasRarity = pragmaRows.some((col) => col.name === "rarity");
 
           if (!hasAchievementId && hasAchievementType) {
             // Old structure - query and transform
@@ -5541,7 +5536,9 @@ class Database {
                     if (!achievementMap.has(row.achievement_type)) {
                       let achievementData = {};
                       try {
-                        achievementData = JSON.parse(row.achievement_data || "{}");
+                        achievementData = JSON.parse(
+                          row.achievement_data || "{}"
+                        );
                       } catch (e) {
                         achievementData = {};
                       }
@@ -5566,13 +5563,13 @@ class Database {
             );
           } else if (hasAchievementId) {
             // New structure - query normally
-            let orderBy = '';
+            let orderBy = "";
             if (hasRarity && hasName) {
-              orderBy = 'ORDER BY rarity, name';
+              orderBy = "ORDER BY rarity, name";
             } else if (hasName) {
-              orderBy = 'ORDER BY name';
+              orderBy = "ORDER BY name";
             } else {
-              orderBy = 'ORDER BY id';
+              orderBy = "ORDER BY id";
             }
 
             this.db.all(
