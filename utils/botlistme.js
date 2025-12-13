@@ -37,6 +37,7 @@ class BotListMe {
       this.botList = new BotList({
         token: this.token,
         botID: this.client.user.id,
+        interval: 30 * 60 * 1000, // Post every 30 minutes (same as VoidBots)
       });
 
       // Start automatic stats posting
