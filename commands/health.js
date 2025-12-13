@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
 const serverHealth = require("../utils/serverHealth");
 const ErrorMessages = require("../utils/errorMessages");
+const logger = require("../utils/logger");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -165,7 +166,7 @@ module.exports = {
         await interaction.editReply({ embeds: [embed] });
       }
     } catch (error) {
-      console.error("[Health Command] Error:", error);
+      logger.error("health", "Health command error", error);
       await interaction.editReply({
         content:
           "❌ Failed to calculate server health. Please try again later.",

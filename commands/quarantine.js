@@ -7,6 +7,7 @@ const {
 } = require("discord.js");
 const db = require("../utils/database");
 const ErrorMessages = require("../utils/errorMessages");
+const logger = require("../utils/logger");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -146,9 +147,7 @@ module.exports = {
           try {
             await quarantineRole.setPermissions([]);
           } catch (error) {
-            console.error(
-              `Failed to update quarantine role permissions: ${error.message}`
-            );
+            logger.error("quarantine", "Failed to update quarantine role permissions", error);
           }
         }
       }
@@ -232,9 +231,7 @@ module.exports = {
             updated++;
           } catch (error) {
             // Skip if we can't edit (e.g., missing permissions on that channel)
-            console.error(
-              `Failed to update permissions for ${channel.name}: ${error.message}`
-            );
+            logger.error("quarantine", `Failed to update permissions for ${channel.name}`, error);
           }
         }
 
@@ -261,9 +258,7 @@ module.exports = {
             });
           } catch (error) {
             // Skip if we can't edit (might not have permission for that channel)
-            console.error(
-              `Failed to deny access for ${channel.name}: ${error.message}`
-            );
+            logger.error("quarantine", `Failed to deny access for ${channel.name}`, error);
           }
         }
       } catch (error) {
@@ -355,7 +350,7 @@ module.exports = {
             await member.roles.add(rolesToAdd);
           } catch (error) {
             // If some roles can't be added, continue but log it
-            console.error(`Failed to restore some roles: ${error.message}`);
+            logger.error("quarantine", "Failed to restore some roles", error);
           }
         }
       }

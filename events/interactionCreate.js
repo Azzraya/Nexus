@@ -717,7 +717,7 @@ module.exports = {
               return;
             }
           } catch (error) {
-            console.error("Error handling dashboard button:", error);
+            logger.error("InteractionCreate", "Error handling dashboard button", error);
             await interaction.followUp({
               content: "❌ An error occurred while loading the dashboard view.",
               flags: MessageFlags.Ephemeral,

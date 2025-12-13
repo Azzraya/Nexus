@@ -4,6 +4,7 @@ const {
   EmbedBuilder,
 } = require("discord.js");
 const db = require("../utils/database");
+const logger = require("../utils/logger");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -45,7 +46,7 @@ module.exports = {
           return await this.channelsAudit(interaction);
       }
     } catch (error) {
-      console.error("[Audit Command Error]", error);
+      logger.error("audit", "Audit command error", error);
       return interaction.editReply({
         content: "❌ An error occurred during the audit. Please try again.",
         ephemeral: true,

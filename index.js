@@ -264,15 +264,13 @@ for (const file of eventFiles) {
   if (event.once) {
     client.once(event.name, (...args) => {
       event.execute(...args, client).catch((error) => {
-        logger.error(`[Event Error] ${event.name}:`, error);
-        console.error(`[Event Error] ${event.name}:`, error);
+        logger.error("Event", `Event error: ${event.name}`, error);
       });
     });
   } else {
     client.on(event.name, (...args) => {
       event.execute(...args, client).catch((error) => {
-        logger.error(`[Event Error] ${event.name}:`, error);
-        console.error(`[Event Error] ${event.name}:`, error);
+        logger.error("Event", `Event error: ${event.name}`, error);
       });
     });
   }

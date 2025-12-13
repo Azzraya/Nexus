@@ -123,7 +123,8 @@ class ABTesting {
         confidence: this.calculateConfidence(resultsA, resultsB),
       };
     } catch (error) {
-      console.error("[A/B Testing] Calculate results error:", error);
+      const logger = require("./logger");
+      logger.error("abTesting", "Calculate results error", error);
       return null;
     }
   }

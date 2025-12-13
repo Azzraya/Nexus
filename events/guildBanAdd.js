@@ -110,8 +110,7 @@ module.exports = {
           );
         }
       } catch (error) {
-        logger.error(`[guildBanAdd] Error monitoring ban: ${error.message}`);
-        console.error(`[guildBanAdd] Error monitoring ban:`, error);
+        logger.error("GuildBanAdd", "Error monitoring ban", error);
       }
     }
 
@@ -150,7 +149,7 @@ module.exports = {
         { autoDetected: true }
       );
     } catch (error) {
-      console.error("Failed to add to moderation queue:", error);
+      logger.error("guildBanAdd", "Failed to add to moderation queue", error);
     }
   },
 };

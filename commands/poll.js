@@ -7,6 +7,7 @@ const {
   ButtonStyle,
 } = require("discord.js");
 const db = require("../utils/database");
+const logger = require("../utils/logger");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -172,7 +173,7 @@ module.exports = {
       // Note: Polls auto-expire but need manual ending with /poll end
       // Auto-ending removed due to client reference issues in setTimeout
     } catch (error) {
-      console.error("[Poll] Error creating poll:", error);
+      logger.error("poll", "Error creating poll", error);
 
       if (!interaction.replied && !interaction.deferred) {
         await interaction
@@ -347,7 +348,7 @@ module.exports = {
       // Mark as ended in database
       await this.updatePollStatus(message.id, guildId, false);
     } catch (error) {
-      console.error("[Poll] Failed to end poll:", error);
+      logger.error("poll", "Failed to end poll", error);
     }
   },
 

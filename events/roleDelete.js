@@ -2,6 +2,7 @@ const db = require("../utils/database");
 const Notifications = require("../utils/notifications");
 const AutoRecovery = require("../utils/autoRecovery");
 const ErrorHandler = require("../utils/errorHandler");
+const logger = require("../utils/logger");
 
 module.exports = {
   name: "roleDelete",
@@ -136,7 +137,7 @@ module.exports = {
       try {
         await AutoRecovery.autoSnapshot(role.guild, "Potential nuke detected");
       } catch (error) {
-        console.error("Failed to create recovery snapshot:", error);
+        logger.error("roleDelete", "Failed to create recovery snapshot", error);
       }
     } else {
       await Notifications.send(

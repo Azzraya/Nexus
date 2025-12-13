@@ -105,7 +105,8 @@ class Cache {
     setInterval(() => {
       const cleaned = this.cleanup();
       if (cleaned > 0) {
-        console.log(`[Cache] Cleaned ${cleaned} expired entries`);
+        const logger = require("./logger");
+        logger.debug("Cache", `Cleaned ${cleaned} expired entries`);
       }
     }, intervalMs);
   }

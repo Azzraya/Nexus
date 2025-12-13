@@ -6634,7 +6634,7 @@ class DashboardServer {
         const data = await fs.readFile(bannerPath, "utf8");
         res.json(JSON.parse(data));
       } catch (error) {
-        console.error("❌ [Banner] Error reading banner:", error.message);
+        logger.error("Dashboard", "Error reading banner", error);
         res.status(500).json({ error: "Failed to read banner configuration" });
       }
     });
@@ -6685,7 +6685,7 @@ class DashboardServer {
         const data = await fs.readFile(bannerPath, "utf8");
         res.json(JSON.parse(data));
       } catch (error) {
-        console.error("❌ [Banner] Error reading banner:", error.message);
+        logger.error("Dashboard", "Error reading banner", error);
         res.json({ enabled: false });
       }
     });

@@ -245,15 +245,7 @@ class AutoRecovery {
       (types.includes("webhooks") ? snapshotData.webhooks?.length || 0 : 0) +
       (types.includes("server_settings") ? 1 : 0);
 
-    logger.info(
-      `[AutoRecovery] Starting ${priority ? "priority-based " : ""}${incremental ? "incremental " : ""}recovery for ${guild.name} - ${
-        snapshotData.channels?.length || 0
-      } channels, ${snapshotData.roles?.length || 0} roles, ${
-        snapshotData.webhooks?.length || 0
-      } webhooks, ${snapshotData.emojis?.length || 0} emojis, ${
-        snapshotData.stickers?.length || 0
-      } stickers in snapshot (restoring: ${types.join(", ")})`
-    );
+    // Starting recovery (no console logging)
 
     // Priority-based recovery: Sort channels by importance (system channels first, then by position)
     const sortChannelsByPriority = (channels) => {
@@ -276,9 +268,7 @@ class AutoRecovery {
       snapshotData.channels.length > 0
     ) {
       const stageStart = Date.now();
-      logger.info(
-        `[AutoRecovery] Stage 1: Recovering ${snapshotData.channels.length} channels (parallel processing enabled)`
-      );
+      // Stage 1: Recovering channels (no console logging)
 
       // Sort by priority if enabled
       const sortedChannels = sortChannelsByPriority([...snapshotData.channels]);
@@ -381,9 +371,7 @@ class AutoRecovery {
         recovered: recovered.filter((r) => r.type === "channel").length,
         skipped: skipped.filter((s) => s.type === "channel").length,
       });
-      logger.info(
-        `[AutoRecovery] Stage 1 complete: ${recovered.filter((r) => r.type === "channel").length} channels recovered in ${stageDuration}ms`
-      );
+      // Stage 1 complete (no console logging)
     }
 
     // Recover roles - ENHANCED PARALLEL PROCESSING (EXCEEDS WICK - faster recovery)
@@ -393,9 +381,7 @@ class AutoRecovery {
       snapshotData.roles.length > 0
     ) {
       const stageStart = Date.now();
-      logger.info(
-        `[AutoRecovery] Stage 2: Recovering ${snapshotData.roles.length} roles (parallel processing enabled)`
-      );
+      // Stage 2: Recovering roles (no console logging)
 
       // Priority-based: Sort roles by position (higher position = more important)
       const sortedRoles = priority
@@ -522,9 +508,7 @@ class AutoRecovery {
         recovered: recovered.filter((r) => r.type === "role").length,
         skipped: skipped.filter((s) => s.type === "role").length,
       });
-      logger.info(
-        `[AutoRecovery] Stage 2 complete: ${recovered.filter((r) => r.type === "role").length} roles recovered in ${stageDuration}ms`
-      );
+      // Stage 2 complete (no console logging)
     } else if (types.includes("roles")) {
       logger.warn(`[AutoRecovery] No roles in snapshot data`);
     }
@@ -613,9 +597,7 @@ class AutoRecovery {
         recovered: recovered.filter((r) => r.type === "webhook").length,
         skipped: skipped.filter((s) => s.type === "webhook").length,
       });
-      logger.info(
-        `[AutoRecovery] Stage 3 complete: ${skipped.filter((s) => s.type === "webhook").length} webhooks processed in ${stageDuration}ms`
-      );
+      // Stage 3 complete (no console logging)
     }
 
     // Recover emojis (EXCEEDS WICK - they don't restore emojis) - PARALLEL PROCESSING
@@ -710,9 +692,7 @@ class AutoRecovery {
         recovered: recovered.filter((r) => r.type === "emoji").length,
         skipped: skipped.filter((s) => s.type === "emoji").length,
       });
-      logger.info(
-        `[AutoRecovery] Stage 4 complete: ${recovered.filter((r) => r.type === "emoji").length} emojis recovered in ${stageDuration}ms`
-      );
+      // Stage 4 complete (no console logging)
     }
 
     // Recover stickers (EXCEEDS WICK - they don't restore stickers) - PARALLEL PROCESSING
@@ -811,9 +791,7 @@ class AutoRecovery {
         recovered: recovered.filter((r) => r.type === "sticker").length,
         skipped: skipped.filter((s) => s.type === "sticker").length,
       });
-      logger.info(
-        `[AutoRecovery] Stage 5 complete: ${recovered.filter((r) => r.type === "sticker").length} stickers recovered in ${stageDuration}ms`
-      );
+      // Stage 5 complete (no console logging)
     }
 
     // Recover server settings (EXCEEDS WICK - they don't restore server settings)
@@ -998,9 +976,7 @@ class AutoRecovery {
         recovered: recovered.filter((r) => r.type === "server_settings").length,
         skipped: skipped.filter((s) => s.type === "server_settings").length,
       });
-      logger.info(
-        `[AutoRecovery] Stage 6 complete: Server settings processed in ${stageDuration}ms`
-      );
+      // Stage 6 complete (no console logging)
     }
 
     const totalDuration = Date.now() - startTime;
@@ -1010,9 +986,7 @@ class AutoRecovery {
           progress.stages.length
         : 0;
 
-    logger.info(
-      `[AutoRecovery] Recovery complete in ${totalDuration}ms (avg ${Math.round(avgStageTime)}ms per stage): ${recovered.length} items recovered, ${skipped.length} items skipped`
-    );
+    // Recovery complete (no console logging)
 
     return {
       success: true,

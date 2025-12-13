@@ -28,7 +28,6 @@ module.exports = {
         "Ready",
         "⚠️ Enable it in Discord Developer Portal → Your Bot → Privileged Gateway Intents → Server Members Intent"
       );
-      console.error("❌ CRITICAL: GuildMembers intent is NOT enabled!");
     } else {
       // GuildMembers intent enabled (no console logging)
     }

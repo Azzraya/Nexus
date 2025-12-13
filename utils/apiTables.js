@@ -64,6 +64,7 @@ db.db.run(`
   )
 `);
 
-console.log("[API Tables] All API database tables created");
+const logger = require("./logger");
+logger.info("API Tables", "All API database tables created");
 
 module.exports = {};

@@ -200,9 +200,7 @@ class AdvancedAntiNuke {
     // Pattern 2: Testing on multiple targets (5+ different targets in 30 seconds)
     const uniqueTargets = new Set(data.changes.map((c) => c.targetId));
     if (uniqueTargets.size >= 5) {
-      logger.warn(
-        `[Anti-Nuke] Permission testing detected: ${userId} modified permissions on ${uniqueTargets.size} different targets`
-      );
+        // Permission testing detected (no console logging)
       return {
         suspicious: true,
         reason: "multiple_target_testing",
@@ -707,9 +705,7 @@ class AdvancedAntiNuke {
         ownerId = owner.id;
         ownerTag = owner.user.tag;
         isOwner = member.id === owner.id;
-        logger.warn(
-          `[Anti-Nuke] Fetched owner: ${ownerTag} (${ownerId}), comparing with member: ${member.user.tag} (${member.id})`
-        );
+        // Owner check (no console logging)
       } else {
         // Fallback to guild.ownerId
         ownerId = guild.ownerId;
@@ -722,27 +718,12 @@ class AdvancedAntiNuke {
       // Fallback to guild.ownerId if fetchOwner fails
       ownerId = guild.ownerId;
       isOwner = member.id === guild.ownerId;
-      logger.error(
-        `[Anti-Nuke] Could not fetch owner, using guild.ownerId fallback: ${error.message}`
-      );
+      // Could not fetch owner, using fallback (no console logging)
     }
 
     const isAdmin = member.permissions.has("Administrator");
 
-    // Log detailed info for debugging
-    logger.warn(
-      `[Anti-Nuke] 🚨 CRITICAL THREAT: ${threatType} by ${userId} (${member.user.tag}) in ${guild.id}`
-    );
-    logger.warn(
-      `[Anti-Nuke] Owner check - isOwner: ${isOwner}, isAdmin: ${isAdmin}, ownerId: ${ownerId} (${ownerTag || "unknown"}), member.id: ${member.id} (${member.user.tag}), guild.ownerId: ${guild.ownerId}`
-    );
-
-    // If ownerId matches member but user insists it's not the owner, log a warning
-    if (isOwner && ownerId === member.id) {
-      logger.error(
-        `[Anti-Nuke] ⚠️ WARNING: Member ${member.user.tag} (${member.id}) is detected as server owner (ownerId: ${ownerId}). If this is incorrect, the server ownership may have been transferred or there's a Discord API issue.`
-      );
-    }
+    // Threat detected (no console logging - handled by anti-nuke system)
 
     // If ownerId matches member but it's a mass-ban attack, override owner check
     // This handles cases where an alt account has ownership transferred to it
@@ -768,9 +749,7 @@ class AdvancedAntiNuke {
     }
 
     if (isOwner) {
-      logger.warn(
-        `[Anti-Nuke] ⚠️ THREAT DETECTED from SERVER OWNER ${userId} (${threatType}) in ${guild.id} - Cannot ban/kick owner, but will attempt to remove permissions/roles`
-      );
+      // Threat detected from server owner (no console logging)
       // Don't return - continue to try removing permissions/roles even if we can't ban
     } else if (isAdmin) {
       logger.warn(
@@ -781,9 +760,7 @@ class AdvancedAntiNuke {
     // Get config
     const config = await db.getServerConfig(guild.id);
     if (!config || !config.anti_nuke_enabled) {
-      logger.warn(
-        `[Anti-Nuke] Anti-nuke disabled for ${guild.id} - ENABLING AUTOMATICALLY`
-      );
+      // Anti-nuke disabled - enabling automatically (no console logging)
       // Auto-enable if disabled during attack
       await db.setServerConfig(guild.id, { anti_nuke_enabled: 1 });
     }
@@ -794,9 +771,7 @@ class AdvancedAntiNuke {
       .fetch(this.client.user.id)
       .catch(() => null);
     if (!botMember) {
-      logger.error(
-        `[Anti-Nuke] Could not fetch bot member - cannot take action`
-      );
+      // Could not fetch bot member (no console logging)
       return;
     }
 
@@ -811,9 +786,7 @@ class AdvancedAntiNuke {
           reason: `Anti-Nuke EMERGENCY: ${threatType} detected`,
           deleteMessageSeconds: 604800,
         });
-        logger.success(
-          `[Anti-Nuke] ✅ BANNED ${userId} | ${threatType} | Waiting for removal...`
-        );
+        // Banned attacker (no console logging)
         actionTaken = true;
 
         // Wait 3 seconds for Discord to actually remove the attacker from the server
@@ -872,7 +845,7 @@ class AdvancedAntiNuke {
 
         return; // Success - exit early
       } catch (kickError) {
-        logger.error(`[Anti-Nuke] Immediate kick failed: ${kickError.message}`);
+        // Immediate kick failed (no console logging)
       }
     }
 
@@ -890,7 +863,7 @@ class AdvancedAntiNuke {
         .fetch(this.client.user.id)
         .catch(() => null);
       if (!botMember) {
-        logger.error(`[Anti-Nuke] Could not fetch bot member in ${guild.id}`);
+        // Could not fetch bot member (no console logging)
         return; // Can't proceed without bot member
       }
 
@@ -959,9 +932,7 @@ class AdvancedAntiNuke {
             const hasManageRoles = botMember.permissions.has("ManageRoles");
 
             if (hasAdmin || hasManageRoles) {
-              logger.warn(
-                `[Anti-Nuke] Attempting to elevate bot role from ${botHighestRole.position} to ${newPosition} (attacker at ${attackerHighestRole.position})`
-              );
+              // Attempting to elevate bot role (no console logging)
 
               // Try to set position - with Admin, this should work
               await botHighestRole.setPosition(newPosition, {
@@ -969,9 +940,7 @@ class AdvancedAntiNuke {
                   "Anti-Nuke: Emergency role elevation - must be above attacker bot",
               });
 
-              logger.warn(
-                `[Anti-Nuke] Elevated bot role to position ${newPosition} above attacker in ${guild.id}`
-              );
+              // Elevated bot role (no console logging)
 
               // Wait longer for Discord to process the role change and refresh cache
               await new Promise((resolve) => setTimeout(resolve, 2000));
@@ -986,31 +955,20 @@ class AdvancedAntiNuke {
               );
               const refreshedBotRole = refreshedBotMember.roles.highest;
 
-              logger.warn(
-                `[Anti-Nuke] After elevation - Bot role position: ${refreshedBotRole.position}, Attacker: ${attackerHighestRole.position}`
-              );
+              // Role elevation complete (no console logging)
             } else {
-              logger.error(
-                `[Anti-Nuke] Bot lacks both Administrator and ManageRoles permissions - cannot elevate role in ${guild.id}`
-              );
+            // Bot lacks permissions to elevate role (no console logging)
             }
           } catch (error) {
-            logger.error(`[Anti-Nuke] Could not elevate bot role:`, error);
-            logger.error(`[Anti-Nuke] Error details:`, {
-              message: error?.message || String(error),
-              stack: error?.stack,
-              name: error?.name,
-            });
+            // Could not elevate bot role (no console logging)
             // Continue anyway - try other methods, but it will likely fail
           }
         } else {
-          logger.info(
-            `[Anti-Nuke] Bot role (${botHighestRole.position}) is already above attacker (${attackerHighestRole.position})`
-          );
+          // Bot role already above attacker (no console logging)
         }
       }
     } catch (error) {
-      logger.error(`[Anti-Nuke] Error checking role hierarchy:`, error);
+      // Error checking role hierarchy (no console logging)
     }
 
     // IMMEDIATE LOCKDOWN FIRST - Don't wait for ban
@@ -1030,9 +988,7 @@ class AdvancedAntiNuke {
       // If attacker has Administrator permission, try to remove it from their roles
       let adminRemoved = false;
       if (member.permissions.has("Administrator")) {
-        logger.warn(
-          `[Anti-Nuke] Attacker has Administrator permission - attempting to strip it`
-        );
+        // Attacker has Administrator permission - attempting to strip it (no console logging)
 
         // Try to remove Administrator permission from all of attacker's roles
         for (const role of member.roles.cache.values()) {
@@ -1046,16 +1002,11 @@ class AdvancedAntiNuke {
                   newPerms,
                   "Anti-Nuke: Remove admin from attacker role"
                 );
-                logger.warn(
-                  `[Anti-Nuke] Removed Administrator permission from role ${role.name}`
-                );
+                // Removed Administrator permission from role (no console logging)
                 adminRemoved = true;
               }
             } catch (error) {
-              logger.error(
-                `[Anti-Nuke] Could not remove admin from role ${role.name}:`,
-                error
-              );
+              // Could not remove admin from role (no console logging)
             }
           }
         }
@@ -1070,16 +1021,12 @@ class AdvancedAntiNuke {
               .fetch(userId)
               .catch(() => null);
             if (refreshedMember && hasBanPerms) {
-              logger.warn(
-                `[Anti-Nuke] Admin removed - attempting to ban ${userId} now`
-              );
+              // Admin removed - attempting to ban (no console logging)
               await refreshedMember.ban({
                 reason: `Anti-Nuke EMERGENCY: ${threatType} detected (admin stripped)`,
                 deleteMessageSeconds: 604800,
               });
-              logger.success(
-                `[Anti-Nuke] ✅ BANNED ${userId} after removing admin permissions`
-              );
+              // Banned after removing admin permissions (no console logging)
 
               // Trigger recovery
               this.attemptRecovery(guild, threatType, counts, userId).catch(
@@ -1106,9 +1053,7 @@ class AdvancedAntiNuke {
       );
 
       if (allRolesToRemove.size > 0) {
-        logger.warn(
-          `[Anti-Nuke] Attempting to remove ${allRolesToRemove.size} roles from attacker ${userId}`
-        );
+        // Attempting to remove roles from attacker (no console logging)
 
         try {
           // Try to remove all roles at once - this should work with Admin permission
@@ -1116,15 +1061,10 @@ class AdvancedAntiNuke {
             [],
             "Anti-Nuke: EMERGENCY - Strip all permissions"
           );
-          logger.warn(
-            `[Anti-Nuke] Successfully removed all ${allRolesToRemove.size} roles from attacker ${userId}`
-          );
+          // Successfully removed all roles from attacker (no console logging)
         } catch (error) {
           // If that fails, try removing them one by one (even if not "editable")
-          logger.warn(
-            `[Anti-Nuke] Bulk role removal failed, trying individually:`,
-            error
-          );
+          // Bulk role removal failed, trying individually (no console logging)
           let removedCount = 0;
           for (const role of allRolesToRemove.values()) {
             try {
@@ -1142,9 +1082,7 @@ class AdvancedAntiNuke {
               // Continue with next role
             }
           }
-          logger.warn(
-            `[Anti-Nuke] Removed ${removedCount}/${allRolesToRemove.size} roles individually`
-          );
+          // Removed roles individually (no console logging)
         }
 
         // Reduced wait time (EXCEEDS WICK - faster response)
@@ -1153,11 +1091,7 @@ class AdvancedAntiNuke {
         // Refresh member to get updated permissions
         try {
           await member.fetch(true);
-          logger.warn(
-            `[Anti-Nuke] Refreshed member - Admin permission: ${member.permissions.has(
-              "Administrator"
-            )}`
-          );
+          // Refreshed member (no console logging)
 
           // After removing all roles, try to ban again (roles removed = should be able to ban now)
           if (
@@ -1166,16 +1100,12 @@ class AdvancedAntiNuke {
             !member.permissions.has("Administrator")
           ) {
             try {
-              logger.warn(
-                `[Anti-Nuke] All roles removed - attempting to ban ${userId} now`
-              );
+              // All roles removed - attempting to ban (no console logging)
               await member.ban({
                 reason: `Anti-Nuke EMERGENCY: ${threatType} detected (all roles stripped)`,
                 deleteMessageSeconds: 604800,
               });
-              logger.success(
-                `[Anti-Nuke] ✅ BANNED ${userId} after removing all roles`
-              );
+              // Banned after removing all roles (no console logging)
 
               // Trigger recovery
               this.attemptRecovery(guild, threatType, counts, userId).catch(
@@ -1185,18 +1115,14 @@ class AdvancedAntiNuke {
               );
               return; // Success - exit
             } catch (banError) {
-              logger.error(
-                `[Anti-Nuke] Ban failed after removing all roles: ${banError.message}`
-              );
+              // Ban failed after removing all roles (no console logging)
               // Continue to other methods
             }
           }
         } catch (err) {
           if (err.code === 10004) {
             // Unknown Guild - bot was removed or guild deleted
-            logger.warn(
-              `[Anti-Nuke] Guild ${guild.id} no longer exists, cannot refresh member`
-            );
+          // Guild no longer exists (no console logging)
             return; // Exit early
           }
           logger.error(`[Anti-Nuke] Could not refresh member:`, err);
@@ -1212,9 +1138,7 @@ class AdvancedAntiNuke {
       await guild.roles.fetch().catch((err) => {
         if (err.code === 10004) {
           // Unknown Guild - bot was removed or guild deleted
-          logger.warn(
-            `[Anti-Nuke] Guild ${guild.id} no longer exists, cannot fetch roles`
-          );
+          // Guild no longer exists (no console logging)
           throw err; // Re-throw to exit early
         }
         throw err;
@@ -1250,16 +1174,12 @@ class AdvancedAntiNuke {
 
       // Override owner check for mass-ban attacks (handles alt accounts with transferred ownership)
       if (isOwnerCheck && threatType === "mass_ban") {
-        logger.error(
-          `[Anti-Nuke] ⚠️ Overriding owner check for mass-ban attack - attempting ban anyway (account may have transferred ownership)`
-        );
+        // Overriding owner check for mass-ban attack (no console logging)
         isOwnerCheck = false; // Override - try to ban
       }
 
       if (isOwnerCheck) {
-        logger.warn(
-          `[Anti-Nuke] Skipping ban/kick attempt on server owner ${userId} in ${guild.id} (owner cannot be banned)`
-        );
+        // Skipping ban/kick attempt on server owner (no console logging)
         return;
       }
 
@@ -1279,9 +1199,7 @@ class AdvancedAntiNuke {
             deleteMessageSeconds: 604800, // 7 days in seconds (fixed deprecation)
           });
           removed = true;
-          logger.info(
-            `[Anti-Nuke] Successfully banned ${userId} from ${guild.id}`
-          );
+          // Successfully banned (no console logging)
         } catch (banError) {
           // If ban fails, try kick
           logger.error(`[Anti-Nuke] Ban failed, attempting kick:`, banError);
@@ -1289,9 +1207,7 @@ class AdvancedAntiNuke {
             try {
               await member.kick("Anti-Nuke: Emergency removal");
               removed = true;
-              logger.info(
-                `[Anti-Nuke] Successfully kicked ${userId} from ${guild.id}`
-              );
+              // Successfully kicked (no console logging)
             } catch (kickError) {
               logger.error(`[Anti-Nuke] Kick also failed:`, kickError);
             }
@@ -1299,9 +1215,7 @@ class AdvancedAntiNuke {
         }
       } else if (hasKickPerms) {
         // No ban perms - try kick
-        logger.warn(
-          `[Anti-Nuke] Bot lacks BanMembers permission, attempting kick`
-        );
+        // Bot lacks BanMembers permission, attempting kick (no console logging)
         try {
           await member.kick("Anti-Nuke: Emergency removal");
           removed = true;
@@ -1309,12 +1223,10 @@ class AdvancedAntiNuke {
             `[Anti-Nuke] Successfully kicked ${userId} from ${guild.id}`
           );
         } catch (kickError) {
-          logger.error(`[Anti-Nuke] Kick failed:`, kickError);
+          // Kick failed (no console logging)
         }
       } else {
-        logger.error(
-          `[Anti-Nuke] Bot lacks both BanMembers and KickMembers permissions!`
-        );
+        // Bot lacks both BanMembers and KickMembers permissions (no console logging)
       }
 
       // If still not removed, try timeout as last resort (skip server owner)
@@ -1327,17 +1239,13 @@ class AdvancedAntiNuke {
               28 * 24 * 60 * 60 * 1000,
               "Anti-Nuke: Emergency timeout (max duration)"
             );
-            logger.warn(
-              `[Anti-Nuke] Timed out ${userId} as last resort in ${guild.id}`
-            );
+            // Timed out as last resort (no console logging)
             removed = true;
           } catch (timeoutError) {
-            logger.error(`[Anti-Nuke] Timeout also failed:`, timeoutError);
+            // Timeout also failed (no console logging)
           }
         } else {
-          logger.error(
-            `[Anti-Nuke] Bot lacks ModerateMembers permission - cannot timeout ${userId}`
-          );
+          // Bot lacks ModerateMembers permission (no console logging)
         }
 
         // Final fallback: Log detailed error and try aggressive role removal
@@ -1412,12 +1320,10 @@ class AdvancedAntiNuke {
                 [],
                 "Anti-Nuke: Last resort - remove all roles"
               );
-              logger.warn(
-                `[Anti-Nuke] Removed all roles from ${userId} as final attempt`
-              );
+              // Removed all roles as final attempt (no console logging)
             }
           } catch (roleError) {
-            logger.error(`[Anti-Nuke] Final role removal failed:`, roleError);
+            // Final role removal failed (no console logging)
           }
         }
       }
@@ -1433,9 +1339,7 @@ class AdvancedAntiNuke {
         // Only wait 1 second instead of 3 (optimized for speed)
         await new Promise((resolve) => setTimeout(resolve, 1000));
 
-        logger.info(
-          `[Anti-Nuke] Attacker ${userId} was successfully removed, starting server recovery...`
-        );
+        // Attacker removed, starting recovery (no console logging)
         // Start recovery immediately (don't wait for full cleanup)
         this.attemptRecovery(guild, threatType, counts, userId).catch(
           (error) => {
@@ -1443,9 +1347,7 @@ class AdvancedAntiNuke {
           }
         );
       } else {
-        logger.warn(
-          `[Anti-Nuke] Attacker ${userId} was not removed - skipping recovery to prevent interference`
-        );
+        // Attacker not removed - skipping recovery (no console logging)
       }
     } catch (error) {
       if (error.code === 10004) {
@@ -1634,9 +1536,7 @@ class AdvancedAntiNuke {
         logger.error(`[Anti-Nuke] Error preventing channel creation:`, error);
       }
 
-      logger.info(
-        `[Anti-Nuke] Lockdown activated: ${lockedCount} channels locked, ${deletedSpamChannels} spam channels deleted in ${guild.id}`
-      );
+      // Lockdown activated (no console logging)
 
       // Auto-unlock after 5 minutes (actually restore permissions!)
       setTimeout(
@@ -1725,10 +1625,7 @@ class AdvancedAntiNuke {
         } catch (error) {
           failedCount++;
           // Log error but continue with other channels
-          logger.warn(
-            `[Anti-Nuke] Failed to unlock channel ${channel.id} (${channel.name}):`,
-            error.message
-          );
+          // Failed to unlock channel (no console logging)
         }
       }
 
@@ -1769,9 +1666,7 @@ class AdvancedAntiNuke {
       // Remove from locked guilds
       this.lockedGuilds.delete(guild.id);
 
-      logger.info(
-        `[Anti-Nuke] Server unlocked: ${unlockedCount} channels restored in ${guild.id}`
-      );
+      // Server unlocked (no console logging)
     } catch (error) {
       logger.error(`[Anti-Nuke] Error unlocking server:`, error);
       // Still remove from locked guilds to prevent permanent lock
@@ -1842,9 +1737,7 @@ class AdvancedAntiNuke {
         const attackerChannels = this.attackerCreatedChannels.get(key);
 
         if (attackerChannels && attackerChannels.size > 0) {
-          logger.info(
-            `[Anti-Nuke] Cleaning up ${attackerChannels.size} spam channels created ONLY by detected threat ${attackerUserId}`
-          );
+          // Cleaning up spam channels (no console logging)
 
           let deletedCount = 0;
           const attackWindow = Date.now() - 300000; // Only delete channels created in last 5 minutes
@@ -1891,9 +1784,7 @@ class AdvancedAntiNuke {
         // Clean up spam roles created by attacker
         const attackerRoles = this.attackerCreatedRoles.get(key);
         if (attackerRoles && attackerRoles.size > 0) {
-          logger.info(
-            `[Anti-Nuke] Cleaning up ${attackerRoles.size} spam roles created ONLY by detected threat ${attackerUserId}`
-          );
+          // Cleaning up spam roles (no console logging)
 
           let deletedRoles = 0;
           for (const roleId of attackerRoles) {
@@ -1940,9 +1831,7 @@ class AdvancedAntiNuke {
         // Clean up spam webhooks created by attacker
         const attackerWebhooks = this.attackerCreatedWebhooks.get(key);
         if (attackerWebhooks && attackerWebhooks.size > 0) {
-          logger.info(
-            `[Anti-Nuke] Cleaning up ${attackerWebhooks.size} spam webhooks created ONLY by detected threat ${attackerUserId}`
-          );
+          // Cleaning up spam webhooks (no console logging)
 
           let deletedWebhooks = 0;
           for (const webhookId of attackerWebhooks) {
@@ -2008,11 +1897,7 @@ class AdvancedAntiNuke {
         ? threatLog.timestamp - 5000
         : attackStartTime - 60000; // 5 seconds before threat, or 1 minute before now
 
-      logger.info(
-        `[Anti-Nuke] Looking for snapshots created before ${new Date(
-          minSnapshotTime
-        ).toISOString()}`
-      );
+      // Looking for snapshots (no console logging)
 
       // Get snapshots created BEFORE the attack started (try "full" first, then "auto", then any)
       let snapshots = await new Promise((resolve, reject) => {
@@ -2171,9 +2056,7 @@ class AdvancedAntiNuke {
               await admin.send({ embeds: [dmEmbed] }).catch((error) => {
                 // Handle rate limits gracefully
                 if (error.code === 429 || error.status === 429) {
-                  logger.warn(
-                    `[Anti-Nuke] Rate limited while sending DM to ${admin.id}`
-                  );
+                  // Rate limited while sending DM (no console logging)
                 }
               });
             } catch (error) {
@@ -2188,9 +2071,7 @@ class AdvancedAntiNuke {
         }
       }
 
-      logger.info(
-        `[Anti-Nuke] Sent DM alerts to ${adminMembers.size} admins for threat in ${guild.id}`
-      );
+      // Sent DM alerts to admins (no console logging)
     } catch (error) {
       logger.error(`[Anti-Nuke] Error sending DM alerts:`, error);
     }
@@ -2210,9 +2091,7 @@ class AdvancedAntiNuke {
     const channelAge = Date.now() - channelData.createdAt;
     if (channelAge < 5000 && channelData.messageCount > 3) {
       // SPAM CHANNEL DETECTED - Delete it IMMEDIATELY
-      logger.warn(
-        `[Anti-Nuke] 🚨 SPAM CHANNEL: ${channel.id} in ${channel.guild.id} - ${channelData.messageCount} messages in ${channelAge}ms`
-      );
+      // Spam channel detected (no console logging)
 
       try {
         await channel.delete(
@@ -2235,9 +2114,7 @@ class AdvancedAntiNuke {
 
         // If threat detected, handle it
         if (threatResult.threatDetected) {
-          logger.warn(
-            `[Anti-Nuke] Spam channel creator ${channelData.creator} triggered threat detection`
-          );
+          // Spam channel creator triggered threat detection (no console logging)
         }
       } catch (error) {
         logger.error(`[Anti-Nuke] Error deleting spam channel:`, error);
@@ -2278,9 +2155,7 @@ class AdvancedAntiNuke {
             10 * 60 * 1000,
             "Anti-Nuke: Message spam detected"
           );
-          logger.warn(
-            `[Anti-Nuke] Timed out spammer ${userId} in ${channel.guild.id}`
-          );
+          // Timed out spammer (no console logging)
         }
       } catch (error) {
         // Ignore errors
@@ -2326,9 +2201,7 @@ class AdvancedAntiNuke {
     const skipped = [];
 
     try {
-      logger.info(
-        `[Anti-Nuke] Attempting fallback recovery for ${guild.name} (no snapshots available)`
-      );
+      // Attempting fallback recovery (no console logging)
 
       // Fetch current state from Discord
       await guild.channels.fetch().catch((err) => {
@@ -2391,9 +2264,7 @@ class AdvancedAntiNuke {
         );
       }
 
-      logger.info(
-        `[Anti-Nuke] Fallback recovery complete: ${recovered.length} items recovered, ${skipped.length} items skipped (limited recovery - snapshots recommended)`
-      );
+      // Fallback recovery complete (no console logging)
 
       return {
         success: recovered.length > 0,

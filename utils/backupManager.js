@@ -4,6 +4,7 @@
 const fs = require("fs").promises;
 const path = require("path");
 const db = require("./database");
+const logger = require("./logger");
 
 class BackupManager {
   constructor() {
@@ -15,10 +16,7 @@ class BackupManager {
     try {
       await fs.mkdir(this.backupDir, { recursive: true });
     } catch (error) {
-      console.error(
-        "[Backup Manager] Failed to create backup directory:",
-        error
-      );
+      logger.error("BackupManager", "Failed to create backup directory", error);
     }
   }
 
@@ -72,9 +70,7 @@ class BackupManager {
 
     // Ensure the resolved path starts with the backup directory (prevents traversal)
     if (!resolved.startsWith(resolvedBackupDir)) {
-      console.error(
-        `[Backup Manager] Path traversal detected! Backup ID: ${backupId}, Resolved: ${resolved}`
-      );
+      logger.error("BackupManager", `Path traversal detected! Backup ID: ${backupId}, Resolved: ${resolved}`);
       return null;
     }
 
@@ -171,7 +167,7 @@ class BackupManager {
         message: "Backup created successfully",
       };
     } catch (error) {
-      console.error("[Backup Manager] Create backup error:", error);
+      logger.error("BackupManager", "Create backup error", error);
       return {
         success: false,
         error: error.message,
@@ -244,7 +240,7 @@ class BackupManager {
         message: "Backup restored successfully",
       };
     } catch (error) {
-      console.error("[Backup Manager] Restore backup error:", error);
+      logger.error("BackupManager", "Restore backup error", error);
       return {
         success: false,
         error: error.message,
@@ -259,9 +255,7 @@ class BackupManager {
     try {
       const filepath = this.getBackupFilePath(backupId);
       if (!filepath) {
-        console.error(
-          `[Backup Manager] Invalid backup ID: ${backupId} (path traversal attempt?)`
-        );
+        logger.error("BackupManager", `Invalid backup ID: ${backupId} (path traversal attempt?)`);
         return null;
       }
 
@@ -314,7 +308,7 @@ class BackupManager {
       }
       return true;
     } catch (error) {
-      console.error("[Backup Manager] Restore config error:", error);
+      logger.error("BackupManager", "Restore config error", error);
       return false;
     }
   }
@@ -345,14 +339,11 @@ class BackupManager {
           });
           restored++;
         } catch (err) {
-          console.error(
-            `[Backup Manager] Failed to restore role ${roleData.name}:`,
-            err
-          );
+          logger.error("BackupManager", `Failed to restore role ${roleData.name}`, err);
         }
       }
     } catch (error) {
-      console.error("[Backup Manager] Restore roles error:", error);
+      logger.error("BackupManager", "Restore roles error", error);
     }
 
     return restored;
@@ -388,14 +379,11 @@ class BackupManager {
           });
           restored++;
         } catch (err) {
-          console.error(
-            `[Backup Manager] Failed to restore channel ${channelData.name}:`,
-            err
-          );
+          logger.error("BackupManager", `Failed to restore channel ${channelData.name}`, err);
         }
       }
     } catch (error) {
-      console.error("[Backup Manager] Restore channels error:", error);
+      logger.error("BackupManager", "Restore channels error", error);
     }
 
     return restored;
@@ -426,7 +414,7 @@ class BackupManager {
       });
     } catch (error) {
       // Table might not exist yet
-      console.error("[Backup Manager] Save metadata error:", error);
+      logger.error("BackupManager", "Save metadata error", error);
     }
   }
 
@@ -464,7 +452,7 @@ class BackupManager {
 
       return backups;
     } catch (error) {
-      console.error("[Backup Manager] List backups error:", error);
+      logger.error("BackupManager", "List backups error", error);
       return [];
     }
   }
@@ -486,10 +474,10 @@ class BackupManager {
       return { success: true };
     } catch (error) {
       if (error.code === "ENOENT") {
-        console.error(`[Backup Manager] Backup not found: ${backupId}`);
+        logger.error("BackupManager", `Backup not found: ${backupId}`);
         return { success: false, error: "Backup not found" };
       }
-      console.error("[Backup Manager] Delete backup error:", error.message);
+      logger.error("BackupManager", "Delete backup error", error);
       return { success: false, error: error.message };
     }
   }

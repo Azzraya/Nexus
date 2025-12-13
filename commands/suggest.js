@@ -8,6 +8,7 @@ const {
   TextInputBuilder,
   TextInputStyle,
 } = require("discord.js");
+const logger = require("../utils/logger");
 const db = require("../utils/database");
 
 module.exports = {
@@ -194,7 +195,7 @@ module.exports = {
         req.end();
       }
     } catch (error) {
-      console.error("Error handling suggestion:", error);
+      logger.error("suggest", "Error handling suggestion", error);
     }
   },
 };
