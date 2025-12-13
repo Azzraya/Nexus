@@ -501,6 +501,25 @@ module.exports = {
 
         await member.roles.add(role);
       } catch (error) {
+        // Handle "Unknown Role" error (role was deleted but still in database)
+        if (error.code === 10011 || (error.message && error.message.includes("Unknown Role"))) {
+          logger.warn(
+            "GuildMemberAdd",
+            `Auto-role ${autoRole.role_id} no longer exists in ${member.guild.name}, removing from database`
+          );
+          // Remove the invalid autorole from database
+          db.db.run(
+            "DELETE FROM auto_roles WHERE guild_id = ? AND role_id = ?",
+            [member.guild.id, autoRole.role_id],
+            (err) => {
+              if (err) {
+                logger.error("GuildMemberAdd", "Failed to remove invalid autorole from database", err);
+              }
+            }
+          );
+          continue;
+        }
+        // Log other errors
         ErrorHandler.logError(
           error,
           `guildMemberAdd [${member.guild.id}]`,
