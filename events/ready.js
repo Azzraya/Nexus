@@ -396,6 +396,18 @@ module.exports = {
         }
       }
 
+      // Initialize Botlist.me stats posting
+      if (process.env.BOTLISTME_TOKEN && !client.botListMe) {
+        try {
+          const BotListMe = require("../utils/botlistme");
+          const botListMe = new BotListMe(client, process.env.BOTLISTME_TOKEN);
+          botListMe.initialize();
+          client.botListMe = botListMe;
+        } catch (error) {
+          logger.error("[Botlist.me] Failed to initialize:", error);
+        }
+      }
+
       // Initialize Discord Bots (discord.bots.gg) stats posting
       if (process.env.DISCORDBOTS_TOKEN && !client.discordBots) {
         try {

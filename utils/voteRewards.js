@@ -552,6 +552,20 @@ class VoteRewards {
       }
     }
 
+    // Check Botlist.me
+    if (process.env.BOTLISTME_TOKEN) {
+      try {
+        const BotListMe = require("./botlistme");
+        const botListMe =
+          this.client.botListMe ||
+          new BotListMe(this.client, process.env.BOTLISTME_TOKEN);
+        const hasVoted = await botListMe.hasVoted(userId);
+        if (hasVoted) votedOn.push("Botlist.me");
+      } catch (error) {
+        // Silently fail
+      }
+    }
+
     return votedOn;
   }
 

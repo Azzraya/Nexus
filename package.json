@@ -30,6 +30,7 @@
   "dependencies": {
     "@top-gg/sdk": "^3.1.6",
     "axios": "^1.6.2",
+    "botlist.me.js": "^1.0.3",
     "chalk": "^4.1.2",
     "cheerio": "^1.1.2",
     "compression": "^1.8.1",

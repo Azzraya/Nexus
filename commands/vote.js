@@ -256,7 +256,8 @@ module.exports = {
       if (
         !process.env.TOPGG_TOKEN &&
         !process.env.DISCORDBOTLIST_TOKEN &&
-        !process.env.VOIDBOTS_TOKEN
+        !process.env.VOIDBOTS_TOKEN &&
+        !process.env.BOTLISTME_TOKEN
       ) {
         return interaction.reply({
           content: "❌ No bot list integrations are configured.",
@@ -273,6 +274,7 @@ module.exports = {
           voidbots: null,
           discordbots: null,
           botsondicord: null,
+          botlistme: null,
         };
 
         // Check Top.gg
@@ -359,12 +361,26 @@ module.exports = {
           }
         }
 
+        // Check Botlist.me
+        if (process.env.BOTLISTME_TOKEN) {
+          try {
+            const BotListMe = require("../utils/botlistme");
+            const botListMe =
+              interaction.client.botListMe ||
+              new BotListMe(interaction.client, process.env.BOTLISTME_TOKEN);
+            voteStatus.botlistme = await botListMe.hasVoted(targetUser.id);
+          } catch (error) {
+            logger.debug("Error checking Botlist.me vote:", error);
+          }
+        }
+
         const hasVotedAny =
           voteStatus.topgg ||
           voteStatus.discordbotlist ||
           voteStatus.voidbots ||
           voteStatus.discordbots ||
-          voteStatus.botsondicord;
+          voteStatus.botsondicord ||
+          voteStatus.botlistme;
 
         const embed = new EmbedBuilder()
           .setTitle("📊 Vote Status Check")
@@ -411,6 +427,13 @@ module.exports = {
           statusFields.push({
             name: "Bots on Discord",
             value: voteStatus.botsondicord ? "✅ Voted" : "❌ Not Voted",
+            inline: true,
+          });
+        }
+        if (process.env.BOTLISTME_TOKEN) {
+          statusFields.push({
+            name: "Botlist.me",
+            value: voteStatus.botlistme ? "✅ Voted" : "❌ Not Voted",
             inline: true,
           });
         }
