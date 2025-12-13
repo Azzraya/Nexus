@@ -5515,7 +5515,71 @@ class Database {
                       reject(err2);
                     }
                   } else {
-                    resolve(rows2 || []);
+                    // Check if rows have achievement_id, if not transform them
+                    const transformed = (rows2 || []).map((row) => {
+                      if (!row.achievement_id && row.achievement_type) {
+                        // Old structure row in new structure table - transform it
+                        let achievementData = {};
+                        try {
+                          achievementData = JSON.parse(row.achievement_data || "{}");
+                        } catch (e) {
+                          achievementData = {};
+                        }
+                        return {
+                          id: row.id,
+                          achievement_id: row.achievement_type,
+                          name: achievementData.name || row.achievement_type,
+                          description: achievementData.description || "",
+                          icon: achievementData.icon || "🏆",
+                          requirement_type: achievementData.type || "",
+                          requirement_value: achievementData.value || 0,
+                          reward_xp: achievementData.xp || 0,
+                          reward_role: null,
+                          rarity: achievementData.rarity || "common",
+                          seasonal: 0,
+                        };
+                      }
+                      return row;
+                    });
+                    resolve(transformed);
+                  }
+                }
+              );
+            } else if (err.message && err.message.includes("no such column: achievement_id")) {
+              // Table exists but doesn't have achievement_id column - it's the old structure
+              this.db.all(
+                `SELECT * FROM achievements ORDER BY id`,
+                [],
+                (err2, rows2) => {
+                  if (err2) {
+                    reject(err2);
+                  } else {
+                    // Transform old structure to match new structure format
+                    const achievementMap = new Map();
+                    (rows2 || []).forEach((row) => {
+                      if (!achievementMap.has(row.achievement_type)) {
+                        let achievementData = {};
+                        try {
+                          achievementData = JSON.parse(row.achievement_data || "{}");
+                        } catch (e) {
+                          achievementData = {};
+                        }
+                        achievementMap.set(row.achievement_type, {
+                          id: row.id,
+                          achievement_id: row.achievement_type,
+                          name: achievementData.name || row.achievement_type,
+                          description: achievementData.description || "",
+                          icon: achievementData.icon || "🏆",
+                          requirement_type: achievementData.type || "",
+                          requirement_value: achievementData.value || 0,
+                          reward_xp: achievementData.xp || 0,
+                          reward_role: null,
+                          rarity: achievementData.rarity || "common",
+                          seasonal: 0,
+                        });
+                      }
+                    });
+                    resolve(Array.from(achievementMap.values()));
                   }
                 }
               );
@@ -5523,7 +5587,33 @@ class Database {
               reject(err);
             }
           } else {
-            resolve(rows || []);
+            // Check if rows have achievement_id, if not transform them
+            const transformed = (rows || []).map((row) => {
+              if (!row.achievement_id && row.achievement_type) {
+                // Old structure row in new structure table - transform it
+                let achievementData = {};
+                try {
+                  achievementData = JSON.parse(row.achievement_data || "{}");
+                } catch (e) {
+                  achievementData = {};
+                }
+                return {
+                  id: row.id,
+                  achievement_id: row.achievement_type,
+                  name: achievementData.name || row.achievement_type,
+                  description: achievementData.description || "",
+                  icon: achievementData.icon || "🏆",
+                  requirement_type: achievementData.type || "",
+                  requirement_value: achievementData.value || 0,
+                  reward_xp: achievementData.xp || 0,
+                  reward_role: null,
+                  rarity: achievementData.rarity || "common",
+                  seasonal: 0,
+                };
+              }
+              return row;
+            });
+            resolve(transformed);
           }
         }
       );
