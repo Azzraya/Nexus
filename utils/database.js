@@ -5510,164 +5510,85 @@ class Database {
 
   async getAllAchievements() {
     return new Promise((resolve, reject) => {
-      // Check if achievements table has the new structure with rarity column
+      // First check if achievements table has achievement_id column
       this.db.all(
-        `SELECT * FROM achievements ORDER BY rarity, name`,
+        `PRAGMA table_info(achievements)`,
         [],
-        (err, rows) => {
-          if (err) {
-            // If rarity column doesn't exist, try querying without it
-            if (err.message && err.message.includes("no such column: rarity")) {
-              // Try with just name ordering (new structure without rarity)
-              this.db.all(
-                `SELECT * FROM achievements ORDER BY name`,
-                [],
-                (err2, rows2) => {
-                  if (err2) {
-                    // If name column also doesn't exist, it's the old structure
-                    // Old structure has: id, guild_id, user_id, achievement_type, achievement_data, unlocked_at
-                    if (err2.message && err2.message.includes("no such column: name")) {
-                      // Query old structure without ordering by name
-                      this.db.all(
-                        `SELECT * FROM achievements ORDER BY id`,
-                        [],
-                        (err3, rows3) => {
-                          if (err3) {
-                            reject(err3);
-                          } else {
-                            // Transform old structure to match new structure format
-                            // Old structure stores user-specific achievements, so we need to extract unique achievement types
-                            const achievementMap = new Map();
-                            (rows3 || []).forEach((row) => {
-                              if (!achievementMap.has(row.achievement_type)) {
-                                let achievementData = {};
-                                try {
-                                  achievementData = JSON.parse(row.achievement_data || "{}");
-                                } catch (e) {
-                                  achievementData = {};
-                                }
-                                achievementMap.set(row.achievement_type, {
-                                  id: row.id,
-                                  achievement_id: row.achievement_type,
-                                  name: achievementData.name || row.achievement_type,
-                                  description: achievementData.description || "",
-                                  icon: achievementData.icon || "🏆",
-                                  requirement_type: achievementData.type || "",
-                                  requirement_value: achievementData.value || 0,
-                                  reward_xp: achievementData.xp || 0,
-                                  reward_role: null,
-                                  rarity: achievementData.rarity || "common",
-                                  seasonal: 0,
-                                });
-                              }
-                            });
-                            resolve(Array.from(achievementMap.values()));
-                          }
-                        }
-                      );
-                    } else {
-                      reject(err2);
+        (pragmaErr, pragmaRows) => {
+          if (pragmaErr) {
+            reject(pragmaErr);
+            return;
+          }
+
+          // Check if achievement_id column exists
+          const hasAchievementId = pragmaRows.some(col => col.name === 'achievement_id');
+          const hasAchievementType = pragmaRows.some(col => col.name === 'achievement_type');
+          const hasName = pragmaRows.some(col => col.name === 'name');
+          const hasRarity = pragmaRows.some(col => col.name === 'rarity');
+
+          if (!hasAchievementId && hasAchievementType) {
+            // Old structure - query and transform
+            this.db.all(
+              `SELECT * FROM achievements ORDER BY id`,
+              [],
+              (err, rows) => {
+                if (err) {
+                  reject(err);
+                } else {
+                  // Transform old structure to match new structure format
+                  const achievementMap = new Map();
+                  (rows || []).forEach((row) => {
+                    if (!achievementMap.has(row.achievement_type)) {
+                      let achievementData = {};
+                      try {
+                        achievementData = JSON.parse(row.achievement_data || "{}");
+                      } catch (e) {
+                        achievementData = {};
+                      }
+                      achievementMap.set(row.achievement_type, {
+                        id: row.id,
+                        achievement_id: row.achievement_type,
+                        name: achievementData.name || row.achievement_type,
+                        description: achievementData.description || "",
+                        icon: achievementData.icon || "🏆",
+                        requirement_type: achievementData.type || "",
+                        requirement_value: achievementData.value || 0,
+                        reward_xp: achievementData.xp || 0,
+                        reward_role: null,
+                        rarity: achievementData.rarity || "common",
+                        seasonal: 0,
+                      });
                     }
-                  } else {
-                    // Check if rows have achievement_id, if not transform them
-                    const transformed = (rows2 || []).map((row) => {
-                      if (!row.achievement_id && row.achievement_type) {
-                        // Old structure row in new structure table - transform it
-                        let achievementData = {};
-                        try {
-                          achievementData = JSON.parse(row.achievement_data || "{}");
-                        } catch (e) {
-                          achievementData = {};
-                        }
-                        return {
-                          id: row.id,
-                          achievement_id: row.achievement_type,
-                          name: achievementData.name || row.achievement_type,
-                          description: achievementData.description || "",
-                          icon: achievementData.icon || "🏆",
-                          requirement_type: achievementData.type || "",
-                          requirement_value: achievementData.value || 0,
-                          reward_xp: achievementData.xp || 0,
-                          reward_role: null,
-                          rarity: achievementData.rarity || "common",
-                          seasonal: 0,
-                        };
-                      }
-                      return row;
-                    });
-                    resolve(transformed);
-                  }
+                  });
+                  resolve(Array.from(achievementMap.values()));
                 }
-              );
-            } else if (err.message && err.message.includes("no such column: achievement_id")) {
-              // Table exists but doesn't have achievement_id column - it's the old structure
-              this.db.all(
-                `SELECT * FROM achievements ORDER BY id`,
-                [],
-                (err2, rows2) => {
-                  if (err2) {
-                    reject(err2);
-                  } else {
-                    // Transform old structure to match new structure format
-                    const achievementMap = new Map();
-                    (rows2 || []).forEach((row) => {
-                      if (!achievementMap.has(row.achievement_type)) {
-                        let achievementData = {};
-                        try {
-                          achievementData = JSON.parse(row.achievement_data || "{}");
-                        } catch (e) {
-                          achievementData = {};
-                        }
-                        achievementMap.set(row.achievement_type, {
-                          id: row.id,
-                          achievement_id: row.achievement_type,
-                          name: achievementData.name || row.achievement_type,
-                          description: achievementData.description || "",
-                          icon: achievementData.icon || "🏆",
-                          requirement_type: achievementData.type || "",
-                          requirement_value: achievementData.value || 0,
-                          reward_xp: achievementData.xp || 0,
-                          reward_role: null,
-                          rarity: achievementData.rarity || "common",
-                          seasonal: 0,
-                        });
-                      }
-                    });
-                    resolve(Array.from(achievementMap.values()));
-                  }
-                }
-              );
-            } else {
-              reject(err);
-            }
-          } else {
-            // Check if rows have achievement_id, if not transform them
-            const transformed = (rows || []).map((row) => {
-              if (!row.achievement_id && row.achievement_type) {
-                // Old structure row in new structure table - transform it
-                let achievementData = {};
-                try {
-                  achievementData = JSON.parse(row.achievement_data || "{}");
-                } catch (e) {
-                  achievementData = {};
-                }
-                return {
-                  id: row.id,
-                  achievement_id: row.achievement_type,
-                  name: achievementData.name || row.achievement_type,
-                  description: achievementData.description || "",
-                  icon: achievementData.icon || "🏆",
-                  requirement_type: achievementData.type || "",
-                  requirement_value: achievementData.value || 0,
-                  reward_xp: achievementData.xp || 0,
-                  reward_role: null,
-                  rarity: achievementData.rarity || "common",
-                  seasonal: 0,
-                };
               }
-              return row;
-            });
-            resolve(transformed);
+            );
+          } else if (hasAchievementId) {
+            // New structure - query normally
+            let orderBy = '';
+            if (hasRarity && hasName) {
+              orderBy = 'ORDER BY rarity, name';
+            } else if (hasName) {
+              orderBy = 'ORDER BY name';
+            } else {
+              orderBy = 'ORDER BY id';
+            }
+
+            this.db.all(
+              `SELECT * FROM achievements ${orderBy}`,
+              [],
+              (err, rows) => {
+                if (err) {
+                  reject(err);
+                } else {
+                  resolve(rows || []);
+                }
+              }
+            );
+          } else {
+            // Unknown structure - return empty array
+            resolve([]);
           }
         }
       );
