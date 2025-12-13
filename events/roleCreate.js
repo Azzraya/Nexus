@@ -37,14 +37,6 @@ module.exports = {
       }
     }
 
-    // Logging
-    logger.info(`Role created: ${role.name}`, {
-      guildId: role.guild.id,
-      guildName: role.guild.name,
-      roleId: role.id,
-      roleName: role.name,
-    });
-
     // Enhanced logging
     const EnhancedLogging = require("../utils/enhancedLogging");
     await EnhancedLogging.log(role.guild.id, "role_create", "role", {
